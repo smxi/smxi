@@ -361,8 +361,14 @@ error_handler()
 	then
 		errorFunction=$FUNCNAME
 		errorId='value-null'
-		[ -z "$1" ] && errorExtra="\$1 "
-		[ -z "$2" ] && errorExtra="$errorExtra\$2"
+		if [ -z "$1" ]
+		then
+			errorExtra="\$1 "
+		fi
+		if [ -z "$2" ]
+		then
+			errorExtra="$errorExtra\$2"
+		fi
 	fi
 	case $errorId in
 		# general system checks - 2-50: fatal - exit 
