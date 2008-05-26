@@ -1,0 +1,203 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-package-removal
+####  version: 1.2.1
+####  Date: June 29 2007
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-package-removal
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+########################################################################
+####  FUNCTIONS 
+########################################################################
+
+###---------------------------------------------------------------------
+### package removal stuff
+###---------------------------------------------------------------------
+
+package_removal()
+{
+	local repeat='' response='' Done='' kickit='' opt='' options='' kickthem='' KickItems=''
+	local options="bluetooth captive dmraid-mdadm-lvm german-components-de gnomemeetings isdn klaptopdaemon koffice openoffice.org skype squid wifi wvdial xawtv remove-chosen back-to-main-menu"
+	local RemoveCount=$( echo $options | awk '{print NF-1}' )
+	local wifiKick="$( dpkg -l | egrep '(ipw[1-9]|madwifi|ndis|wifi|rt25|rt61|wlan|at76|at76|bcm|zd12)' | cut -d ' ' -f 3 )"
+	local deStuff='' dumpDe='' i='' packages=''
+	
+	print_lib_info $LIB_PACKAGE_REMOVAL
+	echo $MLINE
+	echo "${S}Please enter each item you want to remove completely."
+	echo "Simply enter the number, hit enter, then enter the next number,"
+	echo "for as many as you want. Once you are done, select ${C}remove-chosen${S}"
+	echo "and the selected items will all be removed one by one. You will be asked to"
+	echo "confirm each item's removal when it comes up, so you can change your mind."
+	echo $LINE
+	echo "${S}Note: german-components-de will look for and remove all -de type packages on the system."
+	echo "Note: wifi can remove ALL wifi firmware, and associated wifi components."
+	echo "${M}This is best for machines that will never use wifi, or for laptops where you"
+	echo "want to remove unneeded wifi components. Please read the items carefully before answering ${C}y${M}."
+	echo $LINE
+	
+	select opt in $options
+	do
+		case $opt in
+			bluetooth)
+				KickItems=$KickItems' bluez'
+				print_kick_items
+				;;
+			captive)
+				KickItems=$KickItems' captive captive-lufs gnome-vfs-httpcaptive captive  captive-install ntfsprogs-gnomevfs'
+				print_kick_items
+				;;
+			dmraid-mdadm-lvm)
+				KickItems=$KickItems' dmraid mdadm lvm lvm2 lvm-common'
+				print_kick_items
+				;;
+			german-components-de)
+				deStuff=$(dpkg -l | grep -o "[.a-z0-9-]*-de[- ][.a-z0-9-]*")
+				# gets rid of linebreaks
+				for i in $deStuff
+				do 
+					dumpDe=$dumpDe$i' '
+				done
+				if [ "$dumpDe" != '' ]
+				then
+					KickItems="$KickItems $dumpDe"
+				else
+					echo "${E}No German components detected.${N}"
+				fi
+				print_kick_items
+				;;
+			gnomemeetings)
+				KickItems="$KickItems gnomemeetings"
+				print_kick_items
+				;;
+			isdn)
+				KickItems="$KickItems isdn"
+				print_kick_items
+				;;
+			klaptopdaemon)
+				KickItems="$KickItems klaptopdaemon"
+				print_kick_items
+				;;
+			koffice)
+				KickItems="$KickItems koffice"
+				print_kick_items #dpkg -l | egrep -i "(kde office|kpim|karm|kontact)"  
+				;;
+			openoffice.org)
+				KickItems="$KickItems openoffice"
+				print_kick_items
+				;;
+			pppoe)
+				KickItems="$KickItems pppoe"
+				print_kick_items
+				;;
+			skype)
+				KickItems="$KickItems skype"
+				print_kick_items
+				;;
+			squid)
+				KickItems="$KickItems squid"
+				print_kick_items
+				;;
+			wifi)
+				if [ -n "$wifiKick" ]
+				then
+					KickItems="$KickItems $wifiKick"
+				else
+					echo "${E}No wifi components detected.${N}"
+				fi
+				print_kick_items
+				;;
+			wvdial)
+					KickItems="$KickItems wvdial"
+				print_kick_items
+				;;
+			xawtv)
+				KickItems="$KickItems xawtv"
+				print_kick_items
+				;;
+			remove-chosen)
+				Done='true'
+				kickthem='true'
+				;;
+			back-to-main-menu)
+				Done='true'
+				kickthem='false'
+				;;
+			*)
+				Done='true'
+				repeat='true'
+				print_error opt
+				;;
+		esac
+		[ "$Done" == 'true' ] && break
+	done
+	
+	# this is just in case user hits remove-chosen without having entered an item
+	if [[ "$kickthem" == 'true' ]] && [[ -n $KickItems ]]
+	then
+		echo $LINE
+		echo "${S}These are your current selections. You will be asked one by one to remove the package or not."
+		echo "${C}$KickItems"
+		echo -e "${Q}Are you sure you want to completely remove all of these now?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)
+				for kickit in $KickItems
+				do
+					echo "${S}Removing ${C}$kickit${S} now.${N}"
+					if [ "$kickit" != 'captive' -a "$kickit" != 'manpages-de' ]
+					then
+						packages=$( dpkg -l | awk '/'$kickit'/{print $2}' )
+						apt-get remove --purge $packages
+						#COLUMNS=200 dpkg -l | awk '/'$kickit'/{print $2}' | xargs -r apt-get remove --purge
+					elif [ "$kickit" == 'captive' ]
+					then
+						apt-get remove --purge captive
+					elif [ "$kickit" == 'manpages-de' ]
+					then
+						apt-get remove manpages-de
+					fi
+				done
+				
+				echo "${S}Finished removing components.${N}"
+				;;
+			n)
+				echo "${S}Ok, let's start over again.${N}"
+				repeat='true'
+				;;
+			*)
+				repeat='true'
+				print_error yn
+				;;
+		esac
+	fi
+	[ "$repeat" == 'true' ] && package_removal
+}
+
+print_kick_items()
+{
+	echo "${S}Selected items to remove:${C}$KickItems" 
+	echo "${S}Enter another item's number to remove more packages, or enter ${C}$RemoveCount${S} to remove items.${N}"
+	kickthem='false'
+}
+# package_removal
+
+###**EOF**###

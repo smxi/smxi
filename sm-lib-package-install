@@ -1,0 +1,825 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-package-install
+####  version: 2.5.1
+####  Date: April 19 2008
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-package-install
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+########################################################################
+####  FUNCTIONS 
+########################################################################
+
+###---------------------------------------------------------------------
+### utilities
+###---------------------------------------------------------------------
+# installs requested packages, 3 args: $1 type; $2 package; $3 optional for pre install
+# procedures, full commands that is.
+# installer also handles metapackage assignments
+package_group_installer()
+{
+	local dmUse=''
+	# this handles cases where no kde exists, we'll use the xdm manager for that
+	[ ! -e /etc/init.d/kdm ] && dmUse=' wdm'
+	# package groups
+	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
+	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons gpm rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'$dmUse
+	local googleEarth='googleearth-package fakeroot'
+	local kdePackages='kde kdm konqueror konversation konq-plugins ksvg kdemultimedia-kio-plugins kdeaddons'
+	local kdepimPackages='kdepim karm kontact korganizer kalarm'
+	local kofficePackages='koffice '
+	local streamTuner='streamtuner streamripper kstreamripper'
+	local xfcePackages='gpm xfce4 xfmedia thunar xfce4-terminal thunar-archive-plugin thunar-media-tags-plugin'$dmUse
+	local xorgPackages='alsa alsa-utils gpm hal libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils udev xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xmms xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'$dmUse
+
+	local packageName=$2
+	echo $LINE
+	echo "${S}Installing ${C}$packageName${S}...${N}"
+	# transfer meta packages to package installer variable
+	[ "$packageName" == 'ceni-stuff' ] && packageName="$ceniStuff"
+	[ "$packageName" == 'fvwm-crystal' ] && packageName="$fvwmCrystal"
+	[ "$packageName" == 'kde' ] && packageName="$kdePackages"
+	[ "$packageName" == 'kdepim' ] && packageName="$kdepimPackages"
+	[ "$packageName" == 'koffice' ] && packageName="$kofficePackages"
+	[ "$packageName" == 'streamtuner' ] && packageName="$streamTuner"
+	[ "$packageName" == 'xfce' ] && packageName="$xfcePackages"
+	[ "$packageName" == 'xorg' ] && packageName="$xorgPackages"
+	[ "$packageName" == 'google-earth' ] && packageName="$googleEarth"
+	
+	[ -n "$3" ] && eval $3 # this removes stuff, or does other operations, first
+	update_sources $1
+	package_installer "$packageName" 'install-user'
+}
+# the main updater function is going to handle most of the checking here, but
+# if the sources are updated, this will force the update
+update_sources()
+{
+	local op='' multi='' DoUpdate='' plain='' skyp='' swift=''
+	local operaSources='deb http://deb.opera.com/opera sid non-free'
+	local skypeSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
+	local swiftSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
+	
+	# if we have to add in any sources to sources.list, we'll need to do a new update
+	# we have to set the update flag to null here or the main updater
+	# won't update the stuff
+	if [ "$1" == 'opera' ]
+	then
+		op=$( grep -c 'opera' $EAS )
+		if [ "$op" -eq 0 ]
+		then
+			echo $LINE
+			echo "${S}Updating ${C}$EAS${S} with Opera sources${N}"
+			echo $operaSources >> $EAS
+			echo "${C}$EAS${S} has been updated.${N}"
+			UPDATED=''
+		fi
+		DoUpdate='true'
+	elif [ "$1" == 'skype' ]
+	then
+		skyp=$( grep -c 'skype' $EAS )
+		if [ "$skyp" -eq 0 ]
+		then
+			echo $LINE
+			echo "${S}Updating ${C}$EAS${S} with Skype sources${N}"
+			echo $skypeSources >> $EAS
+			echo "${C}$EAS${S} has been updated.${N}"
+			UPDATED=''
+		fi
+		DoUpdate='true'
+	elif [ "$1" == 'swiftfox' ]
+	then
+		swift=$( grep -c 'sssss' $EAS )
+		if [ "$swift" -eq 0 ]
+		then
+			echo $LINE
+			echo "${S}Updating ${C}$EAS${S} with Swiftfox sources${N}"
+			echo $swiftSources >> $EAS
+			echo "${C}$EAS${S} has been updated.${N}"
+			UPDATED=''
+		fi
+		DoUpdate='true'
+	elif [ "$1" == 'plain' -a "$UPDATED" != 'true' ]
+	then
+		DoUpdate='true'
+	fi
+
+	if [ "$DoUpdate" == 'true' ]
+	then
+		apt_update_handler 'package-install'
+	fi
+}
+
+###---------------------------------------------------------------------
+### main package install group selectors
+###---------------------------------------------------------------------
+
+# main selector, pick which package group type to install
+select_install_type()
+{
+	local repeat='' options='' opt=''
+
+	print_lib_info $LIB_PACKAGE_INSTALL
+	echo $MLINE
+	echo "${S}The following sections will be expanded over time, but these are your "
+	echo "current Package Install options:"
+	echo $LINE
+	echo "${C}1${S} - ${C}office${S} Features OpenOffice.org installer. Language pack selector."
+	echo "    Now also offers OpenOffice hold/install/update option as well."
+	echo
+	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, msttcorefonts, Opera, Skype, Google Earth."
+	echo
+	echo "${C}3${S} - ${C}utilities${S} sysv-rc-conf, console browsers, networking tools (ceni), and more to come."
+	echo
+	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
+	echo
+	echo "${C}5${S} - ${C}back-to-main-menu${S}"
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="office non-free utilities display-manager back-to-main-menu"
+	select opt in $options
+	do
+		case $opt in
+			office)
+				office_installer
+				repeat='true'
+				;;
+			non-free)
+				non_free_installer
+				repeat='true'
+				;;
+			utilities)
+				utilities_installer
+				repeat='true'
+				;;
+			display-manager)
+				display_manager_installer
+				repeat='true'
+				;;
+			back-to-main-menu)
+				echo "${S}Thanks for checking out the Package Installer.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	[ "$repeat" == 'true' ] && select_install_type
+}
+
+# install office suites, languages packs, etc
+office_installer()
+{
+	local repeat='' options='' opt=''
+
+	echo $MLINE
+	echo "${M} Office Installer"
+	echo $MLINE
+	echo "${S}Currently only OpenOffice.org is here. More to come:"
+	echo $LINE
+	echo "${C}1${S} - ${C}openoffice.org${S} Installs all components of OOo, and also lets"
+	echo "    You choose your OpenOffice.org language packs and dictionaries, when available."
+	echo "${C}2${S} - ${C}openoffice-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to"
+	echo "    latest if ${C}openoffice.org${S} is already installed."
+	echo
+	echo "${C}3${S} - ${C}koffice${S} Installs the main koffice components."
+	echo
+	echo "${C}4${S} - ${C}kde-pim${S} Installs the kpim components. That's personal information"
+	echo "    manager stuff: ${C}kdepim karm kontact korganizer kalarm"
+	echo
+	echo "${C}5${S} - ${C}back-to-install-menu${S}"
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="openoffice.org openoffice-hold-install koffice kde-pim back-to-install-menu"
+	select opt in $options
+	do
+		case $opt in
+			openoffice.org)
+				update_sources plain
+				install_openoffice
+				repeat='true'
+				;;
+			openoffice-hold-install)
+				run_script_import $LIB_MISC_TWEAKS
+				openoffice_hold_install
+				repeat='true'
+				;;
+			koffice)
+				package_group_installer plain koffice
+				repeat='true'
+				;;
+			kde-pim)
+				package_group_installer plain kdepim
+				repeat='true'
+				;;
+			back-to-install-menu)
+				: # echo "${S}Thanks for checking out the Package Installer.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	[ "$repeat" == 'true' ] && office_installer
+}
+
+# main selector, pick which package group type to install
+non_free_installer()
+{
+	local repeat='' options='' opt='' gge64=''
+	if [ "$BITS" == "64" ]
+	then
+		gge64="\n${C}googleearth${M} install is not currently supported for ${C}64 bit${M}, sorry."
+	fi
+
+	echo $MLINE
+	echo "${M} Non Free Software Installer"
+	echo $MLINE
+	echo "${S}Non-free software options. Check out the Free versions too.:"
+	echo $LINE
+	echo "${C}1${S} - ${C}Opera${S} One of the better Non Free packages here. Web browser."
+	echo "    Will add opera.com sources to your ${C}$EAS${S}."
+	echo
+	echo "${C}2${S} - ${C}flash-plugin${S} Installs the flashnonfree-plugin, for use by all browsers."
+	echo "    Check out the new FSF gnash player for the Free Software version flash player."
+	echo
+	echo "${C}3${S} - ${C}java-plugin${S} Installs the Sun Java plugin and jre, for use by all browsers."
+	echo
+	echo "${C}4${S} - ${C}msttcore-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
+	echo
+	echo "${C}5${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
+	echo
+	echo -e "${C}6${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
+	echo
+	echo "${C}7${S} - ${C}back-to-install-menu${S}"
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="opera flash-plugin java-plugin msttcore-fonts skype google-earth back-to-install-menu"
+	select opt in $options
+	do
+		case $opt in
+			opera)
+				package_group_installer opera opera
+				repeat='true'
+				;;
+			flash-plugin)
+				package_group_installer plain flashplugin-nonfree 'update_to_nonfree_sources'
+				repeat='true'
+				;;
+			java-plugin)
+				package_group_installer plain sun-java6-plugin 'update_to_nonfree_sources'
+				echo "${S}Now checking for older versions of Java to update system..."${N}
+				update-alternatives --config java
+				repeat='true'
+				;;
+			msttcore-fonts)
+				package_group_installer plain msttcorefonts 'update_to_nonfree_sources'
+				repeat='true'
+				;;
+			skype)
+				reinstall_skype
+				repeat='true'
+				;;
+			google-earth)
+# 				if [ "$BITS" != "64" ]
+# 				then
+					package_group_installer plain google-earth 'update_to_nonfree_sources'
+					install_google_earth
+# 				else
+# 					echo $ELINE
+# 					echo "${E}googleearth install is not supported for 64 bit, sorry."${N}
+# 					echo $ELINE
+# 				fi
+				repeat='true'
+				;;
+			back-to-install-menu)
+				: # echo "${S}Thanks for checking out the Package Installer.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	[ "$repeat" == 'true' ] && non_free_installer
+}
+#katapult (personally) and kshutdown yakuake
+# various utilities
+
+# apt-get install yakuake  hardinfo lshw
+utilities_installer()
+{
+	local repeat='' options='' opt=''
+
+	echo $MLINE
+	echo "${M} Utilities Installer"
+	echo $MLINE
+	echo "${S}A small, and to increase, collection of useful utilities you might not know about:"
+	echo $LINE
+	echo "${C}1${S} - ${C}sysv-rc-conf${S} A really nice debian runlevel editor. Very feature rich."
+	echo "    Highly recommended, a modern, advanced console tool, better than the gui crap."
+
+	echo "${C}2${S} - ${C}console-browsers${S} Installs a full suite of console browsrs."
+	echo "    Check it out, these are small, fast, and really pleasant. See how the non-gui side."
+	echo "    Installs: ${C}lynx links elinks links2 w3m${S} (w3m is my favorite)"
+	echo "    Hey, everyone has their favorite! See if you find one you like..."
+
+	echo "${C}3${S} - ${C}gnomemeetings-to-ekiga${S} Updates the deprecated ${C}gnomemeetings${S} to the "
+	echo "    new version called ${C}ekiga${S}. Or just installs ${C}ekiga${S}."
+	
+	echo "${C}4${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
+	echo "    These are convient tools to listen to audio streams, and record them."
+	echo 
+	echo "${C}5${S} - ${C}captive-to-ntfs-3g${S} Replaces ${C}Captive${S} with ${C}ntfs-3g${S} for ntfs read/write on linux."
+	echo "    Highly recommended if you dual boot with ntfs partitions and want to write to them."
+	
+	echo "${C}6${S} - ${C}yakuake${S} Quake style terminal emulator for ${C}kde${S}."
+	
+# 	echo "${C}6${S} - ${C}kpowersave${S} Install ${C}kpowersave / powersaved${S}."
+# 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
+	echo "${C}7${S} - ${C}h2-favorites${S} This will setup a machine to be the way I want."
+	echo "    Asks before installing each package group."
+	#kshutdown - shutdown/reboot timer for kde
+	#katapult - alternative way of startings apps
+	echo
+	echo "${C}8${S} - ${C}ceni${S} Install ${C}ceni${S}, a nice command line tool to configure"
+	echo "    and setup wired and wireless networking. A nice alternative to netcardconfig."
+
+# 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
+	
+	echo
+	echo "${C}9${S} - ${C}back-to-install-menu${S}"
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="sysv-rc-conf  console-browsers gnomemeetings-to-ekiga streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni back-to-install-menu"
+	select opt in $options
+	do
+		case $opt in
+			sysv-rc-conf)
+				package_group_installer plain sysv-rc-conf
+				repeat='true'
+				;;
+			console-browsers)
+				package_group_installer plain 'lynx links elinks links2 w3m'
+				repeat='true'
+				;;
+			gnomemeetings-to-ekiga)
+				package_group_installer plain ekiga 'apt-get remove --purge gnomemeetings'
+				repeat='true'
+				;;
+			streamtuner)
+				package_group_installer plain streamtuner
+				repeat='true'
+				;;
+			captive-to-ntfs-3g)
+				update_sources plain
+				install_ntfs_3g
+				repeat='true'
+				;;
+			kpowersave)
+				update_sources plain
+				install_kpowersave
+				repeat='true'
+				;;
+			yakuake)
+				package_group_installer plain yakuake
+				repeat='true'
+				;;
+			h2-favorites)
+				update_sources plain
+				h2_faves
+				repeat='true'
+				;;
+			ceni)
+				# package_group_installer plain ceni-stuff
+				install_ceni
+				repeat='true'
+				;;
+			back-to-install-menu)
+				: # echo "${S}Thanks for checking out the Package Installer.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	[ "$repeat" == 'true' ] && utilities_installer
+}
+
+display_manager_installer()
+{
+	local repeat='' options='' opt=''
+	local xorgPackages=''
+
+	echo $MLINE
+	echo "${M} Desktop / Window Manager Installer"
+	echo $MLINE
+	echo "${S}Get started if you're building this from nothing at all, or just add some extras."
+	echo $LINE
+	echo "${C}1${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
+	echo
+	echo "${C}2${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo
+	echo "${C}3${S} - ${C}kde${S} Base package for kde desktop."
+	echo
+	echo "${C}4${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins."
+	echo
+	echo "${C}5${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps like xmms."
+	echo
+	echo "${C}6${S} - ${C}back-to-install-menu${S}"
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="xorg xfce kde kde-extras fvwm-crystal back-to-install-menu"
+	select opt in $options
+	do
+		case $opt in
+			xorg)
+				package_group_installer plain xorg
+				repeat='true'
+				;;
+			xfce)
+				package_group_installer plain xfce
+				repeat='true'
+				;;
+			kde)
+				package_group_installer plain kde
+				repeat='true'
+				;;
+			kde-extras)
+				package_group_installer plain 'konq-plugins'
+				repeat='true'
+				;;
+			fvwm-crystal)
+				package_group_installer plain fvwm-crystal
+				repeat='true'
+				;;
+			back-to-install-menu)
+				: # echo "${S}Thanks for checking out the Package Installer.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	[ "$repeat" == 'true' ] && display_manager_installer
+}
+
+###---------------------------------------------------------------------
+### package install stuff - office suites
+###---------------------------------------------------------------------
+install_openoffice()
+{
+	# data is this order: 
+	# note: no entry for en-us language pack since that's part of common
+	# oooLanguagePack:oooHyphenation:oooHelp:oooThesaurus:myspell:<Language Name>
+	local oooData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
+
+	local oooLanguages='' l='' ll='' language=''
+	local oooLang='' oooHyph='' oooHelp='' oooThes='' oooDict='' oooDesk=''
+	local doptions='' dopt='' complete='' options=''  opt='' found='' skip=''
+	
+	for l in $oooData
+	do
+		ll=$( echo $l | cut -d ':' -f 6 )
+		oooLanguages=$oooLanguages$ll' '
+	done
+	
+	echo $MLINE
+	echo "${M}OpenOffice.org Installer"
+	echo $MLINE
+	echo "${S}You can pick which language information to use with your OpenOffice install."
+	echo "Once you make your selection, all required Openoffice components will be installed."
+	echo
+	echo "When you select one of these your ${C}openoffice${S} install will use"
+	echo "any available language specific items for your chosen language, including"
+	echo "the language pack, help, thesaurus, and dictionaries."
+	echo "Also installs appropriate desktop integration package for either gnome or kde."
+	echo
+	echo "Select the number for ${C}no-change${S} if you want to return to main script."
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options=$oooLanguages
+
+	select opt in $options
+	do
+		for language in $oooData
+		do
+			if [ "$opt" == "$( echo $language | cut -d ':' -f 6 )" ]
+			then
+				found='true'
+				if [ "$language" == 'no-change' ]
+				then
+					skip='true'
+				else
+					oooLang=$( echo $language | cut -d ':' -f 1 )
+					[ "$oooLang" != '' ] && oooLang='openoffice.org-l10n-'$oooLang
+					oooHyph=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
+					[ "$oooHyph" != '' ] && oooHyph='openoffice.org-hyphenation-'$oooHyph
+					oooHelp=$( echo $language | cut -d ':' -f 3 )
+					[ "$oooHelp" != '' ] && oooHelp='openoffice.org-help-'$oooHelp
+					oooThes=$( echo $language | cut -d ':' -f 4 )
+					[ "$oooThes" != '' ] && oooThes='openoffice.org-thesaurus-'$oooThes
+					oooDict=$( echo $language | cut -d ':' -f 5 )
+					[ "$oooDict" != '' ] && oooDict='myspell-'$oooDict
+				fi
+				break
+			else
+				found='false'
+			fi
+		done
+		break
+	done
+	
+	if [ "$found" == 'true' ]
+	then
+		echo $LINE
+		if [ "$skip" != 'true' ]
+		then
+			echo "${S}Please select your desktop manager. This will install the correct"
+			echo "OpenOffice.org desktop integration package for either kde or gnome."
+			echo "${C}1 - kde${S} Installs kde integration."
+			echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
+			echo "${C}3 - other${S} Does not install integration package."
+			echo $LINE
+			echo -e $SLE
+			echo $LINE
+			
+			doptions='kde gnome other'
+			
+			select dopt in $doptions
+			do
+				case $dopt in
+					kde)
+						oooDesk='openoffice.org-kde'
+						complete='true'
+						;;
+					gnome)
+						oooDesk='openoffice.org-gnome openoffice.org-gtk'
+						complete='true'
+						;;
+					other)
+						oooDesk=''
+						complete='true'
+						;;
+					*)
+						echo "${E}Invalid Selection${N}"
+						;;
+				esac
+				[ "$complete" == 'true' ] && break
+			done
+			
+			echo $LINE
+			echo "${S}Installing your selected language [${C}$opt${S}] components and openoffice.org.${N}"
+			package_installer "openoffice.org openoffice.org-base openoffice.org-calc openoffice.org-common openoffice.org-core openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
+			echo "${S}OpenOffice.org install is completed.${N}"
+		else
+			echo "${S}Continuing on to main script without installing OpenOffice.org.${N}"
+		fi
+	else
+		print_error opt
+		install_openoffice
+	fi
+}
+#install_openoffice
+
+###---------------------------------------------------------------------
+### package install stuff -  non free
+###---------------------------------------------------------------------
+
+# grabs the latest skype deb from the skype site and installs it
+reinstall_skype()
+{
+	local SkypeFileName=''
+	# note: the skype url is a 302 to the current latest version of skype
+	# local skypeDebUrl='http://www.skype.com/go/getskype-linux-beta-deb'
+	
+	# dependencies: libasound2 (>> 1.0.8), libc6 (>= 2.3.2.ds1-4), libgcc1 (>= 1:3.4.1-3), libqt3-mt | libqt3c102-mt (>= 3:3.3.3.2), libstdc++5 (>= 1:3.3.4-1), libx11-6 | xlibs (>> 4.1.0), libxext6 | xlibs (>> 4.1.0)
+	# libasound2 libc6 libgcc1 libstdc++5 
+	local skypeDebUrl='http://www.skype.com/go/getskype-linux-deb'
+	echo $LINE
+	wget -T$TIME_OUT -t2 -Nc $skypeDebUrl
+	SkypeFileName=$(ls -f | grep 'skype')
+	
+	if [ -f $SkypeFileName ]
+	then
+		echo $LINE
+		echo "${S}Skype deb download was successful. Beginning installation of new skype."
+		echo "Removing old skype version.${N}"
+		# install skype
+		COLUMNS=200 dpkg -l | awk '/skype/{print $2}' | xargs -r dpkg --purge
+		echo "${S}Installing new skype.${N}"
+		package_installer 'libstdc++5 libqt4-core libqt4-gui' 'install-user'
+		dpkg -i $SkypeFileName
+		rm -f $SkypeFileName
+		apt-get install -f
+		echo "${S}New skype install completed.${N}"
+	else
+		echo "${E}The skype deb file failed to download, maybe the skype server is down.${N}"
+	fi
+}
+
+install_google_earth()
+{
+	local goog='Google Earth'
+	echo $LINE
+	echo "${S}Starting ${C}$goog${S} installer."
+	echo
+	echo "Downloading installer file and creating ${C}$goog${S} deb...${N}"
+	cd /var/cache/apt/archives
+	make-googleearth-package
+	echo "${S}Installing ${C}$goog${S} deb...${N}"
+	dpkg -i googleearth*.deb
+	cd $SCRIPT_HOME
+	#echo "${S}Cleaning up ${C}$goog${S} installer stuff...${N}"
+	#apt-get remove --purge -y googleearth-package
+	echo "${S}Completed install of ${C}$goog${S}.${N}"
+	echo $LINE
+	echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
+	
+	print_hec
+}
+###---------------------------------------------------------------------
+### package installers for complex stuff, utilities
+###---------------------------------------------------------------------
+install_ceni()
+{
+	local appName='Ceni'
+	
+	echo $LINE
+	echo "${C}$appName${S} is especially nice for wifi console networking configuration, or if you"
+	echo "have any kind of complicated networking, multiple eth cards, etc."
+	echo "Installing ${C}$appName${S} for you now to ${C}$SCRIPT_HOME${S}...${N}"
+# 	cd $SCRIPT_HOME
+# 	wget -T$TIME_OUT -t 2 $TECH_PATTERNS_DISTRO$appName
+# 	chmod +x $appName
+
+	# clean up manual ceni install...
+	if [ -f $SCRIPT_HOME/ceni ]
+	then
+		echo "${S}Removing previous manual script install of ${C}$appName${N}"
+		rm -f $SCRIPT_HOME/ceni
+	fi
+	package_group_installer plain ceni-stuff
+	echo  "${S}Congratulations. ${C}$appName${S} is now installed. To redo your networking, simply type, as root: ${C}$appName${S} (uppercase C)${N}"
+	print_hec
+}
+
+h2_faves()
+{
+	local response=''
+	local removeItems='ifrename' package='' # splashy
+	local addItems='htop libmms0 nano sysv-rc-conf w3m net-tools rdiff-backup ceni'
+	local addItemsKde='karm konq-plugins kmoon' # kdeaddons kde-extras
+	local mozItems='iceweasel icedove'
+	
+	echo $LINE
+	echo "${S}Removing ${C}$removeItems${S}..."
+	echo "${M}Type ${C}y + <enter>${M} to continue, or ${C}n + <enter>${M} to keep these.${N}"
+	read response
+	case $response in
+		y|Y|yes)
+			for package in $removeItems
+			do
+				echo "${S}Removing ${C}$package${S}...${N}"
+				package_remover "$package" '--purge'
+			done
+			;;
+		*)
+			echo "${S}Ok, not removing that group of packages...${N}"
+			;;
+	esac
+	unset response
+	h2_package_group_installer "$addItems"
+	h2_package_group_installer "$addItemsKde"
+	h2_package_group_installer "$mozItems"
+
+	echo "${S}Ok, all done with h2 favorite installs.${N}"
+}
+
+# args: $1 packages to be installed
+h2_package_group_installer()
+{
+	local response=''
+	
+	echo "${S}Installing ${C}$1${S}..."
+	echo "${M}Type ${C}y + <enter>${M} to continue, or ${C}n + <enter>${M} to skip these now.${N}"
+	read response
+	case $response in
+		y|Y|yes)
+			package_installer "$1" 'install-user'
+			;;
+		*)
+			echo "${S}Ok, skipping that group of packages...${N}"
+			;;
+	esac
+	unset response
+}
+
+# swap captive for ntfs-3g ntfs driver
+install_ntfs_3g()
+{
+	echo $LINE
+	echo "${S}For more information on how to setup ntfs-3g, please read ${C}/usr/share/doc/ntfs-3g/README.gz${S}"
+	echo "or use the ${C}sidux-irc${S} factoid ${C}!ntfs-3g${S}."
+	echo "Here is a sample new line in your ${C}/etc/fstab${S} to give you an idea:"
+	echo "${C}/dev/hda1       /media/hda1     ntfs-3g silent,umask=0,no_def_opts,allow_other 0 0"
+	print_hec
+	echo "${S}Changing ${C}Captive${S} to ${C}ntfs-3g${S} now."
+	echo "${S}Removing all ${C}captive${S} components....${N}"
+	package_remover 'captive captive-lufs gnome-vfs-httpcaptive captive  captive-install ntfsprogs-gnomevfs' '--purge'
+	package_installer 'ntfs-3g' 'install-user'
+	echo "${S}Your system will now use ${C}ntfs-3g${S} to read your ntfs files.${N}"
+}
+
+install_kpowersave()
+{
+	local response=''
+	
+	echo $LINE
+	echo "${S}Installing kpowersave and related components now."
+	echo "This uses ${C}unfreeze-rc.d${S} and ${C}freeze-rc.d${S} to update the services.${N}"
+	echo $LINE
+	unfreeze-rc.d
+	package_remover 'apmd powernowd' '--purge'
+	package_installer 'kpowersave' 'install-user'
+	freeze-rc.d
+	
+	echo $LINE
+	echo "${S}Please remember, you will need to add your username to the ${C}powerdev${S} group"
+	echo "before this will take affect."
+	echo "You can do that like this, as root: ${C}adduser <your-normal-login-name> powerdev"
+	echo
+	echo "${C}Kpowersave${S} will not run until you rebooot."
+	echo -e "${Q}Would you like to reboot now?$YNE"
+	echo $LINE
+	read response
+	
+	case $response in
+		y)
+			echo $LINE
+			echo "${S}Rebooting now...${N}"
+			reboot
+			;;
+		n)
+			echo $LINE
+			echo "${S}Ok, but remember, you'll need to reboot before the new kpowersave stuff becomes active.${N}"
+			;;
+		*)
+			print_error yn
+			install_kpowersave
+			;;
+	esac
+}
+
+###---------------------------------------------------------------------
+### package install stuff -  desktop
+###---------------------------------------------------------------------
+
+###**EOF**###

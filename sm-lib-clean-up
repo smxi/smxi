@@ -1,0 +1,601 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-clean-up
+####  version: 2.4.6
+####  Date: April 30 2008
+####  Script Author: Harald Hope
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-clean-up
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+########################################################################
+####  FUNCTIONS 
+########################################################################
+
+###---------------------------------------------------------------------
+### clean up caller function
+###---------------------------------------------------------------------
+# this one just does various odd little things
+clean_up()
+{
+	local repeat='' opt='' currentKernelsPrint='' advanced='' xOption='' cont=''
+	#local currentKernels=$(dpkg -l | grep headers-2 | cut -d " " -f 3 | cut -d '-' -f 3-9 )
+	local currentKernels=$(package_tester 'linux-image-2' 'wild' | cut -d '-' -f 3-9 )
+	local options="apt-clean apt-autoclean kernel-remover remove-kernel-modules clean-old-backups debian-orphans remove-xorg-modules clean-cruft "
+	
+	local tempCount=$( echo $options | wc -w )
+	
+	# I'm leaving this as a template in case I want some -x option stuff later
+	# this stuff is now in misc tweaks legacy tweaks
+	if [ "$EXTRA_OPTIONS" == 'true' ]
+	then
+		# tempCount=$(( $tempCount + 1 ))
+		# xOption='clean-kanotix-packages'
+		# advanced='echo -e "${C}'$tempCount'${S} - Runs ${C}clean-kanotix-packages${S}. This will clean up any legacy kanotix\n\tpackages left over after your ${C}sidux${S} conversion.\n\tEach item will ask you if you want to remove it, answer y or n."'
+		# tempCount=''
+		:
+	fi
+	options="$options $xOption return-main-menu"
+	tempCount=$( echo $options | wc -w )
+	
+	cont=$(( $tempCount ))
+	
+	[ -z "$currentKernels" ] && currentKernels=$CURRENT_KERNEL
+	local removeList='/boot/grub/menu.lst-bu* /etc/apt/sources.list-bu* /etc/kde3/kdm/kdmrc.bu /etc/fstab.old \n /etc/X11/xorg.conf.1st* /etc/X11/xorg.conf-bu* /usr/share/services/kded/mediamanager.desktop-bu*'
+	
+	for x in $currentKernels
+	do 
+		currentKernelsPrint=$currentKernelsPrint' '$x
+	done
+	
+	print_lib_info $LIB_CLEAN_UP
+	echo $MLINE
+	echo "${S}Clean up old junk from your install with these options. Please read each option"
+	echo "carefully before you run it."
+	echo $LINE
+	
+	echo "${C}1${S} - Runs the simple command ${C}apt-get clean${S}."
+	echo "    This removes the apt files cached in ${C}/var/cache/apt/archives${S}. They hurt nothing by"
+	echo "    remaining, and can be interesting to look at, but they also take up diskspace."
+	
+	echo "${C}2${S} - Runs the command ${C}apt-get autoclean${S}."
+	echo "    Like clean, autoclean clears out the local repository of retrieved package files."
+	echo "    The difference is it only removes package files that are not in apt."
+	echo "    This allows a cache to be maintained over a long period without it getting too big."
+	
+	echo "${C}3${S} - Runs ${C}kernel-remover${S}. This removes all kernels ${M}EXCEPT${S} your current kernel: ${C}$CURRENT_KERNEL${S}"
+	echo "    The kernel-remover will give you the option to keep or delete all non running kernels."
+	echo "    I recommend you keep at least one known good kernel besides your current kernel."
+	echo "    To remove your current kernel, you will need to boot into another kernel,"
+	echo "    then run this option and select the kernel you need removed at that time."
+	echo "    Your installed kernels: ${C}$currentKernelsPrint${S}"
+	
+	echo "${C}4${S} - Runs ${C}remove-kernel-modules${S}. This removes any kernel module you want."
+	
+	echo "${C}5${S} - Runs ${C}clean-old-backups${S}. This will remove all the backup files"
+	echo "    this script has created over time. The following backup files will be removed:"
+	echo -e "    ${C}$removeList${S}"
+	echo "    ${W}Please do not use this unless you are sure you don't need those backup files anymore!!${S}"
+	
+	echo "${C}6${S} - Runs ${C}debian-orphans${S}. This will search your system for orphaned Debian"
+	echo "    packages and print out a list of them. It will not remove them, because that's"
+	echo "    not safe to do automatically. Always confirm each package manually before removing it."
+	
+	echo "${C}7${S} - ${C}remove-xorg-modules${S} will remove unused xorg modules."
+	echo "    You will be presented with a list of modules not currently used, and you can"
+	echo "    keep whichever you want, and remove the rest."
+	
+	echo "${C}8${S} - ${C}clean-cruft${S} will remove any parts of packages you removed via"
+	echo "    ${C}apt-get remove${S} without using ${C}dpkg --purge${S}. Has option to simulate first"
+	echo "    so you can see what would happen first. These packages are found via ${C}dpkg -l | grep ^rc${S}"
+	
+	eval $advanced
+	echo
+ 	echo "${C}$cont${S} - Return to main menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		case $opt in
+			apt-clean)
+				apt_clean clean
+				repeat='true'
+				;;
+			apt-autoclean)
+				apt_clean autoclean
+				repeat='true'
+				;;
+			kernel-remover)
+				remove_kernels all
+				repeat='true'
+				;;
+			remove-kernel-modules)
+				run_script_import $LIB_KERNEL
+				remove_kernel_modules
+				repeat='true'
+				;;
+			clean-old-backups)
+				remove_backup_files
+				repeat='true'
+				;;
+			debian-orphans)
+				test_app_exists post # just running this test here in case it's missing
+				debian_orphans
+				repeat='true'
+				;;
+			remove-xorg-modules)
+				remove_xorg_modules
+				repeat='true'
+				;;
+			clean-cruft)
+				clean_cruft
+				repeat='true'
+				;;
+			return-main-menu)
+				echo "${S}Returning to main menu.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break 
+	done
+	
+	[ "$repeat" == 'true' ] && clean_up
+}
+#clean_up
+
+###---------------------------------------------------------------------
+### miscellaneous cleanup utilities
+###---------------------------------------------------------------------
+clean_cruft()
+{
+	local toRemove=$( package_tester '' rc-all )
+	local package='' response='' action='' doIt='' repeat=''
+	toRemove=$( echo $toRemove ) # dump line breaks
+	
+	echo $LINE
+	echo "${S}Uses ${C}dpkg --purge${S} to remove the following cruft left-overs from your system:"
+	echo "${C}$toRemove${N}"
+	echo "${Q}Do you want to purge all these left over package items?"
+	echo -e "${S}(Hit ${C}s${S} to show a simulation of the removal instead)$YNE"
+	read response
+	
+	case $response in
+		y)	
+			doIt='true'
+			;;
+		s) 
+			doIt='true'
+			action='--simulate'
+			repeat='true'
+			;;
+		n)	echo "${S}Ok, going back to the main menu now...${N}"
+			;;
+		*)	print_error yno 's'
+			repeat='true'
+			;;
+	esac
+	
+	if [ "$doIt" == 'true' ]
+	then
+		for package in $toRemove
+		do
+			echo "${S}Purging ${C}$package${S} now...${N}"
+			dpkg --purge $action $package
+		done
+	fi
+	[ "$repeat" == 'true' ] && clean_cruft
+}
+
+apt_clean()
+{
+	local aptcommand=$1 text1=''
+	[ "$1" == 'autoclean' ] && text1=' outdated'
+	
+	echo $LINE
+	echo "${S}Running the command: ${C}apt-get $aptcommand${S}."
+	echo "${C}apt-get $aptcommand${S} will remove all the$text1 archived deb files in ${C}/var/cache/apt/archives${S}${N}"
+	apt-get $aptcommand
+	echo "${S}Your apt archives have been cleaned in the way you requested.${N}"
+}
+
+# uses variable from calling function, removeList
+remove_backup_files()
+{
+	local file='' response=''
+	
+	echo $LINE
+	echo -e "${Q}Are you sure you want to delete all your script backup files?$YNE"
+	read response
+	case $response in
+		y)	echo "${S}Removing all backup files...${N}"
+			for file in $removeList
+			do
+				rm -fv $file
+			done
+			echo "${S}Backup files removed.${N}"
+			;;
+		n)	echo "${S}Continuing without deleting backup files.${N}"
+			;;
+		*)	print_error yn
+			remove_backup_files
+			;;
+	esac
+	print_hec
+}
+
+# cleans out all orphaned packages from various removals.
+debian_orphans()
+{
+	local orphan='' keepThese='libgl1-mesa-dri liblame0 '
+	local cleanMore='' orphan='' orphanTemp=''
+	local orphans=$( deborphan )
+	# loop it to break the linebreaks
+	for orphan in $orphans
+	do
+		orphanTemp="$orphanTemp $orphan"
+	done
+	orphans=$orphanTemp
+	#[ -z "$( echo $keepThese | grep $orphan )" ] && 
+	
+	echo $LINE
+	echo "${S}List of items deborphan thinks you don't need."
+	echo
+	echo "${M}ALWAYS confirm individual packages on this list manually."
+	echo "${W}Do not use automated methods to remove these! Breakage can occur if you do.${N}"
+	echo "${C}$orphans${N}"
+	echo "${S}You can copy these by highlighting the list, then moving to another terminal"
+	echo "using ${C}ctrl+alt+<F2-F6>${S}, assuming you are currently in terminal 1, then"
+	echo "pasting them into your favorite text editor like ${C}nano${S} or ${C}mcedit${S} using"
+	echo "the center mouse wheel button click to paste into the editor."
+	echo
+	echo "Often multimedia library files are called orphaned even though your systems multimedia"
+	echo "use them. So make sure the package is truly obsolete and unused before removing it!"
+	print_hec
+# 	while orphan=$( deborphan )
+# 	test -n "$orphan"
+# 	do 
+# 		apt-get remove --purge --yes $orphan
+# 	done
+# 	
+# 	# run this after the above, this is the old mini-script remove-orphans
+# 
+# 	cleanMore="$( COLUMNS=200 dpkg -l | grep ^rc | awk '{print $2}' )"
+# 	if [ -n "$cleanMore" ]
+# 	then
+# 		dpkg --purge $cleanMore
+# 	fi
+# 	
+# 	echo "${S}Debian deb orphans have been removed.${N}"
+}
+#debian_orphans
+
+###---------------------------------------------------------------------
+### kernel remover components
+###---------------------------------------------------------------------
+remove_kernels()
+{
+	local KernelRemoval=$1 KernelCommand='DISPLAY= /usr/sbin/kernel-remover'
+	# KernelCommand='remove-all-kernels-completely'
+	local KernDown='/usr/src/kernel-downloads' SubDirectories='' directory=''
+	local OldKernelDown='/var/local/kernel-current' kernelStringMatch=''
+	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+	
+	# test to make sure that required scripts are installed, if not, install:
+	test_for_kernel_tools || return 1
+	
+	echo $LINE
+	echo "${S}Running the command: ${C}$KernelCommand${S}."
+	echo "Please make sure to read and answer any questions the script asks you.${N}"
+	eval $KernelCommand
+	#echo $KernelCommand
+	echo "${S}Your requested kernel removal action has been completed."
+	echo $LINE
+	
+	# this just handles really old method, I'll dump this pretty soon
+	if [ -d $OldKernelDown ]
+	then
+		echo "${S}Removing legacy kernel install directories in: ${C}$OldKernelDown${S}...${N}"
+		rm -fr $OldKernelDown
+	fi
+	
+	if [ -d $KernDown ]
+	then
+		if [ "$KernelRemoval" == 'all' ]
+		then
+			SubDirectories=$( ls $KernDown )
+			for directory in $SubDirectories
+			do
+				# this handles new randomness in kernel naming conventions
+				kernelStringMatch=$( test_kernel_strings $directory )
+				if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
+				then
+					remove_the_directory $KernDown $directory
+				fi
+			done
+		else
+			if [ -d $KernDown/$normalizedCurrentKernel ]
+			then
+				echo "${S}Removing kernel directory: ${C}$KernDown/$normalizedCurrentKernel${S}...${N}"
+				rm -fr $KernDown/$normalizedCurrentKernel
+			fi
+		fi
+	else
+		echo "${E}No kernel install directories were located.${N}"
+	fi
+	print_hec
+}
+
+# args: $1 kernel download main directory; $2 sub directory name
+remove_the_directory()
+{
+	local response='' 
+	# quick hack to handle legacy kernel syntax in grub, changing back to old syntax here
+	local grubTester=$( echo $2 | sed -e 's/\.slh\./-slh.*-/' | sed -r 's/(-sidux-(686|amd64))//' )
+	
+	# test to see if kernel is in /etc/fstab, if not, offer to remove
+	if [ -z "$( grep $2 $GRUB_PATH )" -a -z "$( egrep $grubTester $GRUB_PATH )" ]
+	then
+		echo $LINE
+		echo -e "${Q}Do you want to remove the kernel install directory ${C}$1/$2${Q}?$YNE"
+		echo $LINE
+		read response
+		case $response in
+			y)	echo "${S}Removing kernel directory: ${C}$1/$2${S}...${N}"
+				rm -fr $1/$2 && return 0 || return 1
+				;;
+			n)	echo "${S}Continuing without removing directory: ${C}$1/$2${N}"
+				return 0
+				;;
+			*)	print_error yn
+				remove_the_directory $1 $2
+				;;
+		esac
+	fi
+}
+
+# args: $1 command/app
+test_for_kernel_tools()
+{
+	local skh='sidux-kernelhacking' 
+	
+	if [ ! -e /usr/sbin/kernel-remover ]
+	then
+		echo "${M}You are missing the required kernel removal package, script will now install: ${C}$skh${N}"
+		apt_update_handler 'kernel-tools'
+		package_installer "$skh" 'install-missing' || return $?
+	fi
+}
+
+###---------------------------------------------------------------------
+### clean xorg part 1: x-un-1 created this section, the core logic of the script
+###---------------------------------------------------------------------
+
+msg_on()
+{
+	echo "$@" 
+}
+
+msg_off()
+{
+	echo "$@" >/dev/null
+}
+
+list_modules()
+{
+	local modlist="" modtype='' module='' nvidia='' ati=''
+	local installed=$(dpkg -l |grep xserver-xorg |awk '{print $2}')
+	local running=$(grep "LoadModule" /var/log/Xorg.0.log |sed -e 's/\"//g'|awk '{print $3}')
+	running="vesa dummy $running"
+	local currentName=''
+	
+	for module in $installed
+	do
+		currentName=${module##*input-}
+		if [ "$currentName" == "$module" ]
+		then # we must filter the word video
+			currentName=${module##*video-}
+			if [ "$currentName" == "$module" ]
+			then # we must filter the word video
+				modtype="undef"
+			else
+				modtype="video"
+			fi
+		else
+			modtype="input"
+		fi
+
+		if [ "$modtype" == "undef" ]
+		then
+			msg_off  skipping... 
+		else
+			msg_off "Module $currentName is $modtype"
+			# now if the module is in the actual loaded list we skip it
+			# otherwise we add him to the 
+			# list of the modules to be removed
+			is_in=$( echo $running | grep -i $currentName | wc -l )
+
+			if [ $is_in -eq 1 ]
+			then
+				#msg_on "Module $module from type $modtype is currently used" 
+				if [ "${currentName}" == "nvidia" ]
+				then
+					nvidia=1
+				elif [ "${currentName}" == "fglrx" ]
+				then
+					ati=1
+				fi						
+			else
+				#msg_on "Module $module vom type $modtype is not currently used" 
+				modlist="$modlist $module"
+			fi
+		fi
+	done
+
+	if [ "${nvidia}" == "1" ]
+	then
+		modlist=$( echo $modlist | sed 's/xserver-xorg-video-nv//' )
+	elif [ "${ati}" == "1" ]
+	then
+		modlist=$( echo $modlist | sed 's/xserver-xorg-video-ati//' )
+	fi
+
+	if [ ! -z "${modlist}" ]
+	then
+		msg_on "$modlist"
+	fi
+}
+# list_modules
+###---------------------------------------------------------------------
+### clean xorg part II
+###---------------------------------------------------------------------
+
+# this is based on x-un-i's script, clean_xorg_modules.sh, slightly modified version used
+# remove extra xorg modules
+remove_xorg_modules()
+{
+	local back='' StartOver='' found='' remove='' LeaveLoop=''
+	
+	X_ORG_SAVE_LIST='' # must be reset every round to handle start over
+	X_ORG_LIST=$( list_modules | grep ^' xserver' )
+	
+	local XorgListOpt=$X_ORG_LIST' remove-modules start-over back-to-main-menu'
+	local RemoveModules=$( echo $XorgListOpt | awk '{print NF-2}' )
+	
+	echo $MLINE
+	echo "${S}CLEAN XORG MODULES"
+	echo $LINE
+	echo "${S}Please read through this list carefully. If one of the xorg modules should"
+	echo "not be removed, please enter its number and hit enter. Do this until you have"
+	echo "listed all the modules you don't want removed. You are not currently using any of"
+	echo "the listed modules. But if you want to keep some anyway, that is an option."
+	echo "To remove all of them, simply enter ${C}$RemoveModules${S} for ${C}remove-modules${S}"
+	echo $LINE
+	echo "${S}Remember, if the screen scrolls out of sight, you can always"
+	echo "go back up or down by hitting: ${C}shift+pageup/pagedown"
+	echo $LINE
+	
+	options=$XorgListOpt
+	LoopList=$XorgListOpt
+	
+	select opt in $options
+	do
+		for item in $LoopList
+		do
+			if [ "$opt" == "$item" ]
+			then
+				case $item in
+					start-over)
+						StartOver='true'
+						LeaveLoop='true'
+						;;
+					back-to-main-menu)
+						back='true'
+						LeaveLoop='true'
+						StartOver='false'
+						;;
+					remove-modules)
+						remove='true'
+						LeaveLoop='true'
+						StartOver='false'
+						;;
+					*)
+						X_ORG_SAVE_LIST="$X_ORG_SAVE_LIST $item"
+						echo "${S}You have elected to keep the following unused xorg modules:${C}"
+						echo $X_ORG_SAVE_LIST
+						echo "${S}Please select another module to keep, or enter ${C}$RemoveModules${S} to remove all non-selected xorg modules now.${N}"
+						
+						StartOver='false'
+						;;
+				esac
+				break
+			else
+				StartOver='true'
+			fi
+		done
+		[ "$LeaveLoop" == 'true' ] && break
+	done
+	
+	if [ "$StartOver" == 'true' ]
+	then
+		remove_xorg_modules
+	elif [ "$back" == 'true' ]
+	then
+		echo $LINE
+		echo "${S}Returning to Post-dist-upgrade options.${N}"
+	elif [ "$remove" == 'true' ]
+	then
+		remove_xorg_components
+	fi
+}
+
+remove_xorg_components()
+{
+	local XorgListRemove='' keep='' item=''
+	
+	for keep in $X_ORG_SAVE_LIST
+	do
+		for item in $X_ORG_LIST
+		do
+			if [ "$keep" != "$item" ]
+			then
+				XorgListRemove="$XorgListRemove "$item
+			fi
+		done
+		X_ORG_LIST=$XorgListRemove
+		XorgListRemove=''
+	done
+	
+	echo $LINE
+	
+	if [ "$X_ORG_LIST" != '' ]
+	then
+		echo "${S}Running ${C}apt-get remove --purge${S} on the modules you did not preserve.${N}"
+		apt-get remove --purge $X_ORG_LIST
+		echo "${S}The following ${C}xorg modules${S} have been removed:"
+		echo "${C}$X_ORG_LIST"
+		echo $LINE
+		# make logfile for operation
+		write_xorg_remove_log
+		echo "${S}You can find a list of the removed modules here: ${C}$CLEAN_X_ORG_LOG${N}"
+	else
+		echo "${E}No modules are left to remove after your selections.${N}"
+	fi
+}
+
+write_xorg_remove_log()
+{
+	local item=''
+	
+	[ ! -f $CLEAN_X_ORG_LOG ] && touch $CLEAN_X_ORG_LOG
+	echo $LINE >> $CLEAN_X_ORG_LOG
+	echo 'The following Xorg Modules were removed on '$(date +%y-%m-%d)':' >> $CLEAN_X_ORG_LOG
+	echo >> $CLEAN_X_ORG_LOG
+	for item in $X_ORG_LIST
+	do
+		echo $item >> $CLEAN_X_ORG_LOG
+	done
+	echo $LINE >> $CLEAN_X_ORG_LOG
+}
+#remove_xorg_modules
+
+###**EOF**###

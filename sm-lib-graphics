@@ -1,0 +1,556 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-graphics
+####  version: 2.0.3
+####  Date: May 9 2008
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-graphics
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+set_graphics_data()
+{
+	local cardData=$( lspci -n | grep 0300 | cut -d ':' -f 3-4  | cut -d ' ' -f2 )
+	local card='' cardBrand=''
+	
+	# this loop handles cases where users have two cards installed, like
+	# mobo graphics and pci type, and only one has driver support
+	for card in $cardData
+	do
+		cardBrand=$( echo $card | cut -d ':' -f1 )
+		case $cardBrand in
+			10de|12d2)
+				NVIDIA='true'
+				;;
+			1002)
+				ATI='true'
+				;;
+			8086)
+				INTEL='true'
+				;;
+			*)
+				:
+				;;
+		esac
+	done
+	
+	if [ "$TESTING" == 'true' ]
+	then
+		:
+# 		ATI='true'
+# 		INTEL=''
+# 		NVIDIA=''
+	fi
+	
+	GFX_INSTALLER=$MOD_GFX # assign the now default engine script
+}
+
+# main graphics card selector, calls final_graphics_install to do actual driver installs
+install_graphics() 
+{
+	local repeat='' options='' opt='' OptionText='' CurrentDriverText=''
+	local unsupportedNvFgCard='' sgfxiData='' otherError='' otherErrorMessage=''
+	local cardBrand='' error='' xorgNative='' installXorgDriver='install-xorg-driver'
+	local updateDriver='' newX='' kernelInstallToText=''
+	# nvidia stuff
+	local NvOptionText='' OptNv='' OptNvLatest='' NvAdvancedText=''
+	local NvDefault='' NvLatest='' NvPrevious='' NvOlder='' NvOldest=''
+	local NvDefaultMath='' NvLatestMath='' NvPreviousMath='' NvOlderMath='' NvOldestMath='' 
+	local NvTest1='' NvTest2='' NvTest3='' NvTest4=''
+	local NvDefaultMathTemp='' NvLatestMathTemp='' NvPreviousMathTemp=''
+	local NvOldestMathTemp='' 
+	local nvDebSidId='debian-sid-nvidia'
+	local nvDebianSidText="${C}debian-sid-fglrx${S} - Debian nVidia driver install.\n\t${S}The script will install this nvidia driver: ${C}$nvDebSidId${S}\n"
+	#local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1\.[0-9]-[0-9]\{4\}|1[0-9]\{2\}\.[0-9]\{2\})' )
+	#local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1\.[0-9]-[0-9]\{4\}|1[0-9]\{2\}\.[0-9]\{2\})' )
+	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1[0-9]{2}\.[0-9]{2}\.?[0-9]{0,2}|1\.[0-9]-[0-9]{4})' )
+	# fglrx stuff
+	local FgOptionText='' OptFg='' OptFgLatest='' FgLatestText='' FgDebianSid=''
+	local FgDefault='' FgLatest='' FgPrevious='' FgOlder=''
+	local FgDefaultMathTemp='' FgLatestMathTemp='' FgPreviousMathTemp='' FgOlderMathTemp=''
+	local FgTest1='' FgTest2='' FgTest3='' fgXorgError='' fgXorgText=''
+	local FgCurrentDriver=$( dmesg | grep -i 'fglrx' | grep -o -m 1 '8\.[0-9]\{2\}\.[0-9]\{1,2\}' )
+	local FgDebSidId='debian-sid-fglrx'
+	local FgDebianSidText="${C}debian-sid-fglrx${S} - Debian fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDebSidId${S}\n"
+	
+	# intel stuff
+	local optIntel='' 
+
+	# set defaults and tests
+	local initx='init-'$INIT_LEVEL
+		
+	# this sets card id and script names
+	set_graphics_data
+
+	if [ "$NVIDIA" == 'true' ]
+	then
+		cardBrand='nVidia'
+		xorgNative='nv'
+		OptNv=$installXorgDriver
+	elif [ "$ATI" == 'true' ]
+	then
+		cardBrand='ATI'
+		xorgNative='ati'
+		OptFg=$installXorgDriver
+	elif [ "$INTEL" == 'true' ]
+	then
+		cardBrand='Intel'
+		xorgNative='i810'
+		OptIntel=$installXorgDriver
+	fi
+	
+	if [ "$NVIDIA"  == 'true' -o "$ATI"  == 'true' -o "$INTEL" == 'true' ]
+	then
+		# load the gfx installer script
+		test_version_info $GFX_INSTALLER chm
+		# get the output data for print available drivers
+		# bypassing x tests for this.
+		sgfxiData=$( ./$GFX_INSTALLER -pXD )
+		#[ "$TESTING" == 'true' ] && sgfxiData='8.42.3:8.42.3'
+		# test for errors in sgfxi output
+		unsupportedNvFgCard=$( echo $sgfxiData | grep -c 'ERROR: (253)' )
+		fgXorgError=$( echo $sgfxiData | grep -c 'ERROR: (236)' )
+		
+		otherError=$( echo $sgfxiData | egrep -o '\([0-9]{3}\)' )
+		
+		if [ -n "$KERNEL_INSTALL_TO" ] && [ "$NVIDIA"  == 'true' -o "$ATI"  == 'true' ]
+		then
+			kernelInstallToText='echo -e "$MLINE\n${M}You will be installing your graphics driver to this new kernel: ${C}$KERNEL_INSTALL_TO${N}\n"'
+		fi
+		
+		if [ -n "$otherError" -a -z "$fgXorgError" -a -z "$unsupportedNvFgCard" ] # handle weird cases
+		then
+			OptionText='echo -e "${E}Error ${C}'$otherError'${E} occurred. The script is not able to continue.\n${S}Please let the script maintainer know.\n\n"'
+			error='true'
+		else
+			if [ "$INTEL" != 'true' ]
+			then
+				if [ "$unsupportedNvFgCard" -gt 0 ]
+				then
+					OptionText='${E}Although you appear to have a '$cardBrand' card, there is no '$cardBrand' driver\navailable for it. Your '$cardBrand' card is probably too old, or otherwise unsupported.\n\n'
+					error='true'
+				fi
+				if [ "$ATI"  == 'true' ]
+				then
+					if [ "$fgXorgError" -eq 0 ]
+					then
+						fgXorgText='\n${C}install-xorg-radeon${S} - Install the ${C}xorg radeon${S} driver. The following cards are supported:\n\t7000-9250, Xpress200 - Good; 95-9800,x300-x850 - Beta\n${C}install-xorg-radeonhd${S} - ${M}NEW!${S} Install the ${M}beta${S} ${C}xorg radeonhd${S} driver. For newer ATI cards.\n\t${M}No 3d currently - 2d, dual monitor working.${S} Supported cards: Radeon x1200-x1900, HD 2x00\n'
+					else
+						fgXorgText='\n\n${E}Unfortunately, because of an ATI error, there is no working ${C}fglrx${E} driver\navailable for your ATI gfx card and Xorg version ${C}1.3\n\n${S}You can either install the regular ${C}xorg ati${S} native driver, or try the more powerful\n${C}xorg radeon${S} driver, if your ATI card is older than the R500 series.\nIf your card is in the R500 series, you can only use the ${C}vesa${S} driver,sorry.\n\n'
+						error='true'
+					fi
+					OptFg="$OptFg install-xorg-radeon install-xorg-radeonhd"
+				fi
+				# set the update driver message only in case no problems and card supported
+				if [ "$error" != 'true' ] 
+				then 
+					if [ "$X_VERSIONS_PRE" != "$X_VERSIONS_POST" ]
+					then
+						newX="It looks like ${C}Xorg${S} was upgraded in this dist-upgrade -"
+					else
+						newX="Although it looks like ${C}Xorg${S} was not updated, if you installed a new kernel,"
+					fi
+					updateDriver='echo -e "${S}'$newX'\nyou will need to reinstall your '$cardBrand' driver if you use the non-Free ones.\n$LINE"'
+				fi
+			fi
+			
+			OptionText='echo -e "'$OptionText'${S}You can quit, start X now, or install one of the following drivers.\nThe xorg driver does not need to be reinstalled with new kernels or xorg updates.\n$LINE\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg '$xorgNative'${S} drivers. This will\n\talso update your xorg.conf and clean out all currently installed binary drivers.'$fgXorgText'"'
+		fi
+	else
+		OptionText='echo -e "${E}There is no driver available for installation.\nYou do not appear to be running nVidia, Intel, or ATI video cards.\n${S}You can either quit and stay in console, or start X now.\n$LINE"'
+	fi
+
+	if [ "$NVIDIA"  == 'true' -a "$error" != 'true' ]
+	then
+		# set the driver data if it's available
+		if [ -n "$NvCurrentDriver" ]
+		then
+			CurrentDriverText='echo -e "${M}Your currently Installed Nvidia Driver is: ${C}$NvCurrentDriver${S}\n"'
+		fi
+
+		NvDefault=$( echo $sgfxiData | cut -d ':' -f 1 )
+		NvDefaultMath=$( echo $NvDefault | cut -d '-' -f 2 )
+		NvLatest=$( echo $sgfxiData | cut -d ':' -f 2 )
+		NvLatestMath=$( echo $NvLatest | cut -d '-' -f 2 )
+		NvPrevious=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvPreviousMath=$( echo $NvPrevious | cut -d '-' -f 2 )
+		NvOlder=$( echo $sgfxiData | cut -d ':' -f 4 )
+		NvOlderMath=$( echo $NvOlder | cut -d '-' -f 2 )
+		NvOldest=$( echo $sgfxiData | cut -d ':' -f 5 )
+		NvOldestMath=$( echo $NvOldest | cut -d '-' -f 2 )
+# 		[ "$NvDefaultMath" -gt "$NvOlderMath"  ] && NvTest1=0 || NvTest1=1
+# 		[ "$NvPreviousMath" -gt "$NvDefaultMath"  ] && NvTest2=0 || NvTest2=1
+# 		[ "$NvLatestMath" -gt "$NvDefaultMath"  ] && NvTest3=0 || NvTest3=1
+		NvDefaultMathTemp=$( convert_to_new_versioning $NvDefaultMath nv )
+		NvLatestMathTemp=$( convert_to_new_versioning $NvLatestMath nv )
+		NvPreviousMathTemp=$( convert_to_new_versioning $NvPreviousMath nv )
+		NvOlderMathTemp=$( convert_to_new_versioning $NvOlderMath nv )
+		NvOldestMathTemp=$( convert_to_new_versioning $NvOldestMath nv )
+		# this is preparing for the new nvidia driver format, the above will handle the
+		# legacy formatting, and requires no change for new formatting.
+		# once 10x.xx formatting is used, the logic here will handle the conversions
+		# return values: compare_numbers a b: 0 >; 1 =; 2 <
+		NvTest1=$( compare_numbers $NvDefaultMathTemp $NvOldestMathTemp )
+		NvTest2=$( compare_numbers $NvDefaultMathTemp $NvOlderMathTemp )
+		NvTest3=$( compare_numbers $NvLatestMathTemp $NvDefaultMathTemp )
+		if [ "$TESTING" == 'true' ]
+		then
+			echo "tempno 1:$NvDefaultMathTemp 2:$NvLatestMathTemp 3:$NvPreviousMathTemp 4:$NvOlderMathTemp 5:$NvOldestMathTemp"
+			echo "nvtests 1:$NvTest1  2:$NvTest2 3:$NvTest3"
+		fi
+		if [ "$NvTest1" -eq 0 ]
+		then
+			if [ "$NvTest2" -eq 0 ]
+			then
+				OptNvLatest='new-nvidia-c newest-nvidia-c'
+				NvAdvancedText="${C}new-nvidia-c${S} - Newer series nVidia driver, with ${C}-c${S} option.\n\t${W}Only supports nVidia cards version 5200 or greater.\n\t${S}This will install this nVidia driver: ${C}$NvPrevious${S}\n${C}newest-nvidia-c${S} - ${M}Recommended for Newer cards${S} Newest nVidia driver, with ${C}-c${S} option.\n\t${W}Only supports nVidia cards version 5200 or greater.\n\t${S}This will install this nVidia driver: ${C}$NvLatest${S}\n"
+			fi
+			OptNv="$OptNv $nvDebSidId oldest-nvidia older-nvidia-c $OptNvLatest"
+			NvOptionText='echo -e "$nvDebianSidText${C}oldest-nvidia${S} - Use if you have problems with stable/ or newer nVidia install. Recommended for legacy nvidia cards.\n\t${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia-c${S} ${M}Recommended for midrange cards${S} nVidia driver installed with ${C}-c${S} option.\n\t${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText"'
+		else
+			OptNv="$OptNv $nvDebSidId legacy-nvidia"
+			NvOptionText='echo -e "$nvDebianSidText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"'
+		fi
+	fi
+	
+	if [ "$ATI"  == 'true' -a "$error" != 'true' ]
+	then
+		# set the driver data if it's available
+		if [ -n "$FgCurrentDriver" ]
+		then
+			CurrentDriverText='echo -e "${M}Your currently Installed Fglrx/Ati Driver is: ${C}$FgCurrentDriver${S}\n"'
+		fi
+		
+		FgDebianSid=$( echo $sgfxiData | grep -o $FgDebSidId )
+		
+		if [ -z "$FgDebianSid" ]
+		then
+			# run the script, first use the print version flag to get output
+			FgDefault=$( echo $sgfxiData | cut -d ':' -f 1)
+			FgLatest=$( echo $sgfxiData | cut -d ':' -f 2)
+			FgPrevious=$( echo $sgfxiData | cut -d ':' -f 3)
+			FgOlder=$( echo $sgfxiData | cut -d ':' -f 4)
+			
+			FgDefaultMathTemp=$( convert_to_new_versioning $FgDefault ati )
+			FgLatestMathTemp=$( convert_to_new_versioning $FgLatest ati )
+			FgPreviousMathTemp=$( convert_to_new_versioning $FgPrevious ati )
+			FgOlderMathTemp=$( convert_to_new_versioning $FgOlder ati )
+			
+			# return values: 0 >; 1 =; 2 <
+			# set value, 0 for number returned by script > 'older' driver
+			FgTest1=$( compare_numbers $FgDefaultMathTemp $FgOlderMathTemp )
+			# 0 if latest > default returned by script
+			FgTest2=$( compare_numbers $FgLatestMathTemp $FgDefaultMathTemp )
+			# if previous > default returned by script
+			FgTest3=$( compare_numbers $FgPreviousMathTemp $FgDefaultMathTemp )
+			# echo fg2: $FgTest2 fg3: $FgTest3
+			if [ "$TESTING" == 'true' ]
+			then
+				echo "FgNumber 1:$FgDefault 2:$FgLatest 3:$FgPrevious 4:$FgOlder"
+				echo "fgTests 1:$FgTest1  2:$FgTest2 3:$FgTest3"
+			fi
+		fi
+
+		if [ -n "$FgDebianSid" ]
+		then
+			OptFg="$OptFg $FgDebSidId"
+			FgOptionText='echo -e $FgDebianSidText'
+		# this case handles the standard scenario where only one ati driver works
+		elif [ "$FgTest2" -eq 1 -a "$FgPrevious" == '' ]
+		then
+			OptFg="$OptFg $FgDebSidId current-fglrx"
+			FgOptionText='echo -e "$FgDebianSidText${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
+		elif [ "$FgTest1" -eq 0 -a "$FgTest2" -le 1 -a "$FgTest3" -eq 2 -a -n "$FgOlder" ]
+		then
+			if [ "$FgTest2" -eq 0 ]
+			then
+				OptFgLatest=' latest-fglrx'
+				FgLatestText="\n${C}latest-fglrx${S} - Installs the very latest test/beta fglrx driver: ${C}$FgLatest"
+			fi
+			### note: sometimes only 2 fglrx drivers may be useable, switch comments if needed
+			OptFg="$OptFg $FgDebSidId older-fglrx previous-fglrx current-fglrx $OptFgLatest"
+			#OptFg="$OptFg previous-fglrx current-fglrx $OptFgLatest"
+			# OptFg="previous-fglrx current-fglrx $OptFgLatest"
+			
+			FgOptionText='echo -e "$FgDebianSidText${C}older-fglrx${S} - Installs ${C}$FgOlder${S} fglrx driver.\n\tOnly use this if you have problems with current fgrlx drivers.\n${C}previous-fglrx${S} - Installs ${C}$FgPrevious${S} Radeon/fglrx driver.\n\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
+			
+			#FgOptionText='echo -e "${C}previous-fglrx${S} - Installs ${C}$FgOlder${S} Radeon/fglrx driver.\n\t\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
+			
+			
+			# FgOptionText='echo -e "${C}previous-fglrx${S} - Installs ${C}$FgPrevious${S} Radeon/fglrx driver.\n\t\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
+		# this is a special case to handle cases where 2 drivers are working
+		elif [ "$FgTest2" -eq 1 ]
+		then
+			OptFg="$OptFg $FgDebSidId previous-fglrx current-fglrx"
+			FgOptionText='echo -e "$FgDebianSidText${C}previous-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgPrevious${S}\n${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
+# 		else
+# 			OptFg="$OptFg legacy-fglrx"
+# 			FgOptionText='echo -e "${C}legacy-fglrx${S} - ${W}Legacy driver install!${S} script will install an older driver.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
+		fi
+	fi
+	print_lib_info $LIB_GRAPHICS
+	echo $MLINE
+	eval $updateDriver
+	eval $kernelInstallToText
+	eval $CurrentDriverText
+	eval $OptionText
+	eval $NvOptionText
+	eval $FgOptionText
+	echo -e "${C}$initx${S} - No graphics driver install. Quit script, start $initx / X."
+	echo -e "${C}quit${S} - No graphics driver install. Quit script, stay in console."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="$OptIntel $OptNv $OptFg $initx quit"
+	select opt in $options
+	do
+		case $opt in
+			install-xorg-driver)
+				final_graphics_install native
+				;;
+			install-xorg-radeon)
+				final_graphics_install radeon
+				;;
+			install-xorg-radeonhd)
+				final_graphics_install radeonhd
+				;;
+			$nvDebSidId)
+				final_graphics_install nvc $nvDebSidId
+				;;
+			legacy-nvidia)
+				final_graphics_install nv $NvDefault
+				;;
+			oldest-nvidia)
+				final_graphics_install nvo $NvOldestMath
+				;;
+			older-nvidia-c)
+				final_graphics_install nvco $NvOlderMath
+				;;
+			default-nvidia-c)
+			 	final_graphics_install nvc $NvDefault
+				;;
+			new-nvidia-c)
+				final_graphics_install nvco $NvPreviousMath
+				;;
+			newest-nvidia-c)
+				final_graphics_install nvco $NvLatestMath
+				;;
+			$FgDebSidId)
+				final_graphics_install fglrx $FgDebSidId
+				;;
+			older-fglrx)
+				final_graphics_install fglrx-o $FgOlder
+				;;
+			previous-fglrx)
+				final_graphics_install fglrx-o $FgPrevious
+				;;
+			current-fglrx|legacy-fglrx)
+				final_graphics_install fglrx $FgDefault
+				;;
+			
+			latest-fglrx)
+				final_graphics_install fglrx-l $FgLatest
+				;;
+			$initx)
+				final_graphics_install no-driver-install
+				start_default_dm full
+				;;
+			quit)
+				final_graphics_install no-driver-install
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	if [ "$repeat" == 'true' ]
+	then
+		install_graphics
+	fi
+}
+
+# $1 - number to be converted, this will handle old style: 9746
+# and new style 100x.xx without any problems, converts xxyy to xx.yy format
+# so for example: 100.17 > 97.46
+# $2 - nv or ati
+convert_to_new_versioning()
+{
+	local driverNumber='' hasDot=$( echo $1 | grep '\.' )
+	
+	if [ "$2" == 'nv' ]
+	then
+		if [ -n "$hasDot" ]
+		then
+			driverNumber=$1
+		else
+			# I'm using tr here to get rid of , for multi dot numbers, for some reason
+			# setting the LANG=C globally did not resolve the issues.
+			driverNumber=$( echo $1 | gawk '{total = $1 / 100; print total}' | tr ',' '.' )
+		fi
+	elif [ "$2" == 'ati' ]
+	then
+		driverNumber=$( echo $1 | tr '-' '.' )
+	fi
+	echo $driverNumber
+}
+
+## graphics installer functions
+# args: $1, which type of install; $2 driver version
+final_graphics_install()
+{
+	local completed='' FglrxFlag='' installDriver='' extraArgs='' installMess=''
+	local kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 ) 
+	local kernelInstallTo=''
+	
+	# I'm going to trust that data is correct here and let sgfxi test for kernel exists
+	if [ -n "$KERNEL_INSTALL_TO" ]
+	then
+		kernelInstallTo=" -K $KERNEL_INSTALL_TO"
+	fi
+	
+# 	# handle temp new syntax
+# 	if [ -n "$( echo $KERNEL_VERSION | grep 'slh.' )" ]
+# 	then
+# 		# handle this syntax: 2.6.24-2.6.24.1.slh.3-sidux-amd64
+# 		kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 2 | cut -d '.' -f 3 )
+# 	else
+# 		kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '.' -f 3 )
+# 	fi
+	# for user set defaults for gfx
+	local sgfxiArgs=$( sm_pref_tester 'sgfxi' equal )
+	
+	case $1 in
+		native)
+			extraArgs=" -n "
+			installDriver='true'
+			completed='true'
+			;;
+		radeon)
+			extraArgs=" -N radeon"
+			installDriver='true'
+			completed='true'
+			;;
+		radeonhd)
+			extraArgs=" -N radeonhd"
+			installDriver='true'
+			completed='true'
+			;;
+		nv)
+			installMess="${S}installing nVidia driver ${C}$2${S} now...${N}"
+			extraArgs=" -n "
+			installDriver='true'
+			completed='true'
+			;;
+		nvo)
+			installMess="${S}installing nVidia driver ${C}$2${S} now...${N}"
+			extraArgs=" $kernelInstallTo -o $2"
+			installDriver='true'
+			completed='true'
+			;;
+		nvc)
+			installMess="${S}installing nVidia driver ${C}$2${S} with -c option now...${N}"
+			if [ "$2" == 'debian-sid-nvidia' ]
+			then
+				extraArgs=' -s '
+			fi
+			extraArgs=" $kernelInstallTo -c $extraArgs"
+			installDriver='true'
+			completed='true'
+			;;
+		nvco)
+			installMess="${S}installing nVidia driver ${C}$2${S} with -c option now...${N}"
+			extraArgs=" $kernelInstallTo -c -o $2 "
+			installDriver='true'
+			completed='true'
+			;;
+		#note: see irc !ati for more on ati stuff, 
+		#the -r removes modelines from xorg which cause out of sync errors
+		fglrx)
+			# only do if newer kernel
+			if [ "$kernelMajorInstalled" -ge 17 ]
+			then
+				FglrxFlag=' -r '
+			fi
+			# this will force, for ati, debian sid package install instead of ati junk
+			if [ "$2" == 'debian-sid-fglrx' ]
+			then
+				extraArgs=' -s '
+			fi
+			installMess="${S}installing ATI/fglrx driver ${C}$2${S} now...${N}"
+			extraArgs=" $kernelInstallTo $extraArgs $FglrxFlag"
+			installDriver='true'
+			completed='true'
+			;;
+		fglrx-o)
+			# only do if newer kernel
+			if [ "$kernelMajorInstalled" -ge 17 ]
+			then
+				FglrxFlag=' -r '
+			fi
+			installMess="${S}installing ATI/fglrx driver ${C}$2${S} now...${N}"
+			extraArgs=" $kernelInstallTo $FglrxFlag -o $2 "
+			installDriver='true'
+			completed='true'
+			;;
+		fglrx-l)
+			# only do if newer kernel
+			if [ "$kernelMajorInstalled" -ge 17 ]
+			then
+				FglrxFlag=' -r '
+			fi
+			installMess="${S}installing latest ATI/fglrx driver ${C}$2${S} now...${N}"
+			extraArgs=" $kernelInstallTo $FglrxFlag -o $2 "
+			installDriver='true'
+			completed='true'
+			;;
+		no-driver-install)
+			completed='true'
+			;;
+		*)
+			error_handler 'value-bad' $FUNCNAME "$1"
+			;;
+	esac
+	if [ "$TESTING" == 'true' ]
+	then
+		# extraArgs=$extraArgs' -XTF'
+		:
+	fi
+
+	if [ "$installDriver" == 'true' ]
+	then
+		echo $installMess
+		# note: DX and sgfxi Args need to be joined for -
+		./$GFX_INSTALLER -DX$sgfxiArgs $extraArgs
+		# kill root pid on success. We don't want to kill pid on reboot here of sgfxi
+		# so sgfxi exits on quit/reboot with 100
+		if [ "$?" -eq 0 ]
+		then
+			start_default_dm nowmstart
+		fi
+	fi
+	
+	if [ "$completed" == "true" ]
+	then
+		print_completed
+	fi
+}
+# install_graphics
+
+###**EOF**###

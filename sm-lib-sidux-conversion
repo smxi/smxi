@@ -1,0 +1,506 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-sidux-conversion
+####  version: 1.4.1
+####  Date: March 6 2008
+
+####  Copyright (C) Harald Hope 2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-sidux-conversion
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+check_debian()
+{
+	local response='' manual='' debBits='' proceed='' siduxBits='sidux'
+	local timeStamp=$( date +%Y%m%d ) temp1=''
+	
+	print_lib_info $LIB_SIDUX_CONVERSION
+	echo $MBAR
+	echo "${M}You appear to be using Debian or a Debian derived distro."
+	echo "${S}If you want to upgrade your system to ${C}sidux${S}, please enter ${C}y${S}."
+	echo
+	echo "${W}There are no guarantees, support is still experimental.${S} You must have Debian sid"
+	echo "sources present to continue. The script will give you some options for that."
+	echo
+	echo "${W}Ubuntu and Kubuntu based distros exit now or you will destroy your system."
+	echo "If you are not sure if you have those in ${C}$EAS${W}, please check first"
+	echo
+	update_apt_sources
+	manual="$?"
+	if [ "$manual" -gt 0 ]
+	then
+		echo "${S}To update your sources manually: hit ${C}ctrl+alt+F2${S} to start a new terminal session, "
+		echo "use your favorite editor. When done editing, hit ${C}ctrl+alt+F1${S} to come back here."
+		echo
+		echo "Sample Debian Sid ${C}sources.list${S} entry:"
+		echo "${C}deb http://ftp.debian.org/debian unstable main contrib non-free${S}"
+		echo $LINE
+		echo "${S}Enter ${C}y${S} to continue after you've checked your sources, or ${C}n${S} to exit now."
+		echo $MLINE
+		read response
+		echo $LINE
+		case $response in
+			y)	echo "${S}Ok, continuing to next question.${N}"
+				;;
+			n)	echo "${S}Ok, exiting now.${N}"
+				exit 1
+				;;
+			*)	print_error yn
+				;;
+		esac
+	fi
+	echo $MLINE
+	echo "${M}You will be asked if you want to install kde or xfce later in the script, but only this"
+	echo "first time you run the script. To see this after first run, start script with -W option."
+	echo 
+	echo "${W}IMPORTANT: Use this script in the following order for fresh Etch netinstall:${S}"
+	echo "${C}1${S} - You will not see the kernel install option until you are done with"
+	echo "    your sidux and windows manager option installs. Restart script to install "
+	echo "    kernels ${M}AFTER${S} you have started x/kde/xfce at least one time."
+	echo "${C}2${S} - Exit script after upgrade to sidux is completed, without installing graphics drivers."
+	echo "${C}3${S} - Install kernel, reboot. Make sure kde etc works as intended."
+	echo "${C}4${S} - Then use script to install graphics drivers. Start script with ${C}-kdwidt${S}"
+	echo "    to go straight to graphics installer question."
+	print_hec
+	echo "${S}This is your last chance to stop before you convert to sidux..."
+	echo "${C}1${S} - ${C}proceed${S} Install ${C}$BITS${S} bit sidux"
+	echo "${C}2${S} - ${C}quit${S} now, I don't want to chance it."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+	
+	options="proceed quit"
+	select opt in $options
+	do
+		case $opt in
+			proceed)
+				debBits=$BITS
+				proceed='true'
+				;;
+			quit)
+				print_quit
+				exit 1
+				;;
+			*)
+				print_error opt
+				;;
+		esac
+		break
+	done
+	
+	if [ "$proceed" == 'true' ]
+	then
+		echo $LINE
+		[ "$debBits" == '64' ] && siduxBits='sidux64'
+		echo $siduxBits'-'$timeStamp'-d:d' > $SID
+		echo "${S}Ok, continuing with install now.${N}"
+		IS_DEBIAN='true'
+		NO_PDIFFS=$NO_PDIFF_ARGS
+		SKIP_KERNEL='true'
+		[ -x /usr/sbin/mkinitramfs ] || REQUIRED_APPS=$REQUIRED_APPS' initramfs-tools'
+		return $debBits
+	else
+		check_debian
+	fi
+}
+
+# check_debian
+
+check_no_support()
+{
+	local prefId='kanotix-2005-4-warning-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local response=''
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $WBAR
+		echo "${W}KANOTIX 2005-04 - CEBIT WARNING!!"
+		echo $WBAR
+		echo "${M}This script can no longer support upgrading fresh installs of ${C}Kanotix 2005-04${M}"
+		echo "If you have upgraded your system any time since ${C}March 2006${M}, you are fine."
+		echo "There is no change for your support, and everything will continue as before."
+		echo
+		echo "Only users who have not upgraded 2005-04 or Cebit since that date need to pay any"
+		echo "attention to this warning."
+		echo
+		echo "${C}Dist-upgrade${M} will now fail on non-upgraded installs due to kde dependency problems."
+		echo $MLINE
+		echo "${S}You will only be asked this question one time. If you have a non-upgraded install"
+		echo "please use the ${C}update-install${S} option on either ${C}Kanotix 2006-01${S} live cd,"
+		echo "or using the ${C}sidux${S} live cd, when it is released."
+		echo
+		echo "Once you update the install that way, you can safely use this script again."
+		echo $LINE
+		echo -e "${Q}Enter ${C}y${Q} to continue as usual, and ${C}n${Q} to exit now.$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	set_sticky_prefs $prefId
+				echo "${S}Ok, continuing on with upgrade script now${N}"
+				;;
+			n)	echo "${S}Ok, please update your install using update-install from ${C}KANOTIX 2006-01${S} or sidux.${N}"
+				print_quit
+				exit 1
+				;;
+			*)	print_error yn
+				sticky_prefs
+				;;
+		esac
+	fi
+}
+# check_no_support
+change_to_sidux_question()
+{
+	local prefId='check-sidux-sources-2'
+	local prefId2='check-sidux-sources-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local smPref2=$( sm_pref_tester $prefId2 )
+	local response='' siduxYes=''
+	
+	[ "$smPref2" -gt 0 ] && siduxYes='echo -e "$MLINE\n${M}If you have already switched to sidux, just say ${C}y${M} again, I need to do this to clear a setting.\n$MLINE"'
+	
+	if [ "$smPref" -eq 0 -o "$CHECK_SIDUX" == 'true' ]
+	then
+		echo $MLINE
+		echo "${M}Change Kanotix to Sidux - or update Debian to sidux"
+		echo $MLINE
+		echo "${S}As you probably have heard, ${C}Kanotix${S} is not using sid as its foundation any more."
+		echo $LINE
+	fi
+}
+
+change_to_sidux_question_bu()
+{
+	local prefId='check-sidux-sources-2'
+	local prefId2='check-sidux-sources-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local smPref2=$( sm_pref_tester $prefId2 )
+	local response='' siduxYes=''
+	
+	[ "$smPref2" -gt 0 ] && siduxYes='echo -e "$MLINE\n${M}If you have already switched to sidux, just say ${C}y${M} again, I need to do this to clear a setting.\n$MLINE"'
+	
+	if [ "$smPref" -eq 0 -o "$CHECK_SIDUX" == 'true' ]
+	then
+		echo $MLINE
+		echo "${M}Change Kanotix to Sidux - or update Debian to sidux"
+		echo $MLINE
+		echo "${S}As you probably have heard, ${C}Kanotix${S} is not using sid as its foundation any more."
+		echo $LINE
+		echo "${S}Now however, you have to make a choice:"
+		echo "${Q}Do you want to stay with Kanotix as it moves to a foundation like"
+		echo "${C}Debian Etch${Q} or ${C}Ubuntu${Q}, or do you want to keep using ${C}Debian Sid${Q} as your foundation?"
+		echo
+		echo "${W}After March 2007, sidux will no longer officially support switching, so do this NOW!!"
+		echo
+		echo "${W}Kanotix is no longer maintaining their debian sid repositories.${S}"
+		echo
+		echo "If you want to stay with Debian Sid based system, you can change your sources to"
+		echo "use the new ${C}sidux${S} distro. The sidux team includes many former Kanotix developers."
+		echo
+		echo "Selecting ${C}y${S} will delete your Kanotix sources, and add sidux sources to ${C}sources.list${S}."
+		echo "It will also install sidux keyrings. Since it is unclear what will happen with the current"
+		echo "Kanotix apt repositories, you will need to make this decision now."
+		echo "You will see this question every time you start Kanotix upgrade process with this script."
+		echo
+		
+		echo "${S}Selecting ${C}n${S} will exit the script now."
+		eval $siduxYes
+		echo
+		echo -e "${Q}Would you like to change to sidux now?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	update_to_sidux
+				set_sticky_prefs $prefId
+				;;
+			n)	echo "${S}Ok, your sources will stay ${C}Kanotix${S}. Remember, you can switch to ${C}sidux${S} sources"
+				echo "any time by simply starting this script with the ${C}-X${S} option.${N}"
+				print_quit
+				exit 0
+				;;
+			*)	print_error yn
+				check_sidux_sources
+				;;
+		esac
+	fi
+}
+
+#change_to_sidux_question
+update_to_sidux()
+{
+	local siduxApt1='deb http://sidux.com/debian/ sid main contrib non-free firmware fix.main fix.contrib fix.non-free'
+	#local siduxAptTemp1='deb http://sidux.com/repo/transitional/ sid main contrib non-free '
+	#local siduxAptTemp2='deb http://sidux.com/repo/compat/ sid main contrib non-free'
+	local siduxAptRepo='deb http://sidux.com/debian/ sid main fix.main'
+	local isSidux=$( grep -c -i '^deb http://sidux.com' $EAS )
+	
+	echo $LINE
+	echo "${S}Updating apt sources now...${N}"
+	
+	if [ "$isSidux" -eq 0 ]
+	then
+		sed -i -r "s%^#\sKanotix.*%# Sidux Sources%" $EAS
+		perl -pi -e "s%^(deb\shttp://kanotix.com|deb-src\shttp://kanotix.com|#\sdeb\shttp://kanotix.com|#\sdeb-src\shttp://kanotix.com).*\n?%%" $EAS
+		echo $siduxApt1 >> $EAS
+
+		echo "${C}$EAS${S} have been updated.${N}"
+		
+		install_keyrings
+		
+		echo "${S}Congratulations! Your system is now ready to run ${C}Sidux${S}. Enjoy ${C}Debian Sid${S}!!${N}"
+	else
+		echo "${C}$EAS${E} have already been updated for ${C}sidux${E}."
+		install_keyrings
+		echo "${S}Continuing with script.${N}"
+	fi
+	sidux_switch_id
+}
+
+sidux_switch_id()
+{
+	local prefId='k-to-sidux-2'
+	local smPref=$( sm_pref_tester $prefId )
+	local siduxCurrent='' siduxDate='' siduxDebian='' upcr='creating ' 
+	local siduxString='sidux' 
+	local timeStamp=$( date +%Y%m%d )
+	
+	[ "$BITS" == 64 ] && siduxString='sidux64-' || siduxString='sidux-'
+	
+	# get any user stored data and put into new sidux-version
+	if [ -e $SID ]
+	then
+		siduxCurrent=$( cat $SID )
+		siduxDate=$( cat $SID | grep -o "200[0-9]*" )
+		siduxDebian=$( cat $SID | grep -i 'debian' )
+		upcr='updating '
+	fi
+	
+	if [ -n "$siduxDate" ]
+	then
+		siduxString=$siduxString$siduxDate
+	else
+		siduxString=$siduxString$timeStamp
+	fi
+	
+	if [ -n "$siduxDebian" ]
+	then
+		siduxString=$siduxString'-d:d'
+	else
+		siduxString=$siduxString'-d:'$DISTRO_LEVEL
+	fi
+	
+	if [ -e $KAN -o -n "$siduxDebian" ]
+	then
+		echo $MLINE
+		echo "${M} Update system id to sidux format"
+		echo $MLINE
+		echo "${S}This option will remove legacy identification of your upgraded sidux system."
+		echo "You must answer ${C}y${S} to the following, the script will remove your ${C}$KAN${S} and then do"
+		echo "a small change to your ${C}$SID${S} file. It will create a standardized sidux identifier"
+		echo "string for your system, which looks like this: ${C}sidux-20070103-d:3"
+		echo $LINE
+		echo -e "${Q}Do you want to update your system id now?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	
+				echo $LINE
+				echo "${S}Removing ${C}$KAN${N}"
+				rm -f $KAN
+				echo "${S}$upcr ${C}$SID${N}"
+				touch $SID
+				echo $siduxString > $SID
+				echo "${C}$SID${S} is now updated with this information: ${C}$siduxString"
+				echo "Restarting script now so it can use the new id...${N}"
+				./$SCRIPT_NAME -r
+				exit 0
+				;;
+			n)	echo "${S}Ok, exiting script now, you can't continue, sorry.${N}"
+				exit 1
+				;;
+			*)	print_error yn
+				sidux_switch_id
+				;;
+		esac
+	fi
+}
+# sidux_switch_id
+install_window_manager()
+{
+	echo $MBAR
+	echo "${M}Window manager install process"
+	echo $LINE
+	echo "${S}After the sidux components are installed, please continue on to the"
+	echo "${C}Package Install${S} section which will come next, in ${C}Post dist-upgrade${S}."
+	echo "Choose the ${C}display manager${S} option, then first install xorg, then your preferred."
+	echo "display manager. For older installs I recommend ${C}xfce${S} or ${C}fvwm crystal${S}.${N}"
+	print_hec
+	set_sticky_prefs debian-to-sidux-wm-1
+}
+install_window_manager-old()
+{
+	local prefId='debian-to-sidux-wm-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local systemPackages='alsa alsa-utils hal iceweasel libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils udev xbase-clients xdm xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xmms xserver-xorg xorg xserver-xorg-input-kbd xserver-xorg-input-mouse xserver-xorg xserver-xorg-video-all xterm xutils'
+	local kdePackages=$systemPackages' kde kdm konqueror konversation'
+	local xfcePackages=$systemPackages' xfce4 xfmedia '
+	local success='' options='' opt=''
+	
+	echo $MBAR
+	echo "${M}DEBIAN ONLY WINDOWS MANAGER INSTALL"
+	echo $LINE
+	echo "${S}This will install all required packages for ${C}kde${S} or ${C}xfce${S}."
+	echo "More windows managers will be added as they are tested, except for gnome."
+	echo "Keep in mind, ${C}sidux${S} is a kde centered distro and the long term odds"
+	echo "of running ${C}gnome${S} are not great in debian sid from expert reports."
+	echo 
+	echo "${C}kde${S} - Debian users have been having problems getting kde installed and running, this"
+	echo "collection of packages worked well on my tests. It includes all necessary kde,"
+	echo "xorg, and fonts to get your kde up and running. xfce is not tested very well."
+	echo
+	echo "${C}xfce${S} - The xfce option for will do a clean, xfce4 only install. This will"
+	echo "also install required xorg components, iceweasel and some system stuff like alsa etc."
+	echo
+	echo "${M}You will only see this question this one time. The install will be about 250 mB"
+	echo $LINE
+	echo "${C}1${S} - Install kde now."
+	echo 
+	echo "${C}2${S} - Install xfce now."
+	echo 
+	echo "${C}3${S} - Continue, do not install kde. You will not be asked this question again."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="kde-install xfce-install continue"
+
+	select opt in $options
+	do
+		case $opt in
+			kde-install)
+				echo $LINE
+				echo -n "${Q}Would you also like to install ${C}koffice${Q} in kde?${S} [ ${C}y${S} to install, or hit ${C}enter${S} to not install koffice]: ${N}"
+				read response
+				[ "$response" == 'y' ] && kdePackages=$kdePackages' koffice'
+				wm_installer kde "$kdePackages"
+				;;
+			xfce-install)
+				wm_installer xfce "$xfcePackages"
+				;;
+			continue)
+				# set some prefs for successful du
+				set_sticky_prefs $prefId
+				echo "${S}Ok, continuing without installing xorg/windows manager.${N}"
+				;;
+			*)
+				print_error opt
+				;;
+		esac
+		break
+	done
+}
+# args: $1 wm; $2 packages to  install
+wm_installer()
+{
+	local success=0
+	
+	echo $LINE
+	echo "${S}Installing $1 and xorg components now...${N}"
+	package_installer "$2" 'install-always'
+	success="$?"
+	if [ "$success" -eq 0 ]
+	then
+		echo "${S}$1 and xorg components were installed successfully.${N}"
+		set_sticky_prefs debian-to-sidux-wm-1
+		return 0
+	else
+		echo "${S}An error occured during the install, please check the update log.${N}"
+		return 1
+	fi
+}
+
+install_sidux_components()
+{
+	local prefId='install-sidux-packages-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local siduxPackages='configure-cups configure-dsl configure-gprs configure-isdn configure-keyboard configure-mouse configure-ndiswrapper configure-networkcard configure-screenres configure-xawtv deborphan ddcxinfo-sidux distro-defaults etcskel-sidux fix-fonts gfxboot-theme-sidux gpm infobash networkconfig-sidux rebuildfstab sambastart-sidux sidux-irc sidux-graphics sidux-graphics-common sidux-kernelhacking sidux-keyrings sidux-menu sidux-modules sidux-scripts su-me udev-config-sidux user-profile-sidux wodim'
+	# grub-gfxboot 
+	local i='' installedPackage=''
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $MBAR
+		echo "${M}SIDUX PACKAGE INSTALL"
+		echo $LINE
+		echo "${S}This will double check your system to make sure you have all the"
+		echo "${C}sidux${S} packages that you need for a complete install."
+		echo 
+		echo "Please read each item and tell ${C}apt${S} if you want it or not by"
+		echo "answering ${C}y${S} or ${C}n${S} to apt-get install questions. For example, "
+		echo "if you don't have ${C}isdn${S} or ${C}xawtv${S}, answer ${C}n${S} to the isdn or xawtv stuff.${N}"
+		
+		print_hec
+		echo "${S}Checking for and installing missing ${C}sidux${S} packages now...${N}"
+		for i in $siduxPackages
+		do 
+			package_installer "$1" 'install-missing'
+		done
+		echo "${S}Finished installing ${C}sidux${S} packages.${N}"
+		set_sticky_prefs $prefId
+	fi
+}
+
+sidux_graphics()
+{
+	local prefId='sidux-graphics-2'
+	local smPref=$( sm_pref_tester $prefId )
+	local smPref2=$( grep -c 'sidux' $EAS ) # make sure user has sidux in sources.list
+	local OldGrub=$( awk -F= '/^# groot/{print $2}' $GRUB_PATH )
+	local bm='/boot/message'
+	
+	if [ "$1" == 'grub1' -a "$smPref" -eq 0 ]
+	then
+		if [ "$smPref2" -gt 0 -o "$DISTRO_LEVEL" -gt 4 ]
+		then
+			echo $LINE
+			echo "${S}Running ${C}sidux grub${S} fix...${N}"
+			 # make a copy of old penguin graphic
+			[ -f $bm.hd -a "$DISTRO_LEVEL" -lt 5 ] && cp $bm.hd $bm.hd-bu
+			# check for old physical file, move to renamed
+			[ -f $bm ] && mv -f $bm $bm.presidux
+			package_installer 'sidux-graphics sidux-graphics-common' 'install-always' '--reinstall'
+
+			# force link to file
+			if [ -L $bm -o ! -e $bm ]
+			then
+				ln -fs message.hd $bm
+			else
+				echo "${E}No grub graphics file was found. Sorry, script cannot resolve this for you.${N}"
+			fi
+			echo "${S}Running  ${C}grub-install${S} first time to update grub....${N}"
+			grub-install --recheck --no-floppy $OldGrub
+			echo "${S}Running  ${C}grub-install${S} again...${N}"
+			grub-install --recheck --no-floppy $OldGrub
+			echo "${S}Finished with ${C}sidux grub${S} update and graphics reinstall.${N}"
+			set_sticky_prefs $prefId
+		fi
+	fi
+}
+
+###**EOF**###

@@ -1,0 +1,352 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-2006-fixes
+####  version: 1.2.2
+####  Date: January 25 2008
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-2006-fixes
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+#add line feed after last line on preferences
+apt_preferences_fix()
+{
+	local smPref=$( grep -c 'aptprefs' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo "${S}Updating apt preferences to correct small issue...${N}"
+		echo '' >> /etc/apt/preferences
+		set_sticky_prefs aptprefs
+		echo "${C}/etc/apt/preferences ${S}updated.${N}"
+	fi
+}
+
+old_xorg_fix()
+{
+	local smPref=$( grep -c 'old-xorg-1' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Removing and reinstalling xserver-common.${N}"
+		dpkg --force-all --purge xserver-common
+		#apt-get remove  --purge xserver-common
+		#apt-get install xserver-common
+		echo "${S}Running install -f.${N}"
+		apt-get install -f
+		echo "${S}Reinstalling xserver-xorg-core.${N}"
+		apt-get install xserver-xorg-core
+		echo "${S}Running install -f.${N}"
+		apt-get install -f
+		
+		echo "${S}xorg fix is done, hopefully this will work for you.${N}"
+		
+		set_sticky_prefs old-xorg-1
+	fi
+}
+
+console_tools_fix()
+{
+	local smPref=$( grep -c 'console-tools-1' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}console-tools${S} fix to improve Splashy performance...${N}"
+		rm -rf /etc/console-tools
+		apt-get install --reinstall --yes -o DPkg::Options::=--force-confmiss console-tools
+		echo "${C}console-tools${S} is completed.${N}"
+		
+		set_sticky_prefs console-tools-1
+	fi
+}
+
+powersave_fix()
+{
+	local smPref=$( grep -c 'powersave-1' $SM_CONFIG_FILE )
+	local epe='/etc/powersave/events'
+	
+	if [ -f $epe -a "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}powersaved${S} fix to make poweroff button work again...${N}"
+		sed -ri 's/^(EVENT_BUTTON_POWER=).*/\1"wm_shutdown"/' $epe
+		pidof powersaved &>/dev/null && /etc/init.d/powersaved restart
+		set_sticky_prefs powersave-1
+		echo "${C}powersaved${S} fix is completed.${N}"
+	fi
+}
+
+splashy_fix()
+{
+	local smPref=$( grep -c 'splashy-fixe-1' $SM_CONFIG_FILE )
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}splashy fix${S} now.${N}"
+		sed -ri 's/^(CHVT_TTY=)/#\1/' /etc/default/splashy
+		echo "${S}The fix is done.${N}"
+		set_sticky_prefs splashy-fixe-1
+	fi
+}
+
+# do xorg fix: can't do version detection safely yet
+xorg_trigger()
+{
+	local response='' smPref=''
+	
+	# set the xorg version, this must be run after apt-get update, not before
+	# otherwise there is no apt-cache policy xorg set
+	
+	#if [ "$X_ORG_VERSION_PRE" == "6." -o "$X_ORG_VERSION_PRE" == '' ]
+	#then
+		smPref=$( grep -c 'xorg7' $SM_CONFIG_FILE )
+		if [ "$smPref" -eq 0 ]
+		then
+			echo $BAR
+			echo "${S}Running fix-xorg7 is required for the 6.x to 7.x xorg upgrade to work."
+			echo "If you have just upgraded to xorg 7 yet you must choose ${C}y${S}."
+			echo "If you have already upgraded xorg to 7 or greater in the past, don't run this."
+			echo
+			echo "Debian sidux upgrade users, I'd recommend running this unless you are sure" echo "your xorg.conf is solid. This will set your fonts to safe defaults in xorg.conf."
+			echo -e "${Q}Would you like to also run fix-xorg?$YNE"
+			echo $LINE
+			read response
+			
+			case $response in
+				y)	xorg_font_fix
+					set_sticky_prefs xorg7
+					echo $BAR
+					;;
+				n)	echo "${S}Ok, you are ready to go on now.${N}"
+					set_sticky_prefs n xorg7
+					echo $BAR
+					;;
+				*)	print_error yn
+					xorg_trigger
+					;;
+			esac
+		fi
+	#fi
+}
+
+# this is the original fix-xorg.sh
+xorg_font_fix()
+{
+	### make a backup copy of xorg for future reference
+	# this to second time stamp should help fix that old repeated .1st bug
+	local timeStampXorg=$EXXC-bu-$( date +%Y-%m-%d-%H:%M:%S )
+
+	[ ! -e $timeStampXorg ] && cp $EXXC $timeStampXorg
+	
+perl -ni -e 'BEGIN { $f++ } if (/^Section "Files"/) { $f--; print; print <<_EOF_
+\tFontPath\t"/usr/share/fonts/X11/misc"
+\tFontPath\t"/usr/share/fonts/X11/cyrillic"
+\tFontPath\t"/usr/share/fonts/X11/100dpi/:unscaled"
+\tFontPath\t"/usr/share/fonts/X11/75dpi/:unscaled"
+\tFontPath\t"/usr/share/fonts/X11/Type1"
+\tFontPath\t"/usr/share/fonts/X11/100dpi"
+\tFontPath\t"/usr/share/fonts/X11/75dpi"
+\t# path to defoma fonts
+\tFontPath\t"/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
+_EOF_
+} if (! $f && /^EndSection/) { $f++ }; print if ($f)' /etc/X11/xorg.conf
+[ -f /etc/X11/xorg.conf.1st ] && perl -ni -e 'BEGIN { $f++ } if (/^Section "Files"/) { $f--; print; print <<_EOF_
+\tFontPath\t"/usr/share/fonts/X11/misc"
+\tFontPath\t"/usr/share/fonts/X11/cyrillic"
+\tFontPath\t"/usr/share/fonts/X11/100dpi/:unscaled"
+\tFontPath\t"/usr/share/fonts/X11/75dpi/:unscaled"
+\tFontPath\t"/usr/share/fonts/X11/Type1"
+\tFontPath\t"/usr/share/fonts/X11/100dpi"
+\tFontPath\t"/usr/share/fonts/X11/75dpi"
+\t# path to defoma fonts
+\tFontPath\t"/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
+_EOF_
+} if (! $f && /^EndSection/) { $f++ }; print if ($f)' /etc/X11/xorg.conf.1st
+	
+	echo "${S}xorg.conf fonts are updated."
+	echo $LINE
+	echo "${S}Installing xorg 7.0 beginning"
+	echo "Installing xserver components${N}"
+	apt-get install xserver-xorg mesa-utils xkb-data 
+	fix_kdmrc
+	echo "${S}xserver components installed${N}"
+}
+
+fix_kdmrc()
+{
+	#possible fix for 
+	#ln -s /usr/bin/X /usr/X11R6/bin
+	# fix for wrong path
+	echo "${S}Fixing ${C}/etc/kde3/kdm/kdmrc${S}. Changing paths of X"
+	echo "A backup copy is created in the same directory, called ${C}kdmrc.bu${N}"
+	cd $KDMRC_PATH
+	# handles cases where multiple run throughs have occured
+	if [ ! -f kdmrc.bu ]
+	then
+		mv kdmrc kdmrc.bu
+	fi
+	# this is sloppy but it works, I'll fix it later, it handles cases where there is or isn't -br after
+	sed 's@/usr/X11R6/bin/X@/usr/bin/X -br@g' kdmrc.bu > kdmrc.2
+	sed 's@ -br -br@ -br@g' kdmrc.2 > kdmrc
+	rm -f kdmrc.2
+	cd $SCRIPT_HOME
+	echo "${S}kdmrc is updated${N}"
+}
+
+file_removal_1()
+{
+	local smPref=$( grep -c 'udev-fix-4' $SM_CONFIG_FILE ) i=''
+	local FilesToRemove='/etc/udev/rules.d/40-prism2.rules /etc/kde3/kdm/Xservers'
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Removing ${C}$eurp${S} some obsolete files...${N}"
+		for i in $FilesToRemove
+		do
+			[ -f $i ] && rm -f $i
+			echo "${S}Removed the obsolete file: ${C}$i${N}"
+		done
+		set_sticky_prefs udev-fix-4
+	fi
+}
+
+udev_fix_1()
+{
+	local smPref=$( grep -c 'udev-fix-1' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Reinstalling ${C}udev${S} to fix the new issue...${N}"
+		apt-get install --reinstall -y udev
+		echo "${S}The fix is completed.${N}"
+		set_sticky_prefs udev-fix-1
+	fi
+}
+
+install_pmount()
+{
+	local smPref=$( grep -c 'pmount' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Checking to make sure ${C}pmount${S} is installed...${N}"
+		apt-get install pmount
+		set_sticky_prefs pmount
+	fi
+}
+
+wodim_fix()
+{
+	local smPref=$( grep -c 'wodim-fix-1' $SM_CONFIG_FILE ) ubw='/usr/bin/wodim'
+	
+	if [ -f $ubw ]
+	then
+		if [ "$smPref" -eq 0 ]
+		then
+			echo $LINE
+			echo "${S}Update ${C}wodim${S} permissions for cd record fix.${N}"
+			chown root:cdrom /usr/bin/wodim
+			chmod 4750 /usr/bin/wodim
+			echo "${S}Update completed.${N}"
+			set_sticky_prefs wodim-fix-1
+		fi
+	fi
+}
+
+fix_screen_fonts()
+{
+	local smPref=$( grep -c 'screen-fonts-1' $SM_CONFIG_FILE ) ScreenFont=''
+	local ecc='/etc/console-tools/config'
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		ScreenFont=$( grep -c '^SCREEN_FONT=lat0-16' $ecc )
+		if [ "$ScreenFont" -gt 0 ]
+		then
+			echo $LINE
+			echo "${S}Updating ${C}$ecc${S}. Changing value: ${C}SCREEN_FONT=lat0-16${S}"
+			echo "to: ${C}SCREEN_FONT=lat0-sun16${N}"
+			perl -pi -e 's/(^SCREEN_FONT)=.*/\1=lat0-sun16/' $ecc
+			echo "${S}Update completed.${N}"
+		fi
+		set_sticky_prefs screen-fonts-1
+	fi
+}
+
+dbus_install()
+{
+	local response='' runFix='' smPref=$( grep -c 'dbus' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		#part 1 of dbus installer function
+		echo $BAR
+		echo "${S}If you have not dist-upgraded to the new hal/dbus etc, you need to run this step now."
+		echo "Please note that if you have a non-dist-upgraded 2005-4, you will probably need"
+		echo "to reboot before this new hal/dbus stuff will work properly."
+		echo -e "${Q}would you like to update hal/dbus now?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	runFix='true'
+				;;
+			n)	echo "${S}Ok, no hal/dbus fix for you today.${N}"
+				set_sticky_prefs n dbus
+				;;
+			*)	print_error yn
+				dbus_install
+				;;
+		esac
+		
+		# check if the dbus/hal insatll was done, if so, complete the operation
+		if [ "$runFix" == "true" ]
+		then
+			echo $LINE
+			echo "${S}Installing dbus/hal components now...${N}"
+			dpkg --purge hal
+			apt-get install hal dbus
+			#dpkg --purge dbus-1 # can't be done any more
+			echo "${S}hal/dbus stuff installed..."
+			echo "Restarting networking just to be sure...${N}"
+			/etc/init.d/networking restart
+			echo "${S}Ok, hopefully things should be working for you now. Remember, you may"
+			echo "need to reboot before you see the new hal/dbus stuff working properly.${N}"
+			set_sticky_prefs dbus
+		fi
+	fi
+}
+
+fix_broken_openoffice()
+{
+	local OOo=$(dpkg -l | grep -o "openoffice.org[a-z0-9-]*")
+	
+	echo $LINE
+	echo "${S}Removing old ${C}OpenOffice.org${S}...${N}"
+	apt-get remove -y $OOo
+	echo "${S}Installing ${C}testing${S} version of OpenOffice.org...${N}"
+	apt-get -t testing -y install $OOo python-uno
+	echo "${C}OpenOffice.org${S} fix is now completed. Remember, this is a temporary fix. Once the"
+	echo "OOo sid packages are fixed your testing version will be replaced by the correct version.${N}"
+}
+
+###**EOF**###

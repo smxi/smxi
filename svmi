@@ -1,0 +1,1315 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sid(ux) virtual machine installer: sgfxi
+####  Only use for Debian Sid and Sidux, no support for any other distro
+####  version: 0.9.28
+####  Date: April 30 2008
+########################################################################
+####  Copyright (C) Harald Hope 2007-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+####
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+####
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+########################################################################
+####  Script URL: http://techpatterns.com/downloads/distro/svmi
+####  Script Home page: http://techpatterns.com/forums/about----.html
+########################################################################
+########################################################################
+#### DEFINE:
+#### TRUE: -eq 0; == 'true'; function return 0
+#### FALSE: -gt 0; == ''; function return > 0
+########################################################################
+#### VARIABLES
+########################################################################
+
+# colors
+W="[1;31m" # red: Warning message
+E="[1;33m" # yellow: script Error
+S="[1;32m" # green: Standard message
+# L="[1;32m" # green: for resetting default colors
+Q="[1;36m" # CYAN: Questions
+M="[1;36m" # CYAN: Message
+B="[1;34m" # BLUE: Message
+C="[1;35m" # MAGENTA: Command or Path
+N="[0;39m" # default system console color: Normal :: make last in colors
+
+CALLER_DEF=${S} # will switch default output color to the calling script's
+S=${B} # this is slightly tricky, making standard blue AFTER the caller def is set.
+
+# script layout stuff
+BA='=================================================================='
+LI='------------------------------------------------------------------'
+BAR=${S}$BA${N}
+EBAR=${E}$BA${N}
+WBAR=${W}$BA${N}
+MBAR=${M}$BA${N}
+LINE=${S}$LI${N}
+ELINE=${E}$LI${N}
+MLINE=${M}$LI${N}
+WLINE=${W}$LI${N}
+
+# repeated text
+YNE="\n${S}[ type lower case ${C}y${S} or ${C}n${S} and hit ${C}enter${S} ]${N}"
+SLE="${Q}Please type the appropriate number and hit ${C}enter${N}"
+HEC="${Q}Please hit ${C}enter${Q} to continue${N}"
+
+# options and global data
+AUTO_RUN=''
+AUTORUN_ANYANY=''
+AUTORUN_QEMU_IMAGE=''
+AUTORUN_VBOX=''
+AUTORUN_VBOX_MODULE=''
+AUTORUN_VMPLAYER=''
+AUTORUN_VMSERVER=''
+SKIP_CONNECT=''
+SKIP_FUNCTION=''
+SM_INSTALL=''
+START_OPTIONS=''
+TESTING=''
+UPDATED=''
+USER_NAME=''
+VBOX_ALT_VERSION=''
+
+# system paths etc
+EAS='/etc/apt/sources.list'
+EDV='/etc/debian_version'
+EMOD='/etc/modules'
+TPD='http://techpatterns.com/downloads/distro/'
+VMWARE_INSTALL_PATH='/usr/src/vmware-downloads/'
+VMWARE_CONFIG='/usr/bin/vmware-config.pl'
+
+# kernel info
+CURRENT_KERNEL=$(uname -r)
+KERNEL_VERSION=$( uname -r | grep -o -G "2.6.[0-9]*" )
+KERNEL_BASE=$( uname -r | cut -d '.' -f 1-2 ) # like: 2.6
+KERNEL_THREE=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
+KERNEL_THIRD=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
+
+# check for 64 bit first
+if [ -n "$( uname -m | grep -o 'x86_64' )" ]
+then
+	BITS="64"
+else
+	BITS="32"
+fi
+
+# set some core count dependent data
+CORE_COUNT=$( cat /proc/cpuinfo | egrep -c '^processor' )
+
+INSTALL_TYPE=''
+VMP='vmplayer'
+AA='anyany'
+
+DIR_NAME=''
+FILE_NAME=''
+FILE_URL=''
+# http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.i386.tar.gz
+# http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.x86_64.tar.gz
+VMPLAYER_PREFIX='http://download3.vmware.com/software/vmplayer/'
+VMPLAYER_NUMBER='2.0.2'
+VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-59824"
+VMWARE_Z='.tar.gz'
+if [ "$BITS" -eq 32 ]
+then
+	VMWARE_32_64='.i386'
+else
+	VMWARE_32_64='.x86_64'
+fi
+VMPLAYER_RUN='vmware-install.pl'
+VMPLAYER_DIR='vmware-player-distrib'
+
+# ANYANY_ALT='http://rtr.ca/vmware-2.6.24/vmware-any-any-update115a.tgz'
+# http://linuxtoy.org/files/vmware-any-any-update-116.tgz
+# http://groups.google.com/group/vmkernelnewbies/web/vmware-any-any-update-116.tgz
+ANYANY_PREFIX='http://knihovny.cvut.cz/ftp/pub/vmware/'
+# ANYANY_PREFIX='http://groups.google.com/group/vmkernelnewbies/web/'
+ANYANY_VERSION='vmware-any-any-update'
+ANYANY_NUMBER=115 # we'll be doing some math on this maybe
+# ANYANY_Z='.tar.gz'
+ANYANY_Z='.tar.gz'
+ANYANY_RUN='runme.pl'
+ANYANY_ALT=''
+ANYANY_DIR_DASH=''
+ANYANY_FILE_DASH=''
+
+# # use alternate name and location for 2.6.24
+if [ "$KERNEL_THIRD" -eq 24 ]
+then
+	ANYANY_PREFIX='http://rtr.ca/vmware-2.6.24/'
+	ANYANY_Z='.tgz'
+	ANYANY_ALT='a'
+elif [ "$KERNEL_THIRD" -eq 25 ]
+then
+	# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
+	# vmware-any-any-update-116.tgz
+	ANYANY_PREFIX='http://download.rsbac.org/tmp/'
+	#ANYANY_Z='.tgz'
+	#ANYANY_ALT=''
+	ANYANY_NUMBER=117
+	#ANYANY_FILE_DASH=''
+fi
+
+VBOX_VERSION='1.5.6'
+VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
+VBOX_PACKAGE_NO='28266'
+VBOX_PREVIOUS="1.5.0:24069 1.5.2:25433 1.5.4:27034 $VBOX_VERSION:$VBOX_PACKAGE_NO"
+# this is just for cosmetic output of supported versions
+VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
+VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
+VBOX_INSTALLED_VERSION='' # will be set dynamically
+
+# script paths
+SCRIPT_HOME='/usr/local/bin'
+SCRIPT_NAME=$( basename $0 )
+
+CONFIG_FILE='/etc/svmi.conf'
+LOG_FILE='/var/log/svmi.log'
+LOGGING_STARTED='' # this will flag to avoid logging for pre log errors like no root
+
+# miscellaneous settings
+TIME_OUT=25
+DOWNLOAD_COUNTER=0
+
+########################################################################
+####  FUNCTIONS 
+########################################################################
+# only for debugging purposes
+set_test_data()
+{
+	local username=''
+	if [ "$TESTING" == 'true' ] # set testing directories etc
+	then
+		# this is required for testing to make sure we always are starting with true
+		# latest script versions
+		#cd $SCRIPT_HOME
+		# rm -f sgfxi* 
+		# username='harald'
+		# SCRIPT_HOME="/home/$username/bin/scripts/sidux/"
+		# VMWARE_INSTALL_PATH="/home/$username/bin/scripts/sidux/src/"
+
+		:
+	fi
+}
+
+# this will trigger the non interactive installs
+run_non_interactive()
+{
+	if [ "$AUTORUN_ANYANY" == 'true' -o "$AUTORUN_QEMU_IMAGE" == 'true' -o "$AUTORUN_VBOX" == 'true' -o "$AUTORUN_VBOX_MODULE" == 'true' -o "$AUTORUN_VMPLAYER" == 'true' -o "$AUTORUN_VMSERVER" == 'true' ]
+	then
+		AUTORUN='true'
+	fi
+	
+	if [ "$AUTORUN_ANYANY" == 'true' ]
+	then
+		install_vmware $AA
+	fi
+	if [ "$AUTORUN_QEMU_IMAGE" == 'true' ]
+	then
+		create_qemu_image
+	fi
+	if [ "$AUTORUN_VBOX" == 'true' ]
+	then
+		install_vbox
+	fi
+	if [ "$AUTORUN_VBOX_MODULE" == 'true' ]
+	then
+		install_vbox_module
+	fi
+	if [ "$AUTORUN_VMPLAYER" == 'true' ]
+	then
+		install_vmware $VMP
+	fi
+	if [ "$AUTORUN_VMSERVER" == 'true' ]
+	then
+		echo 'not currently working'
+	fi
+}
+########################################################################
+#### Error handling and detections
+#### -------------------------------------------------------------------
+error_handler()
+{
+	local errorCode=$1 # error number 
+	local errorExtra=$2 # this is secondary info, like failed package name
+	local errorData=''
+	local ErrorMessage=''
+	
+	case $errorCode in
+		255) 
+			errorData="This does not appear to be a Debian apt based system!"
+			;;
+		254) 
+			errorData="Sorry, Ubuntu isn't supported by this script"
+			;;
+		253) 
+			errorData="Your kernel type $KERNEL_BASE is not supported for these drivers."
+			;;
+		252) 
+			errorData="You must be logged in as root to run this script."
+			;;
+		251) 
+			errorData="There does not appear to be a live connection, or $SCRIPT_NAME script server is down.\nIf you are sure you have a connection, restart script with -Z option to cancel connection test."
+			;;
+		# specific install issues
+		200) 
+			errorData="The package: $errorExtra failed to install, please check apt for any problems."
+			;;
+		199) 
+			errorData="The file: $errorExtra failed to download - wget reports success."
+			;;
+		198) 
+			errorData="The file: $errorExtra failed to download - wget error."
+			;;
+		197)
+			errorData="The module: $errorExtra failed to build."
+			;;
+		196) 
+			errorData="Removing package $errorExtra failed."
+			;;
+		195) 
+			errorData="The package $errorExtra failed to download."
+			;;
+		194) 
+			errorData="The package $errorExtra failed to download and exceeded tries."
+			;;
+		193) 
+			errorData="tar xzf of $errorExtra failed."
+			;;
+		192) 
+			errorData="No vmware installation was detected for any-any install."
+			;;
+		191) 
+			errorData="The deb package $errorExtra failed to install correctly."
+			;;
+		*) 
+			errorData="Unexpected Error !"
+			;;
+	esac
+	ErrorMessage="ERROR: ($errorCode) $errorData"
+	echo -e ${E}$ErrorMessage${N}
+	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
+	then
+		echo -e $ErrorMessage >> $LOG_FILE
+		echo
+		echo "${S}Time stamped error logs are located here: $LOG_FILE"
+	fi
+	echo "${M}Exiting script now.${N}"
+	
+	exit $errorCode
+}
+
+########################################################################
+#### script utilities
+#### -------------------------------------------------------------------
+
+#print_information
+basic_startup_tests() 
+{
+	# trying here a non zero byte file, of explicit ascii data type.
+	local spiderPage='du-data?svmi=svm-connect-test' #  sgfxi_connection_test
+	
+	### basic system requirements for this script to run, first so user doesn't 
+	### have to be root or out of x to get basic failure information
+	# make sure that it's a debian based system
+	if [ ! -f "$EDV" ]
+	then
+		error_handler 255
+	fi
+	# no ubuntu support
+	if [ "$( cat /etc/issue | grep -i -c 'buntu' )" -gt 0 ]
+	then
+		error_handler 254
+	fi
+	# double check only 2.6 series kernels
+	if [ "$KERNEL_BASE" != '2.6' ]
+	then
+		error_handler 253
+	fi
+	
+	### basic execute requirements
+	cd $SCRIPT_HOME
+	if [ "$(whoami)" != 'root' ]
+	then
+		error_handler 252
+	fi
+	cleanup_temp_files 
+	# there's no need to re-test connections for svmi module since that's redundant
+	# only run this for users on first attempt, script will exit if no connection
+	if [ "$SM_INSTALL" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECT" != 'true' ]
+	then
+		wget -T20 -t 2 --spider -q $TPD$spiderPage || error_handler 251
+		#rm -f $spiderPage
+	fi
+}
+
+# handles bug in stub installer that leaves tempfiles uncleaned
+cleanup_temp_files()
+{
+	local all_files=""
+
+	# Note: if  * is in "" the wildcard does not work
+	# /dev/null handles case where no temp or original file exists
+	all_files=$( ls "${SCRIPT_NAME}."* 2> /dev/null ) 
+	# make sure stuff exists, rm files
+	if [ -n "$all_files" ]
+	then
+		rm -f $all_files
+	fi
+}
+
+check_install_tools()
+{
+	log_info $FUNCNAME s
+	[ ! -x /usr/bin/module-assistant ] && install_package module-assistant
+	[ ! -d /usr/share/build-essential ] && install_package build-essential
+	log_info $FUNCNAME c
+}
+
+# arg: $1 - package names
+install_package()
+{
+	if [ "$UPDATED" != 'true' ]
+	then
+		echo "${S}Updating apt now...${N}"
+		apt-get update && UPDATED='true' 
+	fi
+	if  [ -n "$1" ]
+	then
+		echo "${S}Installing required package ${C}$1${S} now...${N}"
+		apt-get install --allow-unauthenticated --yes $1 || error_handler 200 $1
+	fi
+}
+
+remove_package()
+{
+	local response='' package=''
+	
+	if [ -n "$1" ]
+	then
+		echo $MLINE
+		echo "${M}You will need to remove the following package(s): ${C}$1"
+		echo "${M}in order to proceed with your ${C}$2${M} driver install${N}"
+		echo $MLINE
+		for package in $1 
+		do
+			if [ -n "$( dpkg -l | grep $package )" ]
+			then
+				echo "${S}Removing ${C}$package${S}...${N}"
+				apt-get remove --purge $package || error_handler 196 "$package"
+			else
+				echo "${S}The package ${C}$package${S} is not installed, continuing...${N}"
+			fi
+		done
+		echo "${S}Package(s) removed successfully, continuing with driver install.${N}"
+	fi
+}
+
+# takes one arg: $1 script to get/check
+check_update_script()
+{
+	cd $SCRIPT_HOME # make sure we're in the right place
+	# if newer version, download / replace lib file
+	if [ "$1" == "$SCRIPT_NAME" ]
+	then
+		wget -q -O$1 $TPD$1 || error_handler 198 $1
+		[ ! -f $1 ] && error_handler 199 $1 # if failed, exit with file name + error
+		# restart then exit script, with all start options included
+		chmod +x $1
+		./$1 -R$START_OPTIONS
+		exit 0
+	# I'm only going to load this stuff one time per file so I won't
+	# have to worry about rechecking and multi downloads etc
+	fi
+}
+# args: $1 string to be normalized. All internal script functions will use this syntax:
+# 2.6.24.2.slh.2-sidux-686 / 2.6.24.2.slh.2-sidux-amd64
+normalize_kernel_string()
+{
+	local kernelString=$1 processSlh='' oldSlh='' processedString='' kernelArch=''
+	# first test for the new default .slh. syntax:
+	if [ -n "$( echo $kernelString | egrep '(-slh(64)?-)' )" ]
+	then
+		oldSlh='true'
+	fi
+	if [ -n "$( echo $kernelString | egrep '(2\.6\.[0-9]{2}-2\.6\.[0-9]{2}.*\.slh\.)' )" ]
+	then
+		processSlh='true'
+	fi
+	
+	if [ "$oldSlh" == 'true' -o "$processSlh" == 'true' ]
+	then
+		if [ "$processSlh" == 'true' ]
+		then
+			# this syntax is handled here
+			# 2.6.24-2.6.24.1.slh.3-sidux-amd64 2.6.24-2.6.24.1.slh.3-sidux-686
+			# slice out the part after 2.6.24-
+			processedString=$( echo $kernelString | cut -d '-' -f 2-4 )
+		elif [ "$oldSlh" == 'true' ]
+		then
+			kernelArch=$( echo $kernelString | grep 'slh64'  )
+			# set the kernel arch here
+			if [ -n "$kernelArch" ]
+			then
+				kernelArch='amd64'
+			else
+				kernelArch='686'
+			fi
+			# this syntax is handled here
+			# 2.6.23.15-slh-smp-3 2.6.23.15-slh64-smp-3
+			processedString=$( echo $kernelString | sed -r 's/(-slh(64)?-(smp|up)-)/.slh./g' )
+			processedString=$processedString'-sidux-'$kernelArch
+		fi
+	# do not process user custom or already processed strings at all
+	else
+		processedString=$kernelString
+	fi
+
+	echo $processedString
+}
+
+print_information()
+{
+	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
+	#echo 'sv:' $scriptVersion
+	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
+	local vmPlayer=''
+	if [ -e /usr/bin/vmplayer ]
+	then
+		# vmPV=$( vmplayer -v )
+		vmPlayer='echo "VM installed: '$vmPV'"'
+	fi
+	#local cardInfo=$( lspci | gawk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\sTechnologies\sInc\s|nVidia\sCorporation\s)(.*)%\2%'  )
+	local vmInfo=''
+	
+	echo $MLINE
+	echo " ${M}$SCRIPT_NAME${S} :: version: ${C}$scriptVersion${S} :: last updated: ${C}$scriptDate${N}"
+	#eval $vmPlayer
+}
+
+# this is the hit enter to continue blurb...
+print_hec()
+{
+	local response=''
+	
+	if [ "$AUTORUN" != 'true' ]
+	then
+		echo $LINE
+		# halt the script so people can read the advice
+		echo $HEC
+		echo $LINE
+		read response
+	fi
+}
+
+# this handles typos for y/n questions, or wrong case
+print_error()
+{
+	echo $EBAR
+	if [ "$1" == "yn" ]
+	then
+		echo "${E}You must enter ${C}y${E} to run this option, or ${C}n${E} to reject it."
+		echo "Please make sure that you enter either ${C}y${E} or ${C}n${E}, lower case, thanks.${N}"
+	elif [ "$1" == "opt" ]
+	then
+		echo "${E}======= Error: please enter one of the numbers in the list =======${N}"
+	fi
+	echo $EBAR
+}
+
+create_log() 
+{
+	local svmiVersion=$( grep 'version:' $SCRIPT_NAME | grep -o "[0-9]*\.[0-9]*\.[0-9]*" )
+	
+	# check and create logfile:
+	touch $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
+	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
+# 	echo "Video Card Information:$cardString" >> $LOG_FILE
+# 	echo "Video Card Type: $CARD_BRAND" >> $LOG_FILE
+# 	echo "Video Card Number: $CARD_NUMBER" >> $LOG_FILE
+	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
+	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
+	echo "=======================================" >> $LOG_FILE
+	echo "Start Install log:" >> $LOG_FILE
+	echo "=======================================" >> $LOG_FILE
+}
+
+# $1 is function; $2 is further information
+log_info()
+{
+	local moreInfo=$2
+	
+	if [ "$moreInfo" == 's' ]
+	then
+		moreInfo='started'
+	elif [ "$moreInfo" == 'c' ]
+	then
+		moreInfo='completed successfully'
+	fi
+	
+	echo "function: $1 - message: $moreInfo" >> $LOG_FILE
+}
+
+
+########################################################################
+#### Core virtual machine installer functions
+#### -------------------------------------------------------------------
+
+# startup questions, users choose vm and action
+vm_main_selector()
+{
+	local repeat='' options='' opt='' quitContinue='quit'
+	[ "$SM_INSTALL" == 'true' ] && quitContinue='continue'
+
+	echo $MLINE
+	echo "${M} Virtual Machine Options"
+	
+	echo $MLINE
+	echo "${S}For most new or average users, I recommend running vbox, it's a simple, clean install,"
+	echo "and you'll have your vbox up and running almost immediately."
+	echo $LINE
+	echo "${M}vmware tools are currently quite rough. I do not recommend trying them"
+	echo "unless you already know how to do vmware stuff. The any-any updater is solid, and will"
+	echo "get your current vmware modules built for new kernels fine. The vmware installer is"
+	echo "still quite basic, and will just download and run the installer, with any-any. You"
+	echo "have to do the vmx file creation and the image file creation manually currently."
+	echo
+	echo "${S}vmware player install version: ${C}${C}$VMPLAYER_NUMBER${S}${S}"
+	echo "any-any patch version: ${C}$ANYANY_NUMBER"
+	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player, and any-any patch."
+	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required."
+	echo "${C}3${S} - ${C}make-qemu-image${S} Installs qemu if required, then uses it to create"
+	echo "   a machine image file for you. (incomplete now: only installs qemu if needed)"
+	echo $LINE
+	echo "${M}Please NOTE: ose means open source edition. Ose and non-ose components are NOT compatible."
+	echo "${S}UPDATE: as of current 1.5.4, there is only one additions version, no ose/non ose."
+	echo "${C}4${S} - ${C}install-vbox-ose${S} Installs vbox OSE. If you need to update modules after installing,"
+	echo "    please run ${C}build-vbox-module-ose${S} as well."
+	echo "${C}5${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules, adds module to $EMOD if required."
+	echo "    ${M}NOTE: System must be fully dist-upgraded for this to work right before you run this!"
+	echo "${C}6${S} - ${C}install-vbox-addons-ose${S} Downloads vbox guest additions iso. Helps with driver installation,"
+	echo "    and so on. Highly recommended."
+	
+	echo $LINE
+	echo "${M}For other vbox non-ose versions, use the ${C}svmi -V <vbox version>${M} option"
+	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
+	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
+	echo "${C}7${S} - ${C}install-vbox-non-ose${S} Installs the Debian Etch vbox deb. Module is built automatically."
+	echo "${C}8${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
+	
+	
+	echo "${C}9${S} - ${C}install-vbox-addons-non-ose${S} Downloads vbox guest addons iso. Helps with driver installation,"
+	echo
+	echo "${C}10${S} - ${C}$quitContinue${S}"
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="install-vmware run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-addons-ose install-vbox-non-ose build-vbox-module-non-ose install-vbox-addons-non-ose $quitContinue"
+	select opt in $options
+	do
+		case $opt in
+			install-vmware)
+				install_vmware $VMP
+				repeat='true'
+				;;
+			run-anyany)
+				install_vmware $AA
+				repeat='true'
+				;;
+			make-qemu-image)
+				create_qemu_image
+				repeat='true'
+				;;
+			install-vbox-ose)
+				install_vbox ose
+				repeat='true'
+				;;
+			build-vbox-module-ose)
+				install_vbox_module ose
+				repeat='true'
+				;;
+			install-vbox-addons-ose)
+				install_vbox_addons ose
+				repeat='true'
+				;;
+			install-vbox-non-ose)
+				install_vbox non-ose
+				repeat='true'
+				;;
+			build-vbox-module-non-ose)
+				install_vbox_module non-ose
+				repeat='true'
+				;;
+			install-vbox-addons-non-ose)
+				install_vbox_addons non-ose
+				repeat='true'
+				;;
+			$quitContinue)
+				echo "${S}Thanks for checking out the Virtual Machine Installer.${N}"
+				exit 0
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$repeat" == 'true' ]
+	then
+		vm_main_selector
+	fi
+}
+
+### -------------------------------------------------------------------
+### vmware functions
+### -------------------------------------------------------------------
+
+construct_file_name()
+{
+	log_info $FUNCNAME s
+	
+	if [ "$INSTALL_TYPE" == "$AA" ]
+	then
+		# this will try the next sequence of number in case he updates it
+		if [ "$1" == 'failed' ]
+		then
+			ANYANY_NUMBER=$(( $ANYANY_NUMBER + 1 ))
+		fi
+
+		DIR_NAME=$ANYANY_VERSION$ANYANY_NUMBER$ANYANY_ALT # handles 'a' for 2.6.24
+		FILE_NAME=$ANYANY_VERSION$ANYANY_FILE_DASH$ANYANY_NUMBER$ANYANY_ALT$ANYANY_Z
+		FILE_URL=$ANYANY_PREFIX$FILE_NAME
+	elif  [ "$INSTALL_TYPE" == "$VMP" ]
+	then
+		DIR_NAME=$VMPLAYER_VERSION$VMWARE_32_64
+		FILE_NAME=$DIR_NAME$VMWARE_Z
+		FILE_URL=$VMPLAYER_PREFIX$FILE_NAME
+	fi
+	
+	echo 'DIR_NAME: '$DIR_NAME >> $LOG_FILE
+	echo 'FILE_NAME: '$FILE_NAME >> $LOG_FILE
+	echo 'FILE_URL: '$FILE_URL >> $LOG_FILE
+	
+	log_info $FUNCNAME c
+}
+# construct_file_name anyany failed; exit
+
+# test, download, run app
+download_file()
+{
+	log_info $FUNCNAME s
+	
+	local noGood='' fileURL='' testExtract=''
+	
+	if [ ! -d "$VMWARE_INSTALL_PATH" ]
+	then
+		mkdir $VMWARE_INSTALL_PATH
+	fi
+	
+	cd $VMWARE_INSTALL_PATH
+	#echo 'pwd is: ' $(pwd);exit
+	if [ ! -d "$DIR_NAME" ]
+	then
+		if [ "$DOWNLOAD_COUNTER" -le 1 ]
+		then
+			wget -Nc -T $TIME_OUT $FILE_URL || noGood='true'
+		
+			if [ "$noGood" == 'true' ]
+			then
+				if [ "$INSTALL_TYPE" == "$AA" ]
+				then
+					DOWNLOAD_COUNTER=$(( $DOWNLOAD_COUNTER + 1 ))
+					construct_file_name failed
+					download_file
+				else
+					error_handler 195 $FILE_URL
+				fi
+			else
+				echo 'Send FILE_URL to test_extract_file: '$FILE_URL >> $LOG_FILE
+				testExtract='true'
+			fi
+		else
+			error_handler 194 $FILE_URL
+		fi
+	else
+		echo "${M}You have already downloaded the package, proceeding with install now...${N}"
+		testExtract='true'
+	fi
+	
+	log_info $FUNCNAME c
+	
+	if [ "$testExtract" == 'true' ]
+	then
+		test_extract_file
+	fi
+}
+
+test_extract_file()
+{
+	log_info $FUNCNAME s
+	
+	local extractFailed=''
+	
+	if [ ! -d "$DIR_NAME" ]
+	then
+		tar xzf $FILE_NAME || error_handler 193 $FILE_NAME
+	fi
+	
+	if [ -d "$VMPLAYER_DIR" -a "$INSTALL_TYPE" == "$VMP" ]
+	then
+		mv $VMPLAYER_DIR $DIR_NAME
+	fi
+	
+	log_info $FUNCNAME c
+	run_file
+}
+
+run_file()
+{
+	log_info $FUNCNAME s
+	
+	local runFile=''
+	
+	cd $DIR_NAME
+	
+	case $INSTALL_TYPE in
+		$AA)
+			runFile=$ANYANY_RUN
+			;;
+		$VMP)
+			runFile=$VMPLAYER_RUN
+			;;
+	esac
+	
+	./$runFile
+	
+	log_info $FUNCNAME c
+}
+
+# $1 which install type to use
+install_vmware()
+{
+	log_info $FUNCNAME s
+	
+	INSTALL_TYPE=$1
+	
+	echo $LINE
+	
+	if [ "$1" == "$AA" ]
+	then
+		install_anyany
+	elif [ "$1" == "$VMP" ]
+	then
+		echo "${S}Starting $VMP install and setup. When vmware setup asks you this question:"
+		echo "${M}Before running VMware Player for the first time, you need to configure it"
+		echo "by invoking the following command: /usr/bin/vmware-config.pl...."
+		echo
+		echo "${S}Answer 'n' to this question, and then $AA setup and install will begin automatically.${N}"
+		print_hec
+		construct_file_name
+		download_file
+		# for vmp, we want to also run any any
+		INSTALL_TYPE=$AA
+		install_anyany
+	fi
+	
+	log_info $FUNCNAME c
+	print_hec
+}
+
+install_anyany()
+{
+	log_info $FUNCNAME s
+	
+	if [ -x "$VMWARE_CONFIG" ]
+	then
+		echo "${S}Starting $AA install and setup. When any any asks if you want to run"
+		echo "/usr/bin/vmware-config.pl answer 'y' and your vmware install will complete.${N}"
+		print_hec
+		construct_file_name
+		download_file
+	else
+		error_handler 192
+	fi
+	
+	log_info $FUNCNAME c
+}
+
+create_qemu_image()
+{
+	log_info $FUNCNAME s	
+	
+	local qemuExists=$( dpkg -l | grep 'qemu'  )
+	
+	echo $LINE
+	if [ -z "$qemuExists" ]
+	then
+		install_package qemu
+	else
+		echo "${C}qemu${M} is already installed on your system.${N}"
+	fi
+	
+	log_info $FUNCNAME c
+	print_hec
+}
+
+### -------------------------------------------------------------------
+### vbox functions
+### -------------------------------------------------------------------
+
+# this will set the global installed vbox version to handle mismatches
+set_installed_vbox_version()
+{
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox-ose virtualbox| grep 'Installed:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
+}
+# create and install vbox module:
+# $1 is ose/non-ose
+install_vbox()
+{
+	log_info $FUNCNAME s
+	
+	local vboxOSE='virtualbox-ose virtualbox-ose-source'
+	local vboxGeneral=$( dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox' )
+	local vboxBad='virtualbox virtualbox-source'
+	# default to ose install
+	local toInstall=$vboxOSE toRemove=$vboxBad' '$vboxGeneral
+	
+	if [ "$1" == 'non-ose' ]
+	then
+		toRemove=$vboxGeneral
+		toInstall='libicu38 libxerces27 libxalan110'
+	fi
+	
+	remove_package "$toRemove"
+	install_package "$toInstall"
+	
+	if [ "$1" == 'non-ose' ]
+	then
+		install_vbox_non_ose
+	fi
+	
+	add_vbox_user
+	
+	log_info $FUNCNAME c
+	print_hec
+}
+
+install_vbox_non_ose()
+{
+	local arch='i386' 
+	[ "$BITS" == '64' ] && arch='amd64'
+	local debName='virtualbox_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_etch_'$arch'.deb'
+	local vboxNonOseURL='http://www.virtualbox.org/download/'$VBOX_VERSION'/'$debName
+	
+	if [ ! -d $VBOX_INSTALL_PATH ]
+	then
+		mkdir $VBOX_INSTALL_PATH
+	fi
+	cd $VBOX_INSTALL_PATH
+	
+	if [ ! -f $debName ]
+	then
+		echo "${S}Downloading package ${C}$debName${S}...${N}"
+		wget -Nc $vboxNonOseURL || echo -e "${E}The vbox $debName download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+	else
+		echo "${S}Using previously downloaded package: ${C}$debName${N}"
+	fi
+	
+	if [ -s $debName ]
+	then
+		echo "${S}Installing non free debian virtual box deb now...${N}"
+		dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName 
+		# note that this only runs if the above worked, otherwise exits
+		echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
+		echo "(Note uppercase ${C}V${S} and ${C}B${S})"
+		echo "${C}virtualbox${S} (lowercase ${C}v${S} and ${C}b${S}) is the ${C}virtualbox-ose${S} start command.${N}"
+	else
+		echo "${E}Sorry, the download failed for some reason, let's find out why.${N}"
+		if [ -f $debName ]
+		then
+			rm -f $debName
+		fi
+	fi
+	print_hec
+}
+#install_vbox_non_ose;exit
+
+# note: this will need to check kernel version vbox module / current vbox version
+# $1 is ose or non-ose
+install_vbox_module()
+{
+	log_info $FUNCNAME s 
+	
+	local vbs='virtualbox-ose-source' vbdv='vboxdrv' vbo='virtualbox-ose' vboxSlhMod=''
+	local vboxSource=$( dpkg -l | grep -i $vbs )
+	local isEMod=$( cat $EMOD | grep -i $vbdv )
+	local vbModLoaded=$( lsmod | grep $vbdv )
+	local kernelPath='/usr/src/kernel-downloads/' modDebPath=''
+	# need to grab all of them, not just the main stuff
+	local modDebName='virtualbox-ose-' modDeb=''
+	local nonOseInstalled='' nonOse='virtualbox' success=''
+	
+	echo $LINE
+	if [ "$1" == 'ose' ]
+	then
+		preinstall_cleanup # get rid of previous modules
+		local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+		
+		modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
+		modDeb=$( ls $modDebPath 2> /dev/null )
+		
+		# we'll only get the source if we need to build the module
+		# I'm going to try to force the update as well, since otherwise users
+		# will have an unmatched vbox versioning
+	# 	if [ -z "$vboxSource" -o -z "$vboxSlhMod" ]
+	# 	then
+			echo "${S}Updating ${C}$vbo $vbs${S} now to make sure versions match...${N}"
+			install_package "$vbo $vbs"
+	# 	fi
+		# set it again in case the stuff changed
+		set_installed_vbox_version
+		
+		# we need to check that the kernel module version matches the installed version:
+		# that means it must have the right vbox version number in the deb string
+		vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
+		
+		# note: here we have to make sure that the installed stuff is the same version
+		# as the slh prebuilt modules. If not, we'll simply make the modules manually
+		
+		# since we have to be able to update modules actively, I'm removing the test for
+		# loaded, that triggers a condition that requires running module install two times
+		# if the old module isn't working right, or is for wrong vbox version
+# 		if [ -z "$vbModLoaded" ]
+# 		then
+			if [ -z "$modDeb" -o -z "$vboxSlhMod" ]
+			then
+				echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
+				echo "Building $vbdv module now and running modprobe..." >> $LOG_FILE
+				m-a a-i $vbs || error_handler 197 $vbdv
+			else
+				echo "${S}Installing prebuilt slh vbox kernel module...${N}"
+				echo "Installing prebuilt slh vbox kernel modules: $modDeb" >> $LOG_FILE
+				dpkg -i $modDeb 2>> $LOG_FILE || error_handler 191 $modDeb
+			fi
+# 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
+			modprobe $vbdv
+# 		else
+# 			echo "${M}Kernel Module ${C}$vbdv${M} is already installed...${N}"
+# 			echo "Kernel Module $vbdv is already installed..." >> $LOG_FILE
+# 		fi
+		success='true'
+	elif [ "$1" == 'non-ose' ]
+	then
+		# make sure vbox non ose is installed
+		nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
+		
+		if [ -n "$nonOseInstalled" ]
+		then
+			echo "${S}Running ${C}dpkg-reconfigure${S} on ${C}$nonOse${S}...${N}"
+			dpkg-reconfigure $nonOse
+			success='true'
+		else
+			echo "${C}$nonOse${E} does not appear to be installed, please install it using the menu options."
+			echo "${S}You cannot build the module without having first installed the non-ose vbox!${N}"
+		fi
+	fi
+	if [ "$success" == 'true' ]
+	then
+		# we're going to run this stuff for ose and non-ose now to make sure all users
+		# get this, that might help some fringe cases
+		if [ -z "$isEMod" ]
+		then
+			echo $vbdv >> $EMOD
+		fi
+		modprobe $vbdv
+		echo "${C}$vbdv${S} module should now be up and running.${N}"
+	fi
+	
+	log_info $FUNCNAME c
+	print_hec
+}
+#install_vbox_module
+
+preinstall_cleanup()
+{
+	local previousVbox='' oldVbSource='virtualbox-source'
+	local previousVbm=''  vbdv='vboxdrv'
+	local vbModLoaded=$( lsmod | grep $vbdv )
+		
+	echo $LINE
+	echo "${S}Doing some basic pre module install preparations and cleanup...${N}"
+	if [ -n "$vbModLoaded" ]
+	then
+		rmmod vboxdrv 1>> $LOG_FILE 2>> $LOG_FILE
+	fi
+	
+	previousVbm=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox-modules' )
+	if [ -n "$previousVbm" ]
+	then
+		dpkg --purge $previousVbm  1>> $LOG_FILE 2>> $LOG_FILE
+	fi
+
+	oldVbSource=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep $oldVbSource )
+	if [ -n "$oldVbSource" ]
+	then
+		dpkg --purge $oldVbSource 1>> $LOG_FILE 2>> $LOG_FILE
+	fi
+	
+	previousVbox=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox-ose-modules' )
+	if [ -n "$previousVbox" ]
+	then
+		dpkg --purge $previousVbox  1>> $LOG_FILE 2>> $LOG_FILE
+	fi
+}
+# getent passwd 1000|cut -d\: -f1 
+# your first user is ${1st_user}. Press ENTER to use that, or type the username'
+add_vbox_user()
+{
+	log_info $FUNCNAME s
+	
+	local userExists=''
+	
+	echo $LINE
+	echo "${S}In order for vbox to run, you need to add your normal user name to the ${C}vboxusers${S} group."
+	echo
+	if [ -z "$USER_NAME" ]
+	then
+		echo "This script can do that for you now. If you would like to have that done, please"
+		echo "enter your normal login user name now, then hit enter."
+		echo "(If you have already created this user/group, or want to skip this step, just hit enter)${N}"
+	
+		read USER_NAME
+	else
+		echo "${S}Using the user name you provided: ${C}$USER_NAME${N}"
+	fi
+	
+	# check to see user actually exists, use passwd because someone reported a looping
+	# error here using the test on /home. Tightened test to include : to close name
+	# old test: [ -n "$( ls /home | grep $USER_NAME )" ]
+	userExists=$( egrep -o "^$USER_NAME:" /etc/passwd )
+	
+	if [ "$USER_NAME" != '' ]
+	then
+		echo 'Using USER_NAME: '$USER_NAME >> $LOG_FILE
+		if [ -n "$userExists" ]
+		then
+			echo "${M}NOTE: the new group will not be available to ${C}$USER_NAME${M} until they logout and log back in.${N}"
+			adduser $USER_NAME vboxusers
+		else
+			echo "${E}The user name ${C}$USER_NAME${E} does not appear to exist, please try again...${N}"
+			echo 'Error: USER_NAME: '$USER_NAME 'does not exist in /etc/passwd' >> $LOG_FILE
+			USER_NAME='' # must be reset here to null or loops endlessly
+			add_vbox_user
+		fi
+	fi
+	
+	log_info $FUNCNAME c
+}
+
+# $1 is OSE or non OSE
+install_vbox_addons()
+{
+	log_info $FUNCNAME s
+	
+	local isOSE='' 
+	
+	# testing for both ose and non ose versions, then installing the requested version
+	set_installed_vbox_version
+	# note: as of 1.5.4, there is no longer a separate _OSE download version for addons
+	if [ "$2" == 'ose' ] && [ "$VBOX_INSTALLED_VERSION" == '1.5.0' -o "$VBOX_INSTALLED_VERSION" == '1.5.2' ]
+	then
+		isOSE='_OSE'
+	fi
+	
+	local vboxLib='/usr/lib/virtualbox/'  vboxAddDir='additions'
+	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION$isOSE'.iso'
+	local vboxAddonName='VBoxGuestAdditions.iso'
+	local vboxAddonURL='http://www.virtualbox.org/download/'$VBOX_INSTALLED_VERSION'/'$vboxAddonFile
+	
+	echo $LINE
+	if [ -d $vboxLib ]
+	then
+		cd $vboxLib
+		# for some reason debian/vbox devs changed the default download
+		# path for the addons, and it doesn't match, so here the old
+		# original one, if present, gets removed, and the new one gets a new
+		# directory created, and it's put in that one. 
+		if [ -f $vboxAddonName ]
+		then
+			rm -f $vboxAddonName
+		fi
+		if [ ! -d $vboxAddDir ]
+		then
+			mkdir $vboxAddDir
+		fi
+		cd $vboxAddDir
+		wget -Nc $vboxAddonURL || echo -e "${E}The vbox addons download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+		
+		if [ -s $vboxAddonFile ]
+		then
+			mv $vboxAddonFile $vboxAddonName
+			echo "${S}Please note: to use the ${C}$VBOX_INSTALLED_VERSION${S} iso, simply run vbox, then start your virtual machine."
+			echo "When it is running, you will see a ${C}Devices${S} menu item. Select ${C}Install Guest Additions${S}"
+			echo "vbox will discover the iso you just downloaded and use it for drivers and other tools.${N}"
+		else
+			echo "${E}Sorry, the download failed for some reason, let's find out why.${N}"
+		fi
+	else
+		echo "${E}Virtualbox does not appear to be installed! Please install it first!${N}"
+	fi
+	echo
+	print_hec
+	log_info $FUNCNAME c
+}
+# install_vbox_addons
+########################################################################
+#### OPTIONS 
+########################################################################
+# keep this above getopts to keep it readable
+# args: $1 if err or not, $2 extra data
+
+show_options()
+{
+	if [ "$1" == 'err' ]
+	then
+		echo "${W}Sorry, one of your arguments is not a supported option.${N}"
+		echo "Please check the following options and try again."
+		echo $LINE
+	fi
+	echo "These are your supported options:"
+	echo "-A Run the any any install non-interactively."
+	echo "-h View this help menu."
+	echo "-M Run the vbox module install non-interactively."
+	echo "-R Skips self updating feature. No restart."
+	echo "-u Enter the username that will be used for vbox group membership and other functions."
+	echo "   Best used with non-interactive mode, but is fine for normal mode too. Example: svmi -u jeff"
+	echo "-v Prints $SCRIPT_NAME current version information. Exits after."
+	echo "-V Allows you try a specific Version of vbox. Only applies to non-ose version."
+	echo "   Supported versions: $VBOX_VERSIONS"
+	echo "   Example: svmi -V 1.5.2"
+	echo "-Z Skips connection test. Use this if $SCRIPT_NAME gives you connection failed error but"
+	echo "   you are sure your connection is fine."
+	echo 
+	
+	if [ "$1" == 'err' ]
+	then
+		exit 1
+	else
+		exit 0
+	fi
+}
+
+while getopts ABDFhMPRSTuvV:Z opt
+do
+	case $opt in
+		A) AUTORUN_ANYANY='true'
+			START_OPTIONS=$START_OPTIONS'A'
+			;;
+		B) AUTORUN_VBOX='true'
+			START_OPTIONS=$START_OPTIONS'B'
+			;;
+		D) SM_INSTALL='true'
+			S=${CALLER_DEF} # change standard text color to caller standard text
+			BAR=${S}$BA${N}
+			LINE=${S}$LI${N}
+			START_OPTIONS=$START_OPTIONS'D'
+			;;
+		F) # for debugging purposes only
+			SKIP_FUNCTION='true'
+			START_OPTIONS=$START_OPTIONS'F'
+			;;
+		M) AUTORUN_VBOX_MODULE='true'
+			START_OPTIONS=$START_OPTIONS'M'
+			;;
+		P) AUTORUN_VMPLAYER='true'
+			START_OPTIONS=$START_OPTIONS'P'
+			;;
+		R) SKIP_RESTART='true'
+			;;
+		S) AUTORUN_VMSERVER='true'
+			START_OPTIONS=$START_OPTIONS'S'
+			;;
+		T) TESTING='true'
+			START_OPTIONS=$START_OPTIONS'T'
+			;;
+		u) USER_NAME="$OPTARG"
+			;;
+		v) print_information
+			exit 0
+			;;
+		V) if [ -z "$( echo "$VBOX_PREVIOUS" | grep "$OPTARG:" )" ]
+			then
+				echo "${E}The -V option only supports non-ose vbox versions: $VBOX_VERSIONS${N}"
+				exit 1
+			else
+				VBOX_VERSION="$OPTARG" # assign to main version global
+				VBOX_ALT_VERSION="$OPTARG" # and set the alt as well
+				VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | egrep -o "$VBOX_VERSION:[0-9]{5,6}" | cut -d ':' -f 2 )
+				#echo vb pn $VBOX_PACKAGE_NO
+			fi
+			;;
+		Z) SKIP_CONNECT='true'
+			;;
+		h) show_options
+			;;
+		*) show_options err
+			;;
+	esac
+done
+if [ -n "$USER_NAME" ]
+then
+	START_OPTIONS=$START_OPTIONS" -u $USER_NAME"
+fi
+if [ -n "$VBOX_ALT_VERSION" ]
+then
+	START_OPTIONS=$START_OPTIONS" -V $VBOX_ALT_VERSION"
+fi
+
+########################################################################
+####  EXECUTE
+########################################################################
+
+# run all script checks etc
+
+### if this exits with error, no lib files will be downloaded
+if [ "$SKIP_FUNCTION" != 'true' ]
+then
+	basic_startup_tests
+fi
+### update everything, restart if not run from smxi
+if [ "$SKIP_RESTART" != 'true' -a "$SM_INSTALL" != 'true' -a "$SKIP_FUNCTION" != 'true' ]
+then
+	check_update_script $SCRIPT_NAME
+fi
+set_test_data # this will set other test data for debugging
+
+### don't log the first start if restart/print output happens
+if [ "$SKIP_FUNCTION" != 'true' ]
+then
+	create_log
+	LOGGING_STARTED='true'
+fi
+# will run non interactive and set the AUTO_UPDATE flag
+run_non_interactive
+
+print_information
+check_install_tools
+
+if [ "$AUTO_UPDATE" != 'true' ]
+then
+	vm_main_selector
+fi
+
+exit 0
+###**EOF**###

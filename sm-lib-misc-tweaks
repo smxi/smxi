@@ -1,0 +1,1402 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-misc-tweaks
+####  version: 1.14.9
+####  Date: May 14 2008
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-misc-tweaks
+####  Script Home page: http://techpatterns.com/forums/about736.htm
+########################################################################
+
+########################################################################
+####  FUNCTIONS 
+########################################################################
+
+###---------------------------------------------------------------------
+### miscellaneous hacks and tweaks
+###---------------------------------------------------------------------
+
+# this one just does various odd little things
+misc_hacks()
+{
+	local repeat='' options='' opt=''
+
+	print_lib_info $LIB_MISC_TWEAKS
+	echo $MLINE
+	echo "${S}This is a list of various things you can do at this point before"
+	echo "runnning the graphics installers or exiting the script"
+	echo $LINE
+	
+	echo "${C}1${S} - ${C}mozilla-tweaks${S} Various Mozilla product tweaks, including:"
+	echo "    dump gtk file hander: In all Mozilla products - replaces gtk filehandlers with better ones."
+	echo "    tweak_gecko_prefs: create more sane user defaults in prefs.js"
+	echo "    swiftfox-plugins creates symbolic link to iceweasel plugins from swiftfox."
+	
+	echo "${C}2${S} - ${C}sidux-artwork${S} Options to install sidux ${C}s${S} taskbar icon,"
+	echo "    sidux ${C}kmenu${S} sidebar graphics by drb and raider700, and Cathbard grub graphics."
+	
+	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
+	echo "    ( get rid of all those locales in dist-upgrades ), change-debian-mirrors, change-sidux-mirrors"
+	echo "    ${M}NEW!${S} Crust fix: change ${M}hit enter to continue${S} to what you want."
+	
+	echo "${C}4${S} - ${C}legacy-tweaks${S} More or less obsolete tweaks for things no longer actively"
+	echo "    supported or required by modern sidux systems. But might be useful to older installs."
+	
+	echo "${C}5${S} - ${C}openoffice-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to latest if"
+	echo "    ${C}openoffice.org${S} is already installed."
+
+	echo
+	echo "${C}6${S} - Return to main menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="mozilla-tweaks sidux-artwork advanced-tweaks legacy-tweaks openoffice-hold-install continue"
+	select opt in $options
+	do
+		case $opt in
+			mozilla-tweaks)
+				mozilla_tweaks
+				repeat='true'
+				;;
+			sidux-artwork)
+				latino_cathbard_sidux_kde
+				repeat='true'
+				;;
+			fix-broken-openoffice)
+				fix_broken_openoffice
+				repeat='true'
+				;;
+			advanced-tweaks)
+				advanced_tweaks
+				repeat='true'
+				;;
+			legacy-tweaks)
+				misc_legacy_tweaks
+				repeat='true'
+				;;
+			openoffice-hold-install)
+				openoffice_hold_install
+				repeat='true'
+				;;
+			continue)
+				echo "${S}Continuing on with the main script.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break 
+	done
+	
+	if [ "$repeat" == 'true' ]
+	then
+		misc_hacks
+	fi
+}
+#misc_hacks
+
+###---------------------------------------------------------------------
+### various advanced system tweaks
+###---------------------------------------------------------------------
+
+advanced_tweaks()
+{
+	local opt='' repeat='' options='' tempCount=0 advancedOption1='' advanced1=''
+	local cont=''
+	
+	options="change-debian-mirrors change-sidux-mirrors update-bashrc update-locales alternate-print-hec"
+	
+	# catch the count up again for options
+	tempCount=$( echo $options | wc -w )
+	
+	if [ "$EXTRA_OPTIONS" == 'true' ] 
+	then
+		tempCount=$(( $tempCount + 1 ))
+		advancedOption1='restore-sources.list'
+		advanced1='echo -e "${C}'$tempCount'${S} - ${C}restore-sources.list${S} Move contents of ${C}sources.list.d${S} files to ${C}sources.list${S}"'
+	fi
+	options="$options $advancedOption1 continue"
+	tempCount=$( echo $options | wc -w )
+	cont=$tempCount
+	
+	echo $MLINE
+	echo "${M}ADVANCED TWEAKS"
+	echo $MLINE
+	echo "${S}Update various core parts of your system here. Some of these you have seen before"
+	echo "like the mirror upgrade options. Others are just nice to do if you haven't done it yet."
+	echo $LINE
+	echo "${C}1${S} - ${C}change-debian-mirrors${S} Change your default debian mirrors. "
+	
+	echo "${C}2${S} - ${C}change-sidux-mirrors${S} Change your default sidux mirrors."
+	
+	echo "${C}3${S} - ${C}update-bashrc${S} Updates your root ${C}/root/.bashrc${S} file to enable things like bash autocompletion."
+	
+	echo "${C}4${S} - ${C}update-locales${S} Get rid of all those extra languages and locales"
+	echo "    you don't need and that slow down your dist-upgrades. Includes instructions on what to do."
+	
+	echo "${C}5${S} - ${C}alternate-print-hec${S} Change default  ${C}$SCRIPT_NAME${M} hit enter to continue"
+	echo "    ${S}option to either hit any, or custom, key to continue. A great ${C}Crust${S} snippet."
+
+	eval $advanced1
+	echo "${C}$cont${S} - Return to Miscellaneous Tweaks Main Menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	select opt in $options
+	do
+		case $opt in
+			change-debian-mirrors)
+				change_debian_mirrors
+				repeat='true'
+				;;
+			change-sidux-mirrors)
+				change_kernel_mirrors
+				repeat='true'
+				;;
+			update-bashrc)
+				update_bash_completion
+				repeat='true'
+				;;
+			update-locales)
+				update_locales
+				repeat='true'
+				;;
+			alternate-print-hec)
+				alt_print_hec
+				repeat='true'
+				;;
+			restore-sources.list)
+				restore_standard_sources
+				repeat='true'
+				;;
+			continue)
+				echo "${S}Returning to miscellaneous tweaks main menu...${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break 
+	done
+	
+	if [ "$repeat" == 'true' ]
+	then
+		advanced_tweaks
+	fi
+	
+}
+###---------------------------------------------------------------------
+### openoffice hold/install tweaks
+###---------------------------------------------------------------------
+
+openoffice_hold_install()
+{
+	local opt='' repeat='' options='' 
+	# possible extra holds ttf-freefont
+	local oooPackages="$( package_tester 'openoffice' 'wild-full' ) python-uno"
+	
+	echo $MLINE
+	echo "${M}OpenOffice.org hold/install/update"
+	echo $LINE
+	
+	if [ -n "$oooPackages" ]
+	then
+		echo "${S}Tired of those huge ${C}100mB OpenOffice.org${S} updates every ${C}dist-upgrade${S}? "
+		echo
+		echo "${S}Stop or start those now at will. Change openoffice.org status hold/install  or update openoffice.org."
+		echo $LINE
+		echo "${C}1 - ooo-hold${S} Change package status for your ${C}openoffice.org${S} components to: ${C}hold"
+		echo "${C}2 - ooo-remove-hold${S} Remove any holds on your ${C}openoffice.org${S} components."
+		echo "    Note: this does not install latest, just changes the package status to ${C}install"
+		echo "${C}3 - ooo-update${S} Updates openoffice to latest. Does not change package hold/install status."
+		echo
+		echo "${C}4 - return-main-menu${S} Return to main menu."
+		
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="ooo-hold ooo-remove-hold ooo-update return-main-menu"
+		
+		select opt in $options
+		do
+			case $opt in
+				ooo-hold)
+					echo "${S}Setting your ${C}openoffice${S} component status to: hold${N}"
+					DPKG_HOLD_INSTALL="$oooPackages"
+					set_hold_install 'hold-utility'
+					repeat='true'
+					;;
+				ooo-remove-hold)
+					echo "${S}Setting your ${C}openoffice${S} component status to: install${N}"
+					DPKG_HOLD_INSTALL="$oooPackages"
+					set_hold_install  'install'
+					repeat='true'
+					;;
+				ooo-update)
+					echo "${S}Installing latest versions of your ${C}openoffice${S} components...${N}"
+					package_installer "$oooPackages" 'install-user-ok'
+					repeat='true'
+					;;
+				return-main-menu)
+					echo "${S}Ok, going on, remember, you can always change your install status for your ${C}openoffice${S} components here.${N}"
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+		if [ "$repeat" == 'true' ]
+		then
+			openoffice_hold_install
+		fi
+	else
+		echo "${M}You do not appear to have any ${C}openoffice.org${M} packages installed. To install"
+		echo "openoffice.org, use the convenient ${C}smxi package install${M}, office suites, ooo option.${N}"
+		print_hec
+	fi
+}
+
+
+###---------------------------------------------------------------------
+### Firefox/IW Gtk crap, this will be updated to make it more comprehensive
+###---------------------------------------------------------------------
+mozilla_tweaks()
+{
+	local opt='' repeat='' options=''
+	
+	echo $MLINE
+	echo "${M}Mozilla Tweaks"
+	echo $LINE
+	echo "${S}These tweaks help fix increasingly stupid and annoying Mozilla corporation"
+	echo "default decisions, either by modifying core or user pref files to more closely"
+	echo "resemble rational decisions. These will be modified over time, especially if the"
+	echo "Mozilla corporation continues to make really bad default user option decisions."
+	echo $LINE
+	echo "${C}1 - Dump Gtk File Handler${S} Gets rid of that stupid gtk file handling"
+	echo "    dialogue box in all Mozilla products and replaces it with a better one. When you"
+	echo "    restart any of these Mozilla products you'll see a more useable file handler dialogue box."
+	echo "${C}2 - Tweak Gecko Prefs${S} Fixes some really annoying Gecko/Firefox/Tbird user pref defaults."
+	echo "${C}3 - Run All Tweaks${S} Runs all the above fixes non-interactively at once [${M}recommended${S}]."
+	echo "${C}4 - swiftfox plugins${S} Fixes swiftfox plugins links, creates symbolic link to iceweasel's.${S}."
+
+	echo "${C}5 - Continue${S} Back to main Misc Tweaks menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="dump-gtk-file-handler tweak-gecko-prefs run-all-tweaks swiftfox-plugins continue"
+	
+	select opt in $options
+	do
+		case $opt in
+			dump-gtk-file-handler)
+				dump_gtk_file_handler
+				repeat='true'
+				;;
+			tweak-gecko-prefs)
+				tweak_gecko_prefs
+				repeat='true'
+				;;
+			run-all-tweaks)
+				dump_gtk_file_handler no-interact
+				tweak_gecko_prefs no-interact
+				;;
+			swiftfox-plugins)
+				swiftfox_link_tweak
+				repeat='true'
+				;;
+			continue)
+				echo "${S}Ok, enough gecko/gtk tweaks...${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	if [ "$repeat" == 'true' ]
+	then
+		mozilla_tweaks
+	fi
+}
+
+# links iceweasel plugin directory to swiftfox's, run on every reinstall/upgrade of swiftfox
+swiftfox_link_tweak()
+{
+	local ulsp='/usr/lib/swiftfox/plugins' ulip='/usr/lib/iceweasel/plugins'
+	local uls='/usr/lib/swiftfox'
+
+	# remove swiftfox plugin directory if present
+	if [ -f $ulsp ]
+	then
+		rm -f $ulsp
+	fi
+	if [ -d $ulsp ]
+	then
+		rm -fR $ulsp
+	fi
+
+	echo $LINE
+	if [ -d $ulip ]
+	then
+		if [ -d $uls ]
+		then
+			ln -s $ulip $ulsp
+			echo  "${S}Symbolic link from ${C}$ulip${S} to ${C}$ulsp${S} created.${N}"
+		else
+			echo "${E}No ${C}$uls${E} directory found.${N}"
+		fi
+	else
+		echo "${E}No ${C}$ulip${E} found to link to.${N}"
+	fi
+}
+
+dump_gtk_file_handler()
+{
+	local libsPre='/usr/lib/' libsPost='/components/nsFilePicker.js'
+	local homePre='/home/*/.' homePost='/*/' homeRemove1='compreg.dat' homeRemove2='xpti.dat'
+	local nsFileNu1='' nsFileNu2='' f='' mozfile='' homefile1='' homefile2='' nums=''
+	local unedited=''
+	local mozProds='icedove thunderbird mozilla-thunderbird firefox mozilla/firefox mozilla/iceweasel mozilla-firefox iceweasel iceape seamonkey swiftfox'
+	
+	echo $LINE
+	echo "${S}In case you're interested, the following is a list of which files were edited,"
+	echo "and which local user profile files were deleted. All deleted files will be"
+	echo "recreated the next time you open the program they belong to."
+	echo $LINE
+	
+	for f in $mozProds
+	do
+		mozfile=$libsPre$f$libsPost
+		homefile1=$homePre$f$homePost$homeRemove1
+		homefile2=$homePre$f$homePost$homeRemove2
+
+		if [ -f $mozfile ]
+		then
+			nums=$( cat $mozfile | grep -n '//@line' | grep -o "[0-9]*" )
+			nsFileNu1=$( echo $nums | cut -d ' ' -f 1 )
+			nsFileNu2=$( echo $nums | cut -d ' ' -f 2 )
+			
+			#echo 'sed -i \''$nsFileNu1,$nsFileNu2'
+			unedited=$( grep -c 'FILEPICKER_CONTRACTID,' $mozfile )
+			if [ "$unedited" -eq 0 ]
+			then
+				echo "${S}Editing: ${C}$mozfile${N}"
+				sed -i $nsFileNu1','$nsFileNu2's%"",%FILEPICKER_CONTRACTID,%' $mozfile
+			else
+				echo "${C}$mozfile${S} has already been edited.${N}"
+			fi
+		fi
+		# note, I was using [ -f file ] but it exits with errors when using
+		# /home/*/.mozilla/firefox/*/file. this way seems to work fine though
+		echo -n ${S}
+		rm -fv $homefile1
+		rm -fv $homefile2 
+		echo -n ${N}
+
+		mozfile=''
+		nsFileNu1=''
+		nsFileNu2=''
+		homefile1=''
+		homefile2=''
+		unedited=''
+	done
+	echo $LINE
+	echo "${S}Ok, all done, no more stupid gtk file handlers in your Mozilla products.${N}"
+
+	if [ "$1" != 'no-interact' ]
+	then
+		print_hec
+	fi
+}
+
+tweak_gecko_prefs()
+{
+	local homeprefs='' prefs='prefs.js' homedir='/home/' h='' m='' v='' profileIs='' 
+	local p='' profdirs='' fullprofileprefs='' prefn='' prefv=''
+	local homes=$( ls $homedir )
+	local mozBrowserProds='firefox mozilla/firefox mozilla/iceweasel mozilla-firefox iceweasel iceape seamonkey swiftfox'
+
+	#  defaults now
+	local prefsPairs="browser.backspace_action:0 browser.search.suggest.enabled:false browser.sessionhistory.max_entries:10 browser.sessionhistory.max_total_viewers:1 browser.tabs.closeButtons:3 browser.tabs.tabMinWidth:5 browser.urlbar.hideGoButton:true layout.css.dpi:0 network.cookie.cookieBehavior:1 network.prefetch-next:false print.printer_PostScript/default.print_command:kprinter ui.allow_platform_file_picker:false"
+	
+	echo $LINE
+	echo "${S}Now the script will edit your browser user prefs to more reliable settings."
+	echo "All prefs.js files will be edited with the following changes:${N}"
+	for v in $prefsPairs
+	do
+		prefn=$( echo $v | cut -d ':' -f 1 )
+		prefv=$( echo $v | cut -d ':' -f 2 )
+		echo "${C}$prefn${S} value changed to ${C}$prefv${S}"
+	done
+	echo $LINE
+	
+	for h in $homes
+	do
+		if [ "$h" != 'lost+found' ]
+		then
+			for m in $mozBrowserProds
+			do
+				profileIs=$homedir$h/.$m/
+				if [ -e $profileIs ]
+				then
+					# echo profile path is
+					profdirs=$( ls $profileIs )
+					for p in $profdirs
+					do
+						fullprofileprefs=$profileIs$p/$prefs
+						if [ -d $profileIs$p -a -f $fullprofileprefs ]
+						then
+							echo "${S}Editing ${C}$fullprofileprefs${S}...${N}"
+							
+							for v in $prefsPairs
+							do
+								prefn=$( echo $v | cut -d ':' -f 1 )
+								prefv=$( echo $v | cut -d ':' -f 2 )
+								if [ "$( grep -c -i $prefn $fullprofileprefs )" -eq 0 ]
+								then
+									echo "user_pref(\"$prefn\", $prefv);" >> $fullprofileprefs
+								else
+									sed -i -r "s%($prefn\",\s).*\);%\1$prefv\);%" $fullprofileprefs
+								fi
+							done
+						fi
+					done
+				fi
+			done
+		fi
+	done
+	echo $LINE
+	echo "${S}Ok, all the prefs.js have been updated now.${N}"
+
+	if [ "$1" != 'no-interact' ]
+	then
+		print_hec
+	fi
+}
+# tweak_gecko_prefs
+#dump_gtk_file_handler
+
+###---------------------------------------------------------------------
+### Small graphics tweaks, basic logic by latino
+###---------------------------------------------------------------------
+latino_cathbard_sidux_kde()
+{
+	local opt='' option='' repeat=''
+	
+	echo $MLINE
+	echo "${M}KDE SIDUX MENU BAR, KMENU ICON, GRUB GRAPHIC INSTALLER"
+	echo $LINE
+	echo "${S}This will install the new sidux kmenu graphics items for you."
+	echo "You have three main choices, and the kmenu sidebar will give you the choice"
+	echo "of 3 separate images to install, all are pretty nice by the way."
+	echo
+	echo "To be clear: the kmenu sidebar graphic is the image on the left side of your"
+	echo "kmenu that you get to by clicking on the k button on your taskbar."
+	echo $LINE
+	echo "${C}1${S} - Installs ${C}sidux 's' kmenu icon${S}. This will replace your current"
+	echo "    ${C}k${S} on your taskbar with the sidux ${C}s${S}. Also creates backups for "
+	echo "    your old kmenu default graphic icons."
+	echo
+	echo "${C}2${S} - Will give you a choice of 3 different kmenu side bars to install, then"
+	echo "    will install them for you."
+	echo
+	echo "${C}3${S} - ${C}grub-gfx-cathbard-1${S} A cathbard black/red design, with debian swirls."
+	echo "    down the left side. Updates ${C}$GRUB_PATH${S} as well."
+	echo
+	echo "${C}4${S} - ${C}grub-gfx-sidux-1${S} Original sidux grub graphics design,"
+	echo "    Simple black/red motiff. Updates ${C}$GRUB_PATH${S} as well."
+	echo
+	echo "${C}5${S} - ${C}grub-gfx-restore${S} Returns to standard sidux grub default gfx."
+	echo
+	echo "${C}6${S} - Returns to main menu."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+	options="kmenu-icon kmenu-sidebar grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-restore continue"
+	select opt in $options
+	do
+		case $opt in
+			kmenu-icon)
+				install_kmenu_icon
+				repeat='true'
+				;;
+			kmenu-sidebar)
+				install_kmenu_sidebar
+				repeat='true'
+				;;
+			grub-gfx-cathbard-1)	
+				cathbard_grub_gfx_installer cath.brd
+				repeat='true'
+				;;
+			grub-gfx-sidux-1)	
+				cathbard_grub_gfx_installer sidux.original
+				repeat='true'
+				;;
+			grub-gfx-restore)
+				restore_grub_gfx
+				repeat='true'
+				;;
+			continue)
+				echo "${S}Ok, you are ready to go on now.${N}"
+				;;
+			*)
+				print_error opt
+				;;
+		esac
+		break
+	done
+	if [ "$repeat" == 'true' ]
+	then
+		latino_cathbard_sidux_kde
+	fi
+}
+
+install_kmenu_sidebar()
+{
+	# well, "plain sidux text" "sidux logo" and "coffee theme match"
+	 # drb 1 - elegant style
+	local siduxUrl=$TECH_PATTERNS_DISTRO'artwork/'
+	local siduxKmenuBarUrl1=$siduxUrl'kside_119.png'
+	 # drb 2 coffee style
+	local siduxKmenuBarUrl2=$siduxUrl'kside_213.png'
+	# raider700 sidebar
+	local siduxKmenuBarUrl3=$siduxUrl'kside_810.png'
+	local opt='' option='' menu='' ksp='kside.png'
+	
+	echo $LINE
+	echo "${S}Please select one of the following kmenu side graphics:"
+	echo $LINE
+	echo "${C}1${S} - drb-standard - elegant style"
+	echo
+	echo "${C}2${S} - drb-coffee - Uses the swirling coffee theme."
+	echo
+	echo "${C}3${S} - raider700-standard - A nice, cleanly themed sidux kmenu graphic."
+	echo
+	echo "${C}4${S} - Returns to main menu."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+	options="drb-standard drb-coffee raider-standard continue"
+	select opt in $options
+	do
+		case $opt in
+			drb-standard)
+				menu=$siduxKmenuBarUrl1
+				;;
+			drb-coffee)
+				menu=$siduxKmenuBarUrl2
+				;;
+			raider-standard)
+				menu=$siduxKmenuBarUrl3
+				;;
+			continue)
+				echo "${S}Ok, skipping kside menu graphic install.${N}"
+				;;
+			*)
+				print_error opt
+				;;
+		esac
+		break
+	done
+	echo $LINE
+	echo "${S}Preparing to install new kmenu side image...${N}"
+	cd /usr/share/apps/kicker/pics/
+	[ -f $ksp -a ! -f $ksp-original ] && mv $ksp $ksp-original
+	echo "${S}Downloading new kmenu side image...${N}"
+	wget -O $ksp -T$TIME_OUT -t 2 $menu
+	echo "${S}Done installing kmenu side image.${N}"
+	
+	cd $SCRIPT_HOME
+}
+install_kmenu_icon()
+{
+	local siduxMenuFile='kmenu.tar.gz'
+	local siduxKmenuUrl=$TECH_PATTERNS_DISTRO'artwork/'$siduxMenuFile
+	
+	local ButtonDir='/usr/share/icons/default.kde' #Raider700's
+	local tempDir1='temp33444534' kp='kmenu.png'
+	local iconSizes1='128 16 32 64 22 48' temp2='' temp3=''
+	
+	echo $LINE
+	mkdir $tempDir1
+	cd $tempDir1
+	echo "${S}Downloading the icons...${N}"
+	wget -Nqc -T$TIME_OUT -t 2 $siduxKmenuUrl
+	echo "${S}Extracting the icons...${N}"	
+	tar -xf $siduxMenuFile
+	echo "${S}Installing the icons...${N}"	
+
+	for d in $iconSizes1
+	do
+		temp2='kmenu/'$d'/'$kp
+		temp3=$ButtonDir'/'$d'x'$d'/apps/'$kp
+		[ -f $temp3 -a ! -f $temp3-original ] && mv $temp3 $temp3-original
+		cp $temp2 $temp3
+		temp2=''
+		temp3=''
+	done
+
+	cd ../
+	rm -rf $tempDir1
+	echo "${S}Icons should now be installed, with backups named ${C}kmenu-original${S} in"
+	echo "${C}$ButtonDir${S} subdirectories for $iconSizes1.${N}"
+	cd $SCRIPT_HOME
+}
+
+# args: $1 which grub graphic package
+cathbard_grub_gfx_installer()
+{
+	local cbrd='message.'$1
+	local grubCbrd='/boot/'$cbrd
+	local bgmc=$TECH_PATTERNS_DISTRO'artwork/'$cbrd
+	# make sure not commented out etc
+	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
+	
+	echo $LINE
+	if [ -n "$gfxGrubExists" ]
+	then
+		echo "${S}Downloading ${C}$cbrd${S} file now...${N}"
+		wget -T$TIME_OUT -t 2 -O $grubCbrd $bgmc
+		if [ -s "$grubCbrd" ]
+		then
+			echo "${S}Updating ${C}$GRUB_PATH${S} to use the new grub boot image...${N}"
+			# we're being careful here to not overwrite any other /boot/message type files or links
+			#sed -i 's%^gfxmenu\s(hd0,1)/boot/message$%gfxmenu (hd0,1)'$grubCbrd'%' $GRUB_PATH
+			# need to handle different locations of /boot here
+			sed -ir 's%^\(gfxmenu\s(.*)\)/boot/message.*%\1'$grubCbrd'%' $GRUB_PATH
+			echo "${S}The update to ${C}$cbrd${S} seems to have been a success. You'll know next time you reboot.${N}"
+		else
+			echo "${E}The ${C}$cbrd${E} file did not download successfully. Please try again later."
+			echo "If it fails later, notify the ${C}$SCRIPT_NAME${E} maintainer that the package download failed."
+		fi
+	else
+		echo "${E}Your ${C}$GRUB_PATH${E} does not appear to have a ${C}gfxmenu${E} item configured yet."
+		echo "Please update it to use this feature.${N}"
+	fi
+	print_hec
+}
+
+restore_grub_gfx()
+{
+	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
+	
+	echo $LINE
+	if [ -n "$gfxGrubExists" ]
+	then
+		if [ -f /boot/message ]
+		then
+			echo "${S}Updating ${C}$GRUB_PATH${S} to use the default sidux grub boot image...${N}"
+			sed -ir 's%^\(gfxmenu\s(.*)\)/boot/message.*%\1/boot/message%' $GRUB_PATH
+		else
+			echo "${E}No default grub graphic file ${C}/boot/message${E} exists. Unable to"
+			echo "update since there is no default present.${N}"
+		fi
+	else
+		echo "${E}Your ${C}$GRUB_PATH${E} does not appear to have a ${C}gfxmenu${E} item configured yet."
+		echo "Please update it to use this feature.${N}"
+	fi
+	print_hec
+}
+
+###---------------------------------------------------------------------
+### Fix fonts options
+###---------------------------------------------------------------------
+
+fxfonts()
+{
+	local repeat='' options='' opt=''
+	
+	echo $MLINE
+	echo "${M}FIX FONTS OPTIONS"
+	echo $LINE
+	echo "${S}Running ${C}fix-fonts -e${S} will improve slowed down bootup times on xorg 7"
+	echo "if you upgraded from 6.9. I usually don't run this unless something"
+	echo "major was upgraded and ${C}fix-fonts${S} will correct some issues."
+	echo "You will probably see some errors when fix-fonts runs, but they are trivial,"
+	echo "don't worry about them, those will be 75dpi and 100dpi related."
+	echo $LINE
+	echo "${M}Special Note: ${S}Kde 3.5.x may distort or break the fonts in gtk applications."
+	echo "The fix for this is simple. After the dist-upgrade, when you're back in kde:"
+	echo "1. Go in kcontrol (control center) -> Appearances and Themes -> Fonts"
+	echo "2. Disable antialiased fonts ( uncheck the box if checked )"
+	echo "3. Save [apply], Re-enable [check] again, and save [apply] again"
+	echo $LINE
+	echo "${C}1${S} - Runs ${C}fix-fonts -e${S}. I recommend you choose ${C}1${S} if"
+	echo "    you have just made a big upgrade, especially of ${C}xorg${S}."
+	echo
+	echo "${C}2${S} - Runs ${C}fix-fonts${S} without the ${C}-e${S} [extreme] parameter."
+	echo
+	echo "${C}3${S} - Runs the font cache fix code for you. Use this if you get broken or"
+	echo "    failed font cache error. This will fully restore your ${C}/etc/fonts${S} file "
+	echo "    and reinstall the ${C}fontconfig${S} packages."
+	echo
+	echo "${C}4${S} - Skip this step to continue if you have run ${C}fix-fonts${S} recently,"
+	echo "    and haven't done a major upgrade."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+	
+	options="fixfonts-e fixfonts fixfontconfig continue"
+	select opt in $options
+	do
+		case $opt in
+			fixfonts-e)
+				echo $LINE
+				make_fonts_links
+				fix-fonts -e
+				;;
+			fixfonts)
+				echo $LINE
+				make_fonts_links
+				fix-fonts
+				;;
+			fixfontconfig)
+				echo $LINE
+				echo "${S}Removing old ${C}/etc/fonts${S} file.${N}"
+				rm -rf /etc/fonts
+				echo "${S}Running ${C}fontconfig${S} fix.${N}"
+				apt-get install --reinstall --yes -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew fontconfig fontconfig-config
+				echo "${C}fontconfig${S} fix is now completed. Your fonts should work fine again.${N}"
+				;;
+			continue)
+				echo "${S}Ok, you are ready to go on now.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$repeat" == 'true' ]
+	then
+		fxfonts
+	fi
+}
+#fxfonts
+
+# not used now, dangerous, slh says
+# this will undo the operation one time to maintain xorg stuff
+make_fonts_links()
+{
+	local prefId='fontlinks-1' ulxf='' usfx=''
+	local prefId2='fontlinks-2'
+	local smPref=$( sm_pref_tester $prefId )
+	local smPref2=$( sm_pref_tester $prefId2 )
+	
+	# this one is unusual, we're undoing something here that was an error
+	if [ "$smPref" -eq 1 -a "$smPref2" -ne 1 ]
+	then
+		ulxf='/usr/lib/X11/fonts'
+		usfx='/usr/share/fonts/X11'
+		
+		# remove the symbolic links if they were made
+		if [ -h $ulxf/100dpi ]
+		then
+			rm -f $ulxf/100dpi
+		fi
+		if [ -h $ulxf/75dpi ]
+		then
+			rm -f $ulxf/75dpi
+		fi
+		
+		# this handles cases where users might have already manually applied this fix
+		#[ ! -h $ulxf/100dpi -a ! -d $ulxf/100dpi ] && ln -s $usfx/100dpi/ $ulxf/100dpi
+		#[ ! -h $ulxf/75dpi -a ! -d $ulxf/75dpi ] && ln -s $usfx/75dpi/ $ulxf/75dpi
+		
+		set_sticky_prefs $prefId2
+	fi
+}
+
+###---------------------------------------------------------------------
+### Misc stuff
+###---------------------------------------------------------------------
+
+alt_print_hec()
+{
+	local altHecSet=$( sm_pref_tester 'alt-print-hec' 'equal' )
+	local response='' typeData='' tempTest='' altHecSetting=''
+	local repeat=''
+	
+	if [ -n "$altHecSet"  ]
+	then
+		altHecSetting=$altHecSet
+	else
+		altHecSetting='enter'
+	fi
+	echo $LINE
+	echo "${S}Set ${C}$SCRIPT_NAME${S} to use either any key or a custom single key."
+	echo "Please type either ${C}any${S} or a ${C}single character${S}, and smxi will then use that option"
+	echo "instead of the default ${C}enter${S} option to continue. Or type ${C}enter${S} to restore to default."
+	echo
+	echo "Your current setting is: ${M}hit ${C}$altHecSetting${M} key to continue"
+	echo
+	echo "${M}Script continue options:"
+	echo "${SPACER}${C}any${S} Hit any key, including the spacebar, to continue."
+	echo "${SPACER}${C}enter${S} Default, hit enter to continue."
+	echo "${SPACER}${C}single non-space character${S} Any single character that is not a space."
+	echo
+	echo "${SPACER}${C}cont${S} Don't change, return to main menu."
+	echo $LINE
+	echo "${Q}Please type in your selection from the list above, then hit enter."
+	echo $LINE
+	read response
+		
+	case $response in
+		enter|any)
+			typeData=$response
+			;;
+		cont)
+			echo "${S}Ok, not changing anything, returning to main menus.${N}"
+			;;
+		*)
+			# any single character not a space or tab
+			tempTest=$( echo $response | sed 's/[[:space:]]//g' |grep '^.$' )
+			if [ -z "$tempTest" ]
+			then
+				echo $ELINE
+				echo "${E}Please type either: ${C}enter${E} or ${C}any${E} or a ${C}single non-space character${E},"
+				echo "or ${C}cont${E} to return to main menu...${N}"
+				repeat='true'
+			else
+				typeData=$response
+			fi
+			;;
+		esac
+		
+		if [ "$repeat" == 'true' ]
+		then
+			alt_print_hec
+		fi
+		if [ -n "$typeData" ]
+		then
+			set_alt_hec_data "$typeData"
+		fi
+}
+
+# arg: $1 - data to set in smxi.conf
+set_alt_hec_data()
+{
+	local altHecSet=$( sm_pref_tester 'alt-print-hec' 'equal' )
+	
+	echo $LINE
+	echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default of hit ${C}$1${S} key to continue...${N}"
+	
+	if [ -n "$altHecSet"  ]
+	then
+		sed -i "s/alt-print-hec=.*/alt-print-hec=$1/" $SM_CONFIG_FILE
+	else
+		set_sticky_prefs "alt-print-hec=$1"
+	fi
+	# remember, have to reset global here
+	HEC_ALT=$1
+	print_hec
+}
+
+restore_standard_sources()
+{
+	local easld='/etc/apt/sources.list.d/'
+	# we need to avoid putting backups or any other crap into this output
+	local subSources=$( ls $easld | grep '\.list$' ) sourceFile=''
+	
+	echo $LINE
+	if [ -n "$subSources" ]
+	then
+		echo "${S}Transferring ${C}$easld${S} file content to ${C}$EAS${S}"
+		echo "and deleting the sub files now...${N}"
+		echo
+		# make one line break above
+		echo >> $EAS
+		for sourceFile in $subSources
+		do
+			echo "${SPACER}${S}Moving contents of ${C}$sourceFile${M} to ${C}$EAS${N}"
+			echo "# $sourceFile contents" >> $EAS
+			cat $easld$sourceFile >> $EAS
+			# and one line break below...
+			echo >> $EAS
+			echo "${SPACER}${S}Deleting ${C}$sourceFile${M}...${N}"
+			rm -f $easld$sourceFile
+		done
+		echo
+		echo "${S}Ok, all done, now you're back to using standard ${C}$EAS${S} now... have fun${N}"
+	else
+		echo "${M}Your ${C}$easld${M} directory has no active ${C}.list${M} files"
+		echo "so there is nothing to change or update.${N}"
+	fi
+	print_hec
+}
+
+update_locales()
+{
+	local upl='dpkg-reconfigure locales'
+	
+	echo $LINE
+	echo "${S}This will run this command: ${C}$upl${S}"
+	echo "This will start the reconfiguring of your ${C}locales${S}. You will see a box with"
+	echo "all the available locales. The ones you are currently using have a small star"
+	echo "next to them, you can activate or deactivate that local by hitting your space bar."
+	echo
+	echo "You can move up and down the list using your up/down arrows. Once you have selected"
+	echo "or deselected your desired locales, use your tab key to highlight ok, hit enter,"
+	echo "then ${C}dpkg${S} will ask you to select your default system locale."
+	echo
+	echo "Once you select OK and hit enter, ${C}dpkg${S} will get rid of or add your locales."
+	echo " Hint: for older installs, change your default locale to use ${C}UTF 8${S},"
+	echo "that will let you see all the characters."
+	print_hec
+	eval $upl
+}
+# this should search and modify .bashrc if required.
+update_bash_completion()
+{
+	local rbe='' rbrc='/root/.bashrc'
+	
+	# test for bashrc, test for data if exists, and create file if doesn't
+	if [ -f $rbrc ]
+	then
+		rbe=$( grep 'if [ -f /etc/bash_completion ]' $rbrc )
+	else
+		touch $rbrc
+	fi
+	
+	echo $LINE
+	if [ -z "$rbe" ]
+	then
+		echo "${S}Updating your ${C}$rbrc${S} now...${N}"
+# 		if [ -f $rbrc ]
+# 		then
+# 			tail -n 3 /root/.bashrc
+# 		fi
+		echo >> $rbrc
+		echo 'if [ -f /etc/bash_completion ]' >> $rbrc
+		echo 'then' >> $rbrc
+		echo '	. /etc/bash_completion' >> $rbrc
+		echo 'fi' >> $rbrc
+		echo  >> $rbrc
+# 		cat >> /root/.bashrc <<EOF
+# if [ -f /etc/bash_completion ]
+# then
+# 	. /etc/bash_completion
+# fi
+# EOF
+		echo "${C}$rbrc${S} was successfully updated.${N}"
+	else
+		echo "${C}$rbrc${M} has already been updated.${N}"
+	fi
+}
+
+
+
+###---------------------------------------------------------------------
+### xorg upgrade stuff
+###---------------------------------------------------------------------
+# trigger function
+# can be set, maybe, via misc tweaks
+xorg_73_upgrade_1()
+{
+	local prefId='xorg-73-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 -o "$1" == 'misc' ]
+	then
+		xorg_73_main
+	fi
+}
+
+xorg_73_main()
+{
+	local repeat='' options='' opt=''
+	
+	run_script_import $LIB_GRAPHICS
+	set_graphics_data
+	
+	local intelText='' nvidiaText='' atiText='' unknownText=''
+	if [ "$NVIDIA" == 'true' ]
+	then
+		nvidiaText='echo "${M}You appear to be using an ${C}nVidia${M} graphics card"'
+	fi
+	if [ "$INTEL" == 'true' ]
+	then
+		intelText='echo "${M}You appear to be using an ${C}Intel${M} graphics card"'
+	fi
+	if [ "$FGLRX" == 'true' ]
+	then
+		atiText='echo "${M}You appear to be using an ${C}ATI${M} graphics card"'
+	fi
+	if [ "$NVIDIA" != 'true' -a "$INTEL" != 'true' -a "$FGLRX" != 'true' ]
+	then
+		unknownText='echo -e "${M}You appear to be using an ${C}unknown${M} graphics card, \nbut should be fine with native xorg driver."'
+	fi
+	
+	echo $MBAR
+	echo "${M}XORG 7.3 UPDATER TOOL"
+	echo $MLINE
+	echo "${S}This tool will do its best to bring your system up to date with"
+	echo "the new ${C}xorg 7.3${S}."
+	echo
+	echo "Currently, nvidia is fully supported in smxi and sgfxi. If you run the intel option,"
+	echo "your ${C}$X_ORG_PATH${S} will be updated to the new syntax for intel drivers."
+	echo
+	echo "${M}ati fglrx users: we finally have a working driver with xorg 7.3 support!"
+	echo "    Use the ${C}1${M} option as well. Only driver ${C}8.42.3${M} is supported and working."
+	echo 
+	echo "${S}If you are using the free ${C}xorg ati / radeon${S} driver, you will be fine, and can just upgrade normally."
+	echo
+	echo "All other chipsets are working fine, more or less."
+	echo $LINE
+	eval $nvidiaText
+	eval $intelText
+	eval $atiText
+	eval $unknownText
+	echo $LINE
+	echo "${C}1${S} - ${C}install-xorg${S} nvidia, fglrx/ati, and all non Intel users run this."
+	echo "    If you are using the ${C}free xorg ati/radeon${S} driver, also run this"
+	echo "${C}2${S} - ${C}install-xorg-intel${S} Intel video card users, please run this one."
+	echo "    It will update and backup your current xorg.conf to use new syntax."
+	echo "${C}3${S} - ${C}stop-bothering-me${S} If you already updated your xorg manually, or other reasons."
+	echo "    Select this and this question never appear again."
+	echo "${C}4${S} - ${C}hold-xorg${S} If you want xorg held to 7.2 version,"
+	echo "    this will place xorg on auto hold/release. You will be asked"
+	echo "    this question every time you run smxi unless you select ${C}3${S}."
+	
+	echo "${C}5${S} - ${C}quit${S} Exits the script."
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options='install-xorg install-xorg-intel stop-bothering-me hold-xorg quit'
+
+	select opt in $options 
+	do
+		case $opt in
+			install-xorg)
+				xorg_73_install plain
+				;;
+			install-xorg-intel)
+				xorg_73_install intel
+				xorg_73_intel_updater
+				;;
+			stop-bothering-me)	
+				set_sticky_prefs xorg-73-1
+				;;
+			hold-xorg)
+				xorg_73_hold_release
+				;;
+			quit)
+				set_hold_install install
+				print_quit
+				exit 0
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	if [ "$repeat" == 'true' ]
+	then
+		xorg_73_main
+	fi
+}
+
+xorg_73_intel_updater()
+{
+	local timeStampXorg=$X_ORG_PATH-bu-73-$( date +%Y-%m-%d-%H:%M:%S )
+	
+	echo $LINE
+	echo "${S}Backing up ${C}$X_ORG_PATH${S} to ${C}$timeStampXorg${S}..${N}"
+	if [ ! -e $timeStampXorg ]
+	then
+		cp $X_ORG_PATH $timeStampXorg
+	fi
+	
+	# check for right  xorg version in driver
+	# clears up xorg.conf
+	echo "${S}Updating ${C}$X_ORG_PATH${S} to remove Modelines, Modes, VertRefresh, HorizSync..${N}"
+	# dump the i810 just in case, intel works fine
+	sed -i -r 's%^\s*Driver\s*"i810"%\tDriver\t"intel"%' $X_ORG_PATH
+	# strip out all the crap
+	perl -pi -e 's/^\s+(HorizSync|VertRefresh|Modeline|Modes)\s+.+\n?//;s/^\s+#\s+\d+x\d+\s+@\s+[\.\d]+\s*Hz.*\n?//' $X_ORG_PATH
+	 
+	echo "${S}Your ${C}$X_ORG_PATH${S} has been updated to support intel's new syntax..${N}"
+	print_hec
+	 
+	# comments out modelines
+	#perl -pi -e 's/^\s+(HorizSync|VertRefresh|Modes)\s+.+\n?//;s/^\s+Modeline/\t# Modeline/' $X_ORG_PATH
+	 
+	 #sed -i '/^[ \t]\+\(HorizSync\|VertRefresh\|Modes\).*/d' $X_ORG_PATH
+}
+
+xorg_73_hold_release()
+{
+	# reset hold/install data, add the extra xorg stuff
+	local xorgHolds='xorg xserver-xorg-core xserver-xorg'
+	
+	echo $LINE
+	echo "${S}Placing ${C}xorg${S} components on hold so you can dist-upgrade now..${N}"
+	DPKG_HOLD_INSTALL="$DPKG_HOLD_INSTALL $xorgHolds"
+	set_hold_install hold-utility
+	echo "${S}Continuing on with your dist-upgrade without upgrading xorg to 7.3..${N}"
+}
+
+# $1 is plain/intel
+xorg_73_install()
+{
+	local installIntel=''
+	
+	if [ "$1" == 'intel' ]
+	then
+		installIntel='xserver-xorg-video-intel'
+	fi
+	
+	echo $LINE
+	echo "${S}Installing the new ${C}xorg 7.3${S} now...${N}"
+	# on success, don't ask question again, dont' need the custom intel since using -all
+	package_installer 'xorg xserver-xorg-core xserver-xorg xserver-xorg-input-all xserver-xorg-video-all' 'install-always' && set_sticky_prefs xorg-73-1
+	echo "${S}Remember, you can use the ${C}xorg${S} cleanup function in Miscellaneous Tweaks section"
+	echo "to get rid of unneeded xorg components.${N}"
+	
+	print_hec
+}
+
+###---------------------------------------------------------------------
+### Legacy Tweaks
+###---------------------------------------------------------------------
+
+# this one just does various odd little things
+misc_legacy_tweaks()
+{
+	local repeat='' options='' opt=''
+	
+	echo $MLINE
+	echo "${M}LEGACY TWEAKS - USE ONLY IF NEEDED"
+	echo $MLINE
+	echo "${S}Most of these are not needed on current systems, but I'm leaving them here in case"
+	echo "they are useful to some users at some point for some unknown reason."
+	echo $LINE
+	
+	# 	echo "${C}1${S} - Modifies ${C}infobash${S} slightly so it outputs the complete ${C}xorg${S} version number."
+	# 	echo "    The script will also install the latest version of ${C}locsmif's infobash${S} script before modifying it."
+	# 	echo "    Please note: this can only be used if you have upgraded ${C}xorg${S} at least one time since install"
+	# 	echo "    But if you just did a ${C}dist-upgrade${S} you probably have upgraded ${C}xorg${S}."
+	
+	echo "${C}1${S} - ${C}alsaconf${S} - for your alsa sound configuration."
+	echo "    ${M}Alert: ${C}alsaconf${M} has been deprecated and should not be required any longer.${S}"
+	echo
+	echo "${W}WARNING: Splashy is NOT supported in sidux. It is garbage, and causes nothing but PROBLEMS."
+	echo "${C}2${S} - ${C}start-splashy${S} Starts the sidux splash in ${C}init-d${S}."
+	echo "    Please note: default sidux installations will not start splashy by themselves."
+	echo "    ${M}There is no current sidux splashy theme in apt, nor will there ever be, hopefully."
+	
+	echo "${C}3${S} - ${C}turn-off-splashy${S} Removes the splashy startup/stop option with ${C}update-rc.d${S}."
+	echo
+	echo "${C}4${S} - ${C}fix-init-scripts${S} Simply creates correct initscript file if you accidentally"
+	echo "    answered 'n' [keep old ${C}initscripts${S}] instead of 'y' [replace with new] during dist-upgrade."
+	
+	echo "${C}5${S} - ${C}clean-kanotix-transitional${S} - This will clean up the transitional kanotix"
+	echo "     packages left over after your first dist-upgrade after switching to ${C}sidux${S}."
+	
+	echo "${C}6${S} - ${C}clean-kanotix-packages${S} - This will clean up any legacy kanotix"
+	echo "    packages left over after your ${C}sidux${S} conversion."
+	echo "    Each item will ask you if you want to remove it, answer y or n."
+	
+	echo
+	echo "${C}7${S} - Return to main ${C}Miscellaneous Tweaks${S} menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options="alsa-conf start-splashy turn-off-splashy fix-init-scripts clean-kanotix-transitional clean-kanotix-packages continue"
+	select opt in $options
+	do
+		case $opt in
+			alsa-conf)
+				alsaconf
+				repeat='true'
+				;;
+			clean-kanotix-transitional)
+				clean_kanotix_transitional
+				repeat='true'
+				;;
+			clean-kanotix-packages)
+				clean_kanotix_packages
+				repeat='true'
+				;;
+			fix-init-scripts)
+				echo $LINE
+				echo "${S}Reconfiguring initscripts.${N}"
+				apt-get install --yes --reinstall -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew initscripts
+				echo "${S}Initscript fix is now done.${N}"
+				repeat='true'
+				;;
+			infobash-tweak)
+				check_xorg_version post # just to double check
+				infobash_tweak
+				repeat='true'
+				;;
+			start-splashy)
+				splashy_control start-splashy
+				repeat='true'
+				;; 
+			turn-off-splashy)
+				splashy_control stop-splashy
+				repeat='true'
+				;;
+			continue)
+				echo "${S}Returning to main ${C}Miscellaneous Tweaks${S} menu...${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break 
+	done
+	
+	if [ "$repeat" == 'true' ]
+	then
+		misc_legacy_tweaks
+	fi
+}
+
+# this adds a small conditional before the xorg version assignment, it will
+# only run if xorg is in apt-cache policy already. Changes output from say 7.0.0 to 7.0.22
+infobash_tweak()
+{
+	local IBPath='/usr/bin/infobash' IBPathT='/usr/bin/infobash-temp' DoIt=''
+	local XOk=$(echo $X_ORG_VERSION_POST | grep -c "[1678].")
+	#echo $XOk
+	
+	echo $MLINE
+	echo "${S}INFOBASH TWEAK"
+	echo $LINE
+	# built in updater function of infobash
+	# echo "${S}Updating ${C}Infobash${S} to latest version...${N}"
+	# $IBPath --update
+	# echo "${C}Infobash${S} should now be updated if all went well.${N}"
+	# must come after new infobash is loaded
+	# I have to update it here to correctly handle xorg
+	sed -i -r "s%apt-cache policy xorg | grep 'Installed: 1:'%apt-cache policy xserver-xorg | grep 'Installed: [1-2]:'%" $IBPath
+	sed -i -r "s%apt-cache policy xorg-server-xorg | grep 'Installed: 1:'%apt-cache policy xserver-xorg-core | grep 'Installed: [1-2]:'%" $IBPath
+	DoIt=$( cat $IBPath | grep -c "apt-cache policy xserver-xorg | grep 'Installed: 1:'" )
+	
+	if [ "$XOk" -eq 0 ]
+	then
+		echo "${W}Sorry, you need to have done an upgrade through ${C}apt-get${S} of ${C}xorg${S} for this to work."
+		echo "${S}You can run it again after you've upgraded ${C}xorg${S} at least one time.${N}"
+	fi
+	
+	if [ "$DoIt" -eq 0 ]
+	then
+		mv $IBPath $IBPathT
+		
+		InfoBashTweak="if [ ! -z \$( grep -oi 'Debian' /etc/issue ) ]\n  then\n    XVERNUM=\$(apt-cache policy xserver-xorg-core | grep 'Installed: [1-2]:' | egrep -m 1 -o \"(1|7)\.[0-9]*\.[0-9]*\")\n  fi\n  XVER=\"\$XVENDOR \$XVERNUM\""
+		
+		echo "${S}Modifying ${C}infobash${S} to show full ${C}xorg${S} version${N}"
+		
+		sed "s@XVER=\"\$XVENDOR \$XVERNUM\"@$InfoBashTweak@g" $IBPathT > $IBPath
+		
+		rm -f $IBPathT
+		chmod +x $IBPath
+		#cat /usr/bin/infobash | grep '' | echo -e $InfoBashTweak
+		echo "${C}infobash${S} has been modified${N}"
+	else
+		echo "${S}Infobash is already modified${N}"
+	fi
+	print_hec
+}
+
+splashy_control()
+{
+	local frozen=''
+	if [ "$1" == 'stop-splashy' ]
+	then
+		echo $LINE
+		echo "${S}Turning off ${C}splashy${S} auto start/shutdown display...${N}"
+		update-rc.d -f splashy-init remove 
+		update-rc.d -f splashy remove 
+		echo "${S}Auto start/stop turned off now.${N}"
+	elif [ "$1" == 'start-splashy' ]
+	then
+		echo $LINE
+		echo "${S}Turning on ${C}splashy${S} auto start/shutdown display...${N}"
+		# activate splashy
+		[ -f /etc/frozen-rc.d ] && frozen=1
+		[ -r /etc/default/distro ] && . /etc/default/distro
+		if [ -x /etc/init.d/splashy-init ]
+		then
+			[ -x /usr/sbin/unfreeze-rc.d ] && /usr/sbin/unfreeze-rc.d
+			update-rc.d -f splashy-init remove
+			update-rc.d splashy-init start 01 S . stop 01 0 6 .
+			[ -n "$frozen" -a -x /usr/sbin/freeze-rc.d ] && /usr/sbin/freeze-rc.d
+		fi
+		echo "${S}Auto start/shutdown display for ${C}splashy${S} activated now."
+		echo "${M}Remember, you can use this script to turn it off if you decide you don't like it.${N}"
+	fi
+}
+
+clean_kanotix_transitional()
+{
+	local oldKanotix=$(COLUMNS=300 dpkg -l | grep "allow an easy transition between kanotix and sidux" | awk '{ print $2 }')
+	
+	echo $LINE
+	if [ -n "$oldKanotix" ]
+	then
+		echo -e "${S}Removing the following transitional kanotix packages:\n${C}$oldKanotix${N}"
+		apt-get remove $oldKanotix
+		echo "${S}All Kanotix to sidux transitional packages removed.${N}"
+	else
+		echo "${E}There are no transitional packages to remove.${N}"
+	fi
+	print_hec
+}
+
+clean_kanotix_packages()
+{
+	local packages=$( dpkg -l | grep -i 'kanotix' | cut -d ' ' -f 3)
+	local package='' isOk=''
+	
+	echo $LINE
+	if [ -n "$packages" ]
+	then
+		for package in $packages
+		do 
+			# isOk=$( echo $package | grep -c 'ndiswrapper-utils' )
+			isOk=0
+			if [ "$isOk" -eq 0 ]
+			then
+				echo "${S}Removing ${C}$package${S} now...${N}"
+				apt-get remove --purge $package
+			fi
+		done
+		echo "${S}Finished removing Kanotix legacy packages.${N}"
+	else
+		echo "${S}No Kanotix legacy packages found to remove.${N}"
+	fi
+	print_hec
+}
+
+###**EOF**###

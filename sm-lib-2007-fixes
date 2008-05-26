@@ -1,0 +1,627 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-2007-fixes
+####  version: 1.3.16
+####  Date: March 12 2008
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-2007-fixes
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+#### $DISTRO_VERSION numbers / distro name:
+#### 5 sidux test pre release, kanotix/debian conversions ( debian - d:d )
+#### 6 chaos, 7 tartaros, 8 gaia, 9 eros - 2007-01/4
+########################################################################
+
+###---------------------------------------------------------------------
+### script executor
+###---------------------------------------------------------------------
+# args: $1 - pre / post
+run_2007_fixes()
+{
+	if [ "$1" == 'pre' ]
+	then
+		if [ "$DISTRO_LEVEL" -lt 9 ]
+		then
+			libnurses_fix_1
+		fi
+		# REGULAR FIXES
+		if [ "$DISTRO_LEVEL" -lt 6 ]
+		then
+			remove_zd1211rw
+		fi
+		
+		if [ "$DISTRO_LEVEL" -lt 7 ]
+		then
+			hal_dbus_fix_1
+			k3b_fix_1
+			sysv_freeze_fix_1
+			:
+		fi
+		if [ "$DISTRO_LEVEL" -lt 8 ]
+		then
+			libc6_fix_1
+			icedove_fix_1
+			libxine_fix_1
+			ooo_fix_2
+			wine_fix_1
+			apt_conf_sidux_fix_1
+			libntfs_3g4_fix_1
+		fi
+		if [ "$DISTRO_LEVEL" -lt 9 ]
+		then
+			bcm_fix_1
+			ipw3945-4965-fix-1 # this may require moving to somewhere else if it kills connections
+			# this handles the xorg fixes
+			run_script_import $LIB_MISC_TWEAKS
+			xorg_73_upgrade_1
+		fi
+		if [ "$DISTRO_LEVEL" -lt 10 ]
+		then
+			acpid_fix_1
+			k3b_fix_4 # held due to package version mismatch
+			sidux_kioslave_fix_1
+			mlocate_locate_update
+			ralink_fix_1
+			# removes items in list of packages
+			kde_sdk_fix_1
+			remove_sidux_legacy_1
+			#kdebase_fix_1
+		fi
+	
+	elif [ "$1" == 'post' ]
+	then
+		if [ "$DISTRO_LEVEL" -lt 7 ]
+		then
+			tzdata_fix_1
+		fi
+	fi
+}
+
+###---------------------------------------------------------------------
+### specific du fixes
+###---------------------------------------------------------------------
+kde_sdk_fix_1()
+{
+	local prefId='kdesdk-scripts-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'kdesdk-scripts' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
+		echo $LINE
+		package_remover 'kdesdk-scripts' '--purge'
+		set_sticky_prefs $prefId 
+	fi
+}
+
+sysv_freeze_fix_1()
+{
+	local prefId='sysv-freeze-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'sysv-freeze' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
+		echo $LINE
+		package_remover 'sysv-freeze' '--purge'
+		set_sticky_prefs $prefId 
+	fi
+}
+
+libntfs_3g4_fix_1()
+{
+	local prefId='libntfs-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'libntfs-3g4' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
+		echo $LINE
+		package_remover 'libntfs-3g4' '--purge'
+		set_sticky_prefs $prefId 
+	fi
+}
+
+
+acpid_fix_1()
+{
+	local prefId='acpid-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		package_installer 'acpid' 'force-present' 
+		set_sticky_prefs $prefId 
+	fi
+}
+
+apt_conf_sidux_fix_1()
+{
+	local prefId='apt-conf-sidux-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		package_installer 'apt-conf-sidux' 'force-present' 
+		set_sticky_prefs $prefId 
+	fi
+}
+
+libnurses_fix_1()
+{
+	local prefId='libncurses5-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		package_installer 'libncurses5' 'force-present' 
+		set_sticky_prefs $prefId 
+	fi
+}
+
+kdebase_fix_1()
+{
+	local prefId='kdebase-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'kdebase-bin-kde3' ii )
+
+	if [ -n "$isInstalled" -a "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		package_installer 'kdebase-bin-kde3' 'install-always'
+		set_sticky_prefs $prefId 
+	fi
+}
+remove_sidux_legacy_1()
+{
+	local prefId='k3b-fix-4'
+	local smPref=$( sm_pref_tester $prefId )
+	local legacyPackages='configure-networkcard networkconfig-sidux configure-screenres rootshell sidux-menu sidux-xdg'
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}We will need to remove some legacy ${C}sidux${S} packages to avoid future issues."
+		echo
+		echo "This will change only two common sidux commands, please make a note of the changes:"
+		echo "  ${C}netcardconfig${S} is now replaced by ${C}ceni${S}"
+		echo "  ${C}fix-res${S} functionality is now found by running: ${C}siduxcc${S}, then"
+		echo "  going to ${C}display -> resolution${S} which has defaults or custom resolutions.  ${N}"
+		print_hec
+		package_remover "$legacyPackages" '--purge --yes'
+		set_sticky_prefs $prefId
+	fi
+}
+
+# we have to check for users with k3b-i18n and reinstall it if present
+# I always forget this, but non english users need this check
+k3b_fix_4()
+{
+	local prefId='k3b-fix-4'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'k3b' ii )
+	local packageExists=$( package_tester 'k3b-i18n' ii )
+	
+	if [ -n "$isInstalled" -a "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Starting ${C}k3b${S} fix now...${N}"
+		package_remover 'k3b' '--yes'
+		package_installer 'k3b' 'install-always'
+		[ -n "$packageExists" ] && package_installer 'k3b-i18n' 'install-always'
+		echo "${C}k3b${S} fix is completed.${N}"
+		set_sticky_prefs $prefId
+
+	fi
+}
+
+sidux_kioslave_fix_1()
+{
+	local prefId='sidux-kioslave-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local sksInstalled=$( package_tester 'sidux-kioslave' )
+	local sccInstalled=$( package_tester 'siduxcc' )
+	
+	if [ -n "$sksInstalled" -a -n "$sccInstalled" -a "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}siduxcc${S} fix now...${N}"
+		package_installer 'siduxcc sidux-kioslave' 'install-always'
+		set_sticky_prefs $prefId
+	fi
+}
+
+# args: $1 - current mirror
+mlocate_locate_update()
+{
+	local prefId='mlocate-locate-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local findUtils=$( package_tester  'findutils' )
+	local mlocate=$( package_tester  'mlocate' )
+	local response='' repeat=''
+	
+	if [ -n "$findUtils" -a -z "$mlocate" -a "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}The ${C}locate${S} function has been moved to a new package: ${C}mlocate${S}"
+		echo 
+		echo "${C}mlocate${S} has significantly improved ${C}locate${S} and ${C}updatedb${S} performance, and"
+		echo "is replacing the old versions that were in ${C}findutils${S}. "
+		echo
+		echo "It is highly recommended to use the new package. Nothing else will change in your system,"
+		echo "${C}locate / updatedb${S} can still be started using the same commands as before."
+		echo
+		echo "${M}Note: after the install, you will need to run ${C}updatedb${M} again to set the new database for locate."
+		echo
+		echo -e "${Q}Would you like to install ${C}mlocate${Q} now?$YNE"
+		echo $LINE
+		read response
+
+		case $response in
+			y)	package_installer 'mlocate findutils' 'install-always'
+				echo "${C}mlocate${S} is now installed. Remember, you need to run ${C}updatedb${S} one time to reset the database.${N}"
+				;;
+			n)	echo "${S}Ok, but remember, to user ${C}locate${S}, you need to install ${C}mlocate${S} first, then run ${C}updatedb${S}.${N}"
+				;;
+			*)	print_error yn
+				repeat='true'
+				;;
+		esac
+		if [ "$repeat" == 'true' ]
+		then
+			mlocate_locate_update
+		else
+			set_sticky_prefs $prefId
+			print_hec
+		fi
+	fi
+}
+
+
+hal_dbus_fix_1()
+{
+	local prefId='hal-dbus-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}hal dbus${S} fix now (this is only for testing chaos, ignore if you are upgraded)"
+		echo "Stopping hal and dbus now...${N}"
+		# chaos did not have hal separate...
+		#/etc/init.d/hal stop
+		/etc/init.d/dbus stop
+		package_installer 'hal dbus' 'force-always'
+		# restart it just in case...
+		/etc/init.d/dbus start
+		echo "${S}Hopefully this fix will work...${N}"
+		set_sticky_prefs $prefId
+	fi
+}
+ralink_fix_1()
+{
+	local prefId='ralink-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local ralinkTest=$( dpkg -l | grep -e "^ii[ \t]*firmware-rt61" -e "^ii[ \t]*firmware-rt73" -e "^ii[ \t]*rt61-fwcutter" -e "^ii[ \t]*rt73-fwcutter" )
+
+# 	if [ "$smPref" -eq 0 ]
+# 	then
+		if [ -n "$ralinkTest" ]
+		then
+			echo $LINE
+			echo "${S}Running ${C}ralink${S} fix now...${N}"
+			package_remover 'firmware-rt61 firmware-rt73 rt61-fwcutter rt73-fwcutter' '--purge --yes'
+			package_installer 'firmware-ralink' 'install-always'
+		fi
+# 		set_sticky_prefs $prefId
+# 	fi
+}
+
+bcm_fix_1()
+{
+	local prefId='bcm-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local b43='b43-fwcutter' bcm43='bcm43xx-fwcutter'
+	local isBcm43=$( package_tester  $bcm43 )
+	local isB43=$( package_tester  $b43 )
+	
+	if [ "$smPref" -eq 0 ] && [ -n "$isBcm43" -a -z "$isB43" ]
+	then
+		echo $LINE
+		package_installer "$b43" 'install-always'
+		set_sticky_prefs $prefId
+	fi
+}
+
+wine_fix_1()
+{
+	local prefId='wine-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isWine=$( package_tester 'libwine' ii-wild )
+	
+	if [ "$smPref" -eq 0 -a -n "$isWine" ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}wine${S} fix now...${N}"
+		package_installer 'wine' 'force-always'
+		package_installer 'wine-bin' 'force-always'
+		set_sticky_prefs $prefId
+	fi
+}
+
+ooo_fix_2()
+{
+	local prefId='ooo-fix-3'
+	local smPref=$( sm_pref_tester $prefId )
+	local isOOo=$( package_tester 'openoffice.org-common' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isOOo" ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}openoffice.org${S} fix now...${N}"
+		package_installer 'openoffice.org-common openoffice.org-core' 'install-always'
+		package_installer 'openoffice.org-calc' 'install-always'
+		set_sticky_prefs $prefId
+	fi
+}
+libxine_fix_1()
+{
+	local prefId='libxine1-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isLibxine=$( package_tester 'libxine1' )
+	lxfm='libxine1-ffmpeg'
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		if [ -n "$isLibxine" ]
+		then
+			echo $LINE
+			echo "${S}Updating ${C}$lxfm${S} now...${N}"
+			package_installer "$lxfm" 'install-always'
+			set_sticky_prefs $prefId
+		fi
+	fi
+}
+
+icedove_fix_1()
+{
+	local prefId='icedove-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local response='' repeat='' icedoveExists='' icedoveLocale=''
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		icedoveExists=$( package_tester 'icedove' )
+		
+		if [ -n "$icedoveExists" ]
+		then
+			# this will reinstall any locales the user had
+			icedoveLocale=$( package_tester  'icedove-locale-' wild )
+			echo $MLINE
+			echo "${M}Icedove Fix"
+			echo $MLINE
+			echo "${S}Due to a problem upgrading ${C}icedove email client${S}, we are offering"
+			echo "a fix here. The fix has been tested by users, and seems to be working reliably."
+			echo "If you have already upgraded to icedove 2.0 with no problems, you do not"
+			echo "need to run this fix. ${C}$SCRIPT_NAME${S} has left ${C}icedove${S} on hold until we could"
+			echo "come up with a reasonably safe solution, and this fix seems to do the job."
+			echo
+			echo "The fix is quite simple, and should work for most users:"
+			echo "${C}apt-get remove --purge icedove"
+			echo "apt-get install icedove"
+			echo "${S}After the upgrade your icedove icons will be gone. This is a known issue."
+			if [ -n "$icedoveLocale" ]
+			then
+				echo "${M}Your icedove locale ${C}$icedoveLocale${M} is not currently in Debian Sid."
+				echo "You will need to reinstall it in a day or two, once it is working in sid again."
+			fi
+			echo
+			echo "${S}You will only see this question one time. The sidux forums have more information"
+			echo "on this issue if you run into problems. If you do not see your emails when you open"
+			echo "icedove again, please check the ${M}sidux Upgrade Warnings forums${S} for more"
+			echo "help and advice ${M}before${S} doing anything else."
+			echo $LINE
+			echo -e "${Q}Would you like to run the fix now?$YNE"
+			echo $LINE
+			read response
+			case $response in
+				y)	icedove_backup
+					echo $LINE
+					echo "${S}Running fix now.${N}"
+					
+					package_remover 'icedove' '--purge -y --force-yes' 
+					package_installer 'icedove' 'install-always'
+					echo "${S}Fix is completed. I hope it works for you.${N}"
+					set_sticky_prefs $prefId
+					;;
+				n)	echo "${S}Not running fix. Remember, you can run the fix manually if you want later.${N}"
+					set_sticky_prefs $prefId
+					;;
+				*)	print_error yn
+					repeat='true'
+					;;
+			esac
+			[ "$repeat" == 'true' ] && icedove_fix_1
+		else
+			set_sticky_prefs $prefId #only run this once no matter what
+		fi
+	fi
+}
+
+icedove_backup()
+{
+	local homeDir='/home/' 
+	local userHomes=$( ls $homeDir ) icedoveDir='.mozilla-thunderbird'
+	local response='' d='' tbirdHomeIs='' icedoveBu=''
+	
+	echo $LINE
+	echo "${S}I like to be very careful with emails, so here's an option to backup all your"
+	echo "user ${C}$icedoveDir${S} directories before proceeding with the rest of the fix."
+	echo
+	echo "${M}Important: Do not do this if you do not have enough room in your home directory!!"
+	
+	echo -e "${Q}Would you like to backup your profile home directory first?$YNE"
+	echo $LINE
+	read response
+	case $response in
+		y)	echo "${S}Backing up directories now.${N}"
+			for d in $userHomes
+			do
+				if [ "$d" != 'lost+found' ]
+				then
+					tbirdHomeIs="$homeDir$d/$icedoveDir"
+					icedoveBu=$tbirdHomeIs-icedove-fix-bu
+					#echo $tbirdHomeIs
+					if [ -e "$tbirdHomeIs" ]
+					then
+						echo "${S}Copying ${C}$tbirdHomeIs${S} to ${C}$icedoveBu${N}"
+						cp -Rp $tbirdHomeIs $icedoveBu
+					fi
+				fi
+			done
+			echo "${S}Finished backing up directories.${N}"
+			;;
+		n)	echo "${S}Not running fix. Remember, you can run the fix manually if you want later.${N}"
+			;;
+		*)	print_error yn
+			repeat='true'
+			;;
+	esac
+	[ "$repeat" == 'true' ] && icedove_backup
+}
+## DEBUGGER
+#script_debugger icedove_backup
+
+tzdata_fix_1()
+{
+	local prefId='tzdata-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Reconfiguring ${C}tzdata${S} again to help resolve packaging problem.${N}"
+		print_hec
+		dpkg-reconfigure tzdata
+		set_sticky_prefs $prefId
+	fi
+}
+
+du_gtk_fix_1()
+{
+	local prefId='gtk-du-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local holdTest=''
+	[ -n "$( echo $DPKG_HOLD_INSTALL | egrep '(libgnomeui-0|libgtk2.0-0|libmetacity0)' )" ] && holdTest='true'
+
+	if [ "$smPref" -eq 0 -a "$holdTest" == 'true' ]
+	then
+		echo $LINE
+		echo "${S}Running a new ${C}dist-upgrade${S} to solve a gtk issue. Please read"
+		echo "the following very carefully, check for any packages to be removed. If present,"
+		echo "say n to the continue question and report to forums or irc.${N}"
+		if [ "$USE_LOG" != 'true' ]
+		then
+			apt-get dist-upgrade
+		else
+			logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$DU_LOG'du-temp'
+			apt-get dist-upgrade 2>$logfile 2>&1 | tee $logfile
+		fi
+		exitStatus=${PIPESTATUS[0]}
+		apt_error_handling du-temp $exitStatus
+		set_sticky_prefs $prefId
+	fi
+}
+
+k3b_fix_1()
+{
+	local prefId='k3b-fix-3' dumpPackage='k3b libk3b2'
+	local smPref=$( sm_pref_tester $prefId )
+	local k3b2=$( package_tester 'libk3b2' )
+	local k3bLang=$(package_tester 'k3b-i18n' )
+	
+	if [ "$smPref" -eq 0 -a -n "$k3b2" ]
+	then
+		[ -n "$k3bLang" ] && k3bLang='k3b-i18n'
+		echo $LINE
+		echo "${S}Purging ${C}$dumpPackage${S} then reinstalling ${C}k3b${S} to resolve a conflict...${N}"
+		package_remover "$dumpPackage" '--purge --yes'
+		package_installer "k3b $k3bLang" 'install-always'
+		set_sticky_prefs $prefId
+	fi
+}
+
+remove_zd1211rw()
+{
+	local prefId='zd1211rw-firmware-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local zd12='zd1211rw-firmware'
+	local zd1211=$( package_tester $zd12 )
+	 
+	if [ "$smPref" -eq 0 -a -n "$zd1211" ]
+	then
+		echo $LINE
+		package_remover "$zd12" '--purge --yes'
+		set_sticky_prefs $prefId
+	fi
+}
+
+# note, this now has fix: ipw3945-3 included
+ipw3945-4965-fix-1()
+{
+	local prefId='ipw3945-4'
+	local smPref=$( sm_pref_tester $prefId )
+	local ipw3945='iwlwifi-3945-ucode' ipw4965='iwlwifi-4965-ucode' iwlwifi='iwlwifi-ucode'
+	local ipw3945_3='ipw3945-ucode-1.13'
+	
+	local newWifi='firmware-iwlwifi' userDriver=''
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		local is3945=$( package_tester $ipw3945 )
+		local is3945_3=$( package_tester $ipw3945_3 )
+		local is4965=$( package_tester $ipw4965 )
+		local isWifi=$( package_tester $iwlwifi )
+		
+		[ -n "$is3945" ] && userDriver=$ipw3945
+		[ -n "$is3945_3" ] && userDriver=$ipw3945_3
+		[ -n "$isWifi" ] && userDriver=$iwlwifi
+		[ -n "$is4965" ] && userDriver=$ipw4965
+		
+		if [ -n "$is3945" -o -n "$isWifi" -o -n "$is4965" -o -n "$is3945_3" ]
+		then
+			echo $LINE
+			echo "${S}updating your wifi driver ${C}$userDriver${S} to use the new Debian packaged ${C}$newWifi${S} driver."
+			echo "Please let this proceed because this will help resolve many wifi issues for you over time.${N}"
+			print_hec
+			echo "${S}updating to use ${C}$newWifi${S} now...${N}"
+			# this handles odd cases where user might have more than one installed
+			[ -n "$is3945" ] && dpkg --purge --yes $ipw3945
+			[ -n "$is3945_3" ] && dpkg --purge --yes $ipw3945_3
+			[ -n "$isWifi" ] && dpkg --purge --yes $iwlwifi
+			[ -n "$is4965" ] && dpkg --purge --yes $ipw4965
+			# install new wifi stuff for user
+			package_installer "$newWifi" 'force-always'
+			echo "${S}The ${C}$newWifi${S} driver update is complete. Continuing with script now...${N}"
+		fi
+		set_sticky_prefs $prefId
+	fi
+}
+###**EOF**###

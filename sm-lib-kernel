@@ -1,0 +1,493 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-kernel
+####  version: 2.1.4
+####  Date: May 8 2008
+
+####  Copyright (C) Harald Hope 2005-2008
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+
+####  Script Author: Harald Hope 
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-kernel
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+check_kernel()
+{
+	local opt='' options='continue advanced-kernel-install' 
+	local advancedKernel='' kernelFile=''
+	
+	prefId='meta-package-selection'
+	smPref=$( sm_pref_tester $prefId 'equal' )
+	
+	# two cases, one it's not set, the other standard default
+	if [ -z "$smPref" -o "$smPref" == 'manual' ]
+	then
+		# set to use proper advanced kernel data 64 / 32 bit
+		# no need to load this data more than once per run through.
+		# only need this data in the single case of -K option startup
+		# otherwise it loads in advanced kernel install
+		if [ "$SET_KERNEL_DATA" != 'true' -a "$ADVANCED_KERNEL" == 'true' ]
+		then
+			set_kernel_data
+			SET_KERNEL_DATA='true'
+		fi
+		
+		# test for advanced kernels too for the comparison, no need to test for null strings
+		# first need to normalize data for comparison
+		if [ -n "$KERNEL_ADVANCED_LIST" ]
+		then
+			local kalNormal=$( echo "$KERNEL_ADVANCED_LIST" | cut -d ' ' -f 1  )
+			kalNormal=$( normalize_kernel_string $kalNormal )
+			local ckNormal=$( normalize_kernel_string $CURRENT_KERNEL )
+			advancedKernel=$( echo $kalNormal | grep -o $ckNormal )
+			if [ -n "$advancedKernel" ]
+			then
+				KERNEL_EQUAL_INSTALL='true'
+			fi
+		fi
+		# sets KERNEL_EQUAL_INSTALL
+		test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
+		
+		# this is for comparing say 23/25 (2.6.23/2.6.25) with arithmetic, sometimes
+		# need to force du prior to kernel install to avoid errors
+		local kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 )
+		local kernelMajorCurrent=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -o -G "2.6.[0-9]*" | cut -d '.' -f 3 )
+		local kernelCompare=$(( $kernelMajorCurrent - $kernelMajorInstalled ))
+	
+		# test to see if same kernel or newer is available
+		if [ "$KERNEL_EQUAL_INSTALL" == 'true' ]
+		then
+			if [ -n "$advancedKernel" ]
+			then 
+				kernelFile=$advancedKernel
+			elif [ "$CURRENT_APT_KERNEL" == "$CURRENT_KERNEL" ]
+			then
+				kernelFile=$CURRENT_APT_KERNEL
+			fi
+		fi
+	
+		print_lib_info $LIB_KERNEL
+		echo $MLINE
+		# check for too old kernel version
+		if [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
+		then
+			# this is now a real, dynamic compare, if user kernel is > 2 major versions behind
+			# go to dist-upgrade first, and kernel install will come after. Only run first time
+			# the first condition handles cases where the latest install kernel requires a du first
+			# the first case will now never happen, needs to be dumped
+			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$KERNEL_EQUAL_INSTALL" != 'true' ] 
+			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' ] 
+			then
+				echo "${M}Your kernel version ${C}$KERNEL_VERSION${M} requires that you first run"
+				echo "a ${C}dist-upgrade${M} before you install a new kernel. The option to install"
+				echo "the new kernels is in the ${C}POST DIST-UPGRADE FIXES${M} menu.${N}"
+				KERNEL_POST_DU_INSTALL='true'
+				print_hec
+			else
+				kernel_question
+			fi
+		else
+			echo "${M}Your current kernel:              ${C}$CURRENT_KERNEL${M}"
+			echo "is the same as the latest kernel: ${C}$kernelFile"
+			echo
+			echo "${S}You can install other kernels in ${C}POST DIST-UPGRADE FIXES kernel-install${S}."
+			echo -n "${M}Continuing."
+			for i in $( seq 0 16 )
+			do
+				sleep 0.3
+				echo -n '.'
+			done
+			echo ${N}
+		fi
+	fi
+}
+
+# args: $1 - post-du, started via post du options
+kernel_question()
+{
+	local opt='' repeat='' kernelsNotEqual='' kernelsNotEqualOpt='' cont='' advanced=''
+	local duText='Continue to dist-upgrade' repeat='' removeModules=''
+	local options=" remove-kernel-modules advanced-kernel-options"
+	local tempCount=$( echo $options | wc -w )
+	# sets KERNEL_EQUAL_INSTALL
+	test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
+	# handle the switch of kernel install location text here
+	if [ "$KERNEL_POST_DU_INSTALL" == 'true' -o "$KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ]
+	then
+		duText='Continue. Return to main menu'
+	fi
+	
+	if [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
+	then
+		tempCount=$(( $tempCount + 1 ))
+		kernelsNotEqualOpt='install-apt-kernel'
+		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL\n$LINE\n${C}1${S} - Installs latest apt kernel: ${C}$CURRENT_APT_KERNEL${S}\n"'
+	else
+		kernelsNotEqual='echo -e "${M}Your current kernel: ${C}$CURRENT_KERNEL${M}\nis the same as the latest kernel:  ${C}$CURRENT_APT_KERNEL\n$MLINE"'
+	fi
+	advanced=$tempCount
+	removeModules=$(( $tempCount - 1 ))
+	options="$kernelsNotEqualOpt $options continue"
+	tempCount=$( echo $options | wc -w )
+	cont=$tempCount
+
+	if [ "$1" == 'post-du' ]
+	then
+		print_lib_info $LIB_KERNEL
+		echo $MLINE
+	fi
+
+	echo "${W}Kernels do not come with these modules for GPL reasons: ${C}isdn adsl${S}"
+	echo "${S}If you are using wifi, you may need to reinstall your wifi drivers to the new kernel."
+	echo
+	echo "If you restart the script after you reboot and no network connection is found,"
+	echo "the script will offer you choices of wifi modules to reinstall automatically."
+	echo $MLINE
+	echo "${S}Remember, if you use ${C}Nvidia${S} or ${C}Fglrx${S} video drivers, or if you use vmware,"
+	echo "you will need to reinstall those kernel drivers."
+	echo "${M}Graphics drivers can now be reinstalled without a reboot, right to the new kernel.${S}"
+	echo
+	if [ "$1" != 'post-du' ]
+	then
+		echo "${S}If you are going to use this script for the ${C}dist-upgrade${S}, just install the kernel, "
+		echo "then, when kernel install is finished, select the ${C}continue${S} option, and"
+		echo "you can install nvidia/fglrx drivers if you want without rebooting."
+	else
+		echo "If you reboot, or restart the script, you can skip script parts using the following ${C}$SCRIPT_NAME${S} arguments:"
+		echo "${C}smxi -kwidt${S} (to skip directly to Graphics driver install)"
+		echo "${C}smxi -kwid${S} (to skip to the Post Dist-upgrade Fixes menu)"
+	fi
+	echo $MLINE
+	echo "${S}Please note, if you install a kernel, a backup copy of your grub configuration file"
+	echo "${C}menu.lst${S}, will be created here: ${C}$GRUB_BU_PATH${S}."
+	echo $MLINE
+	eval $kernelsNotEqual
+	echo "${C}$removeModules${S} - Remove installed kernel modules. Offers list of modules, remove one by one."
+	echo "${C}$advanced${S} - Advanced Kernel Install. The advanced options allow you to select zipped"
+	echo "    kernels from a list. Here you can select other kernel versions in case you are"
+	echo "    having trouble with your current one."
+	echo "    ${M}NEW!${S} Option to run ${C}kernel meta-package${S} handler. This lets you"
+	echo "    remove all kernel meta-packages, install them, and install apt kernels."
+	echo
+	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
+	#echo "    which you want to install the modules, and if you installed that kernel with this script."
+	#echo
+	echo "${C}$cont${S} - $duText without installing a new kernel."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		case $opt in
+			install-apt-kernel)
+				run_script_import $LIB_KERNEL_INSTALL
+				print_lib_info $LIB_KERNEL_INSTALL
+				double_check_kernel 'apt'
+				;;
+			install-standard-kernel)
+				run_script_import $LIB_KERNEL_INSTALL
+				print_lib_info $LIB_KERNEL_INSTALL
+				double_check_kernel 'standard'
+				;;
+			remove-kernel-modules)
+				remove_kernel_modules
+				repeat='true'
+				;;
+			advanced-kernel-options)
+				run_script_import $LIB_KERNEL_INSTALL
+				#echo "${S}Running advanced options now${N}"
+				advanced_kernel_install
+				;;
+			continue)
+				if [ "$1" == "nogo" ]
+				then
+					echo "${W}Ok, but you cannot do the dist-upgrade with this kernel."
+					echo "${S}Exiting the script now${N}"
+					exit 0
+				else
+					#echo $1' is this x value'
+					echo "${S}Ok, remember, you can use this to upgrade your kernel any time you want.${N}"
+				fi
+				;;
+			install-wifi)
+				install_wireless_modules
+				repeat='true'
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$repeat" == 'true' ]
+	then
+		kernel_question $1
+	fi
+}
+# set_kernel_data
+# check_kernel
+
+###---------------------------------------------------------------------
+### kernel questino utilities
+###---------------------------------------------------------------------
+
+remove_kernel_modules()
+{
+	local installedModules="$( package_tester 'modules-.*sidux' 'wild-full' )"
+	local moduleStoreTemp='' store='' store2=''
+	# we need to dump the multi modules first:
+	for store in $installedModules
+	do
+		store=$( egrep -o '.*-modules' <<< $store )
+		if [ "$store" != "$store2" ]
+		then
+			moduleStoreTemp="$moduleStoreTemp $store"
+		fi
+		store2=$store
+	done
+	installedModules="$moduleStoreTemp continue"
+	
+	local moduleCount="$(( $( wc -w <<< $installedModules ) - 1 ))"
+	local opt='' options='' module='' skip='' found=''
+	local options=$installedModules
+	local contCount="$( wc -w <<< $options )"
+	
+	echo $MLINE
+	echo "${M}Kernel Module Remover"
+	echo $MLINE
+	echo "${S}Select from the following to remove an installed kernel module:"
+	echo $LINE
+	echo "${C}1-$moduleCount${S} - Remove modules one by one until completed."
+	echo "       ${W}WARNING: The selected module for ALL installed kernels will be removed."
+	echo "${C}$contCount${S} - When you are done removing, select this to continue with script."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		for module in $installedModules
+		do
+			if [ "$opt" == "$module" ]
+			then
+				found='true'
+				if [ "$module" == 'continue' ]
+				then
+					skip='true'
+				else
+					found='true'
+				fi
+				break
+			else
+				found='false'
+			fi
+		done
+		break
+	done
+	
+	if [ "$found" == 'true' ]
+	then
+		if [ "$skip" == 'true' ]
+		then
+			echo "${S}Returning to main script now.${N}"
+		else
+			#echo "${S}Removing ${C}$module${S} now....${N}"
+			# we're doing a wildcard remover here so we can dump all the modules
+			package_remover "$module*" '--yes --purge'
+			remove_kernel_modules
+		fi
+	else
+		print_error opt
+		remove_kernel_modules
+	fi
+}
+
+# this can't be a module because it's required if connection is dropped
+install_wireless_modules()
+{
+	local repeat='' RebootFlag='' opt='' ReturnValue=''
+	local xOption='' advanced='' cont='' quit='' 
+	local options="at76c503a ipw3945 linux-wlan-ng madwifi ndiswrapper rt2400 rt2500 rt61"
+	local tempCount=$( echo $options | wc -w )
+	
+	if [ "$CORE_COUNT" -eq 1 ] # currently only new up kernels have this.
+	then
+		tempCount=$(( $tempCount + 1 ))
+		xOption='rt2570'
+		advanced='echo -e "${C}'$tempCount'${S} - Installs ${C}rt2570${S} module. (for ${C}up${S} CPUs only)."'
+		tempCount=''
+	fi
+	options="$options $xOption continue-no-wifi quit"
+	tempCount=$( echo $options | wc -w )
+	
+	cont=$(( $tempCount - 1 ))
+	quit=$(( $tempCount ))
+	
+	echo $MBAR
+	echo "${M} WIFI MODULE INSTALLER"
+	echo $MBAR
+	echo "${W}You must have used this script to install the kernel for wifi install to work!!"
+	echo "${S}You can install the following modules:"
+	echo "${C}1${S} - Installs the ${C}at76c503a${S} module. Driver for the Atmel USB WLAN adapters."
+	echo "${C}2${S} - Installs the ${C}ipw3945${S} module. Intel 3945 Centrino wireless card."
+	echo "${C}3${S} - Installs the ${C}linux-wlan-ng${S} module. Intersil 802.11b Prism2,"
+	echo "    Prism2.5, and Prism3 reference designs for PCMCIA, PCI, and USB."
+	echo "${C}4${S} - Installs the ${C}madwifi${S} module. Atheros Driver."
+	echo "${C}5${S} - Installs ${C}ndiswrapper${S} module."
+	echo "${C}6${S} - Installs ${C}rt2400${S} module."
+	echo "${C}7${S} - Installs ${C}rt2500${S} module."
+	echo "${C}8${S} - Installs ${C}rt61${S} module."
+	eval $advanced
+	echo
+	echo "${C}$cont${S} - Continues script without installing wireless modules."
+	echo "${C}$quit${S} - Exit the script now."
+	echo $LINE
+	echo $SLE 
+	echo $LINE
+	
+	
+	select opt in $options
+	do
+		case $opt in
+			at76c503a|ipw3945|linux-wlan-ng|madwifi|ndiswrapper|rt2400|rt2500|rt2570|rt61)
+				install_the_module $opt
+				ReturnValue=$?
+				if [ "$ReturnValue" -eq 0 ]
+				then
+					RebootFlag='true'
+				fi
+				;;
+			continue-no-wifi)
+				echo "${S}OK, continuing with script without installing a wifi module.${N}"
+				SKIP_CONNECTIONS='true'
+				;;
+			quit)
+				echo "${S}Exiting the script now.${N}"
+				exit 0
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$RebootFlag" == 'true' ]
+	then
+		echo $LINE
+		echo "${S}The new wifi module you installed will not work until you reboot."
+		echo "If you get the same connection failure box then I guess the wifi module didn't"
+		echo "work. You can try the other one I guess, but that's as far as this script can"
+		echo "take you. Remember, you can always boot with your old kernel in grub if you need to."
+		echo -e "${Q}Would you like to reboot now?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	echo "${S}Rebooting now.${N}"
+				reboot
+				exit 0
+				;;
+			n)	echo "${S}Exiting the script. You will need to reboot before proceeding.${N}"
+				exit 0
+				;;
+			*)	print_error yn
+				repeat='true'
+				;;
+		esac
+		
+	fi
+	if [ "$repeat" == 'true' ]
+	then
+		install_wireless_modules
+	fi
+}
+
+install_the_module()
+{
+	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+	# $1 is module
+	local WifiModule=$KERNEL_DIRECTORY/$normalizedCurrentKernel/$1'*.deb'
+	# WifiModule='/var/local/kernel-current/'$1'*.deb'
+	
+	if [ -f $WifiModule -o "$1" == 'madwifi' ]
+	then
+		echo $LINE
+		echo "${S}The script will now install the ${C}$1${S} module for you.${N}"
+		if [ "$1" != 'madwifi' ]
+		then
+			dpkg -i $WifiModule
+		else
+			m-a a-i madwifi
+		fi
+		echo "${S}If all went well, the ${C}$1${S} module is now installed.${N}"
+		return 0
+	else
+		echo $EBAR
+		echo "${E}I'm sorry, but the script could not locate that module. This module installer"
+		echo "only works if you also used the script to install your current kernel."
+		echo $EBAR
+		return 1
+	fi
+}
+# install_wireless_modules
+
+# switch the kernel file name to get the correct latest 64 bit slh kernel
+set_kernel_data()
+{
+	local isUpSmp=''
+	
+	# run_script_import $LIB_KERNELS
+	
+	if [ "$BITS" == "64" ]
+	then
+		KERNEL_LIST=$KERNEL_LIST_64 # with -K, this includes advanced list
+		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_64
+	else
+		KERNEL_LIST=$KERNEL_LIST_32
+		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_32
+	fi
+	# this will be used for kernel mirror selection, only standard/testing default will be
+	# attempted via mirror install
+	KERNEL_BASE_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
+	
+	# add advanced kernels if any to llst
+	if [ "$ADVANCED_KERNEL" == 'true' ]
+	then
+		KERNEL_LIST="$KERNEL_ADVANCED_LIST $KERNEL_LIST"
+	fi
+
+	# add the list closer
+	KERNEL_LIST="$KERNEL_LIST kernel-metapackage-options back-to-main-menu"
+	# pull out first kernel from the 64/32 list
+	KERNEL_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
+	isSmpUp=$( echo $KERNEL_FILE | grep '\-up\-' )
+	
+	# take 32 bit second position kernel if first kernel is up in list. Legacy now almost
+	if [ "$BITS" == '32' -a -n "$isSmpUp" ]
+	then
+		LATEST_UP_KERNEL=$KERNEL_FILE
+		KERNEL_FILE=$(echo $KERNEL_LIST | cut -d ' ' -f 2 )
+	fi
+	# this will fix a small looping bug in the advanced install options
+	KERNEL_FILE_RESET=$KERNEL_FILE
+}
+## DEBUGGER
+#script_debugger set_kernel_data 'echo bits: $BITS' ''
+
+###**EOF**###
