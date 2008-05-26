@@ -1526,10 +1526,6 @@ driver_support_tests()
 					then
 						error_handler 246
 					fi
-# 					if [ "$KERNEL_THIRD" -eq 25 ]
-# 					then
-# 						install_package 'linux-kbuild-2.6.25'
-# 					fi
 					;;
 			esac
 			
