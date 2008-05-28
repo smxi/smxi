@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 3.0.6
+####  version: 3.0.7
 ####  Date: May 28 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1839,7 +1839,7 @@ run_patches()
 	# new 2.6.25 fixes
 	case $CARD in
 		$NVIDIA)
-			if  [  "$KERNEL_THIRD" -eq 25 ]
+			if [ "$KERNEL_THIRD" -eq 25 ]
 			then
 				case $DRIVER_DEFAULT in
 					171.06|169.12)
@@ -1852,6 +1852,15 @@ run_patches()
 						;;
 					71.86.04)
 						patchFile='NVIDIA_kernel-71.86.04-2305230.diff'
+						apply_patch_file $patchFile
+						;;
+				esac
+			fi
+			if [ "$KERNEL_THIRD" -eq 26 ]
+			then
+				case $DRIVER_DEFAULT in
+					173.14.05)
+						patchFile='NVIDIA_kernel-173.14.05-2419292.diff'
 						apply_patch_file $patchFile
 						;;
 				esac
