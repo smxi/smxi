@@ -225,7 +225,10 @@ k3b_fix_4()
 		echo "${S}Starting ${C}k3b${S} fix now...${N}"
 		package_remover 'k3b' '--yes'
 		package_installer 'k3b' 'install-always'
-		[ -n "$packageExists" ] && package_installer 'k3b-i18n' 'install-always'
+		if [ -n "$packageExists" ]
+		then
+			package_installer 'k3b-i18n' 'install-always'
+		fi
 		echo "${C}k3b${S} fix is completed.${N}"
 		set_sticky_prefs $prefId
 
@@ -458,7 +461,10 @@ icedove_fix_1()
 					repeat='true'
 					;;
 			esac
-			[ "$repeat" == 'true' ] && icedove_fix_1
+			if [ "$repeat" == 'true' ]
+			then
+				icedove_fix_1
+			fi
 		else
 			set_sticky_prefs $prefId #only run this once no matter what
 		fi
@@ -504,7 +510,10 @@ icedove_backup()
 			repeat='true'
 			;;
 	esac
-	[ "$repeat" == 'true' ] && icedove_backup
+	if [ "$repeat" == 'true' ]
+	then
+		icedove_backup
+	fi
 }
 ## DEBUGGER
 #script_debugger icedove_backup
@@ -529,7 +538,10 @@ du_gtk_fix_1()
 	local prefId='gtk-du-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local holdTest=''
-	[ -n "$( echo $DPKG_HOLD_INSTALL | egrep '(libgnomeui-0|libgtk2.0-0|libmetacity0)' )" ] && holdTest='true'
+	if [ -n "$( echo $DPKG_HOLD_INSTALL | egrep '(libgnomeui-0|libgtk2.0-0|libmetacity0)' )" ]
+	then
+		holdTest='true'
+	fi
 
 	if [ "$smPref" -eq 0 -a "$holdTest" == 'true' ]
 	then
@@ -559,7 +571,10 @@ k3b_fix_1()
 	
 	if [ "$smPref" -eq 0 -a -n "$k3b2" ]
 	then
-		[ -n "$k3bLang" ] && k3bLang='k3b-i18n'
+		if [ -n "$k3bLang" ]
+		then
+			k3bLang='k3b-i18n'
+		fi
 		echo $LINE
 		echo "${S}Purging ${C}$dumpPackage${S} then reinstalling ${C}k3b${S} to resolve a conflict...${N}"
 		package_remover "$dumpPackage" '--purge --yes'
@@ -600,10 +615,22 @@ ipw3945-4965-fix-1()
 		local is4965=$( package_tester $ipw4965 )
 		local isWifi=$( package_tester $iwlwifi )
 		
-		[ -n "$is3945" ] && userDriver=$ipw3945
-		[ -n "$is3945_3" ] && userDriver=$ipw3945_3
-		[ -n "$isWifi" ] && userDriver=$iwlwifi
-		[ -n "$is4965" ] && userDriver=$ipw4965
+		if [ -n "$is3945" ]
+		then
+			userDriver=$ipw3945
+		fi
+		if [ -n "$is3945_3" ]
+		then
+			userDriver=$ipw3945_3
+		fi
+		if [ -n "$isWifi" ]
+		then
+			userDriver=$iwlwifi
+		fi
+		if [ -n "$is4965" ]
+		then
+			userDriver=$ipw4965
+		fi
 		
 		if [ -n "$is3945" -o -n "$isWifi" -o -n "$is4965" -o -n "$is3945_3" ]
 		then
@@ -613,10 +640,22 @@ ipw3945-4965-fix-1()
 			print_hec
 			echo "${S}updating to use ${C}$newWifi${S} now...${N}"
 			# this handles odd cases where user might have more than one installed
-			[ -n "$is3945" ] && dpkg --purge --yes $ipw3945
-			[ -n "$is3945_3" ] && dpkg --purge --yes $ipw3945_3
-			[ -n "$isWifi" ] && dpkg --purge --yes $iwlwifi
-			[ -n "$is4965" ] && dpkg --purge --yes $ipw4965
+			if [ -n "$is3945" ]
+			then
+				dpkg --purge --yes $ipw3945
+			fi
+			if [ -n "$is3945_3" ]
+			then
+				dpkg --purge --yes $ipw3945_3
+			fi
+			if [ -n "$isWifi" ]
+			then
+				dpkg --purge --yes $iwlwifi
+			fi
+			if [ -n "$is4965" ]
+			then
+				dpkg --purge --yes $ipw4965
+			fi
 			# install new wifi stuff for user
 			package_installer "$newWifi" 'force-always'
 			echo "${S}The ${C}$newWifi${S} driver update is complete. Continuing with script now...${N}"
