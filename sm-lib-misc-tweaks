@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.14.9
-####  Date: May 14 2008
+####  version: 1.14.10
+####  Date: May 31 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -621,7 +621,10 @@ install_kmenu_sidebar()
 	echo $LINE
 	echo "${S}Preparing to install new kmenu side image...${N}"
 	cd /usr/share/apps/kicker/pics/
-	[ -f $ksp -a ! -f $ksp-original ] && mv $ksp $ksp-original
+	if [ -f $ksp -a ! -f $ksp-original ]
+	then
+		mv $ksp $ksp-original
+	fi
 	echo "${S}Downloading new kmenu side image...${N}"
 	wget -O $ksp -T$TIME_OUT -t 2 $menu
 	echo "${S}Done installing kmenu side image.${N}"
@@ -650,7 +653,10 @@ install_kmenu_icon()
 	do
 		temp2='kmenu/'$d'/'$kp
 		temp3=$ButtonDir'/'$d'x'$d'/apps/'$kp
-		[ -f $temp3 -a ! -f $temp3-original ] && mv $temp3 $temp3-original
+		if [ -f $temp3 -a ! -f $temp3-original ]
+		then
+			mv $temp3 $temp3-original
+		fi
 		cp $temp2 $temp3
 		temp2=''
 		temp3=''
@@ -1344,14 +1350,26 @@ splashy_control()
 		echo $LINE
 		echo "${S}Turning on ${C}splashy${S} auto start/shutdown display...${N}"
 		# activate splashy
-		[ -f /etc/frozen-rc.d ] && frozen=1
-		[ -r /etc/default/distro ] && . /etc/default/distro
+		if [ -f /etc/frozen-rc.d ]
+		then
+			frozen=1
+		fi
+		if [ -r /etc/default/distro ]
+		then
+			. /etc/default/distro
+		fi
 		if [ -x /etc/init.d/splashy-init ]
 		then
-			[ -x /usr/sbin/unfreeze-rc.d ] && /usr/sbin/unfreeze-rc.d
+			if [ -x /usr/sbin/unfreeze-rc.d ]
+			then
+				/usr/sbin/unfreeze-rc.d
+			fi
 			update-rc.d -f splashy-init remove
 			update-rc.d splashy-init start 01 S . stop 01 0 6 .
-			[ -n "$frozen" -a -x /usr/sbin/freeze-rc.d ] && /usr/sbin/freeze-rc.d
+			if [ -n "$frozen" -a -x /usr/sbin/freeze-rc.d ]
+			then
+				/usr/sbin/freeze-rc.d
+			fi
 		fi
 		echo "${S}Auto start/shutdown display for ${C}splashy${S} activated now."
 		echo "${M}Remember, you can use this script to turn it off if you decide you don't like it.${N}"
