@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.5.1
-####  Date: April 19 2008
+####  version: 2.5.2
+####  Date: May 31 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -36,7 +36,10 @@ package_group_installer()
 {
 	local dmUse=''
 	# this handles cases where no kde exists, we'll use the xdm manager for that
-	[ ! -e /etc/init.d/kdm ] && dmUse=' wdm'
+	if [ ! -e /etc/init.d/kdm ]
+	then
+		dmUse=' wdm'
+	fi
 	# package groups
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons gpm rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'$dmUse
@@ -52,17 +55,47 @@ package_group_installer()
 	echo $LINE
 	echo "${S}Installing ${C}$packageName${S}...${N}"
 	# transfer meta packages to package installer variable
-	[ "$packageName" == 'ceni-stuff' ] && packageName="$ceniStuff"
-	[ "$packageName" == 'fvwm-crystal' ] && packageName="$fvwmCrystal"
-	[ "$packageName" == 'kde' ] && packageName="$kdePackages"
-	[ "$packageName" == 'kdepim' ] && packageName="$kdepimPackages"
-	[ "$packageName" == 'koffice' ] && packageName="$kofficePackages"
-	[ "$packageName" == 'streamtuner' ] && packageName="$streamTuner"
-	[ "$packageName" == 'xfce' ] && packageName="$xfcePackages"
-	[ "$packageName" == 'xorg' ] && packageName="$xorgPackages"
-	[ "$packageName" == 'google-earth' ] && packageName="$googleEarth"
+	if [ "$packageName" == 'ceni-stuff' ]
+	then
+		packageName="$ceniStuff"
+	fi
+	if [ "$packageName" == 'fvwm-crystal' ]
+	then
+		packageName="$fvwmCrystal"
+	fi
+	if [ "$packageName" == 'kde' ]
+	then
+		packageName="$kdePackages"
+	fi
+	if [ "$packageName" == 'kdepim' ]
+	then
+		packageName="$kdepimPackages"
+	fi
+	if [ "$packageName" == 'koffice' ]
+	then
+		packageName="$kofficePackages"
+	fi
+	if [ "$packageName" == 'streamtuner' ]
+	then
+		packageName="$streamTuner"
+	fi
+	if [ "$packageName" == 'xfce' ]
+	then
+		packageName="$xfcePackages"
+	fi
+	if [ "$packageName" == 'xorg' ]
+	then
+		packageName="$xorgPackages"
+	fi
+	if [ "$packageName" == 'google-earth' ]
+	then
+		packageName="$googleEarth"
+	fi
 	
-	[ -n "$3" ] && eval $3 # this removes stuff, or does other operations, first
+	if [ -n "$3" ]
+	then
+		eval $3 # this removes stuff, or does other operations, first
+	fi
 	update_sources $1
 	package_installer "$packageName" 'install-user'
 }
@@ -185,7 +218,10 @@ select_install_type()
 		break
 	done
 	
-	[ "$repeat" == 'true' ] && select_install_type
+	if [ "$repeat" == 'true' ]
+	then
+		select_install_type
+	fi
 }
 
 # install office suites, languages packs, etc
@@ -247,7 +283,10 @@ office_installer()
 		break
 	done
 	
-	[ "$repeat" == 'true' ] && office_installer
+	if [ "$repeat" == 'true' ]
+	then
+		office_installer
+	fi
 }
 
 # main selector, pick which package group type to install
@@ -333,7 +372,10 @@ non_free_installer()
 		break
 	done
 	
-	[ "$repeat" == 'true' ] && non_free_installer
+	if [ "$repeat" == 'true' ]
+	then
+		non_free_installer
+	fi
 }
 #katapult (personally) and kshutdown yakuake
 # various utilities
@@ -441,7 +483,10 @@ utilities_installer()
 		break
 	done
 	
-	[ "$repeat" == 'true' ] && utilities_installer
+	if [ "$repeat" == 'true' ]
+	then
+		utilities_installer
+	fi
 }
 
 display_manager_installer()
@@ -505,7 +550,10 @@ display_manager_installer()
 		break
 	done
 	
-	[ "$repeat" == 'true' ] && display_manager_installer
+	if [ "$repeat" == 'true' ]
+	then
+		display_manager_installer
+	fi
 }
 
 ###---------------------------------------------------------------------
@@ -559,15 +607,30 @@ install_openoffice()
 					skip='true'
 				else
 					oooLang=$( echo $language | cut -d ':' -f 1 )
-					[ "$oooLang" != '' ] && oooLang='openoffice.org-l10n-'$oooLang
+					if [ "$oooLang" != '' ]
+					then
+						oooLang='openoffice.org-l10n-'$oooLang
+					fi
 					oooHyph=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
-					[ "$oooHyph" != '' ] && oooHyph='openoffice.org-hyphenation-'$oooHyph
+					if [ "$oooHyph" != '' ]
+					then
+						oooHyph='openoffice.org-hyphenation-'$oooHyph
+					fi
 					oooHelp=$( echo $language | cut -d ':' -f 3 )
-					[ "$oooHelp" != '' ] && oooHelp='openoffice.org-help-'$oooHelp
+					if [ "$oooHelp" != '' ]
+					then
+						oooHelp='openoffice.org-help-'$oooHelp
+					fi
 					oooThes=$( echo $language | cut -d ':' -f 4 )
-					[ "$oooThes" != '' ] && oooThes='openoffice.org-thesaurus-'$oooThes
+					if [ "$oooThes" != '' ]
+					then
+						oooThes='openoffice.org-thesaurus-'$oooThes
+					fi
 					oooDict=$( echo $language | cut -d ':' -f 5 )
-					[ "$oooDict" != '' ] && oooDict='myspell-'$oooDict
+					if [ "$oooDict" != '' ]
+					then
+						oooDict='myspell-'$oooDict
+					fi
 				fi
 				break
 			else
@@ -612,7 +675,10 @@ install_openoffice()
 						echo "${E}Invalid Selection${N}"
 						;;
 				esac
-				[ "$complete" == 'true' ] && break
+				if [ "$complete" == 'true' ]
+				then
+					break
+				fi
 			done
 			
 			echo $LINE
