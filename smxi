@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.28.23
+####  version: 7.29.0
 ####  Date: May 31 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -409,8 +409,13 @@ error_handler()
 			errorCode=32
 			errorMessage="The zip kernel installer file could not be found.\n${LOG_INDENT}The kernel install cannot continue."
 			;;
+		user-killed-du)
+			errorCode=33
+			errorMessage="User initiated dist-upgrade termination via ctrl+c or kill."
+			;;
+			
 		# failures in actions/functions not requiring script exit: 51-150: serious
-		
+		# none yet
 		# internal script errors/failures in system: 151-254: normal
 		value-bad)
 			errorCode=253
@@ -2270,6 +2275,9 @@ install_dist_upgrade()
 	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f dist-upgrade-again check-services continue $reboot"
 	
+	# set the trap here, first echo is to clear the top line
+	trap 'echo "";echo $WLINE;echo "${W}You exited with ctrl+c or kill, removing holds if needed.${N}"; set_hold_install install; error_handler user-killed-du $FUNCNAME' INT TERM
+	
 	# if current kernel was not in grub prior to du, and is in grub post du
 	if [ "$currentAptKernelGrub" != "$CURRENT_APT_KERNEL_GRUB" -a -n "$metaExists" -a -n "$currentAptKernelGrub" ]
 	then
@@ -2326,7 +2334,6 @@ install_dist_upgrade()
 		fi
 		#echo "${Q}Please hit ${C}enter${Q} to start ${C}dist-upgrade${S}."
 		print_hec
-
 		if [ "$USE_LOG" != 'true' ]
 		then
 			apt-get dist-upgrade
@@ -2379,7 +2386,6 @@ install_dist_upgrade()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
 	
 	select opt in $options
 	do
@@ -2441,7 +2447,7 @@ install_dist_upgrade()
 		esac
 		break
 	done
-	
+	trap - INT TERM
 	# run du cleanup etc tasks once user decides to continue, note that
 	# script uses the error numbers to determine which message to display on repeat
 	if [ "$repeat" == 'true' ]
@@ -2451,6 +2457,7 @@ install_dist_upgrade()
 	then
 		post_du_tasks
 	fi
+	
 }
 ## DEBUGGER
 #script_debugger 'install_dist_upgrade repeat 1'
@@ -3028,6 +3035,7 @@ run_script_components()
 		if [ "$SKIP_DIST_UPGRADE" != 'true' -a "$SKIP_CONNECTIONS" != 'true' ]
 		then
 			install_dist_upgrade 'first'
+			# execute it here to take stuff off hold if needed
 		fi
 	fi
 	test_xorg_version post # this is used by graphics and tweaks
