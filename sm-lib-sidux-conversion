@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 1.4.1
-####  Date: March 6 2008
+####  version: 1.4.2
+####  Date: March 31 2008
 
 ####  Copyright (C) Harald Hope 2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -104,13 +104,19 @@ check_debian()
 	if [ "$proceed" == 'true' ]
 	then
 		echo $LINE
-		[ "$debBits" == '64' ] && siduxBits='sidux64'
+		if [ "$debBits" == '64' ]
+		then
+			siduxBits='sidux64'
+		fi
 		echo $siduxBits'-'$timeStamp'-d:d' > $SID
 		echo "${S}Ok, continuing with install now.${N}"
 		IS_DEBIAN='true'
 		NO_PDIFFS=$NO_PDIFF_ARGS
 		SKIP_KERNEL='true'
-		[ -x /usr/sbin/mkinitramfs ] || REQUIRED_APPS=$REQUIRED_APPS' initramfs-tools'
+		if [ ! -x /usr/sbin/mkinitramfs ]
+		then
+			REQUIRED_APPS=$REQUIRED_APPS' initramfs-tools'
+		fi
 		return $debBits
 	else
 		check_debian
@@ -172,7 +178,10 @@ change_to_sidux_question()
 	local smPref2=$( sm_pref_tester $prefId2 )
 	local response='' siduxYes=''
 	
-	[ "$smPref2" -gt 0 ] && siduxYes='echo -e "$MLINE\n${M}If you have already switched to sidux, just say ${C}y${M} again, I need to do this to clear a setting.\n$MLINE"'
+	if [ "$smPref2" -gt 0 ]
+	then
+		siduxYes='echo -e "$MLINE\n${M}If you have already switched to sidux, just say ${C}y${M} again, I need to do this to clear a setting.\n$MLINE"'
+	fi
 	
 	if [ "$smPref" -eq 0 -o "$CHECK_SIDUX" == 'true' ]
 	then
@@ -192,7 +201,10 @@ change_to_sidux_question_bu()
 	local smPref2=$( sm_pref_tester $prefId2 )
 	local response='' siduxYes=''
 	
-	[ "$smPref2" -gt 0 ] && siduxYes='echo -e "$MLINE\n${M}If you have already switched to sidux, just say ${C}y${M} again, I need to do this to clear a setting.\n$MLINE"'
+	if [ "$smPref2" -gt 0 ]
+	then
+		siduxYes='echo -e "$MLINE\n${M}If you have already switched to sidux, just say ${C}y${M} again, I need to do this to clear a setting.\n$MLINE"'
+	fi
 	
 	if [ "$smPref" -eq 0 -o "$CHECK_SIDUX" == 'true' ]
 	then
@@ -280,7 +292,12 @@ sidux_switch_id()
 	local siduxString='sidux' 
 	local timeStamp=$( date +%Y%m%d )
 	
-	[ "$BITS" == 64 ] && siduxString='sidux64-' || siduxString='sidux-'
+	if [ "$BITS" == 64 ]
+	then
+		siduxString='sidux64-'
+	else
+		siduxString='sidux-'
+	fi
 	
 	# get any user stored data and put into new sidux-version
 	if [ -e $SID ]
@@ -397,7 +414,10 @@ install_window_manager-old()
 				echo $LINE
 				echo -n "${Q}Would you also like to install ${C}koffice${Q} in kde?${S} [ ${C}y${S} to install, or hit ${C}enter${S} to not install koffice]: ${N}"
 				read response
-				[ "$response" == 'y' ] && kdePackages=$kdePackages' koffice'
+				if [ "$response" == 'y' ]
+				then
+					kdePackages=$kdePackages' koffice'
+				fi
 				wm_installer kde "$kdePackages"
 				;;
 			xfce-install)
@@ -481,9 +501,15 @@ sidux_graphics()
 			echo $LINE
 			echo "${S}Running ${C}sidux grub${S} fix...${N}"
 			 # make a copy of old penguin graphic
-			[ -f $bm.hd -a "$DISTRO_LEVEL" -lt 5 ] && cp $bm.hd $bm.hd-bu
+			if [ -f $bm.hd -a "$DISTRO_LEVEL" -lt 5 ]
+			then
+				cp $bm.hd $bm.hd-bu
+			fi
 			# check for old physical file, move to renamed
-			[ -f $bm ] && mv -f $bm $bm.presidux
+			if [ -f $bm ]
+			then
+				mv -f $bm $bm.presidux
+			fi
 			package_installer 'sidux-graphics sidux-graphics-common' 'install-always' '--reinstall'
 
 			# force link to file
