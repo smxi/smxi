@@ -2457,7 +2457,6 @@ install_dist_upgrade()
 	then
 		post_du_tasks
 	fi
-	
 }
 
 # arg: $1 - trap function name
@@ -3047,7 +3046,6 @@ run_script_components()
 		if [ "$SKIP_DIST_UPGRADE" != 'true' -a "$SKIP_CONNECTIONS" != 'true' ]
 		then
 			install_dist_upgrade 'first'
-			# execute it here to take stuff off hold if needed
 		fi
 	fi
 	test_xorg_version post # this is used by graphics and tweaks
