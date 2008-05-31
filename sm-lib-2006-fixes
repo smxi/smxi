@@ -152,7 +152,10 @@ xorg_font_fix()
 	# this to second time stamp should help fix that old repeated .1st bug
 	local timeStampXorg=$EXXC-bu-$( date +%Y-%m-%d-%H:%M:%S )
 
-	[ ! -e $timeStampXorg ] && cp $EXXC $timeStampXorg
+	if [ ! -e $timeStampXorg ]
+	then
+		cp $EXXC $timeStampXorg
+	fi
 	
 perl -ni -e 'BEGIN { $f++ } if (/^Section "Files"/) { $f--; print; print <<_EOF_
 \tFontPath\t"/usr/share/fonts/X11/misc"
@@ -166,7 +169,9 @@ perl -ni -e 'BEGIN { $f++ } if (/^Section "Files"/) { $f--; print; print <<_EOF_
 \tFontPath\t"/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
 _EOF_
 } if (! $f && /^EndSection/) { $f++ }; print if ($f)' /etc/X11/xorg.conf
-[ -f /etc/X11/xorg.conf.1st ] && perl -ni -e 'BEGIN { $f++ } if (/^Section "Files"/) { $f--; print; print <<_EOF_
+if [ -f /etc/X11/xorg.conf.1st ]
+then
+	perl -ni -e 'BEGIN { $f++ } if (/^Section "Files"/) { $f--; print; print <<_EOF_
 \tFontPath\t"/usr/share/fonts/X11/misc"
 \tFontPath\t"/usr/share/fonts/X11/cyrillic"
 \tFontPath\t"/usr/share/fonts/X11/100dpi/:unscaled"
@@ -178,6 +183,7 @@ _EOF_
 \tFontPath\t"/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
 _EOF_
 } if (! $f && /^EndSection/) { $f++ }; print if ($f)' /etc/X11/xorg.conf.1st
+fi
 	
 	echo "${S}xorg.conf fonts are updated."
 	echo $LINE
@@ -220,7 +226,10 @@ file_removal_1()
 		echo "${S}Removing ${C}$eurp${S} some obsolete files...${N}"
 		for i in $FilesToRemove
 		do
-			[ -f $i ] && rm -f $i
+			if [ -f $i ]
+			then
+				rm -f $i
+			fi
 			echo "${S}Removed the obsolete file: ${C}$i${N}"
 		done
 		set_sticky_prefs udev-fix-4
