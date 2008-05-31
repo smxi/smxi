@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-removal
-####  version: 1.2.1
-####  Date: June 29 2007
+####  version: 1.2.2
+####  Date: May 31 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -145,11 +145,14 @@ package_removal()
 				print_error opt
 				;;
 		esac
-		[ "$Done" == 'true' ] && break
+		if [ "$Done" == 'true' ]
+		then
+			break
+		fi
 	done
 	
 	# this is just in case user hits remove-chosen without having entered an item
-	if [[ "$kickthem" == 'true' ]] && [[ -n $KickItems ]]
+	if [ "$kickthem" == 'true' ] && [ -n "$KickItems" ]
 	then
 		echo $LINE
 		echo "${S}These are your current selections. You will be asked one by one to remove the package or not."
@@ -189,7 +192,10 @@ package_removal()
 				;;
 		esac
 	fi
-	[ "$repeat" == 'true' ] && package_removal
+	if [ "$repeat" == 'true' ]
+	then
+		package_removal
+	fi
 }
 
 print_kick_items()
