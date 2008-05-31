@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.28.22
-####  Date: May 15 2008
+####  version: 7.28.23
+####  Date: May 31 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -129,7 +129,10 @@ IS_LIVE=''
 if [ -s $EDD ]
 then
 	. $EDD
-	[ "$FLL_DISTRO_MODE" == 'live' ] && IS_LIVE='true'
+	if [ "$FLL_DISTRO_MODE" == 'live' ]
+	then
+		IS_LIVE='true'
+	fi
 fi 
 
 # kernel info
@@ -983,15 +986,30 @@ cleanup_extra_files()
 		all_files=$( ls "${i}."* 2> /dev/null ) 
 		# make sure stuff exists, then rm files
 		# factoid: if you put $all_files in "" it will not work with rm -f
-		[ -n "$all_files" ] && rm -f $all_files
+		if [ -n "$all_files" ]
+		then
+			rm -f $all_files
+		fi
 	done
 	# handle any legacy stuff too
 	all_files=$( ls "du-fixes"* 2> /dev/null ) 
-	[ -n "$all_files" ] && rm -f $all_files
-	[ -f sm ] && rm -f sm
+	if [ -n "$all_files" ]
+	then
+		rm -f $all_files
+	fi
+	if [ -f sm ]
+	then
+		rm -f sm
+	fi
 	# just in case a legacy user comes, don't want to lose the configs
-	[ -f /etc/du-fixes.conf ] && mv -f /etc/du-fixes.conf /etc/smxi.conf
-	[ -f /etc/sm.conf ] && mv -f /etc/sm.conf /etc/smxi.conf
+	if [ -f /etc/du-fixes.conf ]
+	then
+		mv -f /etc/du-fixes.conf /etc/smxi.conf
+	fi
+	if [ -f /etc/sm.conf ]
+	then
+		mv -f /etc/sm.conf /etc/smxi.conf
+	fi
 	# clean up a mistake I made with new apt installer logic
 	if [ -n "$( grep 'no-set' $SM_CONFIG_FILE )" ]
 	then
@@ -1005,13 +1023,28 @@ create_script_files()
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
 	
 	# make config file / log dir if required
-	[ ! -f $SM_CONFIG_FILE ] && touch $SM_CONFIG_FILE
-	[ ! -d $SM_LOG_DIR ] && mkdir $SM_LOG_DIR
+	if [ ! -f $SM_CONFIG_FILE ]
+	then
+		touch $SM_CONFIG_FILE
+	fi
+	if [ ! -d $SM_LOG_DIR ]
+	then
+		mkdir $SM_LOG_DIR
+	fi
 	# move old xorg clean up log if present
-	[ -f $oldCleanXorgLog ] && mv $oldCleanXorgLog $CLEAN_X_ORG_LOG
+	if [ -f $oldCleanXorgLog ]
+	then
+		mv $oldCleanXorgLog $CLEAN_X_ORG_LOG
+	fi
 	# change to new format for sources
-	[ -f $EASMD ] && mv $EASMD $EASDL
-	[ -f $EASMS ] && mv $EASMS $EASSL
+	if [ -f $EASMD ]
+	then
+		mv $EASMD $EASDL
+	fi
+	if [ -f $EASMS ]
+	then
+		mv $EASMS $EASSL
+	fi
 	# rename directories to new syntax
 	update_kernel_directories
 }
@@ -1088,7 +1121,12 @@ normalize_kernel_string()
 		then
 			kernelArch=$( echo $kernelString | grep 'slh64'  )
 			# set the kernel arch here
-			[ -n "$kernelArch" ] && kernelArch='amd64' || kernelArch='686'
+			if [ -n "$kernelArch" ]
+			then
+				kernelArch='amd64'
+			else
+				kernelArch='686'
+			fi
 			# this syntax is handled here
 			# 2.6.23.15-slh-smp-3 2.6.23.15-slh64-smp-3
 			processedString=$( echo $kernelString | sed -r 's/(-slh(64)?-(smp|up)-)/.slh./g' )
@@ -1112,9 +1150,17 @@ test_kernel_strings()
 	then
 		# set the global, which will be used by various testing functions
 		# or just echo the status true/false for functions that use that
-		[ "$2" == 'set-ke' ] && KERNEL_EQUAL_INSTALL='true' || echo 'true'
+		if [ "$2" == 'set-ke' ]
+		then
+			KERNEL_EQUAL_INSTALL='true'
+		else
+			echo 'true'
+		fi
 	else
-		[ "$2" == 'set-ke' ] || echo 'false'
+		if [ "$2" != 'set-ke' ]
+		then
+			echo 'false'
+		fi
 	fi
 }
 #normalize_kernel_string $(uname -r);exit
@@ -1201,7 +1247,10 @@ sm_pref_tester()
 {
 	local smPref='' testType='standard'
 	
-	[ -n "$2" ] && testType=$2
+	if [ -n "$2" ]
+	then
+		testType=$2
+	fi
 	# since this is core, I am adding error detection to avoid hangs
 	if [ -n "$1" ]
 	then
@@ -1275,25 +1324,40 @@ start_default_dm()
 		then
 			if [ -x /etc/init.d/kdm ]
 			then
-				[ "$TESTING" == 'true' ] && echo 'kdm start'
+				if [ "$TESTING" == 'true' ]
+				then
+					echo 'kdm start'
+				fi
 				/etc/init.d/kdm start && success='true'
 			elif [ -x /etc/init.d/gdm ]
 			then
 				/etc/init.d/gdm start && success='true'
 			elif [ -x /etc/init.d/xdm ]
 			then
-				[ "$TESTING" == 'true' ] && echo 'xdm start'
+				if [ "$TESTING" == 'true' ]
+				then
+					echo 'xdm start'
+				fi
 				/etc/init.d/xdm start && success='true'
 			fi
 		else
-			[ "$TESTING" == 'true' ] && echo $displayManager' default start'
+			if [ "$TESTING" == 'true' ]
+			then
+				echo $displayManager' default start'
+			fi
 			# question: why is this in some cases not working? No init 5 is happening
-			[ -x /etc/init.d/$displayManager ] && /etc/init.d/$displayManager start
+			if [ -x /etc/init.d/$displayManager ]
+			then
+				/etc/init.d/$displayManager start
+			fi
 			success='true'
 		fi
 	elif [ "$1" == 'nowmstart' ]
 	then
-		[ "$TESTING" == 'true' ] && echo 'nwmstart'
+		if [ "$TESTING" == 'true' ]
+		then
+			echo 'nwmstart'
+		fi
 		success='true'
 	elif [ "$1" == 'killroot' ]
 	then
@@ -1307,7 +1371,10 @@ start_default_dm()
 	fi
 	if [ "$success" == 'true' ]
 	then
-		[ "$TESTING" == 'true' ] && echo 'start: '$INIT_LEVEL 'pid: '$LOGIN_PID
+		if [ "$TESTING" == 'true' ]
+		then
+			echo 'start: '$INIT_LEVEL 'pid: '$LOGIN_PID
+		fi
 		
 		if [ -n "$LOGIN_PID" ]
 		then
@@ -1397,13 +1464,24 @@ check_display_and_x()
 	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
 	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
 	
-	[ -n "$hasVM" ] && sleepTime=15
+	if [ -n "$hasVM" ]
+	then
+		sleepTime=15
+	fi
 	do_wm_pid_test # this checks for pid files for xdm,kdm,gdm
-	[ "$?" -eq 1 ] && wmRunning='true' || wmRunning=''
+	if [ "$?" -eq 1 ]
+	then
+		wmRunning='true'
+	else
+		wmRunning=''
+	fi
 
 	# forces update of script and restarts it
 	check_force_update
-	[ "$Z_SET" == "$data1$data2" ] && facts='true'
+	if [ "$Z_SET" == "$data1$data2" ]
+	then
+		facts='true'
+	fi
 
 	# this should handle most cases, now supports Debian default start of gdm/kdm in init 3
 	if [ "$RunLvl" != '3' -o "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
@@ -1439,15 +1517,32 @@ check_display_and_x()
 #  				fi
 
 				do_wm_pid_test
-				[ "$?" -eq 1 ] && wmRunning='true' || wmRunning=''
+				if [ "$?" -eq 1 ]
+				then
+					wmRunning='true'
+				else
+					wmRunning=''
+				fi
 
 				if [ "$wmRunning" == 'true' ]
 				then
 					echo "${S}Shutting down all instances of ${C}kdm/gdm/xdm/wdm${S} now...${N}"
-					[ -e /var/run/kdm.pid ] && /etc/init.d/kdm stop
-					[ -e /var/run/gdm.pid ] && /etc/init.d/gdm stop
-					[ -e /var/run/xdm.pid ] && /etc/init.d/xdm stop
-					[ -e /var/run/wdm.pid ] && /etc/init.d/wdm stop
+					if [ -e /var/run/kdm.pid ]
+					then
+						/etc/init.d/kdm stop
+					fi
+					if [ -e /var/run/gdm.pid ]
+					then
+						/etc/init.d/gdm stop
+					fi
+					if [ -e /var/run/xdm.pid ]
+					then
+						/etc/init.d/xdm stop
+					fi
+					if [ -e /var/run/wdm.pid ]
+					then
+						/etc/init.d/wdm stop
+					fi
 				fi
 				;;
 			n)	echo "${S}Exiting the script. Please run the script in runlevel 3."
@@ -1499,7 +1594,10 @@ check_script_path()
 		fi
 	fi
 	# then go on to cd
-	[ "$( pwd )" != "$SCRIPT_HOME" ] && cd $SCRIPT_HOME
+	if [ "$( pwd )" != "$SCRIPT_HOME" ]
+	then
+		cd $SCRIPT_HOME
+	fi
 }
 
 check_distro_version()
@@ -1521,7 +1619,11 @@ check_distro_version()
 	for (( i=0; i < ${#supportedReleases[@]}; i++ ))
 	do
 		dis=$( echo $DISTRO_VERSION | egrep -i "${supportedReleases[$i]%^*}" )
-		[ -n "$dis" ] && DISTRO_LEVEL=${supportedReleases[$i]#*^} && break
+		if [ -n "$dis" ]
+		then
+			DISTRO_LEVEL=${supportedReleases[$i]#*^}
+			break
+		fi
 	done
 
 	shopt -s nocasematch # turn on caseinsensitive
@@ -1533,7 +1635,10 @@ check_distro_version()
 			distroName=" ${C}Kanotix${W}"
 			;;
 		*) 
-			[ -e $DEB ] && distroName=" ${C}Debian system${W}"
+			if [ -e $DEB ]
+			then
+				distroName=" ${C}Debian system${W}"
+			fi
 			;;
 	esac
 	shopt -u nocasematch # turn off case insensitive
@@ -1545,10 +1650,16 @@ check_distro_version()
 		check_debian
 		ReturnValue="$?"
 	
-		[ "$ReturnValue" -eq 32 -o "$ReturnValue" -eq 64 ] && DISTRO_LEVEL=5
+		if [ "$ReturnValue" -eq 32 -o "$ReturnValue" -eq 64 ]
+		then
+			DISTRO_LEVEL=5
+		fi
 	fi
 
-	[ "$DISTRO_LEVEL" -lt 5 ] && print_unsupported "$distroName"
+	if [ "$DISTRO_LEVEL" -lt 5 ]
+	then
+		print_unsupported "$distroName"
+	fi
 }
 ## DEBUGGER
 #script_debugger check_distro_version 'echo dl: $DISTRO_LEVEL' 'DISTRO_VERSION="sidux 2007-04"'
@@ -1568,11 +1679,17 @@ check_age()
 	if [ $ScriptYear -eq $CurrentYear ]
 	then
 		Diff=$(( $CurrentDay - $ScriptDay ))
-		[ $Diff -gt $MAX_AGE ] && TooOld='true'
+		if [ $Diff -gt $MAX_AGE ]
+		then
+			TooOld='true'
+		fi
 	elif [ $CurrentYear -eq $NextYear ]
 	then
 		Diff=$(( $CurrentDay + 365 - $ScriptDay ))
-		[ $Diff -gt $MAX_AGE ] && TooOld='true'
+		if [ $Diff -gt $MAX_AGE ]
+		then
+			TooOld='true'
+		fi
 	else
 		TooOld='true'
 	fi
@@ -1676,7 +1793,10 @@ check_connection()
 		echo "${S}Internet connection is present and working.${N}"
 	fi
 	
-	[ "$repeat" == 'true' ] && check_connection
+	if [ "$repeat" == 'true' ]
+	then
+		check_connection
+	fi
 }
 
 restart_networking()
@@ -1955,13 +2075,22 @@ print_install_information()
 	local AdvancedOptions=''
 	local dpkgUpdate='' dpkgInstall='' 
 	local latestKernel='NO KERNEL DATA'
-	[ -n "$CURRENT_APT_KERNEL" ] && latestKernel=$( normalize_kernel_string $CURRENT_APT_KERNEL )
+	if [ -n "$CURRENT_APT_KERNEL" ]
+	then
+		latestKernel=$( normalize_kernel_string $CURRENT_APT_KERNEL )
+	fi
 	local currentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 	local dpkgif='/var/lib/dpkg/status'
 	local ScriptLastRun=$( sm_pref_tester script-last-used equal )
-	[ "$ScriptLastRun" == '' ] && ScriptLastRun='Last script use date not yet set'
+	if [ "$ScriptLastRun" == '' ]
+	then
+		ScriptLastRun='Last script use date not yet set'
+	fi
 	local ScriptLastDu=$( sm_pref_tester script-last-du-complete equal )
-	[ "$ScriptLastDu" == '' ] && ScriptLastDu='Last script d-u not yet set'
+	if [ "$ScriptLastDu" == '' ]
+	then
+		ScriptLastDu='Last script d-u not yet set'
+	fi
 	
 	if [ -f $dpkgif ]
 	then
@@ -1971,7 +2100,10 @@ print_install_information()
 	fi
 	# this keeps the check_version output together with the system version output
 	# note that for -v output, $CHECK_VERSION_TEXT is not set yet
-	[ -n "$CHECK_VERSION_TEXT" ] && echo "$CHECK_VERSION_TEXT"
+	if [ -n "$CHECK_VERSION_TEXT" ]
+	then
+		echo "$CHECK_VERSION_TEXT"
+	fi
 	print_version
 	
 	echo "${S}You are running the ${C}$BITS bit${S} version of Debian/Sidux."
@@ -2089,7 +2221,10 @@ print_quit()
 pre_du_tasks()
 {
 	# one last test to dump non supported		
-	[ "$DISTRO_LEVEL" -lt 5 ] && print_unsupported " ${C}Debian system${W}"
+	if [ "$DISTRO_LEVEL" -lt 5 ]
+	then
+		print_unsupported " ${C}Debian system${W}"
+	fi
 	# begin update tasks
 	apt_update_handler 'pre-du'
 
@@ -2158,7 +2293,10 @@ install_dist_upgrade()
 	# obsolete, but I'll keep it in case I need to flash some version specific du message.
 	if [ "$smPref" -eq 0 ]
 	then
-		[ "$DISTRO_LEVEL" -lt 2 ] && ConnectionDropped='echo -e "${W}After your dist-upgrade you may lose your network connection.${S}\nIf this happens some parts of the script will not work. To fix this,\nsimply restart the script, and it will restart your connection for you\nif there is no connection present.\n$LINE"'
+		if [ "$DISTRO_LEVEL" -lt 2 ]
+		then
+			ConnectionDropped='echo -e "${W}After your dist-upgrade you may lose your network connection.${S}\nIf this happens some parts of the script will not work. To fix this,\nsimply restart the script, and it will restart your connection for you\nif there is no connection present.\n$LINE"'
+		fi
 	fi
 	
 	# only do this part the first time the function runs
@@ -2278,7 +2416,10 @@ install_dist_upgrade()
 				;;
 			continue)
 				# set some prefs for successful du
-				[ "$smPref" -eq 0 ] && set_sticky_prefs $prefId
+				if [ "$smPref" -eq 0 ]
+				then
+					set_sticky_prefs $prefId
+				fi
 				set_sticky_prefs d
 				echo "${S}Ok, you are ready to go on now.${N}"
 				continue='true'
@@ -2357,7 +2498,10 @@ libc6_fix_1()
 	local prefId='libc6-fix-4'
 	local smPref=$( sm_pref_tester $prefId )
 	local kernelMessage=' with your new kernel'
-	[ "$1" == 'pre-du' ] && kernelMessage=' before you dist-upgrade'
+	if [ "$1" == 'pre-du' ]
+	then
+		kernelMessage=' before you dist-upgrade'
+	fi
 	
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ]
  	then
@@ -2369,9 +2513,10 @@ libc6_fix_1()
 		#echo "it after your ${C}dist-upgrade${M} is done. This works fine.${N}"
 		package_installer 'libc6 libc6-dev tzdata locales util-linux' 'force-always' 
 		# let's only set this if needed
- 		[ "$smPref" -eq 0 ] && set_sticky_prefs $prefId
- 		
- 		
+ 		if [ "$smPref" -eq 0 ]
+ 		then
+ 			set_sticky_prefs $prefId
+ 		fi
  	fi
  	# I'm putting this in here to make sure it has fired at least once pre kernel install
  	busybox_fix_1
@@ -2596,7 +2741,10 @@ print_usage()
 {
 	local ErrorMessage=''
 	
-	[ "$1" == 'err' ] && ErrorMessage='echo -e "${E}An option you selected is not a supported option.\n$LINE"'
+	if [ "$1" == 'err' ]
+	then
+		ErrorMessage='echo -e "${E}An option you selected is not a supported option.\n$LINE"'
+	fi
 	echo $MBAR
 	echo "${M}OPTION HELP MENU: $SCRIPT_NAME"
 	echo $MBAR
