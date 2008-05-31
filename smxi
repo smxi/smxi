@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.1
+####  version: 7.29.2
 ####  Date: May 31 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2477,6 +2477,9 @@ du_trap_handler()
 # this will only run if user enters the 'continue' option to avoid looping errors
 post_du_tasks()
 {
+	# set the trap here
+	trap 'du_trap_handler $FUNCNAME' INT TERM
+	
 	# this is all just debian conversion stuff
 	if [ "$IS_DEBIAN" == 'true' -a "$CON_DEB" == 'true' ]
 	then
@@ -2497,7 +2500,7 @@ post_du_tasks()
 	then
 		run_2008_fixes 'post'
 	fi
-	
+	trap - INT TERM
 	## take the package(s) off hold if they were set
 	set_hold_install install
 }
