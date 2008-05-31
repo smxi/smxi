@@ -84,7 +84,10 @@ get_configs()
 		echo
 		echo $MLINE
 	fi
-	[ -f "$CONFIGS_BODY" ] && rm -f $CONFIGS_BODY
+	if [ -f "$CONFIGS_BODY" ]
+	then
+		rm -f $CONFIGS_BODY
+	fi
 }
 
 # issue warning if status = danger etc
