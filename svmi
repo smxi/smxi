@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 0.9.28
-####  Date: April 30 2008
+####  version: 0.9.29
+####  Date: May 31 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -365,8 +365,14 @@ cleanup_temp_files()
 check_install_tools()
 {
 	log_info $FUNCNAME s
-	[ ! -x /usr/bin/module-assistant ] && install_package module-assistant
-	[ ! -d /usr/share/build-essential ] && install_package build-essential
+	if [ ! -x /usr/bin/module-assistant ]
+	then
+		install_package module-assistant
+	fi
+	if [ ! -d /usr/share/build-essential ]
+	then
+		install_package build-essential
+	fi
 	log_info $FUNCNAME c
 }
 
@@ -417,7 +423,10 @@ check_update_script()
 	if [ "$1" == "$SCRIPT_NAME" ]
 	then
 		wget -q -O$1 $TPD$1 || error_handler 198 $1
-		[ ! -f $1 ] && error_handler 199 $1 # if failed, exit with file name + error
+		if [ ! -f $1 ]
+		then
+			error_handler 199 $1 # if failed, exit with file name + error
+		fi
 		# restart then exit script, with all start options included
 		chmod +x $1
 		./$1 -R$START_OPTIONS
@@ -566,7 +575,10 @@ log_info()
 vm_main_selector()
 {
 	local repeat='' options='' opt='' quitContinue='quit'
-	[ "$SM_INSTALL" == 'true' ] && quitContinue='continue'
+	if [ "$SM_INSTALL" == 'true' ]
+	then
+		quitContinue='continue'
+	fi
 
 	echo $MLINE
 	echo "${M} Virtual Machine Options"
@@ -908,7 +920,10 @@ install_vbox()
 install_vbox_non_ose()
 {
 	local arch='i386' 
-	[ "$BITS" == '64' ] && arch='amd64'
+	if [ "$BITS" == '64' ]
+	then
+		arch='amd64'
+	fi
 	local debName='virtualbox_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_etch_'$arch'.deb'
 	local vboxNonOseURL='http://www.virtualbox.org/download/'$VBOX_VERSION'/'$debName
 	
