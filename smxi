@@ -411,7 +411,7 @@ error_handler()
 			;;
 		user-killed-du)
 			errorCode=33
-			errorMessage="User initiated dist-upgrade termination via ctrl+c or kill."
+			errorMessage="User initiated dist-upgrade component termination via ctrl+c or kill."
 			;;
 			
 		# failures in actions/functions not requiring script exit: 51-150: serious
