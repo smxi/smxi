@@ -1,6 +1,6 @@
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/conftest.sh NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/conftest.sh
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/conftest.sh	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/conftest.sh	2008-04-21 18:19:44.641750192 +0200
+diff -ru usr/src/nv/conftest.sh usr/src/nv-100.14.19-pkg0-2.6.25/conftest.sh
+--- usr/src/nv/conftest.sh	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/conftest.sh	2008-04-21 18:19:44.641750192 +0200
 @@ -559,6 +559,27 @@ case "$5" in
          fi
      ;;
@@ -29,9 +29,9 @@ diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/conftest.sh NVIDIA-Linux-
      change_page_attr)
          #
          # Determine if change_page_attr() is present
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/Makefile.kbuild NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/Makefile.kbuild
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/Makefile.kbuild	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/Makefile.kbuild	2008-04-21 18:26:00.441751124 +0200
+diff -ru usr/src/nv/Makefile.kbuild usr/src/nv-100.14.19-pkg0-2.6.25/Makefile.kbuild
+--- usr/src/nv/Makefile.kbuild	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/Makefile.kbuild	2008-04-21 18:26:00.441751124 +0200
 @@ -242,10 +242,18 @@ endif
  
  ifeq ($(PATCHLEVEL), 4)
@@ -53,9 +53,9 @@ diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/Makefile.kbuild NVIDIA-Li
  endif
  
  VMAP_ARGS := $(shell $(CONFTEST) vmap_arg_count)
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv.c NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/nv.c
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv.c	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/nv.c	2008-04-21 23:27:02.578768061 +0200
+diff -ru usr/src/nv/nv.c usr/src/nv-100.14.19-pkg0-2.6.25/nv.c
+--- usr/src/nv/nv.c	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/nv.c	2008-04-21 23:27:02.578768061 +0200
 @@ -89,6 +89,17 @@ static const char *__cpgattr_warning = \
      "problems, but system stability may be adversely affected.\n"
      "It is recommended that you update to Linux 2.6.11 (or a newer\n"
@@ -378,9 +378,9 @@ diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv.c NVIDIA-Linux-x86-100
  #else
      return 0;
  #endif
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv-linux.h NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/nv-linux.h
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv-linux.h	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/nv-linux.h	2008-04-21 18:29:20.899751817 +0200
+diff -ru usr/src/nv/nv-linux.h usr/src/nv-100.14.19-pkg0-2.6.25/nv-linux.h
+--- usr/src/nv/nv-linux.h	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/nv-linux.h	2008-04-21 18:29:20.899751817 +0200
 @@ -857,9 +857,10 @@ typedef void irqreturn_t;
  
  #define NV_PGD_OFFSET(address, kernel, mm)              \
@@ -440,9 +440,9 @@ diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv-linux.h NVIDIA-Linux-x
   * interface.
   */
  #ifndef X86_FEATURE_NX
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv-vm.c NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/nv-vm.c
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv-vm.c	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/nv-vm.c	2008-04-21 18:32:45.403750168 +0200
+diff -ru usr/src/nv/nv-vm.c usr/src/nv-100.14.19-pkg0-2.6.25/nv-vm.c
+--- usr/src/nv/nv-vm.c	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/nv-vm.c	2008-04-21 18:32:45.403750168 +0200
 @@ -43,42 +43,40 @@ nv_vm_list_page_count(nv_pte_t **page_li
  }
  #endif
@@ -521,9 +521,9 @@ diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/nv-vm.c NVIDIA-Linux-x86-
          if (!NV_PGD_PRESENT(pgd))
              goto failed;
  
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/os-interface.c NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/os-interface.c
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/os-interface.c	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/os-interface.c	2008-04-21 18:53:28.735750157 +0200
+diff -ru usr/src/nv/os-interface.c usr/src/nv-100.14.19-pkg0-2.6.25/os-interface.c
+--- usr/src/nv/os-interface.c	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/os-interface.c	2008-04-21 18:53:28.735750157 +0200
 @@ -1172,6 +1172,18 @@ void* NV_API_CALL os_map_kernel_space(
  {
      void *vaddr;
@@ -553,9 +553,9 @@ diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/os-interface.c NVIDIA-Lin
      NV_IOUNMAP(addr, size_bytes);
  }
  
-diff -Nuarp NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/os-registry.c NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/os-registry.c
---- NVIDIA-Linux-x86-100.14.19-pkg0/usr/src/nv/os-registry.c	2007-09-12 23:53:20.000000000 +0200
-+++ NVIDIA-Linux-x86-100.14.19-pkg0-2.6.25/usr/src/nv/os-registry.c	2008-04-21 18:54:59.126751444 +0200
+diff -ru usr/src/nv/os-registry.c usr/src/nv-100.14.19-pkg0-2.6.25/os-registry.c
+--- usr/src/nv/os-registry.c	2007-09-12 23:53:20.000000000 +0200
++++ usr/src/nv-100.14.19-pkg0-2.6.25/os-registry.c	2008-04-21 18:54:59.126751444 +0200
 @@ -381,34 +381,36 @@ static int NVreg_RemapLimit = 0;
  NV_MODULE_PARAMETER(NVreg_RemapLimit);
  
