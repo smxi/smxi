@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 3.0.9
+####  version: 3.0.10
 ####  Date: June 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1522,10 +1522,11 @@ driver_support_tests()
 						misc_fixes nvidia-24-link # this might always be needed, all cases?
 					fi
 					# I'm going to leave these tests in case users want to run 2.6.24 for a while
-					if [ "$KERNEL_THIRD" -ge 25 ] && [ "$DRIVER_DEFAULT" == '100.14.19' -o "$DRIVER_DEFAULT" == '100.14.23' ]
-					then
-						error_handler 246
-					fi
+					# trying new 100.xxxx patch, so not using this now
+# 					if [ "$KERNEL_THIRD" -ge 25 ] && [ "$DRIVER_DEFAULT" == '100.14.19' -o "$DRIVER_DEFAULT" == '100.14.23' ]
+# 					then
+# 						error_handler 246
+# 					fi
 					;;
 			esac
 			
@@ -1844,6 +1845,11 @@ run_patches()
 					case $DRIVER_DEFAULT in
 						171.06|169.12)
 							patchFile='NVIDIA_kernel-169.12-2286310.diff'
+							apply_patch_file $patchFile
+							;;
+						# patch url: http://www.nvnews.net/vbulletin/showthread.php?t=112452
+						100.14.19|100.14.23)
+							patchFile='NVIDIA-x86-100.14.19-kernel-2.6.25-compat.diff'
 							apply_patch_file $patchFile
 							;;
 						96.43.05)
