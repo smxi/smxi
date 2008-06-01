@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 3.0.8
-####  Date: May 28 2008
+####  version: 3.0.9
+####  Date: June 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -609,7 +609,7 @@ detect_card_version()
 				# fireGL cards, temp no support in fglrx
 				# http://wiki.cchtml.com/index.php/Hardware
 				# note: 4e50 should work with 8.4 driver
-				3154|3e54|4147|4154|4a4d|4e47|4e4b|4e50|4e54|5464|5550|5551|564a|564b|5b64|5d49|5e48|5e49|71C4)
+				3154|3e54|4147|4154|4a4d|4e47|4e4b|4e54|5464|5550|5551|564a|564b|5b64|5d49|5e48|5e49|71C4)
 					IS_LEGACY_0='true'
 					error_handler 253
 					;;
