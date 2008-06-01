@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.2
-####  Date: May 31 2008
+####  version: 7.29.3
+####  Date: June 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -2574,11 +2574,12 @@ nvidia_sse_alert()
 		echo "${W}Your${C}$CPU_NAME${W} does ${C}NOT${W} support ${C}SSE."
 		echo $MLINE
 		echo "${S}What does this mean? It means with new drivers you will not have 3d support."
-		echo "The 100 series drivers do work, but cannot be installed on 2.6.25 kernels."
+		echo "The 100 series drivers do work, but cannot be installed on 2.6.26 kernels."
 		echo
-		echo "${S}Only drivers of series ${C}169/96/71${S} or newer work on ${C}2.6.25${S} and later kernels."
+		echo "${S}Only drivers of series ${C}169/96/71${S} or newer work on ${C}2.6.26${S} and later kernels."
 		echo "For now, this leaves you with only these choices:"
-		echo "${C}1 - ${S}Stay with the latest ${C}2.6.24${S} kernel and use the ${C}100.xx${S} drivers."
+		echo "${C}1 - ${S}Stay with the latest ${C}2.6.25${S} kernel and use the ${C}100.xx${S} drivers."
+		echo "    You must install these drivers with sgfxi, like this: ${C}sgfxi -co 100.14.19"
 		echo "${C}2 - ${S}Forget about 3d and just use the 2d part of the driver, or run the legacy ${C}7xxx${S} drivers."
 		echo "${C}3 - ${S}Use the ${C}xorg nv${S} drivers instead, which aren't very good."
 		echo "${C}4 - ${S}Get an old used ${C}ATI 7/8/9xxx${S} card that has fine working ${C}xorg drivers."
