@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
-####  Only use for Debian Sid and Sidux, no support for any other distro
+####  Only use for Debian Sid/Testing and sidux, no support for any other distro
 ####  version: 3.0.12
 ####  Date: June 2 2008
 ########################################################################

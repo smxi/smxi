@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.1.2
-####  Date: May 31 2008
+####  version: 2.2.0
+####  Date: June 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -34,8 +34,9 @@
 # 32 or 64 bit is selected automatically, otherwise the user can do what they want
 advanced_kernel_install()
 {
-	local found='false' kernel='' ck='' dcka='' options='' opt=''
-	local text_1='' text_2=''  rcMessage='' startMeta=''
+	local found='false' kernel='' ck='' dcka='' options='' opt='' 
+	local text_1='' text_2=''  rcMessage='' startMeta='' debianKernel=''
+	local optionList=''
 	
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
@@ -44,11 +45,14 @@ advanced_kernel_install()
 		set_kernel_data
 		SET_KERNEL_DATA='true'
 	fi
-	
-	local bmmOption=$( echo $KERNEL_LIST | wc -w )
-	local kmOption=$(( $bmmOption - 1 )) 
-	local kernelCount=$(( $bmmOption - 2 )) 
-	
+	# add the list closer items
+	local debiankernel=''
+	local kernelCount=$( echo $KERNEL_LIST | wc -w )
+	local kmOption=$(( $kernelCount + 1 )) 
+	local bmmOption=$(( $kernelCount + 2 )) 
+	[ "$TESTING" == 'true' ] && debiankernel='install-debian-kernel'
+	optionList="$KERNEL_LIST $debiankernel kernel-metapackage-options back-to-main-menu"
+
 	print_lib_info $LIB_KERNEL_INSTALL
 	echo $MLINE
 	echo "${M}NOTE: These are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
@@ -65,11 +69,11 @@ advanced_kernel_install()
 	echo $LINE
 	
 	# this was set to correct 64/32 list in set_64_32 function
-	options=$KERNEL_LIST
+	options=$optionList
 
 	select opt in $options
 	do
-		for kernel in $KERNEL_LIST
+		for kernel in $optionList
 		do
 			if [ "$opt" == "$kernel" ]
 			then
@@ -79,6 +83,9 @@ advanced_kernel_install()
 					# KERNEL_FILE_RESET is set in set_32_64_bit
 					KERNEL_FILE=$KERNEL_FILE_RESET
 					ck='true'
+				elif [ "$kernel" == 'install-debian-kernel' ]
+				then
+					debianKernel='true'
 				elif [ "$kernel" == 'kernel-metapackage-options' ]
 				then
 					startMeta='true'
@@ -103,6 +110,10 @@ advanced_kernel_install()
 	elif [ "$ck" == 'true' ]
 	then
 		kernel_question
+	elif [ "$debianKernel" == 'true' ]
+	then
+		get_current_apt_kernel debian
+		double_check_kernel apt-debian
 	elif [ "$startMeta" == 'true' ]
 	then
 		kernel_meta_package_handler standard
@@ -112,17 +123,22 @@ advanced_kernel_install()
 	fi
 }
 
-# args: $1 - advanced/apt
+# args: $1 - advanced/apt/apt-debian
 double_check_kernel()
 {
 	local repeat='' options='' opt='' kernelFile=''
 	
-	if [ "$1" == 'apt' ]
-	then
-		kernelFile="$CURRENT_APT_KERNEL" 
-	else
-		kernelFile=$KERNEL_FILE
-	fi
+	case $1 in
+		apt)
+			kernelFile="$CURRENT_APT_KERNEL" 
+			;;
+		apt-debian)
+			kernelFile="$CURRENT_DEBIAN_KERNEL" 
+			;;
+		advanced|standard)
+			kernelFile=$KERNEL_FILE
+			;;
+	esac
 	
 	echo $LINE
 	echo "${S}Ok, installing this kernel: ${C}$kernelFile${S}"
@@ -142,22 +158,29 @@ double_check_kernel()
 		case $opt in
 			yes-install-kernel)
 				echo "${S}OK, now the script will install kernel ${C}$kernelFile${S} for you.${N}"
-				if [ "$1" != 'apt' ]
-				then
-					update_kernel
-					echo $LINE
-				else
-					install_apt_kernel
-				fi
+				case $1 in 
+					apt)
+						install_apt_kernel
+						;;
+					apt-debian)
+						install_apt_kernel debian
+						;;
+					advanced|standard)
+						update_kernel
+						echo $LINE
+						;;
+				esac
 				;;
 			no-return-to-menu)
 				echo "${S}Ok, let's try it again, please make your selection.${N}"
-				if [ "$1" == "advanced" ]
-				then
-					advanced_kernel_install
-				else
-					kernel_question
-				fi
+				case $1 in 
+					advanced|apt-debian)
+						advanced_kernel_install
+						;;
+					*)
+						kernel_question
+						;;
+				esac
 				;;
 			continue-no-kernel)
 				echo "${S}OK, continuing with script without installing new kernel."
@@ -359,37 +382,47 @@ set_metapackage_selections()
 ###---------------------------------------------------------------------
 
 # master apt kernel installer function
+# args: $1 debian - optional, only for debian kernels
 install_apt_kernel()
 {
+	local currentAptKernel=$CURRENT_APT_KERNEL
+	if [ "$1" == 'debian' ]
+	then
+		currentAptKernel=$CURRENT_DEBIAN_KERNEL
+	fi
 	libc6_fix_1 'kernel'
 	backup_grub
-	install_the_apt_kernel
-	kernel_data $CURRENT_APT_KERNEL
-	update_kernel_links $CURRENT_APT_KERNEL # must run prior to update_grub
+	install_the_apt_kernel $currentAptKernel
+	kernel_data $currentAptKernel
+	update_kernel_links $currentAptKernel # must run prior to update_grub
 	update_grub
-	install_apt_kernel_modules 'standard'
-	extra_module_installer $CURRENT_APT_KERNEL 'madwifi'
-	# extra_module_installer $CURRENT_APT_KERNEL 'ndiswrapper'
-	create_kernel_install_directory $CURRENT_APT_KERNEL
-	download_remaining_module_debs
+	install_apt_kernel_modules 'standard' $currentAptKernel
+	extra_module_installer $currentAptKernel 'madwifi'
+	if [ "$1" == 'debian' ] # not in debian
+	then
+		extra_module_installer $currentAptKernel 'ndiswrapper'
+	fi
+	create_kernel_install_directory $currentAptKernel
+	download_remaining_module_debs $currentAptKernel
 	copy_debs_to_install_directory
 	post_install_messages
-	reboot_now_question $CURRENT_APT_KERNEL
+	reboot_now_question $currentAptKernel
 }
 
 # the actual first step install
+# args: $1 - kernel version to install
 install_the_apt_kernel()
 {
-	local kernelImage="linux-image-$CURRENT_APT_KERNEL"
-	local kernelHeaders="linux-headers-$CURRENT_APT_KERNEL"
+	local kernelImage="linux-image-$1"
+	local kernelHeaders="linux-headers-$1"
 	
 	echo $LINE
-	echo "${S}Installing your new ${C}$CURRENT_APT_KERNEL${S} kernel now...${N}"
+	echo "${S}Installing your new ${C}$1${S} kernel now...${N}"
 	package_installer "$kernelHeaders $kernelImage" 'install-user'
 }
 
 # now loop through and install all running modules for new kernel
-# args: $1 - type standard/meta
+# args: $1 - type standard/meta; $2 - kernel version to install, only for standard
 install_apt_kernel_modules()
 {
 	local supportedModules='acer_acpi acerhk acx atl2 aufs et131x fsam7400 gspca kqemu sqlzma ndiswrapper omnibook quickcam av5100 squashfs vboxadd vboxdrv'
@@ -398,7 +431,7 @@ install_apt_kernel_modules()
 	
 	case $1 in
 		standard)
-			moduleType=$CURRENT_APT_KERNEL
+			moduleType=$2
 			;;
 		meta)
 			if [ "$BITS" == '64' ]
@@ -452,6 +485,7 @@ install_apt_kernel_modules()
 
 # this will sync the kernel download directory module debs with the sidux ones.
 # to come: using the user set mirror?
+# args: $1 - kernel name
 download_remaining_module_debs()
 {
 	# not current: acx100- redhat-cluster-modules- loop-aes-modules-
@@ -463,18 +497,18 @@ download_remaining_module_debs()
 	
 	for module in $availableModules
 	do
-		echo "${SPACER}${S}Checking for ${C}$module$CURRENT_APT_KERNEL${S} now...${N}"
+		echo "${SPACER}${S}Checking for ${C}$module$1${S} now...${N}"
 		if [ "$TESTING" != 'true' ]
 		then
 			moduleError=''
-			apt-get install -d --yes $module$CURRENT_APT_KERNEL &> /dev/null || moduleError='true'
+			apt-get install -d --yes $module$1 &> /dev/null || moduleError='true'
 			if [ "$moduleError" == 'true' ]
 			then
-				missingModules="$missingModules $module$CURRENT_APT_KERNEL"
-				echo "${SPACER}${SPACER}${M}Module ${C}$module$CURRENT_APT_KERNEL${M} is not available.${N}"
+				missingModules="$missingModules $module$1"
+				echo "${SPACER}${SPACER}${M}Module ${C}$module$1${M} is not available.${N}"
 			fi
 		else
-			apt-get install -d --yes $module$CURRENT_APT_KERNEL || missingModules="$missingModules $module$CURRENT_APT_KERNEL"
+			apt-get install -d --yes $module$1 || missingModules="$missingModules $module$1"
 		fi
 	done
 	echo
@@ -492,9 +526,10 @@ download_remaining_module_debs()
 }
 
 # copy over all installed kernel debs to kernel download directory
+# args: $1 - kernel version
 copy_debs_to_install_directory()
 {
-	local kernelBase=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 2 )
+	local kernelBase=$( echo $1 | cut -d '-' -f 2 )
 	local installDirectory="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY"
 	
 	echo $LINE
@@ -793,6 +828,7 @@ reboot_now_question()
 {
 	local repeat='' options='reboot-now continue quit'
 	
+	cd $SCRIPT_HOME # needed to make sure user is back in correct directory
 	# sets KERNEL_EQUAL_INSTALL
 	test_kernel_strings $1 'set-ke'
 	

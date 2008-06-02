@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.7.10
-####  Date: May 31 2008
+####  version: 1.8.0
+####  Date: June 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1387,21 +1387,29 @@ list_distro_mirrors()
 ###---------------------------------------------------------------------
 
 # check apt for latest kernel version
+# args: $1 - debian - optional, to get current sid kernel version if needed
 get_current_apt_kernel()
 {
 	local tempKernels='' platform='686' tempKernelCount='' kernelThird=0
-	local kernel1='' kernel2='' kernel1Greater='' slicePoint=''
+	local kernel1='' kernel2='' kernel1Greater='' slicePoint='' sidux='-sidux' distro='sidux'
+	local currentAptKernel=''
 	
 	if [ "$BITS" == '64' ]
 	then
 		platform='amd64'
 	fi
+	if [ "$1" == 'debian' ]
+	then
+		sidux=''
+		distro='Debian'
+	fi
 	# first we run the update, if needed
 	apt_update_handler 'kernel'
 	# then we'll slice out the latest apt kernel
 	echo
-	echo "${S}Calculating latest sidux kernel version now...${N}"
-	tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6-sidux-$platform /var/lib/apt/lists/*_Packages | cut -d '-' -f 3-6 | cut -d ' ' -f 1 )
+	echo "${S}Calculating latest $distro kernel version now...${N}"
+	# need to make sure it's not a bigmem kernel from debian too, ends in  $platform
+	tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$sidux-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 )
 	# get rid of the linebreaks if > 1 returned, that can happen if mirror and main repo 
 	# have different versions.
 	#echo tempKernels $tempKernels
@@ -1430,15 +1438,22 @@ get_current_apt_kernel()
 		# this handles 1 or > 2, that's such a fringe case I don't want to bother with
 		# unless someone actually ever has that problem, or use kelmo's function instead
 		slicePoint=$tempKernelCount
+	fi 
+	# slice the right kernel out:
+	currentAptKernel=$( echo $tempKernels | cut -d ' ' -f $slicePoint )
+	
+	# important to only set the debian kernel data, not the other globals here
+	if [ "$1" == 'debian' ]
+	then
+		CURRENT_DEBIAN_KERNEL=$currentAptKernel
+	else
+		CURRENT_APT_KERNEL=$currentAptKernel
+		kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
+		# now just slice out the major version, and add 1 so it's always 1 > than current
+		KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
+		# global will handle alert to metapackage users to reboot post du
+		CURRENT_APT_KERNEL_GRUB=$( grep -i -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	fi
-	# now we'll actually slice the right kernel out:
-	CURRENT_APT_KERNEL=$( echo $tempKernels | cut -d ' ' -f $slicePoint )
-	# now just slice out the major version, and add 1 so it's always 1 > than current
-	kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
-	KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
-
-	# global will handle alert to metapackage users to reboot post du
-	CURRENT_APT_KERNEL_GRUB=$( grep -i -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 }
 
 ###---------------------------------------------------------------------

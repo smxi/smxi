@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.1.4
-####  Date: May 8 2008
+####  version: 2.1.5
+####  Date: June 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -472,8 +472,6 @@ set_kernel_data()
 		KERNEL_LIST="$KERNEL_ADVANCED_LIST $KERNEL_LIST"
 	fi
 
-	# add the list closer
-	KERNEL_LIST="$KERNEL_LIST kernel-metapackage-options back-to-main-menu"
 	# pull out first kernel from the 64/32 list
 	KERNEL_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
 	isSmpUp=$( echo $KERNEL_FILE | grep '\-up\-' )
