@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.2.1
+####  version: 2.2.2
 ####  Date: June 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -404,7 +404,7 @@ install_apt_kernel()
 	fi
 	create_kernel_install_directory $currentAptKernel
 	download_remaining_module_debs $currentAptKernel
-	copy_debs_to_install_directory
+	copy_debs_to_install_directory $currentAptKernel
 	post_install_messages
 	reboot_now_question $currentAptKernel
 }
@@ -529,6 +529,7 @@ download_remaining_module_debs()
 # args: $1 - kernel version
 copy_debs_to_install_directory()
 {
+	# this handles both 2.6.24-2.6.24-3 and 2.6.25-3 syntax
 	local kernelBase=$( echo $1 | cut -d '-' -f 1-2 )
 	local installDirectory="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY"
 	
