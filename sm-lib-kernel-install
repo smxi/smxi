@@ -46,12 +46,12 @@ advanced_kernel_install()
 		SET_KERNEL_DATA='true'
 	fi
 	# add the list closer items
-	local debiankernel=''
+	local debianKernelOption=''
 	local kernelCount=$( echo $KERNEL_LIST | wc -w )
 	local kmOption=$(( $kernelCount + 1 )) 
 	local bmmOption=$(( $kernelCount + 2 )) 
-	[ "$TESTING" == 'true' ] && debiankernel='install-debian-kernel'
-	optionList="$KERNEL_LIST $debiankernel kernel-metapackage-options back-to-main-menu"
+	[ "$TESTING" == 'true' ] && debianKernelOption='install-debian-kernel'
+	optionList="$KERNEL_LIST $debianKernelOption kernel-metapackage-options back-to-main-menu"
 
 	print_lib_info $LIB_KERNEL_INSTALL
 	echo $MLINE
