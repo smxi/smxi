@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 3.0.11
-####  Date: June 1 2008
+####  version: 3.0.12
+####  Date: June 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -79,12 +79,8 @@ KERNEL_BASE='' # like: 2.6
 # note the extra cut -d '-' -f 1 test is to dump the doubled 2.6.24 in new kernel strings.
 KERNEL_THREE='' # like: 2.6.19
 KERNEL_THIRD='' # like: 19, for math use
+IS_SIDUX_KERNEL=''
 
-# KERNEL_VERSION=$( uname -r ) # full kernel name
-# KERNEL_BASE=$( uname -r | cut -d '.' -f 1-2 ) # like: 2.6
-# # note the extra cut -d '-' -f 1 test is to dump the doubled 2.6.24 in new kernel strings.
-# KERNEL_THREE=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
-# KERNEL_THIRD=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
 # check for 64 bit first
 if [ -n "$( uname -m | grep -o 'x86_64' )" ]
 then
@@ -112,41 +108,31 @@ TDFX='tdfx'
 DISPLAY_MANAGER=$( cat /etc/X11/default-display-manager 2>/dev/null )
 DISPLAY_MANAGER=$( basename $DISPLAY_MANAGER 2>/dev/null )
 
-if [ -n "$(find /proc/acpi/battery/ -mindepth 1 -type d 2>/dev/null)" ]
-then
-	LAPTOP='true'
-else
-	LAPTOP=''
-fi
-
 # Position matters: 1-latest; 2-middle; 3-older; 4-oldest
 VERSIONS=''
 OTHER_VERSIONS=''
-# other stuff: 169.07 100.14.11:100.14.09:1.0-9746:1.0-9742:1.0-8776:100.14.11
+# other stuff: nothing now
 NV_VERSIONS='173.14.05:169.12:96.43.05:71.86.04'
 NV_DEFAULT='173.14.05'
 NV_LEGACY=$( echo $NV_VERSIONS | cut -d ':' -f 4 )
 NV_OLDER=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
-#NV_QUAD='1.0-9762' # no more individual quad drivers
-NV_QUAD=$NV_DEFAULT
-NV_TESTING='173.08:171.06' #100.14.23 171.06
-#00.14.09:1.0-9755:1.0-9746:1.0-9639:1.0-9631:1.0-7185:169.09:169.07:169.04:96.43.01:71.86.01
-NV_OTHERS='100.14.23:100.14.19'
+NV_QUAD=$NV_DEFAULT # no more individual quad drivers
+NV_TESTING='' 
+NV_OTHERS='173.08:171.06:100.14.23:100.14.19'
 
 # debian sid legacies:
 NV_DEB_SID_LEGACY_1='71xx'
 NV_DEB_SID_LEGACY_2='96xx'
 
-# other options: :8.41.7:8.40.4:8.34.8 8.36.5:8.35.5:8.32.5::8.37.6
+# other options: nothing now
 # IMPORTANT: on function set_download_info the actual path file name is set:
-FG_VERSIONS='8-5' # 8.42.3 7-12 8-02 8-4
+FG_VERSIONS='8-5'
 FG_DEFAULT='8-5'
 
 FG_LEGACY='' # no legacy for ati + xorg >= 7.1
 FG_TESTING=''
-#FG_OTHERS='8.36.5:8.35.5:8.35.5:8.34.8:8.32.5:8.39.4:8.38.7:8.37.6'
-FG_OTHERS=''
+FG_OTHERS='8-4'
 DRIVER_LEGACY=''
 DRIVER_INSTALL=''
 DRIVER_DEFAULT=''
@@ -157,7 +143,6 @@ IS_LEGACY_0='' # unsupported completely by any non-free driver
 IS_LEGACY_1='' # oldest card versions supported
 IS_LEGACY_2='' # midrange legacy card versions supported
 
-DRIVER_EMUL_32=''
 DRIVER_FILE=''
 USE_XVMC=''
 
@@ -192,9 +177,6 @@ LOG_FILE_DIR="/var/log/sgfxi/"
 LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
 
 SCRIPT_NAME='sgfxi'
-# lib files, includes, not exec stuff
-LIB_NV_PATCHES='sgfxi-lib-nv-patches'
-LIB_FG_PATCHES='sgfxi-lib-fg-patches'
 
 EXPERIMENTAL_XORG_ATI='xserver-xorg-video-ati_6.6.193-1'
 EXPERIMENTAL_LIBDRM2='libdrm2_2.4.0~git20070625-1'
@@ -452,7 +434,6 @@ select_card()
 					echo "${C}$card${N}"
 					# override the global values and handle this explicitly
 					CARD_DATA=$singleCardId
-					#echo card data: $CARD_DATA
 					
 					if [ "$SKIP_CONFIG" != 'true' ]
 					then
@@ -465,18 +446,14 @@ select_card()
 						# set correct bus id as last step, note you have to check for . in PCI string:
 						# like this: O1:00.0 and change it to O1:00:0
 						BUS_ID=$( lspci -n | grep $CARD_DATA | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
-						#BUS_ID=$( echo $tester | grep $CARD_DATA | egrep -o '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
 						# handle explicit assignment of busid to avoid errors
 						echo "${B}Updating ${C}xorg.conf${B} to use the card with this BusID: ${C}$BUS_ID${N}"
 						if [ -n "$BUS_ID" ]
 						then
 							# create a dummy in case it's needed by new xorg system
-# 							if [ "$( egrep -c 'Section[ \t]*"Device"' $EXXC )" -eq 0 ]
-# 							then
-								create_section_device
-# 							else # otherwise just update the existing bus id thing
-								sed -i -r 's/\s*#*\s*BusID.*/\tBusID\t"PCI:'$BUS_ID'"/' $EXXC
-# 							fi
+							create_section_device
+							# this is redundant if set above but easier to do for all cases
+							sed -i -r 's/\s*#*\s*BusID.*/\tBusID\t"PCI:'$BUS_ID'"/' $EXXC
 						fi
 					fi
 				fi
@@ -511,7 +488,6 @@ set_card()
 		1002)
 			CARD=$FGLRX
 			foundCard='true'
-			#[ -d /SIDUX ] && error_handler 239 # tartaros support fglrx livecd install
 			;;
 		8086)
 			CARD=$INTEL
@@ -657,7 +633,6 @@ detect_card_version()
 #### -------------------------------------------------------------------
 kernel_string_info()
 {
-	local isSlh=''
 	# The kernel variables stuff needs to be in a separate function to get data from
 	# either the running kernel or the new installed kernel
 	if [ -n "$INSTALL_TO_KERNEL" ]
@@ -666,24 +641,11 @@ kernel_string_info()
 	else
 		KERNEL_VERSION=$( uname -r ) # full kernel name
 	fi
-	isSlh=$( echo $KERNEL_VERSION | grep -e "[\.|-]slh\(64\)\?[\.|-]" )
-	
-	KERNEL_BASE=$( echo $KERNEL_VERSION | cut -d '.' -f 1-2 ) # like: 2.6
 
-	# check if the kernel has either .slh. or -slh-
-	# if it does, treat it as a pure slh kernel (sorry)
-	if [ -n "$isSlh" ]
-	then
-		# NOTE:This is for slh kernels
-		#note the extra cut -d '-' -f 1 test is to dump the doubled 2.6.24 in new kernel strings.
-		# note: need to handle new slh syntax: 2.6.25-2.slh.3, the last cut test does that
-		KERNEL_THREE=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
-		KERNEL_THIRD=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
-	else
-		# NOTE: any kernel that doesn't have slh nor doubled 2.6.24
-		KERNEL_THREE=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
-		KERNEL_THIRD=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
-	fi	
+	IS_SIDUX_KERNEL=$( echo $KERNEL_VERSION | grep -e "[\.|-]slh\(64\)\?[\.|-]" )
+	KERNEL_BASE=$( echo $KERNEL_VERSION | cut -d '.' -f 1-2 ) # like: 2.6
+	KERNEL_THREE=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
+	KERNEL_THIRD=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
 
 	# to debug this function, run through with -T as well as -K
 	if [ "$TESTING" == 'true' ]
@@ -911,17 +873,6 @@ remove_package()
 		fi
 	done
  	echo "${B}Package(s) removed successfully, continuing with driver install.${N}"
-# 	echo "${M}Please hit ${C}y + <enter>${M} to remove it, or ${C}n${M} to exit now.${N}"
-# 	read response
-# 	case $response in
-# 		y|Y|yes)
-# 			apt-get remove --purge $1 || error_handler 190 "$1"
-# 			echo "${B}Package removed successfully, continuing with driver install.${N}"
-# 			;;
-# 		*) 
-# 			error_handler 191 "$1"
-# 			;;
-# 	esac
 }
 
 update_to_nonfree_sources()
@@ -949,7 +900,6 @@ update_to_nonfree_sources()
 		do
 			if [ -f "$i" ]
 			then
-				#cp $i $i-bu-$(date +%y-%m-%d)
 				echo "${B}Updating your ${C}$i${B} to use non-free / contrib now...${N}"
 				sed -i -r 's%(#?deb.*(debian\.org|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
 				# the second test requires the results of the first to work
@@ -960,23 +910,6 @@ update_to_nonfree_sources()
 		apt-get update && UPDATED='true' # need to refresh
 	fi
 	
-	log_info $FUNCNAME c
-}
-
-# get all required lib files first before anything else
-get_lib_files()
-{
-	log_info $FUNCNAME s
-	
-	case $CARD in
-		$NVIDIA)
-			check_update_script $LIB_NV_PATCHES
-			;;
-		$FGLRX)
-			check_update_script $LIB_FG_PATCHES
-			;;
-	esac
-
 	log_info $FUNCNAME c
 }
 
@@ -997,10 +930,6 @@ check_update_script()
 		$SCRIPT_NAME)
 			wget -q -O$fileNameTemp $TPD$1 || error_handler 198 $1
 
-# 			if [ ! -s $fileNameTemp ]
-# 			then
-# 				error_handler 199 $1 # if failed, exit with file name + error
-# 			fi
 			# all smxi files have this string as last line, so if it's there, the file should usually
 			# run fine, except for weird fringe cases where the ascii file is corrupted partially
 			isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
@@ -1068,10 +997,8 @@ apply_patch_file()
 		echo "${B}Running patch ${C}$patchFile${B}...${N}"
 
 		patch -p0 < $patchDirectory$patchFile || error_handler 179 $patchFile
-# 		if [ "$?" -gt 0 ]
-# 		then
-			rm -f $patchFile
-# 		fi
+		# remove the patch file after use just to keep the stuff neat long term
+		rm -f $patchFile
 		echo "${B}Patching completed...${N}"
 	else
 		error_handler 181 $patchFile
@@ -1091,7 +1018,6 @@ print_information_continue()
 	
 	if [ "$1" == 'standard' ]
 	then
-		# echo $3
 		if [ "$AUTORUN" != 'true' ]
 		then
 			echo "${M}Hit ${C}<enter>${M} to continue, or  ${C}x + <enter>${M} to exit now if there is an error.${N}"
@@ -1507,43 +1433,29 @@ driver_support_tests()
 		supported-driver)
 			case $CARD in
 				$FGLRX)
-					if [ "$KERNEL_THIRD" != '23' -a "$DRIVER_DEFAULT" == '8.42.3' ]
-					then
-						error_handler 235 23
-					fi
-					if [ "$KERNEL_THIRD" -ge 25 ] && [ "$DRIVER_DEFAULT" == '8-5' -o "$DRIVER_DEFAULT" == $DEBIAN_SID_FGLRX ] && [ "$TESTING" != 'true' ]
-					then
-						error_handler 246
-					fi
+					case $KERNEL_THIRD in
+						25|26)
+							case $DRIVER_DEFAULT in
+								8-5|8-4|$DEBIAN_SID_FGLRX)
+									# fglrx is working on sid kernels, so users who want up to date
+									# system will need to use debian sid kernels + fglrx
+									if [ -n "$IS_SIDUX_KERNEL" ] && [ "$TESTING" != 'true' ]
+									then
+										error_handler 246
+									fi
+									;;
+							esac
+							;;
+					esac
 					;;
 				$NVIDIA)
-					if [ "$KERNEL_THIRD" -ge 24 ]
-					then
-						misc_fixes nvidia-24-link # this might always be needed, all cases?
-					fi
-					# I'm going to leave these tests in case users want to run 2.6.24 for a while
-					# trying new 100.xxxx patch, so not using this now
-# 					if [ "$KERNEL_THIRD" -ge 25 ] && [ "$DRIVER_DEFAULT" == '100.14.19' -o "$DRIVER_DEFAULT" == '100.14.23' ]
-# 					then
-# 						error_handler 246
-# 					fi
+					case $KERNEL_THIRD in
+						24|25|26)
+							misc_fixes nvidia-24-link # this might always be needed, all cases?
+							;;
+					esac
 					;;
 			esac
-			
-# 			if [ "$CARD" == $NVIDIA -a "$KERNEL_THIRD" == '24' ]
-# 			then
-# 				if [ "$BITS" != '64' ]
-# 				then
-# 					misc_fixes nvidia-24-link # this might always be needed, all cases?
-# 				fi
-# 				if [ "$TESTING" != 'true' -a "$BITS" != '64' -a "$NV_DEFAULT" != '169.09' ]
-# 				then
-# 					error_handler 234 24
-# 				else
-# 					misc_fixes nvidia-24-link
-# 				fi
-# 			fi
-			
 			;;
 		nvidia-supported-driver)
 			:
@@ -1591,50 +1503,17 @@ set_download_info()
 	case $CARD in
 		$NVIDIA)
 			PKG=0
-			# if we use this, it will be used in the EMUL_32 section if at all, but not for 
-			# anything else
-			DRIVER_EMUL_32=1.0.${DRIVER_DEFAULT#1.0-}
-			# change this: only the 64 bit 7184 currently needs de nvidia, the rest US
-			if [ "$DRIVER_DEFAULT" == '1.0-7184' -a "$ARCH" == '_64' ]
-			then
-				country='de'
-			fi
 			SERVER=$country'.download.nvidia.com'
 			# set the package name, .run is added to it when it's needed
-			# note: emul can probably be dumped unless a user wants it
-			if [ "$ARCH" == '_64' -a "$EMUL_32" == '1' ]
-			then
-				DRIVER_FILE="NVIDIA-Linux-x86-$DRIVER_DEFAULT-pkg$PKG"
-				downloadUrl="http://$SERVER/XFree86/Linux-x86/$DRIVER_DEFAULT/"
-			else
-				DRIVER_FILE="NVIDIA-Linux-x86$ARCH-$DRIVER_DEFAULT-pkg$PKG"
-				downloadUrl="http://$SERVER/XFree86/Linux-x86$ARCH/$DRIVER_DEFAULT/"
-			fi
+			DRIVER_FILE="NVIDIA-Linux-x86$ARCH-$DRIVER_DEFAULT-pkg$PKG"
+			downloadUrl="http://$SERVER/XFree86/Linux-x86$ARCH/$DRIVER_DEFAULT/"
 			;;
 		$FGLRX)
-			# fglrx-driver_8.433-1_i386.deb
-			# fglrx-driver-dev_8.433-1_i386.deb
-			# fglrx-kernel-src_8.433-1_i386.deb
-			# fglrx-amdcccle_8.433-1_i386.deb
-			#https://a248.e.akamai.net/f/674/9206/0/www2.ati.com/drivers/linux/ati-driver-installer-8.443.1-x86.x86_64.run
-			
-			# because the ati dweebs are now bringing in two numbering schemas...
-			case $DRIVER_DEFAULT in
-				7-11) DRIVER_DEFAULT='8.433'
-					;;
-				7-12)	DRIVER_DEFAULT='8.443.1'
-					;;
-	# 			8-01)	DRIVER_DEFAULT='8.454.1'
-	# 				;;
-	# 			8-02)	DRIVER_DEFAULT='8.455.2'
-	# 				;;
-			esac
 			# set driver package name
 			# DRIVER_FILE="ati-driver-installer-$DRIVER_DEFAULT-$CPU"
 			DRIVER_FILE="ati-driver-installer-$DRIVER_DEFAULT-x86.x86_64"
 			# set download path
 			downloadUrl='http://www2.ati.com/drivers/linux/'
-			#[ "$ARCH" == 'amd64' ] && downloadUrl='http://www2.ati.com/drivers/linux/64bit/'
 			;;
 	esac
 
@@ -1764,10 +1643,14 @@ preinstall_cleanup()
 	fi
 	
 	####### NVIDIA removal...
+	# double check, clean up anything left after uninstaller runs
 	rm -f /usr/src/nvidia* 1>> $LOG_FILE 2>> $LOG_FILE
 	rm -rf /usr/src/modules/nvidia* 1>> $LOG_FILE 2>> $LOG_FILE
-		
-	rmmod nvidia 1>> $LOG_FILE 2>> $LOG_FILE
+	
+	if [ -n "$( lsmod | grep '^nvidia' )" ]
+	then
+		rmmod nvidia 1>> $LOG_FILE 2>> $LOG_FILE
+	fi
 	rm -f /lib/modules/$KERNEL_VERSION/kernel/drivers/video/nvidia.*o 1>> $LOG_FILE 2>> $LOG_FILE
 	rm -f /lib/modules/$KERNEL_VERSION/volatile/nvidia.*o >/dev/null 1>> $LOG_FILE 2>> $LOG_FILE
 	# this is legacy stuff, not currently present
@@ -1793,7 +1676,7 @@ preinstall_cleanup()
 	then
 		error_handler 192 $installError
 	fi
-	
+
 	## this is just to check after the above un-installer runs, this must be here or the 
 	## above packages won't be present, better to let nvidia handle uninstalling itself
 	# also can clean out install-binary-gfx packages or nvidia-glx if present
@@ -1815,17 +1698,10 @@ preinstall_cleanup()
 	
 	# this is present in some installs, debian etch default for instance 
 	GL='/usr/X11R6/lib/libGL.so.1.2'
-	for package in $( dpkg-divert --list | grep "diversion of $GL" | cut -f7 -d' ' | grep -v -e fglrx-driver -e xorg-driver-fglrx )
+	for package in $( dpkg-divert --list | grep "diversion of $GL" | cut -d ' ' -f 7 | grep -v -e fglrx-driver -e xorg-driver-fglrx )
 	do 
 		dpkg-divert --package $package --remove $GL  1>> $LOG_FILE 2>> $LOG_FILE
 	done
-	
-	# this can go after we're sure older systems have been updated
-	if [ -e $GL-temp ] 
-	then
-		rm -f $GL
-		mv $GL-temp $GL
-	fi
 	
 	log_info $FUNCNAME c
 }
@@ -1837,7 +1713,6 @@ run_patches()
 	
 	local patchFile=''
 	
-	# new 2.6.25 fixes
 	case $CARD in
 		$NVIDIA)
 			case $KERNEL_THIRD in 
@@ -1938,7 +1813,7 @@ run_driver_installer()
 			installerArgs="$DRIVER_DEFAULT --buildpkg $distroId/$distroCodeName"
 			echo "dist-id/dist-codename: $distroId/$distroCodeName" >> $LOG_FILE
 			
-			# tell stupid installer correct x version
+			# tell fglrx installer correct x version
 	# 		if [ -n "$( echo $X_VERSION | egrep '[1-2]\.[4-9]' )" ]
 	# 		then
 	# 			export XVERSION=$X_VERSION
@@ -2097,11 +1972,11 @@ clean_up_fglrx_junk()
 # this is only for fgrlx
 install_fglrx_debs()
 {
-	# ati change this syntax practically every damned month... hope they stabilize
+	# ati change this syntax too much... hope they stabilize
 	# fglrx-amdcccle_8.443.1-1_i386.deb
-	#fglrx-driver_8.443.1-1_i386.deb
+	# fglrx-driver_8.443.1-1_i386.deb
 	# fglrx-driver-dev_8.443.1-1_i386.deb
-	#fglrx-installer_8.443.1-1_i386.changes
+	# fglrx-installer_8.443.1-1_i386.changes
 	# fglrx-kernel-src_8.443.1-1_i386.deb
 	if [ "$CARD" == $FGLRX ]
 	then
@@ -2116,8 +1991,8 @@ install_fglrx_debs()
 		
 		log_info $FUNCNAME s
 		
-		# this is slightly anal, but may handle a case where extra debs exist
-		# due to weird user action. Also protects against new ati foolishness.
+		# this is slightly excessive, but may handle a case where extra debs exist
+		# due to weird user action. Also protects against new ati randomness.
 		if [ -f $fgDriver ]
 		then
 			:
@@ -2165,10 +2040,7 @@ install_fglrx_debs()
 		then
 			$usunf
 		fi
-		
-# 		dpkg -i $fgDriver 1>> $LOG_FILE 2>> $LOG_FILE || error_handler 195 $fgDriver
-# 		dpkg -i $fgAmdcccle 1>> $LOG_FILE 2>> $LOG_FILE || error_handler 195 $fgAmdcccle
-# 		dpkg -i $fgKernelSrc 1>> $LOG_FILE 2>> $LOG_FILE || error_handler 195 $fgKernelSrc
+
 		# due to problems with config file questions, trying no logging of 1>> now
 		dpkg -i $fgDriver 2>> $LOG_FILE || error_handler 195 $fgDriver
  		dpkg -i $fgAmdcccle 2>> $LOG_FILE || error_handler 195 $fgAmdcccle
@@ -2187,7 +2059,6 @@ install_fglrx_debs()
 		echo "${B}Placing ATI packages on hold to avoid dist-upgrade issues with Debian fglrx drivers...${N}"
 		echo fglrx-amdcccle hold | dpkg --set-selections
 		echo fglrx-driver hold | dpkg --set-selections
-		## fglrx module hold | dpkg --set-selections
 	
 		log_info $FUNCNAME c
 	fi
@@ -2635,6 +2506,7 @@ update_xorg()
 	local ignoreDisplay='Option\t"IgnoreDisplayDevices"\t"TV"\n\t'
 	# fglrx stuff, we're using default agpart no now instead
 	local agpart='no' layout='AUTO,AUTO' allowGlx=''
+	
 	# this is set in rare cases of dual card early copy of xorg.conf
 	if [ "$XORG_BACKED_UP" != 'true' ]
 	then
@@ -2683,10 +2555,12 @@ update_xorg()
 				# only use fglrx internal agpart if not in system and never for 64 bit
 				#[ "$( lsmod | grep -c 'agpgart' )" -gt 0 -o "$CPU" == 'x86_64' ] && agpart='no'
 				
-				if [ "$LAPTOP" == 'true' ]
-				then
-					layout='LVDS,AUTO' # no space in string
-				fi
+				# this is only for laptops
+# 				if [ -n "$(find /proc/acpi/battery/ -mindepth 1 -type d 2>/dev/null)" ]
+# 				then
+# 					layout='LVDS,AUTO' # no space in string
+# 				fi
+
 				# \n\tOption      "UseInternalAGPGART" "'$agpart'"\n\tOption      "VideoOverlay" "on"
 				# \n\tOption      "MonitorLayout" "'$layout'
 				perl -pi -e 's/^([\s]*Load\s*"extmod")/#\1\n\tSubSection  "extmod"\n\t  Option  "omit xfree86-dga"\n\tEndSubSection/;
@@ -2791,6 +2665,7 @@ show_options()
 	echo "-C Skip Xorg configuration. Only use this if your Xorg is already working with your driver."
 	echo "   Main use is if you have dual card output and don't want xorg.conf changed."
 	echo "-d Remove IgnoreDisplayDevices, allow TV for example (nVidia cards only)."
+	# leaving these commented out in case new experimental xorg drivers need to be tested
 # 	echo "-e Use experimental drivers (currently: xorg ati only)."
 # 	echo "-E Adds extra experimental driver features. Currently libdrm2 things for ati."
 	echo "-h View this help menu."
@@ -3040,11 +2915,6 @@ preinstall_cleanup
 if [ "$USE_DEBIAN_SID" != 'true' ]
 then
 	# note this must occur before binary driver install
-	# legacy, leaving this just in case I need to restore lib method
-# 	if [ "$SKIP_FUNCTION" != 'true' -a "$PRINT_VER" != 'true' ]
-# 	then
-# 		get_lib_files
-# 	fi
 	run_patches
 	run_driver_installer
 	post_installer_steps
