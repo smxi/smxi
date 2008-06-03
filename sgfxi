@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.2
-####  Date: June 2 2008
+####  version: 3.1.3
+####  Date: June 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -300,6 +300,9 @@ error_handler()
 			;;
 		231) 
 			errorData="The file: $errorExtra appears to be corrupted. Please try to update again."
+			;;
+		230)
+			errorData="Could not detect gcc version: $errorExtra, or it is not installed.\nPlease let the script maintainer know, this may be a bug in the script."
 			;;
 		# specific install issues
 		200) 
@@ -1598,6 +1601,9 @@ prep_install()
 {
 	log_info $FUNCNAME s
 	
+	local gccVersion=$( egrep -io 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | egrep -o '[4-6]\.[0-9]{1,2}' )
+	local ubgv="/usr/bin/gcc-$gccVersion"
+	
 	# We now need to do active detection of fglrx-install directory name due to
 	# silly random directory naming schema ati just started with 8.35.5
 	# hint to ATI: just copy nvidia, they do it better than you!
@@ -1619,13 +1625,12 @@ prep_install()
 	
 	cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
 	
-	CC=gcc-$( perl -pe '($_)=/gcc.[Vv]ersion\s(4\.\d|3\.\d|2\.\d+)/;' /proc/version )
-	if [ -e /usr/bin/$CC ]
+	if [ -x "$ubgv" ]
 	then
-		CC=/usr/bin/$CC || unset CC
+		export CC=$ubgv
+	else
+		error_handler 230 "$ubgv"
 	fi
-	export CC
-	
 	log_info $FUNCNAME c
 }
 
