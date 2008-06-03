@@ -1724,7 +1724,7 @@ run_patches()
 				25)
 					apply_module_patch pre
 					case $DRIVER_DEFAULT in
-						173.08|171.06|169.12)
+						171.06|169.12)
 							patchFile='NVIDIA_kernel-169.12-2286310.diff'
 							apply_patch_file $patchFile
 							;;
