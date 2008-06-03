@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.4
+####  version: 3.1.5
 ####  Date: June 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1839,7 +1839,7 @@ run_driver_installer()
 			fi
 			installerArgs="$installerArgs -k $KERNEL_VERSION"
 			./$installer $installerArgs 1>> $LOG_FILE 2>> $LOG_FILE || installError="$?"
-			# remove the patched stuff before anything else happens
+			# reverting the patched stuff before anything else happens
 			apply_module_patch post
 			;;
 		$FGLRX)
@@ -2678,7 +2678,7 @@ show_options()
 	fi
 	echo "Script Requirements: Debian Sid or Sidux. No other distro supported!"
 	echo "Xorg version required: 7.1/1.1 or greater - Your X version: $xVersion"
-	echo "Linux Kernel required: 2.6.18 or greater - Your kernel: $KERNEL_VERSION"
+	echo "Linux Kernel required: 2.6.18 or greater - Your kernel: $(uname -r)"
 	echo $LINE
 	echo "'default:' - This is the driver installed automatically unless it is not supported by"
 	echo "your card. Some older cards will force an override of this basic default. Script will"
