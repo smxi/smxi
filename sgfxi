@@ -1744,6 +1744,7 @@ run_patches()
 					esac
 					;;
 				26)
+					debian_kernel_patch pre
 					case $DRIVER_DEFAULT in
 						173.14.05)
 							patchFile='NVIDIA_kernel-173.14.05-2419292.diff'
@@ -1777,6 +1778,7 @@ run_patches()
 }
 
 # arg: $1 - pre/post Undoing the patches in case the xen stuff is needed later
+# as of 2.6.25-2, debian kernels are compiled with xen, which breaks nvidia currently
 debian_kernel_patch()
 {
 	local lmkv="/lib/modules/$KERNEL_VERSION"

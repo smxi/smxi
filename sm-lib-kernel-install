@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.2.2
+####  version: 2.2.3
 ####  Date: June 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -36,7 +36,7 @@ advanced_kernel_install()
 {
 	local found='false' kernel='' ck='' dcka='' options='' opt='' 
 	local text_1='' text_2=''  rcMessage='' startMeta='' debianKernel=''
-	local optionList=''
+	local optionList='' listCount='' dkiOption=''
 	
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
@@ -47,21 +47,35 @@ advanced_kernel_install()
 	fi
 	# add the list closer items
 	local debianKernelOption=''
-	local kernelCount=$( echo $KERNEL_LIST | wc -w )
+	local kernelCount=$( wc -w <<< $KERNEL_LIST )
 	
-	[ "$TESTING" == 'true' ] && debianKernelOption='install-debian-kernel'
+	if [ "$TESTING" == 'true' ]
+	then
+		debianKernelOption='install-debian-kernel'
+	fi
 	optionList="$KERNEL_LIST $debianKernelOption kernel-metapackage-options back-to-main-menu"
 	
-	local kmOption=$(( $kernelCount + 1 )) 
-	local bmmOption=$(( $kernelCount + 2 )) 
+	listCount=$( wc -w <<< $optionList )
+	
+	local dkiOption=$(( $listCount - 2 )) 
+	local kmOption=$(( $listCount - 1 )) 
+	local bmmOption=$listCount 
 
 	print_lib_info $LIB_KERNEL_INSTALL
 	echo $MLINE
-	echo "${M}NOTE: These are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
-	echo "FOR NORMAL APT INSTALL, RETURN TO MAIN MENU!!"
+	echo "${M}NOTE: The listed kernels are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
+	echo "For current, standard, sidux apt kernel install, RETURN TO MAIN MENU!!"
 	echo
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
 	echo
+	if [ "$TESTING" == 'true' ]
+	then
+		echo "${C}$dkiOption - install-debian-kernel${M} NEW!${S} Installs standard Debian kernel, current version"
+		echo "     as well as Debian kernel modules, just like the apt kernel installer for sidux."
+		echo "     Note: you will see which specific Debian kernel will be installed in the next step, "
+		echo "     and can skip the install if you don't want it."
+		echo
+	fi
 	echo "${C}$kmOption - kernel-metapackage-options${M} NEW!${S} Kernel metapackage options: remove, install"
 	echo "     sidux kernel/module metapackages. Also, install current apt kernel + modules."
 	echo
@@ -128,22 +142,25 @@ advanced_kernel_install()
 # args: $1 - advanced/apt/apt-debian
 double_check_kernel()
 {
-	local repeat='' options='' opt='' kernelFile=''
+	local repeat='' options='' opt='' kernelFile='' extraText=''
 	
 	case $1 in
 		apt)
 			kernelFile="$CURRENT_APT_KERNEL" 
+			extraText='current sidux'
 			;;
 		apt-debian)
 			kernelFile="$CURRENT_DEBIAN_KERNEL" 
+			extraText='vanilla Debian'
 			;;
 		advanced|standard)
 			kernelFile=$KERNEL_FILE
+			extraText='sidux archived'
 			;;
 	esac
 	
 	echo $LINE
-	echo "${S}Ok, installing this kernel: ${C}$kernelFile${S}"
+	echo "${S}You will be installing the ${C}$extraText${S} kernel: ${C}$kernelFile${S}"
 	echo "${Q}Is this correct?"
 	echo $LINE
 	echo "${C}1${S} - Yes, install this kernel now."
