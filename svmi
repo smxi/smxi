@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 1.0.0
+####  version: 1.0.1
 ####  Date: June 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -581,6 +581,11 @@ vm_main_selector()
 	fi
 	if [ -n "$GCC_EXPORT" ]
 	then
+		# the correct g++ version is required for the gcc version to build module
+		if [ ! -x "/usr/bin/g++-$GCC_EXPORT" ]
+		then
+			install_package g++-$GCC_EXPORT
+		fi
 		export CC=/usr/bin/gcc-$GCC_EXPORT
 	fi
 
