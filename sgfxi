@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.3
+####  version: 3.1.4
 ####  Date: June 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1722,7 +1722,7 @@ run_patches()
 		$NVIDIA)
 			case $KERNEL_THIRD in 
 				25)
-					debian_kernel_patch pre
+					apply_module_patch pre
 					case $DRIVER_DEFAULT in
 						171.06|169.12)
 							patchFile='NVIDIA_kernel-169.12-2286310.diff'
@@ -1749,7 +1749,7 @@ run_patches()
 					esac
 					;;
 				26)
-					debian_kernel_patch pre
+					apply_module_patch pre
 					case $DRIVER_DEFAULT in
 						173.14.05)
 							patchFile='NVIDIA_kernel-173.14.05-2419292.diff'
@@ -1784,23 +1784,24 @@ run_patches()
 
 # arg: $1 - pre/post Undoing the patches in case the xen stuff is needed later
 # as of 2.6.25-2, debian kernels are compiled with xen, which breaks nvidia currently
-debian_kernel_patch()
+apply_module_patch()
 {
 	local lmkv="/lib/modules/$KERNEL_VERSION"
+	local bccx=$( grep -i 'CONFIG_XEN=y' /boot/config-$KERNEL_VERSION )
 	
 	# the debian sid nvidia drivers are now working fine with xen enabled sid kernels
-	if [ -z "$IS_SIDUX_KERNEL" ] && [ -d "$lmkv" -a "$USE_DEBIAN_SID" != 'true' -a "$TESTING" == 'true' ]
+	if [ "$USE_DEBIAN_SID" != 'true' ] && [ -d "$lmkv" -a -n "$bccx" ]
 	then
 		# patch source: http://blog.creonfx.com/linux/how-to-install-nvidia-driver-on-2625-2-debian-kernel-with-xen
 		cd $lmkv
 		case $1 in 
 			pre)
-				echo "${B}Patching for Debian Kernel, this might take a while...${N}"
+				echo "${B}Running pre-install module patches (this might take a while)...${N}"
 				grep 'CONFIG_XEN' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_XEN/CONFIG_LUPO/g' {}
 				export IGNORE_XEN_PRESENCE=1
 				;;
 			post)
-				echo "${B}Removing patch for Debian Kernel, this might take a while...${N}"
+				echo "${B}Reverting pre-install module patches (this might take a while)...${N}"
 				grep 'CONFIG_LUPO' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_LUPO/CONFIG_XEN/g' {}
 				;;
 		esac
@@ -1839,7 +1840,7 @@ run_driver_installer()
 			installerArgs="$installerArgs -k $KERNEL_VERSION"
 			./$installer $installerArgs 1>> $LOG_FILE 2>> $LOG_FILE || installError="$?"
 			# remove the patched stuff before anything else happens
-			debian_kernel_patch post
+			apply_module_patch post
 			;;
 		$FGLRX)
 			distroId='Debian'
