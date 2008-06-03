@@ -1717,7 +1717,7 @@ run_patches()
 		$NVIDIA)
 			case $KERNEL_THIRD in 
 				25)
-					if [ -z "$IS_SIDUX_KERNEL" ]
+					if [ -z "$IS_SIDUX_KERNEL" -a "$TESTING" == 'true' ]
 					then
 						if [ -d "/lib/modules/$KERNEL_VERSION" -a "$USE_DEBIAN_SID" != 'true' ]
 						then
