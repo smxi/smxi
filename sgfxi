@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.0
+####  version: 3.1.1
 ####  Date: June 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1717,7 +1717,7 @@ run_patches()
 		$NVIDIA)
 			case $KERNEL_THIRD in 
 				25)
-					if [ -z "$IS_SIDUX_KERNEL" -a "$TESTING" == 'true' ]
+					if [ -z "$IS_SIDUX_KERNEL" ]
 					then
 						debian_kernel_patch pre
 					fi
@@ -1783,7 +1783,7 @@ run_patches()
 debian_kernel_patch()
 {
 	local lmkv="/lib/modules/$KERNEL_VERSION"
-	if [ -d "$lmkv" -a "$USE_DEBIAN_SID" != 'true' ]
+	if [ -d "$lmkv" -a "$USE_DEBIAN_SID" != 'true' -a "$TESTING" == 'true' ]
 	then
 		cd $lmkv
 		case $1 in 
@@ -1795,7 +1795,6 @@ debian_kernel_patch()
 			post)
 				echo "${B}Removing patch for Debian Kernel, this might take a while...${N}"
 				grep 'CONFIG_LUPO' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_LUPO/CONFIG_XEN/g' {}
-				
 				;;
 		esac
 		cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
@@ -1833,7 +1832,10 @@ run_driver_installer()
 			installerArgs="$installerArgs -k $KERNEL_VERSION"
 			./$installer $installerArgs 1>> $LOG_FILE 2>> $LOG_FILE || installError="$?"
 			# remove the patched stuff before anything else happens
-			debian_kernel_patch post
+			if [ -z "$IS_SIDUX_KERNEL" ]
+			then
+				debian_kernel_patch post
+			fi
 			;;
 		$FGLRX)
 			distroId='Debian'
