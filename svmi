@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 0.9.29
-####  Date: May 31 2008
+####  version: 1.0.0
+####  Date: June 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -578,6 +578,10 @@ vm_main_selector()
 	if [ "$SM_INSTALL" == 'true' ]
 	then
 		quitContinue='continue'
+	fi
+	if [ -n "$GCC_EXPORT" ]
+	then
+		export CC=/usr/bin/gcc-$GCC_EXPORT
 	fi
 
 	echo $MLINE
@@ -1204,6 +1208,7 @@ show_options()
 	fi
 	echo "These are your supported options:"
 	echo "-A Run the any any install non-interactively."
+	echo "-g Lets you use a specific gcc version to compile module. Example: -g 4.1"
 	echo "-h View this help menu."
 	echo "-M Run the vbox module install non-interactively."
 	echo "-R Skips self updating feature. No restart."
@@ -1225,7 +1230,7 @@ show_options()
 	fi
 }
 
-while getopts ABDFhMPRSTuvV:Z opt
+while getopts ABDFg:hMPRSTuvV:Z opt
 do
 	case $opt in
 		A) AUTORUN_ANYANY='true'
@@ -1243,6 +1248,16 @@ do
 		F) # for debugging purposes only
 			SKIP_FUNCTION='true'
 			START_OPTIONS=$START_OPTIONS'F'
+			;;
+		g)
+			if [ ! -x "/usr/bin/gcc-$OPTARG" ]
+			then
+				echo "${E}You do  not have the version of gcc you requested installed for export: ${C}$OPTARGS"
+				echo "${S}These are your installed versions: $( echo $( ls /usr/bin/gcc-* | cut -d '-' -f 2 ) )${N}"
+				exit 1
+			else
+				GCC_EXPORT=$OPTARG
+			fi
 			;;
 		M) AUTORUN_VBOX_MODULE='true'
 			START_OPTIONS=$START_OPTIONS'M'
@@ -1289,6 +1304,10 @@ fi
 if [ -n "$VBOX_ALT_VERSION" ]
 then
 	START_OPTIONS=$START_OPTIONS" -V $VBOX_ALT_VERSION"
+fi
+if [ -n "$GCC_EXPORT" ]
+then
+	START_OPTIONS=$START_OPTIONS" -g $GCC_EXPORT"
 fi
 
 ########################################################################
