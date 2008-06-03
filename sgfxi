@@ -1722,8 +1722,8 @@ run_patches()
 						if [ -d "/lib/modules/$KERNEL_VERSION" -a "$USE_DEBIAN_SID" != 'true' ]
 						then
 							echo "${B}Patching for Debian Kernel, this might take a while...${N}"
-# 							cd /lib/modules/$KERNEL_VERSION
-# 							grep CONFIG_XEN . -Rl | xargs -i sed -i -e 's/CONFIG_XEN/CONFIG_LUPO/g' {}
+							cd /lib/modules/$KERNEL_VERSION
+ 							grep CONFIG_XEN . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_XEN/CONFIG_LUPO/g' {}
 							export IGNORE_XEN_PRESENCE=1
 							cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
 						fi
