@@ -1786,6 +1786,7 @@ debian_kernel_patch()
 	# the debian sid nvidia drivers are now working fine with xen enabled sid kernels
 	if [ -z "$IS_SIDUX_KERNEL" ] && [ -d "$lmkv" -a "$USE_DEBIAN_SID" != 'true' -a "$TESTING" == 'true' ]
 	then
+		# patch source: http://blog.creonfx.com/linux/how-to-install-nvidia-driver-on-2625-2-debian-kernel-with-xen
 		cd $lmkv
 		case $1 in 
 			pre)
