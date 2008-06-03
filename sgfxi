@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.0.13
+####  version: 3.1.0
 ####  Date: June 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1719,14 +1719,7 @@ run_patches()
 				25)
 					if [ -z "$IS_SIDUX_KERNEL" -a "$TESTING" == 'true' ]
 					then
-						if [ -d "/lib/modules/$KERNEL_VERSION" -a "$USE_DEBIAN_SID" != 'true' ]
-						then
-							echo "${B}Patching for Debian Kernel, this might take a while...${N}"
-							cd /lib/modules/$KERNEL_VERSION
- 							grep CONFIG_XEN . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_XEN/CONFIG_LUPO/g' {}
-							export IGNORE_XEN_PRESENCE=1
-							cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
-						fi
+						debian_kernel_patch pre
 					fi
 					case $DRIVER_DEFAULT in
 						171.06|169.12)
@@ -1786,6 +1779,29 @@ run_patches()
 	log_info $FUNCNAME c
 }
 
+# arg: $1 - pre/post Undoing the patches in case the xen stuff is needed later
+debian_kernel_patch()
+{
+	local lmkv="/lib/modules/$KERNEL_VERSION"
+	if [ -d "$lmkv" -a "$USE_DEBIAN_SID" != 'true' ]
+	then
+		cd $lmkv
+		case $1 in 
+			pre)
+				echo "${B}Patching for Debian Kernel, this might take a while...${N}"
+				grep 'CONFIG_XEN' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_XEN/CONFIG_LUPO/g' {}
+				export IGNORE_XEN_PRESENCE=1
+				;;
+			post)
+				echo "${B}Removing patch for Debian Kernel, this might take a while...${N}"
+				grep 'CONFIG_LUPO' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_LUPO/CONFIG_XEN/g' {}
+				
+				;;
+		esac
+		cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
+	fi
+}
+
 ### run patch module, then install
 run_driver_installer()
 {
@@ -1816,6 +1832,8 @@ run_driver_installer()
 			fi
 			installerArgs="$installerArgs -k $KERNEL_VERSION"
 			./$installer $installerArgs 1>> $LOG_FILE 2>> $LOG_FILE || installError="$?"
+			# remove the patched stuff before anything else happens
+			debian_kernel_patch post
 			;;
 		$FGLRX)
 			distroId='Debian'
