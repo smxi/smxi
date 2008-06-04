@@ -137,7 +137,7 @@ fi
 ln -fs "linux-headers-${VER}" /usr/src/linux >/dev/null 2>&1
 
 # try to install external dfsg-free module packages
-for i in acer_acpi acerhk acx atl2 aufs et131x fsam7400 gspca kqemu sqlzma ndiswrapper omnibook quickcam av5100 squashfs vboxadd vboxdrv; do
+for i in acer_acpi acerhk acx atl2 aufs av5100 btrfs eeepc_acpi et131x fsam7400 gspca kqemu ndiswrapper omnibook qc_usb quickcam r5u870 rfswitch sfc sqlzma squashfs tp_smapi vboxadd vboxdrv; do
 	MODULE_PATH="$(/sbin/modinfo -k $(uname -r) -F filename "${i}" 2>/dev/null)"
 	if [ -n "${MODULE_PATH}" ]; then
 		MODULE_PACKAGE="$(dpkg -S ${MODULE_PATH} 2>/dev/null)"
