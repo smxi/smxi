@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.0
+####  version: 1.3.1
 ####  Date: June 4 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -65,7 +65,7 @@ b43_fwcutter_fix_1()
 		echo $LINE
 		echo "${S}Running ${C}b43-fwcutter${S} fix now...${N}"
 		# odd trick here, this will remove console-tools
-		package_remover 'b43-fwcutter' '--purge'
+		package_remover 'b43-fwcutter' '--purge --yes'
 		rm -rf /lib/firmware/b43 /lib/firmware/b43legacy
 		package_installer 'b43-fwcutter' 'install-always'
 		set_sticky_prefs $prefId 
