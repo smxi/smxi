@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.4
-####  Date: June 2 2008
+####  version: 7.29.5
+####  Date: June 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -913,10 +913,11 @@ launch_function_trigger()
 			;;
 		kernel-mirrors)
 			prefId='smxi-kernel-mirror-2'
-			scriptOption=$CHANGE_KERNEL_MIRROR
 			scriptFunction='change_kernel_mirrors'
 			# test to make sure it's not a dead mirror
 			force_kernel_mirror_change
+			# must come after since it's reset above if needed
+			scriptOption=$CHANGE_KERNEL_MIRROR
 			;;
 		kernel-metapackage)
 			prefId='kernel-metapackage-1'
