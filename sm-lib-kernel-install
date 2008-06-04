@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.2.4
+####  version: 2.2.5
 ####  Date: June 3 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -49,10 +49,10 @@ advanced_kernel_install()
 	local debianKernelOption=''
 	local kernelCount=$( wc -w <<< $KERNEL_LIST )
 	
-	if [ "$TESTING" == 'true' ]
-	then
+# 	if [ "$TESTING" == 'true' ]
+# 	then
 		debianKernelOption='install-debian-kernel'
-	fi
+# 	fi
 	optionList="$KERNEL_LIST $debianKernelOption kernel-metapackage-options back-to-main-menu"
 	
 	listCount=$( wc -w <<< $optionList )
@@ -68,14 +68,14 @@ advanced_kernel_install()
 	echo
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
 	echo
-	if [ "$TESTING" == 'true' ]
-	then
+# 	if [ "$TESTING" == 'true' ]
+# 	then
 		echo "${C}$dkiOption - install-debian-kernel${M} NEW!${S} Installs standard Debian kernel, current version"
 		echo "     as well as Debian kernel modules, just like the apt kernel installer for sidux."
 		echo "     Note: you will see which specific Debian kernel will be installed in the next step, "
 		echo "     and can skip the install if you don't want it."
 		echo
-	fi
+# 	fi
 	echo "${C}$kmOption - kernel-metapackage-options${M} NEW!${S} Kernel metapackage options: remove, install"
 	echo "     sidux kernel/module metapackages. Also, install current apt kernel + modules."
 	echo

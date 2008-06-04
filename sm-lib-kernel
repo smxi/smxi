@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.1.5
-####  Date: June 2 2008
+####  version: 2.1.6
+####  Date: June 3 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -174,11 +174,10 @@ kernel_question()
 	echo $MLINE
 	eval $kernelsNotEqual
 	echo "${C}$removeModules${S} - Remove installed kernel modules. Offers list of modules, remove one by one."
-	echo "${C}$advanced${S} - Advanced Kernel Install. The advanced options allow you to select zipped"
-	echo "    kernels from a list. Here you can select other kernel versions in case you are"
-	echo "    having trouble with your current one."
-	echo "    ${M}NEW!${S} Option to run ${C}kernel meta-package${S} handler. This lets you"
-	echo "    remove all kernel meta-packages, install them, and install apt kernels."
+	echo "${C}$advanced${S} - Advanced Kernel Install. The advanced options allow you do the following:"
+	echo "    ${C}*${S} Install archived sidux kernels. Sometimes older kernels work and newer ones don't for some users."
+	echo "    ${C}*${S} ${M}NEW!${S} Debian vanilla kernel install, with module installer automated."
+	echo "    ${C}*${S} ${C}kernel meta-package${S} Remove kernel meta-packages; install them; install apt kernels."
 	echo
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
 	#echo "    which you want to install the modules, and if you installed that kernel with this script."
