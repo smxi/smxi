@@ -999,8 +999,8 @@ force_kernel_mirror_change()
 		echo "${M}SMXI sidux-apt Kernel / Sources Mirror Update"
 		echo $MLINE
 		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
-		echo "is not functioning. You will need to update your kernel mirror to use another"
-		echo "mirror in your region. You will only see this question one time."
+		echo "is not functioning. You will need to update your sidux mirrors to use another"
+		echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
 		echo
 		echo -e "${Q}Would you like to reset your mirror now?$YNE"
 		echo $LINE
