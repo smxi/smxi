@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.8.1
-####  Date: June 3 2008
+####  version: 1.8.2
+####  Date: June 4 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -985,10 +985,12 @@ update_to_nonfree_sources()
 # screws up, or whatever else might happen, and has.
 force_kernel_mirror_change()
 {
-	
+	# core-eu-4:http://ftp.spline.de/pub/sidux/debian/ 
 	local prefId='smxi-kernel-borked-1'
 	local smPref=$( sm_pref_tester $prefId )
-	local isBorked=$( echo $( get_set_mirror 'get' 'mirrors' ) | egrep '(eecs.wsu.edu)' )
+	#local isBorked=$( echo $( get_set_mirror 'get' 'mirrors' ) | egrep '(http://ftp.spline.de/pub/sidux/debian/)' )
+	local borkedMirror='http://ftp.spline.de/pub/sidux/debian/'
+	local isBorked=$( grep -Ro -m1 "$borkedMirror" /etc/apt/ 2>/dev/null )
 	local reply=''
 	
 	if [ -n "$isBorked" -a "$smPref" -eq 0 ]
@@ -996,7 +998,7 @@ force_kernel_mirror_change()
 		echo $MLINE
 		echo "${M}SMXI sidux-apt Kernel / Sources Mirror Update"
 		echo $MLINE
-		echo "${S}Your current sidux-apt/kernel mirror ${C}$isBorked${S}"
+		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
 		echo "is not functioning. You will need to update your kernel mirror to use another"
 		echo "mirror in your region. You will only see this question one time."
 		echo
@@ -1007,12 +1009,12 @@ force_kernel_mirror_change()
 		case $response in
 			y|Y|yes|YES|Yes)
 				echo "${S}Ok, you can now select a new kernel mirror...${N}"
-				set_sticky_prefs $prefId
+				#set_sticky_prefs $prefId
 				CHANGE_KERNEL_MIRROR='true'
 				;;
 			*)
 				echo "${S}Ok, but remember, to change your mirror, just start ${C}$SCRIPT_NAME${S} with ${C}-M${S} option.${N}"
-				set_sticky_prefs $prefId
+				#set_sticky_prefs $prefId
 				;;
 		esac
 	fi
@@ -1164,6 +1166,8 @@ get_set_mirror()
 	local currentMirror='' isSiduxMulti='' currentIsSidux='' siduxTempHolder='' 
 	local siduxSpecs='' updateIt='' siduxTempMainHolder='' sources='' 
 	local counter=0 sourcesCount=0
+	# this is needed to handle bad mirror cases in get
+	local badMirrors='core-eu-4:http://ftp.spline.de/pub/sidux/debian/  '
 	# can't loop this endlessly
 	if [ "$3" != 'get-them' ]
 	then
@@ -1196,7 +1200,7 @@ get_set_mirror()
 			case $1 in
 				get)
 					counter=$(( $counter + 1 ))
-					for mirror in $siduxMirrors
+					for mirror in $siduxMirrors $badMirrors
 					do
 						mirrorTemp=$(echo $mirror | cut -d ':' -f 2-4 )
 						# it's very important here to search only for start deb, no #
@@ -1358,13 +1362,13 @@ list_distro_mirrors()
 	# usa-2:http://lug01.eecs.wsu.edu/sidux/ 
 	# usa-1:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/ 
 	# new-zealand-1:ftp://debian.co.nz/Sidux/debian/  
+	# core-eu-4:http://ftp.spline.de/pub/sidux/debian/  
 	local siduxMirrors="
 	core-eu-1:http://debian.tu-bs.de/project/sidux/debian/  
 	core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/  
 	core-eu-3:ftp://ftp.spline.de/pub/sidux/debian/  
-	core-eu-4:http://ftp.spline.de/pub/sidux/debian/  
-	core-eu-5:http://sidux.com/debian/  
-	core-eu-6:http://sidux.net/debian/  
+	core-eu-4:http://sidux.com/debian/  
+	core-eu-5:http://sidux.net/debian/  
 	alt-africa-1:http://ftp.leg.uct.ac.za/pub/linux/sidux/debian/ 
 	alt-asia-1:http://ftp.tw.debian.org/pub/Sidux/debian/ 
 	alt-asia-2:ftp://ftp.tw.debian.org/pub/Sidux/debian/ 

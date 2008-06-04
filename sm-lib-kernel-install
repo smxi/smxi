@@ -484,8 +484,6 @@ install_apt_kernel_modules()
 				if grep-aptavail -PX "${modulePackage}" >/dev/null 2>&1
 				then
 					#echo "${SPACER}${S}Checkinging kernel module: ${C}$modulePackage${N}"
-					#apt-get install $modulePackage
-					#apt-get --assume-yes install "${modulePackage}"
 					package_installer "${modulePackage}" 'install-missing'
 					if [ "$?" -ne 0 ]
 					then
