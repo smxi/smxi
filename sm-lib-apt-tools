@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.8.2
+####  version: 1.8.3
 ####  Date: June 4 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1001,6 +1001,11 @@ force_kernel_mirror_change()
 		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
 		echo "is not functioning. You will need to update your sidux mirrors to use another"
 		echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
+		if [ -n "$( grep 'ftp.spline.de' <<< $borkedMirror )" ]
+		then
+			echo "${M}NOTE: http://ftp.spline.de is a ${C}CORE${M} mirror, so make sure to pick another ${C}core${M} when you replace it."
+		fi
+		
 		echo
 		echo -e "${Q}Would you like to reset your mirror now?$YNE"
 		echo $LINE
