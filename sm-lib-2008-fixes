@@ -44,6 +44,10 @@ run_2008_fixes()
 			console_tools_kbd_fix_1
 			b43_fwcutter_fix_1
 		fi
+		if [ "$DISTRO_LEVEL" -lt 12 ]
+		then
+			:
+		fi
 		
 	elif [ "$1" == 'post' ]
 	then
@@ -64,7 +68,6 @@ b43_fwcutter_fix_1()
 	then
 		echo $LINE
 		echo "${S}Running ${C}b43-fwcutter${S} fix now...${N}"
-		# odd trick here, this will remove console-tools
 		package_remover 'b43-fwcutter' '--purge --yes'
 		rm -rf /lib/firmware/b43 /lib/firmware/b43legacy
 		package_installer 'b43-fwcutter' 'install-always'
