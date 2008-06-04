@@ -445,7 +445,7 @@ install_the_apt_kernel()
 # add: tp-smapi- r5u870- eeepc-acpi- qc-usb- sfc- rfswitch-
 install_apt_kernel_modules()
 {
-	local supportedModules='acer_acpi acerhk acx atl2 aufs av5100 btrfs et131x fsam7400 gspca kqemu ndiswrapper omnibook qc_usb quickcam r5u870 rfswitch sfc sqlzma squashfs tp_smapi vboxadd vboxdrv'
+	local supportedModules='acer_acpi acerhk acx atl2 aufs av5100 btrfs eeepc_acpi et131x fsam7400 gspca kqemu ndiswrapper omnibook qc_usb quickcam r5u870 rfswitch sfc sqlzma squashfs tp_smapi vboxadd vboxdrv'
 	local module='' modulePath='' modulePackage='' moduleType='' kernelArch='686'
 	local extraModuleText=''
 	
