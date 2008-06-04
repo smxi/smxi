@@ -65,7 +65,7 @@ b43_fwcutter_fix_1()
 		echo $LINE
 		echo "${S}Running ${C}b43-fwcutter${S} fix now...${N}"
 		# odd trick here, this will remove console-tools
-		package-remover 'b43-fwcutter' '--purge'
+		package_remover 'b43-fwcutter' '--purge'
 		rm -rf /lib/firmware/b43 /lib/firmware/b43legacy
 		package_installer 'b43-fwcutter' 'install-always'
 		set_sticky_prefs $prefId 
