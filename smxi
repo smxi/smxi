@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.5
+####  version: 7.29.6
 ####  Date: June 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -60,7 +60,7 @@
 #### 1 2005-04; 2 cebit; 3 Easter; 4 2006-01-rc1-x (only conversions: d:1-d:4 format)
 #### NOTE: all kanotix conversions are treated as 5
 #### 5 sidux test pre release, kanotix/debian conversions ( debian - d:d )
-#### 6 chaos, 7 tartaros, 8 gaia, 9 eros, 10 nyx
+#### 6 chaos, 7 tartaros, 8 gaia, 9 eros, 10 nyx 11 erberos 12 13
 ########################################################################
 
 ########################################################################
@@ -144,6 +144,8 @@ CURRENT_DEBIAN_KERNEL=''
 # handle this syntax: 2.6.24-2.6.24.1.slh.3-sidux-amd64
 # by slicing first part out using -, we should end up 2.6.24 in most cases
 KERNEL_VERSION=$( uname -r | cut -d '-' -f 1 | egrep -o "2\.6\.[0-9]{2,3}" )
+# for math kernel compares, eg, -gt 24
+KERNEL_THIRD=$( cut -d '.' -f 3 <<< $KERNEL_VERSION )
 KERNEL_FILE=''
 KERNEL_FILE_RESET=''
 # these 4 will be loaded via sm-lib-kernels
