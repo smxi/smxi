@@ -1358,7 +1358,7 @@ check_supported_driver()
 
 set_version()
 {
-	local response='' case1='' printDriver=''
+	local response='' printDriver=''
 	
 	log_info $FUNCNAME s
 	# I'm forcing special cases to override the defaults so the data
