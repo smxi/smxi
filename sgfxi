@@ -2,11 +2,12 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.5
-####  Date: June 3 2008
+####  version: 3.1.6
+####  Date: June 5 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
+####  Contributors: ati card driver and xorg configuration in general: damentz and d2kx
 ####  This program is free software; you can redistribute it and/or modify it under 
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1133,7 +1134,7 @@ install_native_driver()
 		
 		if [ "$PRINT_VER" != 'true' ]
 		then
-			print_information_continue standard "The graphics installer will be installing the${C}$experimentalText Free xorg${B} driver: ${C}$driverInstall${N}" $FUNCNAME
+			print_information_continue 'standard' "The graphics installer will be installing the${C}$experimentalText Free xorg${B} driver: ${C}$driverInstall${N}" $FUNCNAME
 		else
 			exit 0 # this is required for smxi native driver tests
 		fi
@@ -1357,7 +1358,7 @@ check_supported_driver()
 
 set_version()
 {
-	local response='' nvPre='' case1='' printDriver=''
+	local response='' case1='' printDriver=''
 	
 	log_info $FUNCNAME s
 	# I'm forcing special cases to override the defaults so the data
@@ -1379,25 +1380,10 @@ set_version()
 		fi
 		exit 0
 	fi
-	# driver override has to come after the print out or else will print wrong data
-	case $CARD in
-		$FGLRX)
-			nvPre='' # not for fglrx, just nvidia needs that 1.0- prepended
-			;;
-		$NVIDIA)
-			nvPre='1.0-'  # for legacy nvidia format, only used for -o override
-			# if the assigned driver is in 10x.xx form
-			case1=$( echo $DRIVER_OVERRIDE | grep '\.' ) 
-			if [ -n "$case1" ]
-			then
-				nvPre='' # then don't use the old prefix
-			fi
-			;;
-	esac
 
 	if [ -n "$DRIVER_OVERRIDE" ]
 	then
-		DRIVER_DEFAULT=$nvPre$DRIVER_OVERRIDE
+		DRIVER_DEFAULT=$DRIVER_OVERRIDE
 	fi
 	# error_handler 246 $DRIVER_DEFAULT # for unsupported cards
 	if [ "$USE_DEBIAN_SID" != 'true' ]
@@ -1416,10 +1402,10 @@ set_version()
 	
 	if [ "$SM_INSTALL" != 'true' -a -n "$START_OPTIONS_PRINT" ]
 	then
-		print_information_continue info "You are using the following options:\n$START_OPTIONS_PRINT" $FUNCNAME
+		print_information_continue 'info' "You are using the following options:\n$START_OPTIONS_PRINT" $FUNCNAME
 	fi
 	echo -e "Driver installed using options:\n$START_OPTIONS_PRINT" >> $LOG_FILE
-	print_information_continue standard "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}" $FUNCNAME
+	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}" $FUNCNAME
 
 	echo "Installing this driver: $DRIVER_DEFAULT" >> $LOG_FILE
 	
@@ -1436,20 +1422,21 @@ driver_support_tests()
 		supported-driver)
 			case $CARD in
 				$FGLRX)
-					case $KERNEL_THIRD in
-						25|26)
+# 					case $KERNEL_THIRD in
+# 						25|26)
 							case $DRIVER_DEFAULT in
-								8-5|8-4|$DEBIAN_SID_FGLRX)
+								8-4|8-5)
 									# fglrx is working on sid kernels, so users who want up to date
 									# system will need to use debian sid kernels + fglrx
-									if [ -n "$IS_SIDUX_KERNEL" ] && [ "$TESTING" != 'true' ]
+									if [ -n "$IS_SIDUX_KERNEL" ]
 									then
-										error_handler 246
+										# error_handler 246
+										print_information_continue 'standard' "You must be using sidux kernel of at least version ${C}2.6.25-4.slh.8${B} to install fglrx ${C}$DRIVER_DEFAULT\n${B}Your kernel version is: ${C}$KERNEL_VERSION${N}"
 									fi
 									;;
 							esac
-							;;
-					esac
+# 							;;
+# 					esac
 					;;
 				$NVIDIA)
 					case $KERNEL_THIRD in
@@ -1763,9 +1750,15 @@ run_patches()
 			case $KERNEL_THIRD in 
 				25)
 					case $DRIVER_DEFAULT in
-						8-4)
-							patchFile=''
-							# apply_patch_file $patchFile
+						8-4|8-5)
+							if [ -n "$IS_SIDUX_KERNEL" ] # debian kernls work normally, no patch required
+							then
+								# pre patch link required:
+								ln -s arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1.0 arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1
+								ln -s arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1.0 arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1
+								patchFile='FGLRX-8-4-8-5-2008-06-08.diff'
+								apply_patch_file $patchFile
+							fi
 							;;
 					esac
 					;;
