@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.6
-####  Date: June 4 2008
+####  version: 7.29.7
+####  Date: June 5 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -2375,13 +2375,13 @@ install_dist_upgrade()
 	fi
 	eval $rebootTopText
 	echo $LINE
-	echo "$SPACER${C}1 - use-install-f${S} Use this to try to resolve error in dist-upgrade."
-	echo "$SPACER${C}2 - dist-upgrade-again${S} Run this after correcting an error with ${C}1${S}."
+	echo "${C}1 - use-install-f${S} Use this to try to resolve error in dist-upgrade."
+	echo "${C}2 - dist-upgrade-again${S} Run this after correcting an error with ${C}1${S}."
 	echo
-	echo "$SPACER${C}3 - check-services${S} Runs ${C}rcconf${S} to let you turn back off any services that might "
+	echo "${C}3 - check-services${S} Runs ${C}rcconf${S} to let you turn back off any services that might "
 	echo "    have been turned on during the ${C}dist-upgrade${S} (more options in the future)."
 	echo
-	echo "$SPACER${C}4 - continue${S} Continue on with script, do this when dist-upgrade is successful."
+	echo "${C}4 - continue${S} Continue on with script, do this when dist-upgrade is successful."
 	eval "$rebootText"
 	
 	echo "${C}$exitNo - quit${S} If you need to fix error, you can exit here. In general, please"
