@@ -835,7 +835,7 @@ post_install_messages()
 		echo "X/Kde will not work until you reinstall your ${C}$driverReinstall${M} driver."
 		echo
 		echo "${S}You can reinstall the driver to your new kernel now using ${C}$SCRIPT_NAME${S} (continue, do not exit script),"
-		echo "or you can do it manually, with${C}sgfxi -K <your new kernel name> <other  options>${S}${N}"
+		echo "or you can do it manually, with ${C}sgfxi -K <your new kernel name> <other  options>${S}${N}"
 		print_hec
 	fi
 }
