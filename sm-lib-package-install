@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.5.2
-####  Date: May 31 2008
+####  version: 2.6.0
+####  Date: June 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -51,46 +51,39 @@ package_group_installer()
 	local xfcePackages='gpm xfce4 xfmedia thunar xfce4-terminal thunar-archive-plugin thunar-media-tags-plugin'$dmUse
 	local xorgPackages='alsa alsa-utils gpm hal libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils udev xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xmms xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'$dmUse
 
-	local packageName=$2
+	local itemName=$2
 	echo $LINE
-	echo "${S}Installing ${C}$packageName${S}...${N}"
+	echo "${S}Installing ${C}$itemName${S}...${N}"
 	# transfer meta packages to package installer variable
-	if [ "$packageName" == 'ceni-stuff' ]
-	then
-		packageName="$ceniStuff"
-	fi
-	if [ "$packageName" == 'fvwm-crystal' ]
-	then
-		packageName="$fvwmCrystal"
-	fi
-	if [ "$packageName" == 'kde' ]
-	then
-		packageName="$kdePackages"
-	fi
-	if [ "$packageName" == 'kdepim' ]
-	then
-		packageName="$kdepimPackages"
-	fi
-	if [ "$packageName" == 'koffice' ]
-	then
-		packageName="$kofficePackages"
-	fi
-	if [ "$packageName" == 'streamtuner' ]
-	then
-		packageName="$streamTuner"
-	fi
-	if [ "$packageName" == 'xfce' ]
-	then
-		packageName="$xfcePackages"
-	fi
-	if [ "$packageName" == 'xorg' ]
-	then
-		packageName="$xorgPackages"
-	fi
-	if [ "$packageName" == 'google-earth' ]
-	then
-		packageName="$googleEarth"
-	fi
+	case $itemName in
+		ceni-stuff)
+			packageName="$ceniStuff"
+			;;
+		fvwm-crystal)
+			packageName="$fvwmCrystal"
+			;;
+		kde)
+			packageName="$kdePackages"
+			;;
+		kdepim)
+			packageName="$kdepimPackages"
+			;;
+		koffice)
+			packageName="$kofficePackages"
+			;;
+		streamtuner)
+			packageName="$streamTuner"
+			;;
+		xfce)
+			packageName="$xfcePackages"
+			;;
+		xorg)
+			packageName="$xorgPackages"
+			;;
+		google-earth)
+			packageName="$googleEarth"
+			;;
+	esac
 	
 	if [ -n "$3" ]
 	then
@@ -99,57 +92,70 @@ package_group_installer()
 	update_sources $1
 	package_installer "$packageName" 'install-user'
 }
+
 # the main updater function is going to handle most of the checking here, but
 # if the sources are updated, this will force the update
 update_sources()
 {
 	local op='' multi='' DoUpdate='' plain='' skyp='' swift=''
 	local operaSources='deb http://deb.opera.com/opera sid non-free'
+	local operaApt="$EAS.d/opera.list"
 	local skypeSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
-	local swiftSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
+	local skypeApt="$EAS.d/skype.list"
+	local swiftSources='deb http://getswiftfox.com/builds/debian unstable non-free'
+	local swiftApt="$EAS.d/swiftfox.list"
+	local extraFunctions='' grepSearch='' sourceFile='' sourcesData='' sourcePresent=''
+	
+	case $1 in 
+		opera)
+			# opera keyrings
+			extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
+			grepSearch='deb.opera.com'
+			sourceFile=$operaApt
+			sourcesData=$operaSources
+			DoUpdate='true'
+			;;
+		skype)
+			grepSearch='download.skype.com'
+			sourceFile=$skypeApt
+			sourcesData=$skypeSources
+			DoUpdate='true'
+			;;
+		swiftfox)
+			grepSearch='getswiftfox.com'
+			sourceFile=$swiftApt
+			sourcesData=$swiftSources
+			DoUpdate='true'
+			;;
+		plain)
+			if [ "$UPDATED" != 'true' ]
+			then
+				DoUpdate='true'
+			fi
+			;;
+	esac
 	
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff
-	if [ "$1" == 'opera' ]
+	sourcePresent=$( grep -Rl $grepSearch $EAS* )
+	if [ -z "$sourcePresent" ]
 	then
-		op=$( grep -c 'opera' $EAS )
-		if [ "$op" -eq 0 ]
+		echo $LINE
+		echo "${S}Creating sourcefile: ${C}$sourceFile${N}"
+		if [ ! -f "$sourceFile" ]
 		then
-			echo $LINE
-			echo "${S}Updating ${C}$EAS${S} with Opera sources${N}"
-			echo $operaSources >> $EAS
-			echo "${C}$EAS${S} has been updated.${N}"
-			UPDATED=''
+			echo "# $grepSearch sources added by smxi package installer" > $sourceFile
+			echo $sourcesData >> $sourceFile
+			echo >> $sourceFile
+		else
+			echo >> $sourceFile
+			echo "# $grepSearch sources added by smxi package installer" >> $sourceFile
+			echo $sourcesData >> $sourceFile
 		fi
-		DoUpdate='true'
-	elif [ "$1" == 'skype' ]
-	then
-		skyp=$( grep -c 'skype' $EAS )
-		if [ "$skyp" -eq 0 ]
-		then
-			echo $LINE
-			echo "${S}Updating ${C}$EAS${S} with Skype sources${N}"
-			echo $skypeSources >> $EAS
-			echo "${C}$EAS${S} has been updated.${N}"
-			UPDATED=''
-		fi
-		DoUpdate='true'
-	elif [ "$1" == 'swiftfox' ]
-	then
-		swift=$( grep -c 'sssss' $EAS )
-		if [ "$swift" -eq 0 ]
-		then
-			echo $LINE
-			echo "${S}Updating ${C}$EAS${S} with Swiftfox sources${N}"
-			echo $swiftSources >> $EAS
-			echo "${C}$EAS${S} has been updated.${N}"
-			UPDATED=''
-		fi
-		DoUpdate='true'
-	elif [ "$1" == 'plain' -a "$UPDATED" != 'true' ]
-	then
-		DoUpdate='true'
+		echo "${S}Source file: ${C}$sourceFile${S} has been created.${N}"
+		eval $extraFunctions
+		UPDATED=''
 	fi
 
 	if [ "$DoUpdate" == 'true' ]
@@ -170,14 +176,14 @@ select_install_type()
 	print_lib_info $LIB_PACKAGE_INSTALL
 	echo $MLINE
 	echo "${S}The following sections will be expanded over time, but these are your "
-	echo "current Package Install options:"
+	echo "current Package Install options (apt sources updated where needed):"
 	echo $LINE
 	echo "${C}1${S} - ${C}office${S} Features OpenOffice.org installer. Language pack selector."
 	echo "    Now also offers OpenOffice hold/install/update option as well."
 	echo
 	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, msttcorefonts, Opera, Skype, Google Earth."
 	echo
-	echo "${C}3${S} - ${C}utilities${S} sysv-rc-conf, console browsers, networking tools (ceni), and more to come."
+	echo "${C}3${S} - ${C}utilities${S} sysv-rc-conf, console browsers, networking tools (ceni), swiftfox, and more."
 	echo
 	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
 	echo
@@ -328,6 +334,7 @@ non_free_installer()
 	do
 		case $opt in
 			opera)
+				# sources update is called in following function
 				package_group_installer opera opera
 				repeat='true'
 				;;
@@ -398,8 +405,8 @@ utilities_installer()
 	echo "    Installs: ${C}lynx links elinks links2 w3m${S} (w3m is my favorite)"
 	echo "    Hey, everyone has their favorite! See if you find one you like..."
 
-	echo "${C}3${S} - ${C}gnomemeetings-to-ekiga${S} Updates the deprecated ${C}gnomemeetings${S} to the "
-	echo "    new version called ${C}ekiga${S}. Or just installs ${C}ekiga${S}."
+	echo "${C}3${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your"
+	echo "    cpu type for optimal performance. It's up to you to know your cpu."
 	
 	echo "${C}4${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
 	echo "    These are convient tools to listen to audio streams, and record them."
@@ -428,7 +435,7 @@ utilities_installer()
 	echo -e $SLE
 	echo $LINE
 	
-	options="sysv-rc-conf  console-browsers gnomemeetings-to-ekiga streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni back-to-install-menu"
+	options="sysv-rc-conf  console-browsers swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -440,8 +447,8 @@ utilities_installer()
 				package_group_installer plain 'lynx links elinks links2 w3m'
 				repeat='true'
 				;;
-			gnomemeetings-to-ekiga)
-				package_group_installer plain ekiga 'apt-get remove --purge gnomemeetings'
+			swiftfox)
+				swiftfox_installer
 				repeat='true'
 				;;
 			streamtuner)
@@ -882,6 +889,97 @@ install_kpowersave()
 			install_kpowersave
 			;;
 	esac
+}
+
+swiftfox_installer()
+{
+	local opt='' options='' swiftOpt='' swiftPackage='' found='' skip=''
+	local swiftAthlon64='swiftfox-athlon64:(AMD64-users-on-a-64bit-OS)'
+	# current swiftfox packages
+	# http://getswiftfox.com/builds/debian/packages
+	
+	local swiftfoxChoices="
+	swiftfox-i686:(Athlon-Thunderbird-or-Pentium-2)
+	swiftfox-athlon-xp
+	swiftfox-athlon64-32bit:(AMD-64-users-on-a-32bit-OS)
+	swiftfox-pentium-m
+	swiftfox-pentium3
+	swiftfox-pentium3m
+	swiftfox-pentium4
+	swiftfox-prescott:(Intel-Core-duo/solo)
+	"
+	
+	# no point in offering 32 bit package here for 64 bit users, and vica versa
+	if [ "$BITS" == '64' ]
+	then
+		swiftfoxChoices="
+		swiftfox-athlon64:(AMD-64-users-on-a-64bit-OS)
+		swiftfox-prescott:(Intel-Core-duo/solo)
+		"
+	fi
+
+	local rtmmNu=$( wc -w <<< $swiftfoxChoices )
+	local swiftNu=$(( $rtmmNu -1 ))
+	
+	echo $MLINE
+	echo "${M}Swiftfox Installer"
+	echo $MLINE
+	echo "${S}You can pick a swiftfox version for your specific cpu."
+	echo "It's too much work to detect for you, so please select the right one!"
+	echo "Once you make your selection, the script will install that swiftfox for you."
+	echo
+	echo "${M}Keep in mind, it's risky running two versions of Firefox, like Iceweasel and Swiftfox.${S}"
+	echo "I recommend using only one, but I tend to be careful."
+	echo
+	echo "If needed, ${C}$SCRIPT_NAME${S} will add the required swiftfox sources for apt before installing."
+	echo
+	echo "${C}1-$swiftNu - ${S} Select which swiftfox version you want to install."
+	echo
+	echo "${C}$rtmmNu - return-to-menu${S} Return to utility installer."
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options=$swiftfoxChoices
+
+	select opt in $options
+	do
+		for swiftOpt in $swiftfoxChoices
+		do
+			if [ "$opt" == "$swiftOpt" ]
+			then
+				found='true'
+				if [ "$swiftOpt" == 'return-to-menu' ]
+				then
+					skip='true'
+				else
+					swiftPackage="$( cut -d ':' -f 1 <<< $swiftOpt )"
+				fi
+				break
+			else
+				found='false'
+			fi
+		done
+		break
+	done
+	
+	if [ "$found" == 'true' ]
+	then
+
+		if [ "$skip" != 'true' ]
+		then
+			update_sources swiftfox
+			package_installer $swiftPackage 'install-user'
+			#echo installing $swiftPackage now...
+		else
+			echo $LINE
+			echo "${S}Returning to main script now...${N}"
+		fi
+	else
+		print_error opt
+		swiftfox_installer
+	fi
 }
 
 ###---------------------------------------------------------------------
