@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.1
+####  version: 2.6.2
 ####  Date: June 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -403,8 +403,8 @@ utilities_installer()
 	echo "    Installs: ${C}lynx links elinks links2 w3m${S} (w3m is my favorite)"
 	echo "    Hey, everyone has their favorite! See if you find one you like..."
 
-	echo "${C}3${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your"
-	echo "    cpu type for optimal performance. It's up to you to know your cpu."
+	echo "${C}3${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
+	echo "    for optimal performance. Will show your installed cpu so you can make the right choice."
 	
 	echo "${C}4${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
 	echo "    These are convient tools to listen to audio streams, and record them."
@@ -892,10 +892,9 @@ install_kpowersave()
 swiftfox_installer()
 {
 	local opt='' options='' swiftOpt='' swiftPackage='' found='' skip=''
-	local swiftAthlon64='swiftfox-athlon64:(AMD64-users-on-a-64bit-OS)'
+	local LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= cpuType=$( grep -i -m 1 'model name' /proc/cpuinfo | cut -d ':' -f 2  )
 	# current swiftfox packages
 	# http://getswiftfox.com/builds/debian/packages
-	
 	local swiftfoxChoices="
 	swiftfox-i686:(Athlon-Thunderbird-or-Pentium-2)
 	swiftfox-athlon-xp
@@ -922,15 +921,15 @@ swiftfox_installer()
 	echo $MLINE
 	echo "${M}Swiftfox Installer"
 	echo $MLINE
-	echo "${S}You can pick a swiftfox version for your specific cpu."
-	echo "It's too much work to detect for you, so please select the right one!"
-	echo "Once you make your selection, the script will install that swiftfox for you."
+	echo "${S}You can pick a swiftfox version for your running cpu:"
+	echo "${C}$cpuType ${S}(running a ${C}$BITS bit${S} operating system)"
+	echo "${S}Once you make your selection, ${C}$SCRIPT_NAME${S} will install that swiftfox version."
 	echo
 	echo "${M}Keep in mind, it's risky running two versions of Firefox, like Iceweasel and Swiftfox.${S}"
-	echo "I recommend using only one, but I tend to be careful."
+	echo "I recommend using only one Mozilla based browser, but I tend to be careful."
 	echo
 	echo "If needed, ${C}$SCRIPT_NAME${S} will add the required swiftfox sources for apt before installing."
-	echo
+	echo $LINE
 	echo "${C}1-$swiftNu - ${S} Select which swiftfox version you want to install."
 	echo
 	echo "${C}$rtmmNu - return-to-menu${S} Return to utility installer."
