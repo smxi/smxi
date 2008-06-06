@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.6
-####  Date: June 5 2008
+####  version: 3.1.7
+####  Date: June 6 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -304,6 +304,9 @@ error_handler()
 			;;
 		230)
 			errorData="Could not detect gcc version: $errorExtra, or it is not installed.\nPlease let the script maintainer know, this may be a bug in the script."
+			;;
+		229) 
+			errorData="The driver: $DRIVER_DEFAULT does not work on sidux kernels.\nYou are trying to install it to this kernel: $KERNEL_VERSION\nCurrently $FGLRX only works on new Debian kernels."
 			;;
 		# specific install issues
 		200) 
@@ -1430,8 +1433,8 @@ driver_support_tests()
 									# system will need to use debian sid kernels + fglrx
 									if [ -n "$IS_SIDUX_KERNEL" ]
 									then
-										# error_handler 246
-										print_information_continue 'standard' "You must be using sidux kernel of at least version ${C}2.6.25-4.slh.8${B} to install fglrx ${C}$DRIVER_DEFAULT\n${B}Your kernel version is: ${C}$KERNEL_VERSION${N}"
+										error_handler 229
+										# print_information_continue 'standard' "You must be using sidux kernel of at least version ${C}2.6.25-4.slh.8${B} to install fglrx ${C}$DRIVER_DEFAULT\n${B}Your kernel version is: ${C}$KERNEL_VERSION${N}"
 									fi
 									;;
 							esac
@@ -1751,13 +1754,15 @@ run_patches()
 				25)
 					case $DRIVER_DEFAULT in
 						8-4|8-5)
-							if [ -n "$IS_SIDUX_KERNEL" ] # debian kernls work normally, no patch required
+							# debian kernls work normally, no patch required
+							# note: due to concerns raised, this patch is not going to be used
+							if [ -n "$IS_SIDUX_KERNEL" ] 
 							then
-								# pre patch link required:
+								# pre patch link required, just to keep the information for future reference:
 								ln -s arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1.0 arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1
 								ln -s arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1.0 arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1
-								patchFile='FGLRX-8-4-8-5-2008-06-08.diff'
-								apply_patch_file $patchFile
+								patchFile=''
+								#apply_patch_file $patchFile
 							fi
 							;;
 					esac
@@ -1996,7 +2001,6 @@ clean_up_fglrx_junk()
 	
 	log_info $FUNCNAME c
 }
-
 
 # this is only for fgrlx
 install_fglrx_debs()
