@@ -932,7 +932,7 @@ swiftfox_installer()
 	echo
 	echo "If needed, ${C}$SCRIPT_NAME${S} will add the required swiftfox sources for apt before installing."
 	echo $LINE
-	echo "${C}1-$swiftNu - ${S} Select which swiftfox version you want to install."
+	echo "${C}1-$swiftNu - ${S}Select which swiftfox version you want to install."
 	echo
 	echo "${C}$rtmmNu - return-to-menu${S} Return to utility installer."
 	
