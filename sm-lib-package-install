@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.2
+####  version: 2.6.3
 ####  Date: June 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -904,6 +904,7 @@ swiftfox_installer()
 	swiftfox-pentium3m
 	swiftfox-pentium4
 	swiftfox-prescott:(Intel-Core-duo/solo)
+	return-to-menu
 	"
 	
 	# no point in offering 32 bit package here for 64 bit users, and vica versa
@@ -912,6 +913,7 @@ swiftfox_installer()
 		swiftfoxChoices="
 		swiftfox-athlon64:(AMD-64-users-on-a-64bit-OS)
 		swiftfox-prescott:(Intel-Core-duo/solo)
+		return-to-menu
 		"
 	fi
 
