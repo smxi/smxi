@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.0
+####  version: 2.6.1
 ####  Date: June 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -97,7 +97,7 @@ package_group_installer()
 # if the sources are updated, this will force the update
 update_sources()
 {
-	local op='' multi='' DoUpdate='' plain='' skyp='' swift=''
+	local op='' multi='' doUpdate='' plain='' skyp='' swift=''
 	local operaSources='deb http://deb.opera.com/opera sid non-free'
 	local operaApt="$EAS.d/opera.list"
 	local skypeSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
@@ -113,24 +113,21 @@ update_sources()
 			grepSearch='deb.opera.com'
 			sourceFile=$operaApt
 			sourcesData=$operaSources
-			DoUpdate='true'
 			;;
 		skype)
 			grepSearch='download.skype.com'
 			sourceFile=$skypeApt
 			sourcesData=$skypeSources
-			DoUpdate='true'
 			;;
 		swiftfox)
 			grepSearch='getswiftfox.com'
 			sourceFile=$swiftApt
 			sourcesData=$swiftSources
-			DoUpdate='true'
 			;;
 		plain)
 			if [ "$UPDATED" != 'true' ]
 			then
-				DoUpdate='true'
+				doUpdate='true'
 			fi
 			;;
 	esac
@@ -156,9 +153,10 @@ update_sources()
 		echo "${S}Source file: ${C}$sourceFile${S} has been created.${N}"
 		eval $extraFunctions
 		UPDATED=''
+		doUpdate='true'
 	fi
 
-	if [ "$DoUpdate" == 'true' ]
+	if [ "$doUpdate" == 'true' ]
 	then
 		apt_update_handler 'package-install'
 	fi
