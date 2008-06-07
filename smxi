@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.8
-####  Date: June 5 2008
+####  version: 7.29.9
+####  Date: June 7 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1182,17 +1182,6 @@ sticky_prefs()
 	local prefId2='FirstRunCount2'
 	local smPref=$( sm_pref_tester $prefId )
 	local smPref2=$( sm_pref_tester $prefId2 )
-	
-	# to keep long term stats meaningful, not counting any livecd runs, or vm type stuff
-	if [ "$smPref2" -eq 0 -a "$SKIP_CONNECTIONS" != 'true' ]
-	then
-		local isVm=$( dmesg | egrep -i '(vmware|vbox)' )
-		if [  "$IS_LIVE" != 'true' -a -z "$isVm" ]
-		then
-			local ddurl=$TECH_PATTERNS_DISTRO'distro-counter.php'
-			wget -T$TIME_OUT -t 2 -q --delete-after $ddurl && set_sticky_prefs $prefId2
-		fi
-	fi
 	
 	if [ "$smPref" -eq 0 ]
 	then
@@ -2993,11 +2982,11 @@ run_script_components()
 	# launch_function_trigger tester
 	
 	## checks for first run or -M option to run change_kernel_mirrors
-	## switched off for now until it works again
-# 	if [ "$TESTING" == 'true' ]
-# 	then
+	## no reason to run this on livecd since users can't install kernels anyway
+	if [  "$IS_LIVE" != 'true' ]
+	then
 		launch_function_trigger 'kernel-mirrors'
-# 	fi
+ 	fi
 	
 	if [ "$SKIP_CONNECTIONS" != 'true' ]
 	then
