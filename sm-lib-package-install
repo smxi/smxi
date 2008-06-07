@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.6
+####  version: 2.6.7
 ####  Date: June 7 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -975,7 +975,7 @@ swiftfox_installer()
 		if [ "$skip" != 'true' ]
 		then
 			update_sources swiftfox
-			package_installer $swiftPackage 'install-user-ok' '--force-yes'
+			package_installer $swiftPackage 'install-user-ok' ''
 			#echo installing $swiftPackage now...
 		else
 			echo $LINE
