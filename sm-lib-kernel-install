@@ -524,6 +524,7 @@ install_the_apt_kernel_module()
 			:
 		fi
 	else
+		echo
 		echo "$SPACER${M}$noModuleText: ${C}$moduleOutputName${M} is  not in apt currently.${N}"
 	fi
 }
