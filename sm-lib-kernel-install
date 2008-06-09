@@ -493,7 +493,7 @@ install_apt_kernel_modules()
 	done
 }
 
-# args: $1 - module package name; $2 - triggered from auto/manual mo
+# args: $1 - module package name; $2 - triggered from auto/manual mode
 install_the_apt_kernel_module()
 {
 	local modulePackage=$1 noModuleText=''
