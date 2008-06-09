@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.1.8
-####  Date: June 8 2008
+####  version: 2.2.0
+####  Date: June 9 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -131,8 +131,8 @@ check_kernel()
 kernel_question()
 {
 	local opt='' repeat='' kernelsNotEqual='' kernelsNotEqualOpt='' cont='' advanced=''
-	local duText='Continue to dist-upgrade' repeat='' removeModules=''
-	local options=" remove-kernel-modules advanced-kernel-options"
+	local duText='Continue to dist-upgrade' repeat='' removeModules='' installModules=''
+	local options=" install-kernel-modules remove-kernel-modules advanced-kernel-options"
 	local tempCount=$( echo $options | wc -w )
 	# sets KERNEL_EQUAL_INSTALL
 	test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
@@ -152,6 +152,7 @@ kernel_question()
 	fi
 	advanced=$tempCount
 	removeModules=$(( $tempCount - 1 ))
+	installModules=$(( $tempCount - 2 ))
 	options="$kernelsNotEqualOpt $options continue"
 	tempCount=$( echo $options | wc -w )
 	cont=$tempCount
@@ -187,6 +188,7 @@ kernel_question()
 	echo "${C}menu.lst${S}, will be created here: ${C}$GRUB_BU_PATH${S}."
 	echo $MLINE
 	eval $kernelsNotEqual
+	echo "${C}$installModules${S} - Install kernel modules. Offers list of modules, install one by one (${M}if currently available in apt${S})."
 	echo "${C}$removeModules${S} - Remove installed kernel modules. Offers list of modules, remove one by one."
 	echo "${C}$advanced${S} - Advanced Kernel Install. The advanced options allow you do the following:"
 	echo "    ${C}*${S} Install archived sidux kernels. Sometimes older kernels work and newer ones don't for some users."
@@ -216,6 +218,11 @@ kernel_question()
 				;;
 			remove-kernel-modules)
 				remove_kernel_modules
+				repeat='true'
+				;;
+			install-kernel-modules)
+				run_script_import $LIB_KERNEL_INSTALL
+				kernel_module_installer
 				repeat='true'
 				;;
 			advanced-kernel-options)
@@ -257,6 +264,84 @@ kernel_question()
 ###---------------------------------------------------------------------
 ### kernel questino utilities
 ###---------------------------------------------------------------------
+
+# install kernel modules, either new ones, or ones you want to try
+kernel_module_installer()
+{
+	# clean out -modules- from list
+	local availableModules="$( sed 's/-modules-//g' <<< $( print_module_list ) )"
+	local skip='' opt='' options='' module='' found=''
+	local kernelType='' fullModule='' metaText='' 
+	local options="$availableModules continue"
+	local contCount=$( wc -w <<< $availableModules )
+	local moduleCount=$(( $contCount - 1 )) 
+	local isMeta=$( package_tester "linux-headers-2.6-(sidux-|)(686|amd64)" '' )
+
+	if [ -n "$isMeta" ]
+	then
+		metaText='echo "Since you are using kernel metapackages, the script will install the module metapackage."'
+		kernelType=$( sed 's/linux-headers-//g' <<< $isMeta )
+	else
+		kernelType=$CURRENT_KERNEL
+	fi
+
+	echo $MLINE
+	echo "${M}Kernel Module Installer${N}"
+	echo $MLINE
+	
+	echo "${S}Select from the following to install a kernel module."
+	echo "Not all modules are available all the time, or for each platform (64/32 bit)"
+	echo "If the module is not currently in apt, the script will let you know."
+	echo 
+	echo "${M}Module installs to your current kernel: ${C}$CURRENT_KERNEL${S}"
+	eval $metaText
+	echo $LINE
+	echo "${C}1-$moduleCount${S} - Install desired module to your currently running kernel."
+	echo
+	echo "${C}$contCount${S} - When you are done installing, continue with script."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	select opt in $options
+	do
+		for module in $options
+		do
+			if [ "$opt" == "$module" ]
+			then
+				found='true'
+				if [ "$module" == 'continue' ]
+				then
+					skip='true'
+				else
+					found='true'
+					# assemble actual package name string
+					fullModule="$module-modules-$kernelType"
+				fi
+				break
+			else
+				found='false'
+			fi
+		done
+		break
+	done
+	
+	if [ "$found" == 'true' ]
+	then
+		if [ "$skip" == 'true' ]
+		then
+			echo "${S}Returning to main menu now.${N}"
+		else
+			echo $LINE
+			# echo "${S}Installing ${C}$fullModule${S} now....${N}"
+			install_the_apt_kernel_module "$fullModule" 'manual'
+			kernel_module_installer
+		fi
+	else
+		print_error opt
+		kernel_module_installer
+	fi
+}
 
 remove_kernel_modules()
 {

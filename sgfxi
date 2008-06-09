@@ -81,6 +81,7 @@ KERNEL_BASE='' # like: 2.6
 KERNEL_THREE='' # like: 2.6.19
 KERNEL_THIRD='' # like: 19, for math use
 IS_SIDUX_KERNEL=''
+IS_XEN=''
 
 # check for 64 bit first
 if [ -n "$( uname -m | grep -o 'x86_64' )" ]
@@ -650,6 +651,7 @@ kernel_string_info()
 	fi
 
 	IS_SIDUX_KERNEL=$( echo $KERNEL_VERSION | grep -e "[\.|-]slh\(64\)\?[\.|-]" )
+	IS_XEN=$( grep -i 'CONFIG_XEN=y' /boot/config-$KERNEL_VERSION )
 	KERNEL_BASE=$( echo $KERNEL_VERSION | cut -d '.' -f 1-2 ) # like: 2.6
 	KERNEL_THREE=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
 	KERNEL_THIRD=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
