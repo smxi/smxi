@@ -1626,7 +1626,7 @@ check_distro_version()
 	if [ -f $SMDL ]
 	then
 		DISTRO_LEVEL=$( cat $SMDL )
-		if [ ! -f $SMDV ]
+		if [ -f $SMDV ]
 		then
 			DISTRO_VERSION=$( cat $SMDV )
 		else
