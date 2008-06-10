@@ -275,7 +275,7 @@ kernel_module_installer()
 	local options="$availableModules continue"
 	local contCount=$( wc -w <<< $options )
 	local moduleCount=$(( $contCount - 1 )) 
-	local isMeta=$( package_tester "linux-headers-2.6-(sidux-|)(686|amd64)" '' )
+	local isMeta=$( package_tester "linux-headers-2.6-(sidux-|)(486|686|amd64)" '' )
 
 	if [ -n "$isMeta" ]
 	then
