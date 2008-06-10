@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.2.0
+####  version: 2.2.1
 ####  Date: June 9 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -273,7 +273,7 @@ kernel_module_installer()
 	local skip='' opt='' options='' module='' found=''
 	local kernelType='' fullModule='' metaText='' 
 	local options="$availableModules continue"
-	local contCount=$( wc -w <<< $availableModules )
+	local contCount=$( wc -w <<< $options )
 	local moduleCount=$(( $contCount - 1 )) 
 	local isMeta=$( package_tester "linux-headers-2.6-(sidux-|)(686|amd64)" '' )
 
