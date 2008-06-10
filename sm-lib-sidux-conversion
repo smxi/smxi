@@ -1,20 +1,19 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 1.4.3
-####  Date: June 8 2008
+####  version: 1.4.2
+####  Date: March 31 2008
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2008
 ####  This program is free software; you can redistribute it and/or modify it under 
 ####  the terms of the GNU General Public License as published by the Free Software
-####  Foundation; either version 2 of the License, or (at your option) any later version.
+####  Foundation; either version 3 of the License, or (at your option) any later version.
 
 ####  This program is distributed in the hope that it will be useful, but WITHOUT 
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-####  Get the full text of the GPL here:
-####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
 
 ####  Script Author: Harald Hope 
 ####  This is a library file for smxi and cannot be run independently

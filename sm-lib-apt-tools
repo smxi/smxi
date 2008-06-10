@@ -977,7 +977,7 @@ create_apt_source_item()
 {
 	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
 	
-	sourcePresent=$( grep -Rl "$grepSearch" $EAS* )
+	sourcePresent=$( grep -iRl "$grepSearch" $EAS* )
 	if [ -z "$sourcePresent" ]
 	then
 		# handle cases where users prefer single sources.list
