@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.7
-####  Date: June 6 2008
+####  version: 3.1.8
+####  Date: June 9 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -1472,8 +1472,10 @@ misc_fixes()
 			then
 				rm -f $headersDir/asm
 			fi
+			
 			echo "${B}Creating symbolic link ${C}asm-x86 asm${B}...${N}"
-			ln -s $headersDir/asm-x86 $headersDir/asm || error_handler 233 "link -s asm-x86 asm"
+			
+			ln -sf $headersDir/asm-x86 $headersDir/asm || error_handler 233 "link -s asm-x86 asm"
 				
 			if [ ! -e $headersDir/asm-i386 -a "$BITS" == '32' ]
 			then
