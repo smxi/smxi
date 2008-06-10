@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.8.7
-####  Date: June 8 2008
+####  version: 1.9.0
+####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -970,6 +970,41 @@ update_to_nonfree_sources()
 ## DEBUGGER
 #script_debugger  update_to_nonfree_sources
 #update_to_nonfree_sources
+
+# will test for and create either new sub apt source list or add to sources.list as needed
+# args: $1 - grepSearch; $2 - sourceFile; $3 - sourcesData
+create_apt_source_item()
+{
+	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
+	
+	sourcePresent=$( grep -Rl $grepSearch $EAS* )
+	if [ -z "$sourcePresent" ]
+	then
+		# handle cases where users prefer single sources.list
+		if [ -z "$( ls $EAS.d )" -a -f $EAS ]
+		then
+			sourceFile=$EAS
+		fi
+		
+		echo $LINE
+		echo "${S}Adding ${C}$grepSearch${S} to sourcefile: ${C}$sourceFile${N}"
+		if [ ! -f "$sourceFile" ]
+		then
+			echo "# $grepSearch sources added by $SCRIPT_NAME" > $sourceFile
+			echo $sourcesData >> $sourceFile
+			echo >> $sourceFile
+		else
+			echo >> $sourceFile
+			echo "# $grepSearch sources added by $SCRIPT_NAME" >> $sourceFile
+			echo $sourcesData >> $sourceFile
+			echo >> $sourceFile
+		fi
+		echo "${S}Source file: ${C}$sourceFile${S} updated.${N}"
+		return 0
+	else
+		return 1
+	fi
+}
 
 ###---------------------------------------------------------------------
 ### kernel mirror selector

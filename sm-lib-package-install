@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.9
-####  Date: June 8 2008
+####  version: 2.6.10
+####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -105,7 +105,7 @@ update_sources()
 	local skypeApt="$EAS.d/skype.list"
 	local swiftSources='deb http://getswiftfox.com/builds/debian unstable non-free'
 	local swiftApt="$EAS.d/swiftfox.list"
-	local extraFunctions='' grepSearch='' sourceFile='' sourcesData='' sourcePresent=''
+	local extraFunctions='' grepSearch='' sourceFile='' sourcesData=''
 	
 	case $1 in 
 		opera)
@@ -132,35 +132,16 @@ update_sources()
 			fi
 			;;
 	esac
-	# handle cases where users prefer single sources.list
-	if [ -z "$( ls $EAS.d )" -a -f $EAS ]
-	then
-		sourceFile=$EAS
-	fi
 	
+	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData"
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff
-	sourcePresent=$( grep -Rl $grepSearch $EAS* )
-	if [ -z "$sourcePresent" ]
+	if [ "$?" -eq 0 ]
 	then
-		echo $LINE
-		echo "${S}Adding ${C}$grepSearch${S} to sourcefile: ${C}$sourceFile${N}"
-		if [ ! -f "$sourceFile" ]
-		then
-			echo "# $grepSearch sources added by smxi package installer" > $sourceFile
-			echo $sourcesData >> $sourceFile
-			echo >> $sourceFile
-		else
-			echo >> $sourceFile
-			echo "# $grepSearch sources added by smxi package installer" >> $sourceFile
-			echo $sourcesData >> $sourceFile
-			echo >> $sourceFile
-		fi
-		echo "${S}Source file: ${C}$sourceFile${S} updated.${N}"
 		eval $extraFunctions
-		UPDATED=''
 		doUpdate='true'
+		UPDATED=''
 	fi
 
 	if [ "$doUpdate" == 'true' ]
@@ -977,7 +958,7 @@ swiftfox_installer()
 		then
 			update_sources swiftfox
 			package_installer "$swiftPackage libxp6" 'install-user' '--allow-unauthenticated'
-			#echo installing $swiftPackage now...
+			# echo installing $swiftPackage now...
 		else
 			echo $LINE
 			echo "${S}Returning to main script now...${N}"
