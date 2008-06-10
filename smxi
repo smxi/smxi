@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.29.10
-####  Date: June 8 2008
+####  version: 7.30.0
+####  Date: June 10 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -113,16 +113,11 @@ GRUB_BU_PATH=$GRUB_PATH'-bu-'$(date +%y-%m-%d)
 KAN='/etc/kanotix-version'
 SID='/etc/sidux-version'
 DEB='/etc/debian_version'
+SMDV='/etc/s-distro-version'
+SMDL='/etc/s-distro-level'
 
 # distro version info
 DISTRO_VERSION=''
-if [ -f $SID ]
-then
-	DISTRO_VERSION=$(cat $SID)
-elif [ -f $KAN ]
-then
-	DISTRO_VERSION=$(cat $KAN)
-fi
 # this one is used for assigning fixes based on release versions, default is 0
 DISTRO_LEVEL=0
 # simple live test, this will be used to turn off some script features
@@ -258,7 +253,6 @@ ADVANCED_KERNEL=''
 CHANGE_KERNEL_MIRROR=''
 CHANGE_MIRRORS=''
 CHECK_SIDUX=''
-CON_DEB=''
 DEBUGGING=''
 DPKG_UPDATE=''
 EXTRA_OPTIONS=''
@@ -288,9 +282,9 @@ Z_SET=''
 # sm-lib-apt-tools
 CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
+CON_DEB=''
 CONNECTION_RETRY=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
-IS_DEBIAN=''
 KERNEL_EQUAL_INSTALL=''
 KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
@@ -376,7 +370,7 @@ error_handler()
 		fi
 	fi
 	case $errorId in
-		# general system checks - 2-50: fatal - exit 
+		# general system checks - 2-100: fatal - exit 
 		# note: I'm leaving 1 as a default script wide as I move to this error handler
 		force-update-failed)
 			errorCode=4
@@ -390,9 +384,13 @@ error_handler()
 			errorCode=5
 			errorMessage="The Script has not been updated in more than ${C}$MAX_AGE${W} Days\n${LOG_INDENT}It is not safe to proceed.\n${LOG_INDENT}Check that the script is still being maintained please before you use it."
 			;;
+		unidentified-distro)
+			errorCode=6
+			errorMessage="Your distro could not be identified by $SCRIPT_NAME.\nIf it is a Debian derived distro which should be supported, please let the script author\nknow how to identify it so it can be supported in the future."
+			;;
 		unsupported-distro)
 			errorCode=3
-			errorMessage="Ok, you can't use this script, sorry. Your distro is not supported."
+			errorMessage="The $errorExtra distro is not supported by $SCRIPT_NAME, sorry."
 			;;
 		# kernel section errors
 		kernel-download-failed)
@@ -416,7 +414,7 @@ error_handler()
 			errorMessage="User initiated dist-upgrade component termination via ctrl+c or kill."
 			;;
 			
-		# failures in actions/functions not requiring script exit: 51-150: serious
+		# failures in actions/functions not requiring script exit: 100-150: serious
 		# none yet
 		# internal script errors/failures in system: 151-254: normal
 		value-bad)
@@ -437,10 +435,10 @@ error_handler()
 	if [ "$errorCode" -le 254 -a "$errorCode" -gt 150 ]
 	then
 		errorLevel='internal'
-	elif [ "$errorCode" -le 150 -a "$errorCode" -gt 50 ]
+	elif [ "$errorCode" -le 150 -a "$errorCode" -gt 100 ]
 	then
 		errorLevel='serious'
-	elif [ "$errorCode" -le 50 -a "$errorCode" -gt 1 ]
+	elif [ "$errorCode" -le 100 -a "$errorCode" -gt 1 ]
 	then
 		errorLevel='fatal'
 		errorMessage="${errorMessage}\n${LOG_INDENT}$SCRIPT_NAME cannot continue. Exiting now."
@@ -1442,14 +1440,32 @@ launch_from_X()
 ### checks of various script / system requirements / connections / update script
 ###---------------------------------------------------------------------
 
-# check for correct user status. This script must run as root
-check_user_level()
+# basic support tests
+start_up_tests()
 {
+	# Make sure script is in path set in $SCRIPT_HOME
+	check_script_path
+	# check for correct user status. This script must run as root
 	if [ "$(whoami)" != "root" ]
 	then
 		error_handler 'not-root' $FUNCNAME
 	fi
+	# no ubuntu support
+	if [ "$( cat /etc/issue | grep -i -c 'buntu' )" -gt 0 ]
+	then
+		error_handler 'unsupported-distro' $FUNCNAME 'Ubuntu derived'
+	fi
+	if [ -e $KAN ]
+	then
+		error_handler 'unsupported-distro' $FUNCNAME 'Kanotix'
+	fi
+	if [ ! -e $SID -a ! -e $DEB ]
+	then
+		error_handler 'unidentified-distro' $FUNCNAME ''
+	fi
+		
 }
+
 # this script must run in runlevel 3, and gives option to go into runlevel 3
 check_display_and_x() 
 {
@@ -1597,65 +1613,53 @@ check_script_path()
 	fi
 }
 
+# test for sidux or conversion type system
+# start_up_tests now checks for non-supported distros and levels
 check_distro_version()
 {
-	local distroName=' current distro' ReturnValue='' i='' dis='' temp1=''
-	# note: all conversions are now version 5 by default, kanotix and debian
-	local supportedReleases=( 'sidux(64)? 2008-04^13' 'sidux(64)? 2008-03^12' 'sidux(64)? 2008-02^11' 'sidux(64)? 2008-01^10' 'sidux(64)? 2007-04^9' 'sidux(64)? 2007-03^8' 'sidux(64)? 2007-02^7' 'sidux(64)? 2007-01^6' 'sidux^5' )
+	local distroName=' current distro' i='' dis='' temp1=''
+	# note: pre 2008-06 conversions are now version 8 by default
+	# post 2008-06 conversions will carry id set dynamically by time check
+	local supportedReleases=( 'sidux(64)? 2009-04^17' 'sidux(64)? 2009-03^16' 'sidux(64)? 2009-02^15' 'sidux(64)? 2009-01^14' 'sidux(64)? 2008-04^13' 'sidux(64)? 2008-03^12' 'sidux(64)? 2008-02^11' 'sidux(64)? 2008-01^10' 'sidux(64)? 2007-04^9' 'sidux(64)? 2007-03^8' 'sidux(64)? 2007-02^7' 'sidux(64)? 2007-01^6' 'sidux^8' )
 
-	## Array logic stuff since this is not really human readable:
-	# ${#supportedReleases[@]} is the array count
-	# ${supportedReleases[$i]%^*} is the first item split by ^
-	# ${supportedReleases[$i]#*^} is the second item split by ^
-	#
-	# more on loops: http://tldp.org/LDP/abs/html/loops1.html
-	# more on arrays: http://tldp.org/LDP/abs/html/arrays.html
-	#
-	# supported versions search for string in array, if matched, set distro level
-	# NOTE: default for DISTRO_LEVEL is 0
-	for (( i=0; i < ${#supportedReleases[@]}; i++ ))
-	do
-		dis=$( echo $DISTRO_VERSION | egrep -i "${supportedReleases[$i]%^*}" )
-		if [ -n "$dis" ]
+	# handles conversion cases for all future use
+	if [ -f $SMDL ]
+	then
+		DISTRO_LEVEL=$( cat $SMDL )
+		if [ ! -f $SMDV ]
 		then
-			DISTRO_LEVEL=${supportedReleases[$i]#*^}
-			break
+			DISTRO_VERSION=$( cat $SMDV )
+		else
+			DISTRO_VERSION='Unknown, Error in distro ID'
 		fi
-	done
-
-	shopt -s nocasematch # turn on caseinsensitive
-	case $DISTRO_VERSION in
-		sidux*) 
-			distroName=" ${C}Sidux${W}" 
-			;;
-		kanotix*) 
-			distroName=" ${C}Kanotix${W}"
-			;;
-		*) 
-			if [ -e $DEB ]
+	elif [ -f $SID ]
+	then
+		DISTRO_VERSION=$(cat $SID)
+		## Array logic stuff since this is not really human readable:
+		# ${#supportedReleases[@]} is the array count
+		# ${supportedReleases[$i]%^*} is the first item split by ^
+		# ${supportedReleases[$i]#*^} is the second item split by ^
+		#
+		# more on loops: http://tldp.org/LDP/abs/html/loops1.html
+		# more on arrays: http://tldp.org/LDP/abs/html/arrays.html
+		#
+		# supported versions search for string in array, if matched, set distro level
+		# NOTE: default for DISTRO_LEVEL is 0
+		for (( i=0; i < ${#supportedReleases[@]}; i++ ))
+		do
+			dis=$( echo $DISTRO_VERSION | egrep -i "${supportedReleases[$i]%^*}" )
+			if [ -n "$dis" ]
 			then
-				distroName=" ${C}Debian system${W}"
+				DISTRO_LEVEL=${supportedReleases[$i]#*^}
+				break
 			fi
-			;;
-	esac
-	shopt -u nocasematch # turn off case insensitive
-	
+		done
 	# run debian conversion options only if no id files for s/k present
-	if [ ! -e $KAN -a ! -e $SID -a -e $DEB -a "$CON_DEB" == 'true' ]
+	# non supported tests have already been run in  start_up_tests
+	elif [ ! -f $SID -a -e $DEB ]
 	then
 		run_script_import $LIB_SIDUX_CONVERSION
 		check_debian
-		ReturnValue="$?"
-	
-		if [ "$ReturnValue" -eq 32 -o "$ReturnValue" -eq 64 ]
-		then
-			DISTRO_LEVEL=5
-		fi
-	fi
-
-	if [ "$DISTRO_LEVEL" -lt 5 ]
-	then
-		print_unsupported "$distroName"
 	fi
 }
 ## DEBUGGER
@@ -2000,36 +2004,6 @@ print_lib_info()
 	fi
 }
 
-# args: $1 distro name, must have space first, like name=' debian'
-print_unsupported()
-{
-	local response=''
-	
-	echo $WBAR
-	echo "${W}Your$1 is either too old, or no longer supported."
-	echo
-	echo "${S}You will not be able to use this script to convert your current system. Sorry."
-	echo
-	echo "Sidux dropped all crossgrade and conversion support as of ${C}March 1, 2007${S}."
-	echo "Please install the latest sidux release using the official sidux livecd"
-	echo "installer if you are interested in running sidux."
-	echo
-	echo "If you have already converted, but you are getting this message, please type ${C}y${S} and hit enter"
-	echo "now and the script will complete the missing conversion steps for you now."
-	echo $LINE
-	read response
-	
-	case $response in
-		y|Y) 
-			run_script_import $LIB_SIDUX_CONVERSION
-			update_to_sidux
-			;;
-		*) 
-			error_handler unsupported-distro $FUNCNAME
-			;;
-	esac
-}
-
 print_version()
 {
 	local distroTeam='slh devil etorix kelmo webera x-un-i crust dutchy latino locsmif piper zulu9' 
@@ -2217,11 +2191,6 @@ print_quit()
 
 pre_du_tasks()
 {
-	# one last test to dump non supported		
-	if [ "$DISTRO_LEVEL" -lt 5 ]
-	then
-		print_unsupported " ${C}Debian system${W}"
-	fi
 	# begin update tasks
 	apt_update_handler 'pre-du'
 
@@ -2473,13 +2442,12 @@ post_du_tasks()
 	trap 'du_trap_handler $FUNCNAME' INT TERM
 	
 	# this is all just debian conversion stuff
-	if [ "$IS_DEBIAN" == 'true' -a "$CON_DEB" == 'true' ]
+	if [ "$CON_DEB" == 'true' ]
 	then
 		run_script_import $LIB_SIDUX_CONVERSION
 		install_window_manager
 		install_sidux_components # test to make sure all sidux stuff is installed
 		sidux_graphics grub1
-		sidux_switch_id
 	fi
 	
 	# load the 2007 fixes
@@ -2816,7 +2784,7 @@ print_usage()
 }
 
 ## this is not in a function because these variables need to be set on startup
-while getopts :CdDeEhgiI:kKlmMNpP:sStTvwfruUxZ: opt
+while getopts :dDeEhgiI:kKlmMNpP:sStTvwfruUxZ: opt
 do
 	case $opt in
 		h)	print_usage;;
@@ -2860,9 +2828,6 @@ do
 		E)	echo $MLINE
 			echo "${M}The ${C}-E${M} option has been deprecated in favor of ${C}-M${M} option to set script kernel mirrors.${N}"
 			print_hec
-			;;
-		C) CON_DEB='true'
-			START_OPTIONS=$START_OPTIONS'C'
 			;;
 		# tests: is equal 1-5; more than 1 integer
 		I)	if [ -z "$( echo $OPTARG | egrep "^[1-5]$" )" -o "${#OPTARG}" -gt 1 ]
@@ -2932,11 +2897,7 @@ fi
 # triggers main script features depending on options given
 run_script_components()
 {
-	# Make sure script is in path set in $SCRIPT_HOME
-	check_script_path
-	# run checkuser script, this checks that user is in runlevel 3 and is root
-	# the check_force_update is also run from there, after user level, before init 3
-	check_user_level
+	start_up_tests
 	check_display_and_x
 	create_script_files
 	# clean up old and temp files if required
