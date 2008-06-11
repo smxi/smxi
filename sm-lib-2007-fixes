@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2007-fixes
-####  version: 1.3.16
-####  Date: June 8 2008
+####  version: 1.3.17
+####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -192,21 +192,29 @@ kdebase_fix_1()
 }
 remove_sidux_legacy_1()
 {
-	local prefId='k3b-fix-4'
+	local prefId='k3b-fix-4' package='' packagesInstalled='' isInstalled=''
 	local smPref=$( sm_pref_tester $prefId )
 	local legacyPackages='configure-networkcard networkconfig-sidux configure-screenres rootshell sidux-menu sidux-xdg'
 	
 	if [ "$smPref" -eq 0 ]
 	then
-		echo $LINE
-		echo "${S}We will need to remove some legacy ${C}sidux${S} packages to avoid future issues."
-		echo
-		echo "This will change only two common sidux commands, please make a note of the changes:"
-		echo "  ${C}netcardconfig${S} is now replaced by ${C}ceni${S}"
-		echo "  ${C}fix-res${S} functionality is now found by running: ${C}siduxcc${S}, then"
-		echo "  going to ${C}display -> resolution${S} which has defaults or custom resolutions.  ${N}"
-		print_hec
-		package_remover "$legacyPackages" '--purge --yes'
+		for package in $legacyPackages
+		do
+			packagesInstalled=$packagesInstalled$( package_tester $package )
+		done
+		
+		if [ -n "$packagesInstalled" ]
+		then
+			echo $LINE
+			echo "${S}We will need to remove some legacy ${C}sidux${S} packages to avoid future issues."
+			echo
+			echo "This will change only two common sidux commands, please make a note of the changes:"
+			echo "  ${C}netcardconfig${S} is now replaced by ${C}ceni${S}"
+			echo "  ${C}fix-res${S} functionality is now found by running: ${C}siduxcc${S}, then"
+			echo "  going to ${C}display -> resolution${S} which has defaults or custom resolutions.  ${N}"
+			print_hec
+			package_remover "$packagesInstalled" '--purge --yes'
+		fi
 		set_sticky_prefs $prefId
 	fi
 }
