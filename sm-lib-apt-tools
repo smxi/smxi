@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.10.2
+####  version: 1.10.3
 ####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1458,7 +1458,7 @@ get_current_apt_kernel()
 test_app_exists()
 {
 	local p='' r='' missing='' installApps='' response='' updateError='' appPath='' appExists=''
-	local requiredApps="awk basename bzip2 cat chmod chown cut date egrep gawk gcc grep ln mkdir perl pidof ps readlink sed sleep sort tar touch unzip wc wget whoami"
+	local requiredApps="awk basename bzip2 cat chmod chown cut date egrep gawk gcc grep ln make mkdir perl pidof ps readlink sed sleep sort tar touch unzip wc wget whoami"
 	# dctr is for grep-aptavail
 	local dpkgCheck='dctrl-tools initramfs-tools' 
 	local siduxRequired='deborphan' #  install-binary-gfx
