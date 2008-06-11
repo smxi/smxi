@@ -252,7 +252,6 @@ SET_2008_FIXES=''
 ADVANCED_KERNEL=''
 CHANGE_KERNEL_MIRROR=''
 CHANGE_MIRRORS=''
-CHECK_SIDUX=''
 DEBUGGING=''
 DPKG_UPDATE=''
 EXTRA_OPTIONS=''
@@ -284,6 +283,7 @@ CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
 CON_DEB=''
 CONNECTION_RETRY=''
+DISTRO_SOURCES=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
 KERNEL_EQUAL_INSTALL=''
 KERNEL_FORCE_DU=''
@@ -979,6 +979,15 @@ metapackage_launcher()
 ###---------------------------------------------------------------------
 ### Test for script files, cleanup stuff
 ###---------------------------------------------------------------------
+
+set_distro_data()
+{
+	local distroSources=$( grep -Rl 'sidux' $EAS* )
+	if [ -n "$distroSources" ]
+	then
+		DISTRO_SOURCES='true'
+	fi
+}
 
 # cleans up legacy and stub files if present
 cleanup_extra_files()
@@ -2937,14 +2946,15 @@ run_script_components()
 	fi
 	check_dpkg_update
 	test_app_exists
-
+	# must be set after check_distro_version to set DISTRO_SOURCES global
+	set_distro_data
 	# checks for first run or -m option to run change_debian_mirrors
 	launch_function_trigger 'debian-mirrors'
 	# launch_function_trigger tester
 	
 	## checks for first run or -M option to run change_kernel_mirrors
 	## no reason to run this on livecd since users can't install kernels anyway
-	if [  "$IS_LIVE" != 'true' ]
+	if [  "$IS_LIVE" != 'true' -a "$DISTRO_SOURCES" == 'true' ]
 	then
 		launch_function_trigger 'kernel-mirrors'
  	fi
