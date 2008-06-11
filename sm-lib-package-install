@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.13
+####  version: 2.7.0
 ####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -37,20 +37,22 @@ package_group_installer()
 {
 	local dmUse=''
 	# this handles cases where no kde exists, we'll use the xdm manager for that
-	if [ ! -e /etc/init.d/kdm ]
+	if [ ! -e /etc/init.d/kdm -a ! -e /etc/init.d/gdm ]
 	then
 		dmUse=' wdm'
 	fi
 	# package groups
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
-	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons gpm rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'$dmUse
+	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons gpm rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'
 	local googleEarth='googleearth-package fakeroot'
-	local kdePackages='kdeaddons kdebase kde-core kdelibs kdemultimedia-kio-plugins kdm konqueror konversation konq-plugins kpdf ksvg'
+	local kdeExtras='kdeaddons kdemultimedia-kio-plugins konq-plugins'
+	local kdePackages='kdebase kde-core kdelibs kdm konqueror konversation kpdf ksvg'
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local streamTuner='streamtuner streamripper kstreamripper'
-	local xfcePackages='gpm xfce4 xfmedia thunar xfce4-terminal thunar-archive-plugin thunar-media-tags-plugin'$dmUse
-	local xorgPackages='alsa alsa-utils gpm hal libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils udev xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'$dmUse
+	local systemUtils='alsa alsa-utils gpm hal udev'
+	local xfcePackages='gpm xfce4 xfmedia thunar xfce4-terminal thunar-archive-plugin thunar-media-tags-plugin'
+	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 
 	local itemName=$2
 	echo $LINE
@@ -63,10 +65,19 @@ package_group_installer()
 		fvwm-crystal)
 			packageName="$fvwmCrystal"
 			;;
+		fvwm-crystal-full)
+			packageName="$fvwmCrystal  $systemUtils $xorgPackages $dmUse"
+			;;
 		kde)
 			packageName="$kdePackages"
 			;;
-		kdepim)
+		kde-full)
+			packageName="$kdePackages $systemUtils $xorgPackages"
+			;;
+		kde-extras)
+			packageName="$kdeExtras"
+			;;
+		kde-pim)
 			packageName="$kdepimPackages"
 			;;
 		koffice)
@@ -75,11 +86,20 @@ package_group_installer()
 		streamtuner)
 			packageName="$streamTuner"
 			;;
+		system-utilities)
+			packageName="$systemUtils"
+			;;
 		xfce)
 			packageName="$xfcePackages"
 			;;
+		xfce-full)
+			packageName="$xfcePackages $systemUtils $xorgPackages $dmUse"
+			;;
 		xorg)
-			packageName="$xorgPackages"
+			packageName="$xorgPackages $dmUse"
+			;;
+		xorg-full)
+			packageName="$systemUtils $xorgPackages $dmUse"
 			;;
 		google-earth)
 			packageName="$googleEarth"
@@ -261,7 +281,7 @@ office_installer()
 				repeat='true'
 				;;
 			kde-pim)
-				package_group_installer plain kdepim
+				package_group_installer plain kde-pim
 				repeat='true'
 				;;
 			back-to-install-menu)
@@ -491,45 +511,72 @@ display_manager_installer()
 	echo "${M} Desktop / Window Manager Installer"
 	echo $MLINE
 	echo "${S}Get started if you're building this from nothing at all, or just add some extras."
+	echo "${M}Recommendation:${S} if you are starting from no desktop installed, use the ${C}full${S} option."
+	echo "If you have ${C}xorg${S} already installed, then the standard is probably fine."
 	echo $LINE
-	echo "${C}1${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
-	echo
-	echo "${C}2${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
-	echo
-	echo "${C}3${S} - ${C}kde${S} Base package for kde desktop."
-	echo
-	echo "${C}4${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins."
-	echo
-	echo "${C}5${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
-	echo
-	echo "${C}6${S} - ${C}back-to-install-menu${S}"
+	echo "${C}1${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
+	echo "${C}2${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
+	echo "${C}3${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
+	echo "${C}4${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo "${C}5${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
+	echo "${C}6${S} - ${C}kde${S} Base packages for kde desktop + kpdf, konversation, konqueror."
+	echo "${C}7${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
+	echo "${C}8${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, kde addons."
+	echo "${C}9${S} - ${C}kde-pim${S} karm, kontact, korganizer, kalarm."
+	echo "${C}10${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
+	echo "${C}11${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies + wdm if kdm/gdm not present"
+	echo "${C}12${S} - ${C}back-to-install-menu${S}"
 	
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="xorg xfce kde kde-extras fvwm-crystal back-to-install-menu"
+	options="system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fvwm-crystal fvwm-crystal-full back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
+			system-utilities)
+				package_group_installer plain system-utilities
+				repeat='true'
+				;;
 			xorg)
 				package_group_installer plain xorg
+				repeat='true'
+				;;
+			xorg-full)
+				package_group_installer plain xorg-full
 				repeat='true'
 				;;
 			xfce)
 				package_group_installer plain xfce
 				repeat='true'
 				;;
+			xfce-full)
+				package_group_installer plain xfce-full
+				repeat='true'
+				;;
 			kde)
 				package_group_installer plain kde
 				repeat='true'
 				;;
+			kde-full)
+				package_group_installer plain kde-full
+				repeat='true'
+				;;
 			kde-extras)
-				package_group_installer plain 'konq-plugins'
+				package_group_installer plain kde-extras
+				repeat='true'
+				;;
+			kde-pim)
+				package_group_installer plain kde-pim
 				repeat='true'
 				;;
 			fvwm-crystal)
 				package_group_installer plain fvwm-crystal
+				repeat='true'
+				;;
+			fvwm-crystal-full)
+				package_group_installer plain fvwm-crystal-full
 				repeat='true'
 				;;
 			back-to-install-menu)
