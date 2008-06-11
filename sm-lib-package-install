@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.6.10
+####  version: 2.6.11
 ####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -45,7 +45,7 @@ package_group_installer()
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons gpm rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'$dmUse
 	local googleEarth='googleearth-package fakeroot'
-	local kdePackages='kde kdm konqueror konversation konq-plugins ksvg kdemultimedia-kio-plugins kdeaddons'
+	local kdePackages='kdm konqueror konversation konq-plugins ksvg kdemultimedia-kio-plugins kdeaddons'
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local streamTuner='streamtuner streamripper kstreamripper'
