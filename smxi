@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.30.2
+####  version: 7.30.3
 ####  Date: June 10 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1384,7 +1384,7 @@ start_default_dm()
 		then
 			init $INIT_LEVEL && kill $LOGIN_PID && exit 0
 		else
-			echo "${E}No login Pid found to kill, going to init 5 and exiting script without"
+			echo "${E}No login Pid found to kill, going to init $INIT_LEVEL and exiting script without"
 			echo "killing root session.${N}"
 			init $INIT_LEVEL && exit 0
 		fi
@@ -1485,6 +1485,25 @@ check_display_and_x()
 	local hasVM=$( ls /proc | grep vmnet ) # will be used to add sleep time for vm shutdown
 	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
 	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
+	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	local runlevelUse='' runlevelText='' runlevelText2='' runlevelText3=''
+	
+	case $defaultRunlevel in
+		5)
+			runlevelUse=3
+			runlevelText=" in runlevel $runlevelUse and"
+			runlevelText2=" enter runlevel $runlevelUse and"
+			runlevelText3='echo "${S}Entering ${C}runlevel $runlevelUse${S}. Please wait, this takes a few seconds...${N}"'
+			;;
+		1|2|3|4)
+			runlevelUse=$defaultRunlevel
+			INIT_LEVEL=$defaultRunlevel
+			;;
+		*)
+			# error_handler 'no-runlevel' $FUNCNAME $defaultRunlevel
+			runlevelUse=3 # just in some weird case
+			;;
+	esac
 	
 	if [ -n "$hasVM" ]
 	then
@@ -1506,16 +1525,17 @@ check_display_and_x()
 	fi
 
 	# this should handle most cases, now supports Debian default start of gdm/kdm in init 3
-	if [ "$RunLvl" != '3' -o "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
+	if [ "$RunLvl" != "$runlevelUse" -o "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
 	then
 		echo $WBAR
-		echo "${W}You must be in runlevel 3 and out of X to run this script."
-		echo -e "${Q}Would you like to enter runlevel 3 and exit X now?$YNE"
+		echo "${W}You must be$runlevelUse out of X to run this script."
+		echo -e "${Q}Would you like to$runlevelText2 exit X now?$YNE"
 		echo $LINE
 		read response
 		
 		case $response in
-			y)	echo "${S}Entering ${C}runlevel 3${S}. Please wait, this takes a few seconds...${N}"
+			y)	
+				eval $runlevelText3
 #  				if [ "$TESTING" == 'true' ]
 #  				then
 #  				
@@ -1532,10 +1552,13 @@ check_display_and_x()
 # 					chvt $VT
 # 					echo "${S}Entering ${C}runlevel 3${S}. Please wait, this takes a few seconds...${N}"
 #  				else
-					init 3
+				if [ "$defaultRunlevel" == 5 ]
+				then
+					init $runlevelUse
 					# sleep helps because otherwise script keeps trying to run while init 3 
 					# shutdown process occurs, which gives weird output to user
 					sleep $sleepTime
+				fi
 #  				fi
 
 				do_wm_pid_test
@@ -1567,8 +1590,15 @@ check_display_and_x()
 					fi
 				fi
 				;;
-			n)	echo "${S}Exiting the script. Please run the script in runlevel 3."
-				echo "To enter runlevel 3, switch to su, login, and execute this command: ${C}init 3"
+				
+			n)	
+				if [ "$defaultRunlevel" == 5 ]
+				then
+					echo "${S}Exiting the script. Please run the script in runlevel $runlevelUse."
+					echo "To enter runlevel $runlevelUse, switch to su, login, and execute this command: ${C}init $runlevelUse"
+				else
+					echo "${S}Exiting the script. Please shut down your X desktop before running this script."
+				fi
 				echo $WBAR
 				exit 0
 				;;
