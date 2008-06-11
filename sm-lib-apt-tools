@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.10.1
+####  version: 1.10.2
 ####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -671,7 +671,7 @@ apt_update_handler()
 		# this has to run after update of course
 		install_keyrings
 		# add any gpg stuff that might be needed
-		update_gpg 
+		# update_gpg  # I'm not using this one for now, I don't think there's any point
 		# set this to determine if update should be run again
 		UPDATED='true' 
 	fi
