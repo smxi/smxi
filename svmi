@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 1.1.2
+####  version: 1.1.3
 ####  Date: June 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -596,6 +596,8 @@ log_info()
 vm_main_selector()
 {
 	local repeat='' options='' opt='' quitContinue='quit'
+	# testing for both ose and non ose versions, then installing the requested version
+	set_installed_vbox_version
 	if [ "$SM_INSTALL" == 'true' ]
 	then
 		quitContinue='continue'
@@ -627,8 +629,9 @@ vm_main_selector()
 	echo "    please run ${C}build-vbox-module-ose${S} as well."
 	echo "${C}5${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules, adds module to $EMOD if required."
 	echo "    ${M}NOTE: System must be fully dist-upgraded for this to work right before you run this!"
-	echo "${C}6${S} - ${C}install-vbox-addons-ose${S} Downloads vbox guest additions iso. Helps with driver installation,"
-	echo "    and so on. Highly recommended."
+	echo "${C}6${S} - ${C}install-vbox-addons-ose${S} Downloads vbox guest additions iso. Helps with "
+	echo "    driver installation, and so on. Highly recommended. Will download the version"
+	echo "    for your currently installed virtualbox-ose: ${C}$VBOX_INSTALLED_VERSION"
 	
 	echo $LINE
 	echo "${M}For other vbox non-ose versions, use the ${C}svmi -V <vbox version>${M} option"
@@ -1160,8 +1163,7 @@ install_vbox_addons()
 	
 	local isOSE='' 
 	
-	# testing for both ose and non ose versions, then installing the requested version
-	set_installed_vbox_version
+	
 	# note: as of 1.5.4, there is no longer a separate _OSE download version for addons
 	if [ "$2" == 'ose' ] && [ "$VBOX_INSTALLED_VERSION" == '1.5.0' -o "$VBOX_INSTALLED_VERSION" == '1.5.2' ]
 	then
@@ -1172,7 +1174,7 @@ install_vbox_addons()
 	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION$isOSE'.iso'
 	local vboxAddonName='VBoxGuestAdditions.iso'
 	local vboxAddonURL='http://www.virtualbox.org/download/'$VBOX_INSTALLED_VERSION'/'$vboxAddonFile
-	
+
 	echo $LINE
 	if [ -d $vboxLib ]
 	then
