@@ -48,7 +48,7 @@ FORCE_UPDATE=''
 NATIVE_DRIVER=''
 NATIVE_OVERRIDE=''
 # this is the actual pattern that will be used to search for this stuff in script
-NATIVE_OVERRIDE_SUPPORTED='ati|i128|i740|i810|i810-modesetting|intel|mga|neomagic|nv|radeon|radeohd|sis|tdfx|vesa|vga|voodoo'
+NATIVE_OVERRIDE_SUPPORTED='ati|i128|i740|i810|i810-modesetting|intel|mga|neomagic|nv|openchrome|radeon|radeohd|sis|tdfx|vesa|via|vga|voodoo'
 NO_XVMC=''
 PRINT_VER='' # utilities for smxi
 REMOVE_MODELINES=''
@@ -2408,10 +2408,10 @@ update_xorgconf_driver_version()
 			driverName=$NATIVE_OVERRIDE
 		fi
 	fi
-	# not converting: i810-modesetting i740 i128
+	# not converting: i810-modesetting i740 i128: note openchrome just released in sid
 	# previous: (i810|nvidia|nv|fglrx|ati|radeon|apm|iftv|fbdev|vesa)
 	# these are all current xserver-xorg-video-xxxx drivers, plus nvidia and fglrx
-	sed -i -r 's%^\s*Driver\s*"(apm|ark|ati|chips|cirrus|cyrix|fbdev|fglrx|glint|iftv|ivtv|i810|imstt|intel|mesa|mga|neomagic|newport|nsc|nv|nvidia|radeon|radeonhd|rendition|s3|s3virge|savage|siliconmotion|sis|tdfx|tga|trident|tseng|v4l|vesa|vga|via|vmware|voodoo)"%\tDriver\t"'$driverName'"%' $EXXC
+	sed -i -r 's%^\s*Driver\s*"(apm|ark|ati|chips|cirrus|cyrix|fbdev|fglrx|glint|iftv|ivtv|i810|imstt|intel|mesa|mga|neomagic|newport|nsc|nv|nvidia|openchrome|radeon|radeonhd|rendition|s3|s3virge|savage|siliconmotion|sis|tdfx|tga|trident|tseng|v4l|vesa|vga|via|vmware|voodoo)"%\tDriver\t"'$driverName'"%' $EXXC
 }
 
 
