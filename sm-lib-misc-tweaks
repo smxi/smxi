@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.14.11
-####  Date: June 8 2008
+####  version: 1.14.12
+####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -898,27 +898,12 @@ alt_print_hec()
 		fi
 		if [ -n "$typeData" ]
 		then
-			set_alt_hec_data "$typeData"
+			echo $LINE
+			echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default of hit ${C}$typeData${S} key to continue...${N}"
+			set_sm_pref_values "alt-print-hec" "$typeData"
+			HEC_ALT=$1
+			print_hec
 		fi
-}
-
-# arg: $1 - data to set in smxi.conf
-set_alt_hec_data()
-{
-	local altHecSet=$( sm_pref_tester 'alt-print-hec' 'equal' )
-	
-	echo $LINE
-	echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default of hit ${C}$1${S} key to continue...${N}"
-	
-	if [ -n "$altHecSet"  ]
-	then
-		sed -i "s/alt-print-hec=.*/alt-print-hec=$1/" $SM_CONFIG_FILE
-	else
-		set_sticky_prefs "alt-print-hec=$1"
-	fi
-	# remember, have to reset global here
-	HEC_ALT=$1
-	print_hec
 }
 
 restore_standard_sources()
