@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.7.2
-####  Date: June 10 2008
+####  version: 2.7.3
+####  Date: June 11 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -48,11 +48,11 @@ package_group_installer()
 	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras='kdeaddons kdemultimedia-kio-plugins konq-plugins'
-	local kdePackages='kdebase kde-core kdelibs kdm konqueror konversation kpdf ksvg'
+	local kdePackages='kdebase kdebase-kio-plugins kde-core kdelibs kdm konqueror konversation kpdf ksvg'
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local streamTuner='streamtuner streamripper kstreamripper'
-	local systemUtils='alsa alsa-utils gpm hal udev'
+	local systemUtils='alsa alsa-utils gpm dbus hal pmount udev'
 	local xfcePackages='xfce4 xfmedia thunar xfce4-terminal thunar-archive-plugin thunar-media-tags-plugin'
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 	
