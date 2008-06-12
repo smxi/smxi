@@ -76,7 +76,7 @@ advanced_kernel_install()
 	if [ -n "$altKernelOption" ]
 	then
 		altKernOpt=$(( $listCount - 2 )) 
-		echo "${C}$altKernOpt - $altKernelOption${S} Installs current  ${C}$altKernelText1${S} kernel"
+		echo "${C}$altKernOpt - $altKernelOption${S} Installs current ${C}$altKernelText1${S} kernel"
 		echo "     as well as any any required ${C}$altKernelText1${S} kernel modules available in apt."
 		echo "     Note: you will see which specific ${C}$altKernelText1${S} kernel will be installed in the next step, "
 		echo "     and can skip the install if you don't want it."
