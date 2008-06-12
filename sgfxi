@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.9
+####  version: 3.1.10
 ####  Date: June 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -48,7 +48,7 @@ FORCE_UPDATE=''
 NATIVE_DRIVER=''
 NATIVE_OVERRIDE=''
 # this is the actual pattern that will be used to search for this stuff in script
-NATIVE_OVERRIDE_SUPPORTED='ati|i128|i740|i810|i810-modesetting|intel|mga|neomagic|nv|openchrome|radeon|radeohd|sis|tdfx|vesa|via|vga|voodoo'
+NATIVE_OVERRIDE_SUPPORTED='ati|i128|i740|i810|i810-modesetting|intel|mga|neomagic|nv|openchrome|radeon|radeond|sis|tdfx|vesa|via|vga|voodoo'
 NO_XVMC=''
 PRINT_VER='' # utilities for smxi
 REMOVE_MODELINES=''
