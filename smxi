@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.30.6
+####  version: 7.31.0
 ####  Date: June 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -253,6 +253,7 @@ ADVANCED_KERNEL=''
 CHANGE_KERNEL_MIRROR=''
 CHANGE_MIRRORS=''
 DEBUGGING=''
+DEFAULT_KERNEL=''
 DPKG_UPDATE=''
 EXTRA_OPTIONS=''
 FORCE_DOWNLOAD=''
@@ -983,9 +984,19 @@ metapackage_launcher()
 set_distro_data()
 {
 	local distroSources=$( grep -Rl 'sidux' $EAS* )
+	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
+	
 	if [ -n "$distroSources" ]
 	then
 		DISTRO_SOURCES='true'
+		DEFAULT_KERNEL='sidux'
+	else
+		DEFAULT_KERNEL='debian'
+	fi
+	# override above if required
+	if [ -n "$defaultKernel" ]
+	then
+		DEFAULT_KERNEL=$defaultKernel
 	fi
 }
 
@@ -2275,7 +2286,7 @@ install_dist_upgrade()
 	local smPref=$( sm_pref_tester $prefId )
 	local continue='' repeat='' options='' opt='' ConnectionDropped=''
 	local logfile='' exitStatus=$2 # only for script re-runs, $2 not set first time
-	local metaExists=$( package_tester '2.6-sidux-' 'wild-full' )
+	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f dist-upgrade-again check-services continue $reboot"
@@ -2374,7 +2385,7 @@ install_dist_upgrade()
 		echo
 		echo "Once you are sure the upgrade is done, you can continue, check services, or exit."
 	fi
-	eval $rebootTopText
+	eval "$rebootTopText"
 	echo $LINE
 	echo "${C}1 - use-install-f${S} Use this to try to resolve error in dist-upgrade."
 	echo "${C}2 - dist-upgrade-again${S} Run this after correcting an error with ${C}1${S}."
@@ -2716,7 +2727,7 @@ post_du_options()
 				;;
 			kernel-options)
 				run_script_import $LIB_KERNEL
-				get_current_apt_kernel
+				get_current_apt_kernel $DEFAULT_KERNEL
 				kernel_question post-du
 				repeat='true'
 				;;
@@ -2995,7 +3006,7 @@ run_script_components()
 	
 	if [ "$SKIP_CONNECTIONS" != 'true' ]
 	then
-		get_current_apt_kernel
+		get_current_apt_kernel $DEFAULT_KERNEL
 		if [ "$TESTING" == 'true' ]
 		then
 			echo "CAK: $CURRENT_APT_KERNEL"
