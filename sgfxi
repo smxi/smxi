@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.8
-####  Date: June 9 2008
+####  version: 3.1.9
+####  Date: June 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -2310,6 +2310,8 @@ start_x_question()
 start_stop_x()
 {
 	local displayManagers='kdm gdm xdm' dman='' success=''
+	# setting the default will handle cases like default 2 while still handling 3/5
+	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
 	
 	if [ "$1" == 'stop' ]
 	then
@@ -2343,10 +2345,10 @@ start_stop_x()
 			# the failure case handels a weird thing when kill gives error
 			if [ -n "$LOGIN_PID" ]
 			then
-				init 5 && kill $LOGIN_PID && exit 0 || exit 1 
+				init $defaultRunlevel && kill $LOGIN_PID && exit 0 || exit 1 
 			else
 				echo "${E}No login Pid found to kill, starting init 5 and leaving your root logged in.${N}"
-				init 5 && exit 0 || exit 1 
+				init $defaultRunlevel && exit 0 || exit 1 
 			fi
 		else
 			exit 0 # smxi will handle the pid root kill
