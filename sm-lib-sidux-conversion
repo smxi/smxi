@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 2.0.2
+####  version: 2.0.3
 ####  Date: June 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -58,10 +58,12 @@ check_debian()
 			continue-sidux-sources)
 				update_smxi_data
 				update_to_sidux_sources
+				set_default_system_kernel 'conversion'
 				;;
 			continue-sidux-conversion)
 				update_smxi_data
 				update_to_sidux_sources
+				set_default_system_kernel 'conversion'
 				echo $MLINE
 				echo "${C}$SCRIPT_NAME${M} will now proceed to the dist-upgrade, which will bring your system into sync."
 				echo "Do not quit the script until the dist-upgrade and post dist-upgrade sidux conversion is completed!"

@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.0
+####  version: 1.15.1
 ####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -845,6 +845,7 @@ make_fonts_links()
 ###---------------------------------------------------------------------
 ### Misc stuff
 ###---------------------------------------------------------------------
+# args: $1 - optional - conversion
 set_default_system_kernel()
 {
 	local smPref='distro-kernel'
@@ -874,6 +875,13 @@ set_default_system_kernel()
 	echo "option manually using advanced kernel install options if you want to check it out."
 	echo
 	echo "Your current default kernel setting is: ${C}$altKernelSetting${S}"
+	if [ "$1" == 'conversion' ]
+	then
+		echo
+		echo "${M}If you do not see your distro's standard kernel on this list, please get in touch with"
+		echo "the ${C}$SCRIPT_NAME${M} home forums on techpatterns.com and post the kernel string information"
+		echo "there for your distro, and we'll see if we can get it supported."
+	fi
 	echo $LINE
 	echo "${C}1-$defaultCount${S} Currently supported ${C}$SCRIPT_NAME${S} default system kernel types."
 	echo
