@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.0.5
-####  Date: June 8 2008
+####  version: 2.0.6
+####  Date: June 11 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -90,9 +90,6 @@ install_graphics()
 	
 	# intel stuff
 	local optIntel='' 
-
-	# set defaults and tests
-	local initx='init-'$INIT_LEVEL
 		
 	# this sets card id and script names
 	set_graphics_data
@@ -311,13 +308,13 @@ install_graphics()
 	eval $OptionText
 	eval $NvOptionText
 	eval $FgOptionText
-	echo -e "${C}$initx${S} - No graphics driver install. Quit script, start $initx / X."
+	echo -e "${C}start-desktop${S} - No graphics driver install. Quit script, start desktop / X."
 	echo -e "${C}quit${S} - No graphics driver install. Quit script, stay in console."
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="$OptIntel $OptNv $OptFg $initx quit"
+	options="$OptIntel $OptNv $OptFg start-desktop quit"
 	select opt in $options
 	do
 		case $opt in
@@ -363,11 +360,10 @@ install_graphics()
 			current-fglrx|legacy-fglrx)
 				final_graphics_install fglrx $FgDefault
 				;;
-			
 			latest-fglrx)
 				final_graphics_install fglrx-l $FgLatest
 				;;
-			$initx)
+			start-desktop)
 				final_graphics_install no-driver-install
 				start_default_dm full
 				;;

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.30.4
-####  Date: June 10 2008
+####  version: 7.30.5
+####  Date: June 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1286,21 +1286,20 @@ sm_pref_tester()
 start_windows_manager()
 {
 	local options='' opt=''
-	local initx='init-'$INIT_LEVEL
 	
 	echo $LINE
-	echo "${C}1${S} - Starts your window manager using the command ${C}init $INIT_LEVEL${S}."
+	echo "${C}1${S} - Starts your desktop, X (window manager)."
 	echo "${C}2${S} - Exits the script without starting your window manager."
 	echo $LINE
 	echo "${Q}Would you like to start your window manager now?"
 	echo -e $SLE
 	echo $LINE
 
-	options="$initx quit"
+	options="start-desktop quit"
 	select opt in $options
 	do
 		case $opt in
-			$initx)
+			start-desktop)
 				print_completed
 				start_default_dm full
 				;;
@@ -1475,7 +1474,7 @@ start_up_tests()
 		
 }
 
-# this script must run in runlevel 3, and gives option to go into runlevel 3
+# this script must run out of x, and gives option to go into default runlevel on x start
 check_display_and_x() 
 {
 	# this fixes cases where the runlevel might give a 2 or 3 item result
@@ -1495,13 +1494,9 @@ check_display_and_x()
 			runlevelText2=" enter runlevel $runlevelUse and"
 			runlevelText3='echo "${S}Entering ${C}runlevel $runlevelUse${S}. Please wait, this takes a few seconds...${N}"'
 			;;
-		1|2|3|4)
+		*)
 			runlevelUse=$defaultRunlevel
 			INIT_LEVEL=$defaultRunlevel
-			;;
-		*)
-			# error_handler 'no-runlevel' $FUNCNAME $defaultRunlevel
-			runlevelUse=3 # just in some weird case
 			;;
 	esac
 	
@@ -1552,7 +1547,8 @@ check_display_and_x()
 # 					chvt $VT
 # 					echo "${S}Entering ${C}runlevel 3${S}. Please wait, this takes a few seconds...${N}"
 #  				else
-				if [ "$defaultRunlevel" == 5 ]
+				# eg: 5 -ne 3, 2 - 3, but for 2 type systems, would be 2 - 2
+				if [ "$RunLvl" != "$runlevelUse" ]
 				then
 					init $runlevelUse
 					# sleep helps because otherwise script keeps trying to run while init 3 
@@ -2605,7 +2601,6 @@ post_du_options()
 {
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
 	local  advanced1Option='' advanced2Option='' initX=''
-	local initx='init-'$INIT_LEVEL
 	local options='fixfonts package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
 	
 	local tempCount=$( echo $options | wc -w )
@@ -2626,7 +2621,7 @@ post_du_options()
 		advanced2='echo -e "${C}'$tempCount'${S} - ${C}advanced-install-options${S} Gives more package install options\n    not listed in standard package install."'
 		tempCount=''
 	fi
-	options="$options $advanced1Option $advanced2Option continue-to-graphics $initx quit"
+	options="$options $advanced1Option $advanced2Option continue-to-graphics start-desktop quit"
 	
 	tempCount=$( echo $options | wc -w )
 	
@@ -2672,7 +2667,7 @@ post_du_options()
 	echo
 	echo "${C}$cont${S} - Continue to graphics driver installation. ${M}If you use ${C}nvidia${M} or ${C}ati${M} graphics drivers,"
 	echo "    and either ${C}Xorg${M} updated or you installed a new kernel, you must reinstall your drivers."
-	echo "${C}$initX${S} - Restart X with ${C}$initx${S} (skip graphics (re)install)."
+	echo "${C}$initX${S} - Restart desktop/X (skip graphics (re)install)."
 	echo "${C}$qui${S} - Exits the script."
 	echo $LINE
 	echo -e $SLE
@@ -2723,7 +2718,7 @@ post_du_options()
 			continue-to-graphics)
 				echo "${S}Continuing to graphics driver install...${N}"
 				;;
-			$initx)
+			start-desktop)
 				print_completed
 				start_default_dm full
 				;;
