@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.1
+####  version: 1.15.2
 ####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -851,7 +851,8 @@ set_default_system_kernel()
 	local smPref='distro-kernel'
 	local altKernelSet=$( sm_pref_tester $smPref 'equal' )
 	local typeData='' altKernelSetting='' opt='' options='debian'
-	local defaultCount=0 contCount='' repeat=''
+	local defaultCount=0 contCount='' repeat='' 
+	local continueText='return to main menu' continueText2='returning to main menu'
 	
 	if [ -n "$altKernelSet"  ]
 	then
@@ -877,6 +878,8 @@ set_default_system_kernel()
 	echo "Your current default kernel setting is: ${C}$altKernelSetting${S}"
 	if [ "$1" == 'conversion' ]
 	then
+		continueText="continue with ${C}$SCRIPT_NAME${S}"
+		continueText2="continuing with ${C}$SCRIPT_NAME${S}"
 		echo
 		echo "${M}If you do not see your distro's standard kernel on this list, please get in touch with"
 		echo "the ${C}$SCRIPT_NAME${M} home forums on techpatterns.com and post the kernel string information"
@@ -885,7 +888,7 @@ set_default_system_kernel()
 	echo $LINE
 	echo "${C}1-$defaultCount${S} Currently supported ${C}$SCRIPT_NAME${S} default system kernel types."
 	echo
-	echo "${C}$contCount - continue${S} Don't change or set, return to main menu."
+	echo "${C}$contCount - continue${S} Don't change or set, $continueText."
 	echo $LINE
 	echo $SLE
 	echo $LINE
@@ -900,7 +903,7 @@ set_default_system_kernel()
 				set_distro_data # have to reset globals now
 				;;
 			continue)
-				echo "${S}Ok, not changing anything, returning to main menus.${N}"
+				echo "${S}Ok, not changing anything, $continueText2.${N}"
 				;;
 			*)
 				print_error opt
