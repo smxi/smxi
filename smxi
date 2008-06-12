@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.31.3
+####  version: 7.31.4
 ####  Date: June 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1049,10 +1049,7 @@ create_script_files()
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
 	
 	# make config file / log dir if required
-	if [ ! -f $SM_CONFIG_FILE ]
-	then
-		touch $SM_CONFIG_FILE
-	fi
+	check_sm_pref_file
 	if [ ! -d $SM_LOG_DIR ]
 	then
 		mkdir $SM_LOG_DIR
@@ -1218,6 +1215,7 @@ sticky_prefs()
 # args: $1, s/d, set the du data, or standard, set the sticky string in /etc/smxi.conf 
 set_sticky_prefs()
 {
+	check_sm_pref_file
 	local currentDate=$( date +%Y-%m-%d-%H:%M )
 	
 	case $1 in
@@ -1254,9 +1252,10 @@ sort_sticky_prefs()
 # args: $1 - pref name; $2 - pref value, eg: <name>=<value>
 set_sm_pref_values()
 {
+	check_sm_pref_file
 	local prefId="$1"
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo "$1=$2" >> $SM_CONFIG_FILE
@@ -1265,10 +1264,20 @@ set_sm_pref_values()
 	fi
 	sort_sticky_prefs
 }
+
+check_sm_pref_file()
+{
+	# make config fileif required
+	if [ ! -f $SM_CONFIG_FILE ]
+	then
+		touch $SM_CONFIG_FILE
+	fi
+}
 # args: $1 string to be tested for, returns 0 or > 0
 # $2 - optional: custom test; default standard; equal slice out after =
 sm_pref_tester()
 {
+	check_sm_pref_file
 	local smPref='' testType='standard'
 	
 	if [ -n "$2" ]
