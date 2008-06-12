@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.31.0
+####  version: 7.31.1
 ####  Date: June 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1171,22 +1171,21 @@ test_kernel_strings()
 {
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 	local normalizedPackageId=$( normalize_kernel_string $1 )
+	local value=''
 	
 	if [ "$normalizedCurrentKernel" == "$normalizedPackageId" ]
 	then
-		# set the global, which will be used by various testing functions
-		# or just echo the status true/false for functions that use that
-		if [ "$2" == 'set-ke' ]
-		then
-			KERNEL_EQUAL_INSTALL='true'
-		else
-			echo 'true'
-		fi
+		value='true'
 	else
-		if [ "$2" != 'set-ke' ]
-		then
-			echo 'false'
-		fi
+		value='false'
+	fi
+	# set the global, which will be used by various testing functions
+	# or just echo the status true/false for functions that use that
+	if [ "$2" == 'set-ke' ]
+	then
+		KERNEL_EQUAL_INSTALL=$value
+	else
+		echo $value
 	fi
 }
 #normalize_kernel_string $(uname -r);exit
