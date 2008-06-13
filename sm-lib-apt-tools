@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.0
+####  version: 1.11.1
 ####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1012,131 +1012,138 @@ force_kernel_mirror_change()
 # update kernel mirrors, -M option
 change_kernel_mirrors()
 {
-	local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
-	#local currentMirror=$( sm_pref_tester $prefId 'equal' )
-	local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
-	local currentMirror="$( get_set_mirror 'get' 'mirrors' )"
-	local plural1='' plural2='is'
-	local noMirrorString='No mirrors were detected that fit the search pattern.'
-	
-	local siduxMirrors="
-	$( list_distro_mirrors )
-	$noChange
-	"
-	local cont=$( wc -w <<< $siduxMirrors )
-	local mirrorCount=$(( $cont - 1 ))
-
-	currentMirrorText="$currentMirror"
-# 	if [ "$smPref" -eq 0 ]
-# 	then
-# 		currentMirrorText='UNSET.'
-# 		noChange=''
-# 	else
-# 		currentMirrorText=$currentMirror
-# 	fi
-	# we'll set some singular/plural stuff, and some logic using count
-	local countMirrors=$( echo $currentMirror | wc -w )
-	
-	if [ "$countMirrors" -gt 1 ]
+	if [ -n "$DISTRO_SOURCES" ]
 	then
-		plural1='s' 
-		plural2='are'
-	fi
+		local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
+		#local currentMirror=$( sm_pref_tester $prefId 'equal' )
+		local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
+		local currentMirror="$( get_set_mirror 'get' 'mirrors' )"
+		local plural1='' plural2='is'
+		local noMirrorString='No mirrors were detected that fit the search pattern.'
+		
+		local siduxMirrors="
+		$( list_distro_mirrors )
+		$noChange
+		"
+		local cont=$( wc -w <<< $siduxMirrors )
+		local mirrorCount=$(( $cont - 1 ))
 	
-	if [ "$1" == 'prefs' ]
-	then
-		prefMess='echo -e "\n${M}You will only see this Kernel Mirror Selection option the first time you run\nthe script. To reset your kernel mirrors in the future, use the ${C}-M${M} option.${S}"'
-	fi
-	
-	echo $MBAR
-	echo "${M} SMXI KERNEL MIRROR SELECTION"
-	echo $MLINE
-	
-	echo "${S}Welcome to the sidux apt/kernel mirror selector. Please take a moment to read this"
-	echo "before proceeding. Your current sidux-apt/kernel mirror$plural1 $plural2:"
-	echo "${SPACER}${C}$currentMirrorText${S}"
-	echo
-	echo "There are two types of mirrors: ${C}core${S} (required), and ${C}alternate${S} (optional)."
-	echo "The following are the ${C}core${S} sidux mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
-	echo "${S}You will always use one of these. Picking a core will modify the core mirror always."
-	echo
-	echo "Alternate mirrors are localized, and often provide much faster downloads, but do not sync"
-	echo "as frequently as the core ones. If you pick an alternate, it will be prepended"
-	echo "to your current core mirror, or, if already with alternate, will modify the alternate."
-	echo "${M}Please install at least one alternate mirror, it will really help the sidux server load.${S}"
-	echo
-	echo "${S}When you select your mirror(s), sidux will use it/them as source for latest"
-	echo "kernels and sidux hot-fixes. You can start this script like this: ${C}$SCRIPT_NAME -M${S}"
-	echo "to reset your prefered mirror(s) any time you like."
-	eval $prefMess
-	echo $LINE
-	echo "${C}1-$mirrorCount - Mirror List${S} Select which core/alternate mirror to add or update."
-	if [ -n "$currentMirror" ]
-	then
-		echo
-		echo "${C}$cont - continue${S} If you want to leave your sidux mirror$plural1 alone, or if you are done."
-	fi
-	
-	echo $LINE
-	echo -e $SLE
-	echo $LINE
-	
-	options=$siduxMirrors
-
-	select opt in $options
-	do
-		for mirror in $siduxMirrors
-		do
-			if [ "$opt" == "$mirror" ]
-			then
-				found='true'
-				if [ "$mirror" == 'continue' ]
-				then
-					skip='true'
-				else
-					countryId=$( echo $mirror | cut -d ':' -f 1 )
-					mirrorUrl=$( echo $mirror | cut -d ':' -f 2-3 ) # handles : in urls
-				fi
-				break
-			else
-				found='false'
-			fi
-		done
-		break
-	done
-	
-	if [ "$found" == 'true' ]
-	then
-		echo $LINE
-		if [ "$skip" != 'true' ]
+		currentMirrorText="$currentMirror"
+	# 	if [ "$smPref" -eq 0 ]
+	# 	then
+	# 		currentMirrorText='UNSET.'
+	# 		noChange=''
+	# 	else
+	# 		currentMirrorText=$currentMirror
+	# 	fi
+		# we'll set some singular/plural stuff, and some logic using count
+		local countMirrors=$( echo $currentMirror | wc -w )
+		
+		if [ "$countMirrors" -gt 1 ]
 		then
-			if [ "$currentMirror" != "$noMirrorString" ]
+			plural1='s' 
+			plural2='are'
+		fi
+		
+		if [ "$1" == 'prefs' ]
+		then
+			prefMess='echo -e "\n${M}You will only see this Kernel Mirror Selection option the first time you run\nthe script. To reset your kernel mirrors in the future, use the ${C}-M${M} option.${S}"'
+		fi
+		
+		echo $MBAR
+		echo "${M} SMXI KERNEL MIRROR SELECTION"
+		echo $MLINE
+		
+		echo "${S}Welcome to the sidux apt/kernel mirror selector. Please take a moment to read this"
+		echo "before proceeding. Your current sidux-apt/kernel mirror$plural1 $plural2:"
+		echo "${SPACER}${C}$currentMirrorText${S}"
+		echo
+		echo "There are two types of mirrors: ${C}core${S} (required), and ${C}alternate${S} (optional)."
+		echo "The following are the ${C}core${S} sidux mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
+		echo "${S}You will always use one of these. Picking a core will modify the core mirror always."
+		echo
+		echo "Alternate mirrors are localized, and often provide much faster downloads, but do not sync"
+		echo "as frequently as the core ones. If you pick an alternate, it will be prepended"
+		echo "to your current core mirror, or, if already with alternate, will modify the alternate."
+		echo "${M}Please install at least one alternate mirror, it will really help the sidux server load.${S}"
+		echo
+		echo "${S}When you select your mirror(s), sidux will use it/them as source for latest"
+		echo "kernels and sidux hot-fixes. You can start this script like this: ${C}$SCRIPT_NAME -M${S}"
+		echo "to reset your prefered mirror(s) any time you like."
+		eval $prefMess
+		echo $LINE
+		echo "${C}1-$mirrorCount - Mirror List${S} Select which core/alternate mirror to add or update."
+		if [ -n "$currentMirror" ]
+		then
+			echo
+			echo "${C}$cont - continue${S} If you want to leave your sidux mirror$plural1 alone, or if you are done."
+		fi
+		
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		
+		options=$siduxMirrors
+	
+		select opt in $options
+		do
+			for mirror in $siduxMirrors
+			do
+				if [ "$opt" == "$mirror" ]
+				then
+					found='true'
+					if [ "$mirror" == 'continue' ]
+					then
+						skip='true'
+					else
+						countryId=$( echo $mirror | cut -d ':' -f 1 )
+						mirrorUrl=$( echo $mirror | cut -d ':' -f 2-3 ) # handles : in urls
+					fi
+					break
+				else
+					found='false'
+				fi
+			done
+			break
+		done
+		
+		if [ "$found" == 'true' ]
+		then
+			echo $LINE
+			if [ "$skip" != 'true' ]
 			then
-				#sed -i "s%"$prefId".*%"$prefId"="$mirrorUrl"%" $SM_CONFIG_FILE
-				get_set_mirror 'set' 'mirrors' "$mirrorUrl"
-				change_kernel_mirrors
+				if [ "$currentMirror" != "$noMirrorString" ]
+				then
+					#sed -i "s%"$prefId".*%"$prefId"="$mirrorUrl"%" $SM_CONFIG_FILE
+					get_set_mirror 'set' 'mirrors' "$mirrorUrl"
+					change_kernel_mirrors
+				else
+					echo "${M}$noMirrorString${N}"
+				fi
 			else
-				echo "${M}$noMirrorString${N}"
+				# retest for the new mirror
+	# 			currentMirror=$( get_set_mirror 'get' 'mirrors' 'single' )
+	# 
+	# 			if [ "$currentMirror" != "$mirrorUrl" ]
+	# 			then
+	# 				echo "${E}You MUST select a mirror to use for kernel downloads, it is not optional."
+	# 				echo "Please select one from the list again. Restarting mirror selector now${N}"
+	# 				print_hec
+	# 				change_kernel_mirrors
+	# 			else
+					echo "${S}Continuing on to main script. Remember, you can change your ${C}sidux apt mirrors${S}"
+					echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
+					apt_update_handler 'post-mirror'
+	# 			fi
 			fi
 		else
-			# retest for the new mirror
-# 			currentMirror=$( get_set_mirror 'get' 'mirrors' 'single' )
-# 
-# 			if [ "$currentMirror" != "$mirrorUrl" ]
-# 			then
-# 				echo "${E}You MUST select a mirror to use for kernel downloads, it is not optional."
-# 				echo "Please select one from the list again. Restarting mirror selector now${N}"
-# 				print_hec
-# 				change_kernel_mirrors
-# 			else
-				echo "${S}Continuing on to main script. Remember, you can change your ${C}sidux apt mirrors${S}"
-				echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
-				apt_update_handler 'post-mirror'
-# 			fi
+			print_error opt
+			change_kernel_mirrors
 		fi
 	else
-		print_error opt
-		change_kernel_mirrors
+		echo $MLINE
+		echo "${M}This feature is only available for systems using ${C}sidux${M} sources and kernels.${N}"
+		print_hec
 	fi
 }
 ## DEBUGGER
