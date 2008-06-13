@@ -2128,7 +2128,7 @@ print_version()
 		echo " ${M}$SCRIPT_NAME${S} :: version: ${C}$scriptVersion${S} :: last updated: ${C}$scriptDate"
 	fi
 	echo $LINE
-	echo "${S}Your installed version of Debian/Sidux is: "${C}$DISTRO_VERSION${N}
+	echo "${S}Your installed version of Debian is: "${C}$DISTRO_VERSION${N}
 }
 ## DEBUGGER
 #script_debugger print_version '' ''
