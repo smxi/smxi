@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.32.0
+####  version: 7.32.1
 ####  Date: June 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -988,12 +988,12 @@ metapackage_launcher()
 
 set_distro_data()
 {
-	local siduxSources=$( grep -Rl 'sidux' $EAS $EAS.d/* 2>/dev/null )
+	local siduxSources=$( grep -Ril 'sidux' $EAS $EAS.d/* 2>/dev/null )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	# these tests will be improved over time, but are ok for now
-	local isStable=$( egrep -Rw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(stable|etch)' )
-	local isTesting=$( egrep -Rw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(testing|lenny)' )
-	local isUnstable=$( egrep -Rw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(sid|unstable)' )
+	local isStable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -iciw '(stable|etch)' )
+	local isTesting=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -icw '(testing|lenny)' )
+	local isUnstable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -icw '(sid|unstable)' )
 	
 	if [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
