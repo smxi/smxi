@@ -991,7 +991,7 @@ set_distro_data()
 	local siduxSources=$( grep -Ril 'sidux' $EAS $EAS.d/* 2>/dev/null )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	# these tests will be improved over time, but are ok for now
-	local isStable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -iciw '(stable|etch)' )
+	local isStable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -icw '(sid|unstable)' )
 	
