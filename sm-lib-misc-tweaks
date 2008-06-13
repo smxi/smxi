@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.3
-####  Date: June 12 2008
+####  version: 1.15.4
+####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -51,7 +51,7 @@ misc_hacks()
 	echo "    sidux ${C}kmenu${S} sidebar graphics by drb and raider700, and Cathbard grub graphics."
 	
 	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
-	echo "    ( get rid of all those locales in dist-upgrades ), change-debian-mirrors, change-sidux-mirrors"
+	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors, change-sidux-mirrors"
 	echo "    ${M}NEW!${S} ${C}1.${S} Crust fix: change ${M}hit enter to continue${S} to what you want ${C}2.${S} Set default system kernel"
 	
 	echo "${C}4${S} - ${C}legacy-tweaks${S} More or less obsolete tweaks for things no longer actively"
@@ -148,7 +148,7 @@ advanced_tweaks()
 	echo "${C}3${S} - ${C}update-bashrc${S} Updates your root ${C}/root/.bashrc${S} file to enable things like bash autocompletion."
 	
 	echo "${C}4${S} - ${C}update-locales${S} Get rid of all those extra languages and locales"
-	echo "    you don't need and that slow down your dist-upgrades. Includes instructions on what to do."
+	echo "    you don't need and that slow down your $DU_UPGRADE. Includes instructions on what to do."
 	
 	echo "${C}5${S} - ${C}alternate-print-hec${S} Change default  ${C}$SCRIPT_NAME${M} hit enter to continue"
 	echo "    ${S}option to either hit any, or custom, key to continue. A great ${C}Crust${S} snippet."
@@ -225,7 +225,7 @@ openoffice_hold_install()
 	
 	if [ -n "$oooPackages" ]
 	then
-		echo "${S}Tired of those huge ${C}100mB OpenOffice.org${S} updates every ${C}dist-upgrade${S}? "
+		echo "${S}Tired of those huge ${C}100mB OpenOffice.org${S} updates every ${C}$DU_UPGRADE${S}? "
 		echo
 		echo "${S}Stop or start those now at will. Change openoffice.org status hold/install  or update openoffice.org."
 		echo $LINE
@@ -749,7 +749,7 @@ fxfonts()
 	echo "don't worry about them, those will be 75dpi and 100dpi related."
 	echo $LINE
 	echo "${M}Special Note: ${S}Kde 3.5.x may distort or break the fonts in gtk applications."
-	echo "The fix for this is simple. After the dist-upgrade, when you're back in kde:"
+	echo "The fix for this is simple. After the $DU_UPGRADE, when you're back in kde:"
 	echo "1. Go in kcontrol (control center) -> Appearances and Themes -> Fonts"
 	echo "2. Disable antialiased fonts ( uncheck the box if checked )"
 	echo "3. Save [apply], Re-enable [check] again, and save [apply] again"
@@ -1227,10 +1227,10 @@ xorg_73_hold_release()
 	local xorgHolds='xorg xserver-xorg-core xserver-xorg'
 	
 	echo $LINE
-	echo "${S}Placing ${C}xorg${S} components on hold so you can dist-upgrade now..${N}"
+	echo "${S}Placing ${C}xorg${S} components on hold so you can $DU_UPGRADE now..${N}"
 	DPKG_HOLD_INSTALL="$DPKG_HOLD_INSTALL $xorgHolds"
 	set_hold_install hold-utility
-	echo "${S}Continuing on with your dist-upgrade without upgrading xorg to 7.3..${N}"
+	echo "${S}Continuing on with your $DU_UPGRADE without upgrading xorg to 7.3..${N}"
 }
 
 # $1 is plain/intel
@@ -1272,7 +1272,7 @@ misc_legacy_tweaks()
 	# 	echo "${C}1${S} - Modifies ${C}infobash${S} slightly so it outputs the complete ${C}xorg${S} version number."
 	# 	echo "    The script will also install the latest version of ${C}locsmif's infobash${S} script before modifying it."
 	# 	echo "    Please note: this can only be used if you have upgraded ${C}xorg${S} at least one time since install"
-	# 	echo "    But if you just did a ${C}dist-upgrade${S} you probably have upgraded ${C}xorg${S}."
+	# 	echo "    But if you just did a ${C}$DU_UPGRADE${S} you probably have upgraded ${C}xorg${S}."
 	
 	echo "${C}1${S} - ${C}alsaconf${S} - for your alsa sound configuration."
 	echo "    ${M}Alert: ${C}alsaconf${M} has been deprecated and should not be required any longer.${S}"
@@ -1285,10 +1285,10 @@ misc_legacy_tweaks()
 	echo "${C}3${S} - ${C}turn-off-splashy${S} Removes the splashy startup/stop option with ${C}update-rc.d${S}."
 	echo
 	echo "${C}4${S} - ${C}fix-init-scripts${S} Simply creates correct initscript file if you accidentally"
-	echo "    answered 'n' [keep old ${C}initscripts${S}] instead of 'y' [replace with new] during dist-upgrade."
+	echo "    answered 'n' [keep old ${C}initscripts${S}] instead of 'y' [replace with new] during $DU_UPGRADE."
 	
 	echo "${C}5${S} - ${C}clean-kanotix-transitional${S} - This will clean up the transitional kanotix"
-	echo "     packages left over after your first dist-upgrade after switching to ${C}sidux${S}."
+	echo "     packages left over after your first $DU_UPGRADE after switching to ${C}sidux${S}."
 	
 	echo "${C}6${S} - ${C}clean-kanotix-packages${S} - This will clean up any legacy kanotix"
 	echo "    packages left over after your ${C}sidux${S} conversion."
