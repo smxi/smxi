@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.31.6
+####  version: 7.31.7
 ####  Date: June 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -307,6 +307,7 @@ REMOTE_VERSION=''
 REMOTE_DATE=''
 SET_KERNEL_DATA=''
 SKIP_CONNECTION_RETRY=''
+SYSTEM_BASE=''
 UPDATED=''
 
 # miscellaneous settings
@@ -547,7 +548,6 @@ log_writer()
 	# echo -e "${LOG_INDENT}$1" >> $SM_LOG_FILE
 	:
 }
-
 
 ###---------------------------------------------------------------------
 ### core utilities: script libs update: 'mini-apt', trigger function
@@ -987,8 +987,23 @@ metapackage_launcher()
 
 set_distro_data()
 {
-	local siduxSources=$( grep -Rl 'sidux' $EAS* )
+	local siduxSources=$( grep -Rl 'sidux' $EAS $EAS.d/* )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
+	# these tests will be improved over time, but are ok for now
+	local isTesting=$( egrep -Rw '^deb' $EAS $EAS.d/* | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(testing|lenny)' )
+	local isUnstable=$( egrep -Rw '^deb' $EAS $EAS.d/* | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(sid|unstable)' )
+	
+	if [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
+	then
+		SYSTEM_BASE='testing'
+		WARNING_BODY='warning_message_t'
+		ALERT_BODY='alert_message_t'
+		CONFIGS_BODY='configs_t'
+		HOLD_INSTALL='holds_t'
+		WARNING_STATUS='status_t'
+	else
+		SYSTEM_BASE='sid'
+	fi
 	
 	if [ -n "$siduxSources" ]
 	then
