@@ -983,10 +983,10 @@ metapackage_launcher()
 
 set_distro_data()
 {
-	local distroSources=$( grep -Rl 'sidux' $EAS* )
+	local siduxSources=$( grep -Rl 'sidux' $EAS* )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	
-	if [ -n "$distroSources" ]
+	if [ -n "$siduxSources" ]
 	then
 		SIDUX_SOURCES='true'
 		DEFAULT_KERNEL='sidux'
