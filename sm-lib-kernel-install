@@ -290,7 +290,7 @@ kernel_meta_package_handler()
 		echo "${C}Kernel metapackages:  ${M}Advantage:${S} Latest kernels and modules installed via ${C}$DU_UPGRADE"
 		echo "${M}Negatives:${S} ${C}1.${S} ${C}slh${S} releases a lot of kernels, sometimes 1 or more a day. Usually you do"
 		echo "not need new subversions of kernels, like ${C}2.6.24.2.slh.11${S} to ${C}2.6.24.2.slh.12${S}"
-		echo "${C}2.${S} Needing to reboot after the $DU_UPGRADE ${C}3.${S} Slow sidux servers slowing dist-upgrades"
+		echo "${C}2.${S} Needing to reboot after the $DU_UPGRADE ${C}3.${S} Slow sidux servers slowing $DU_UPGRADE"
 		echo "${C}4.${S} Possible unexpected kernel / hardware issues, kernel regressions, etc."
 		echo $LINE
 		echo "${C}Manual apt install of kernels: ${M}Advantage:${S} ${C}1.${S} Gives full control, lets you decide"
