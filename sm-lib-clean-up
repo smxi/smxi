@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.4.8
-####  Date: June 8 2008
+####  version: 2.4.9
+####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -313,12 +313,18 @@ remove_kernels()
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 	
 	# test to make sure that required scripts are installed, if not, install:
-	test_for_kernel_tools || return 1
+	if [ -n "$SIDUX_SOURCES" ]
+	then
+		test_for_kernel_tools || return 1
+		eval $KernelCommand
+	elif [ -x /usr/sbin/kernel-remover ]
+	then
+		eval $KernelCommand
+	elif [ ! -x /usr/sbin/kernel-remover ]
+	then
+		run_script_import $MOD_KM
+	fi
 	
-	echo $LINE
-	echo "${S}Running the command: ${C}$KernelCommand${S}."
-	echo "Please make sure to read and answer any questions the script asks you.${N}"
-	eval $KernelCommand
 	#echo $KernelCommand
 	echo "${S}Your requested kernel removal action has been completed."
 	echo $LINE

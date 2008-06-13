@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.31.5
-####  Date: June 12 2008
+####  version: 7.31.6
+####  Date: June 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -230,6 +230,7 @@ LIB_2007_FIXES='sm-lib-2007-fixes'
 LIB_2008_FIXES='sm-lib-2008-fixes'
 # script modules
 MOD_GFX='sgfxi'
+MOD_KM='kremover'
 MOD_VM='svmi'
 
 # script import test values
@@ -658,6 +659,9 @@ run_script_import()
 		$MOD_GFX)
 			runIt='true'
 			;;
+		$MOD_KM)
+			runIt='true'
+			;;
 		$MOD_VM)
 			options='-D'
 			runIt='true'
@@ -697,7 +701,7 @@ run_script_import()
 	elif [ "$runIt" == 'true' ]
 	then
 		test_version_info $1 'chm'
-		./$1 $options # run module
+		DISPLAY= ./$1 $options # run module
 	fi
 }
 
