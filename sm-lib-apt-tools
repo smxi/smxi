@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.3
+####  version: 1.11.4
 ####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -932,7 +932,7 @@ create_apt_source_item()
 {
 	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
 	
-	sourcePresent=$( grep -iRl "$grepSearch" $EAS $EAS.d/* )
+	sourcePresent=$( grep -iRl "$grepSearch" $EAS $EAS.d/* 2>/dev/null )
 	if [ -z "$sourcePresent" ]
 	then
 		# handle cases where users prefer single sources.list
