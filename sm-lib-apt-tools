@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.5
+####  version: 1.11.6
 ####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -248,12 +248,12 @@ apt_error_handling()
 	
 	case $1 in
 		du-1|du-2|du-temp)
-			fixText='dist-upgrade/install -f'
-			pText='dist-upgrade'
+			fixText="$DU_UPGRADE/install -f"
+			pText="$DU_UPGRADE"
 			distUpgrade='true'
 			;;
 		du-f)
-			fixText='dist-upgrade/install -f'
+			fixText="$DU_UPGRADE/install -f"
 			pText='install -f'
 			distUpgrade='true'
 			;;
