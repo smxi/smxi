@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sm-lib-warning
 ####  version: 1.2.2
-####  Date: June 8 2008
+####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -34,7 +34,7 @@ get_status()
 		rm -f $WARNING_STATUS
 	else
 		echo $EBAR
-		echo "${E}Failed to download error status data. Please wait to continue with dist-upgrade."
+		echo "${E}Failed to download error status data. Please wait to continue with $DU_UPGRADE."
 		echo $EBAR
 		exit 0
 	fi
@@ -52,7 +52,7 @@ get_warning()
 			rm -f $WARNING_BODY
 		else
 			echo $EBAR
-			echo "${E}Failed to download warning text data. Please wait to continue with dist-upgrade."
+			echo "${E}Failed to download warning text data. Please wait to continue with $DU_UPGRADE."
 			echo $EBAR
 		fi
 	fi
@@ -65,7 +65,7 @@ get_warning()
 			rm -f $ALERT_BODY
 		else
 			echo $EBAR
-			echo "${E}Failed to download alert text data. Please wait to continue with dist-upgrade."
+			echo "${E}Failed to download alert text data. Please wait to continue with $DU_UPGRADE."
 			echo $EBAR
 		fi
 	fi
@@ -80,7 +80,7 @@ get_configs()
 	if [ -f "$CONFIGS_BODY" -a -n "$( cat $CONFIGS_BODY )" ]
 	then
 		echo "${M}Answer ${C}y${M} instead of the standard ${C}n${M} if you are asked to"
-		echo "replace the following config files during dist-upgrade:${N}"
+		echo "replace the following config files during $DU_UPGRADE:${N}"
 		cat $CONFIGS_BODY
 		echo
 		echo $MLINE
@@ -106,37 +106,37 @@ upgrade_warning()
 		get_warning alert
 		echo
 		
-		ContinueText="${E}Continue with ${C}dist-upgrade${E}. Proceed with caution. Watch for fixes noted above."
+		ContinueText="${E}Continue with ${C}$DU_UPGRADE${E}. Proceed with caution. Watch for fixes noted above."
 	fi
 	
 	if [ "$STATUS" == 'danger' -o "$STATUS" == 'danger-alert' ]
 	then
 		echo $WBAR
-		echo "${W}*******     IT IS NOT CURRENTLY SAFE TO DIST-UPGRADE"
+		echo "${W}*******     IT IS NOT CURRENTLY SAFE TO $( tr [a-z] [A-Z] <<< $DU_UPGRADE )"
 		echo ${W}"*******     CURRENT WARNINGS(s)"
 		echo $WBAR
 		get_warning danger
 		echo
 		echo $LINE
-		echo "${S}Please wait to do the dist-upgrade until you have received word "
+		echo "${S}Please wait to do the $DU_UPGRADE until you have received word "
 		echo "that it is safe, or until the script runs without displaying this warning."
 		echo
 		echo "Check the forums and news page of sidux.com for further information."
 		
-		ContinueText="${W}Continue with ${C}dist-upgrade${W}. Proceed at your own risk!!!"
+		ContinueText="${W}Continue with ${C}$DU_UPGRADE${W}. Proceed at your own risk!!!"
 	fi
 	
 	if [ "$STATUS" == 'proceed' ]
 	then
 		echo $MBAR
-		echo "${M}There are currently no known major issues with ${C}dist-upgrade${S}"
+		echo "${M}There are currently no known major issues with ${C}$DU_UPGRADE${S}"
 
-		ContinueText="${S}Continue with ${C}dist-upgrade${S}."
+		ContinueText="${S}Continue with ${C}$DU_UPGRADE${S}."
 	fi
 	
 	echo $LINE
 	echo "${C}1${S} - $ContinueText"
-	echo "${C}2${S} - Continue without doing the ${C}dist-upgrade${S}."
+	echo "${C}2${S} - Continue without doing the ${C}$DU_UPGRADE${S}."
 	echo "    This will let you do graphics install and various other smaller functions."
 	echo
 	echo "${C}3${S} - Quit the script now."
@@ -144,7 +144,7 @@ upgrade_warning()
 	echo $SLE
 	echo $LINE
 	
-	options="continue continue-no-dist-upgrade quit"
+	options="continue continue-no-$DU_UPGRADE quit"
 	select opt in $options
 	do
 		case $opt in
@@ -152,8 +152,8 @@ upgrade_warning()
 				# start xorg install, update, dist-upgrade, xorg component install
 				install_dist_upgrade first
 				;;
-			continue-no-dist-upgrade)
-				echo "${S}Skipping ${C}dist-upgrade${S} for now. Continuing with script.${N}"
+			continue-no-dist-upgrade|continue-no-upgrade)
+				echo "${S}Skipping ${C}$DU_UPGRADE${S} for now. Continuing with script.${N}"
 				;;
 			quit|q)
 				print_quit
