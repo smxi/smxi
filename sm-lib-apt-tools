@@ -1142,7 +1142,7 @@ change_kernel_mirrors()
 		fi
 	else
 		echo $MLINE
-		echo "${M}This feature is only available for systems using ${C}sidux${M} sources and kernels.${N}"
+		echo "${M}This feature is only available for systems using ${C}sidux${M} sources.${N}"
 		print_hec
 	fi
 }
