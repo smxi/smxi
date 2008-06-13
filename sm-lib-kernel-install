@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.4.3
-####  Date: June 12 2008
+####  version: 2.4.4
+####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -181,7 +181,7 @@ double_check_kernel()
 	echo $LINE
 	echo "${C}1${S} - Yes, install this kernel now."
 	echo "${C}2${S} - No, let me go back to the menu to make a new selection."
-	echo "${C}3${S} - Continue with the dist-upgrade without installing a new kernel."
+	echo "${C}3${S} - Continue with the $DU_UPGRADE without installing a new kernel."
 	echo $LINE
 	echo $SLE
 	echo $LINE
@@ -287,10 +287,10 @@ kernel_meta_package_handler()
 		echo "${M}sidux now uses ${C}apt${M} as the default method to install kernels. You have two main"
 		echo "choices, with possible postive / negative outcomes. Pick the one you prefer for your style."
 		echo $MLINE
-		echo "${C}Kernel metapackages:  ${M}Advantage:${S} Latest kernels and modules installed via ${C}dist-upgrade"
+		echo "${C}Kernel metapackages:  ${M}Advantage:${S} Latest kernels and modules installed via ${C}$DU_UPGRADE"
 		echo "${M}Negatives:${S} ${C}1.${S} ${C}slh${S} releases a lot of kernels, sometimes 1 or more a day. Usually you do"
 		echo "not need new subversions of kernels, like ${C}2.6.24.2.slh.11${S} to ${C}2.6.24.2.slh.12${S}"
-		echo "${C}2.${S} Needing to reboot after the dist-upgrade ${C}3.${S} Slow sidux servers slowing dist-upgrades"
+		echo "${C}2.${S} Needing to reboot after the $DU_UPGRADE ${C}3.${S} Slow sidux servers slowing dist-upgrades"
 		echo "${C}4.${S} Possible unexpected kernel / hardware issues, kernel regressions, etc."
 		echo $LINE
 		echo "${C}Manual apt install of kernels: ${M}Advantage:${S} ${C}1.${S} Gives full control, lets you decide"
@@ -299,13 +299,13 @@ kernel_meta_package_handler()
 		echo $LINE
 		echo "${S}To change your selections here later, either start ${C}$SCRIPT_NAME${S} with ${C}-N${S} option, or"
 		echo "access this option page using ${C}kernel-install -> advanced-kernel-options${S}"
-		echo "using the ${C}post dist-upgrade options${S} of ${C}$SCRIPT_NAME${S}"
+		echo "using the ${C}post $DU_UPGRADE options${S} of ${C}$SCRIPT_NAME${S}"
 		echo 
 		echo "Choices ${C}1${S} or ${C}3${S} convert your system to use user run kernel install (${C}manual${S})."
 		echo "Choice ${C}2${S} converts your system to use metapackages (${C}automatic${S})."
-		echo "The ${C}automatic${S} option turns off the pre dist-upgrade kernel install section."
+		echo "The ${C}automatic${S} option turns off the pre $DU_UPGRADE kernel install section."
 		echo
-		echo "${C}4${S} leaves your system alone, and merely turns ${C}$kiState${S} the pre dist-upgrade kernel install"
+		echo "${C}4${S} leaves your system alone, and merely turns ${C}$kiState${S} the pre $DU_UPGRADE kernel install"
 		echo "question, and returns you to ${C}$SCRIPT_NAME${S} to do what you want."
 		echo
 		echo "${S}Confused? You can always try one way, then the other via this control panel, so don't worry!"
@@ -357,7 +357,7 @@ kernel_meta_package_handler()
 					echo "${S}Ok, continuing on using ${C}$defaultAction${S} settings.${N}"
 					if [ "$defaultAction" == 'automatic' ]
 					then
-						echo "${S}Remember, if you want to run this section prior to a ${C}dist-upgrade${S},"
+						echo "${S}Remember, if you want to run this section prior to a ${C}$DU_UPGRADE${S},"
 						echo "just start ${C}$SCRIPT_NAME${S} like this: ${C}$SCRIPT_NAME -N"${N}
 						print_hec
 					fi
@@ -907,11 +907,11 @@ reboot_now_question()
 		echo "${S}To start right into init 3 just type the number ${C}3${S} in grub, then hit enter."
 		echo "Once you are in init 3, rerun ${C}$SCRIPT_NAME${S} and finish the rest of the process."
 		echo
-		echo "${M}NEW!${S} If you continue, you can finish up the dist-upgrade, and install graphics drivers"
+		echo "${M}NEW!${S} If you continue, you can finish up the $DU_UPGRADE, and install graphics drivers"
 		echo "to your new kernel ${C}$1${S} if you need to do that, without rebooting first."
 		echo $LINE
 		echo "${C}1 - reboot-now${S} Reboot system now, do not install graphics drivers."
-		echo "${C}2 - continue${S} Continue on to do the dist-upgrade / graphics driver install."
+		echo "${C}2 - continue${S} Continue on to do the $DU_UPGRADE / graphics driver install."
 		echo "${C}3 - quit${S} Exit script now."
 		
 		echo $LINE
