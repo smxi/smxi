@@ -2170,7 +2170,7 @@ print_install_information()
 	fi
 	print_version
 	
-	echo "${S}You are running the ${C}$BITS bit${S} version this operating system."
+	echo "${S}Operating system: ${C}$BITS bit${S}"
 	echo "${S}Your CPU is: ${C}$CPU_NAME"
 	echo "${S}Your current kernel version is:       ${C}$currentKernel"
 	if [ "$PRINT_VERSION" != 'true' ]
