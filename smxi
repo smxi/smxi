@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.31.8
+####  version: 7.32.0
 ####  Date: June 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -285,8 +285,8 @@ CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
 CON_DEB=''
 CONNECTION_RETRY=''
-SIDUX_SOURCES=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
+DU_UPGRADE='dist-upgrade'
 KERNEL_EQUAL_INSTALL=''
 KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
@@ -306,6 +306,7 @@ PRINT_VERSION=''
 REMOTE_VERSION=''
 REMOTE_DATE=''
 SET_KERNEL_DATA=''
+SIDUX_SOURCES=''
 SKIP_CONNECTION_RETRY=''
 SYSTEM_BASE=''
 UPDATED=''
@@ -414,7 +415,7 @@ error_handler()
 			;;
 		user-killed-du)
 			errorCode=33
-			errorMessage="User initiated dist-upgrade component termination via ctrl+c or kill."
+			errorMessage="User initiated $DU_UPGRADE component termination via ctrl+c or kill."
 			;;
 			
 		# failures in actions/functions not requiring script exit: 100-150: serious
@@ -990,10 +991,20 @@ set_distro_data()
 	local siduxSources=$( grep -Rl 'sidux' $EAS $EAS.d/* 2>/dev/null )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	# these tests will be improved over time, but are ok for now
+	local isStable=$( egrep -Rw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(stable|etch)' )
 	local isTesting=$( egrep -Rw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(testing|lenny)' )
 	local isUnstable=$( egrep -Rw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -v '(sidux|sidux.com|opera|ian-multi|skype)' | egrep -cw '(sid|unstable)' )
 	
-	if [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
+	if [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
+	then
+		SYSTEM_BASE='stable'
+		DU_UPGRADE='upgrade' 
+		WARNING_BODY='warning_message_s'
+		ALERT_BODY='alert_message_s'
+		CONFIGS_BODY='configs_s'
+		HOLD_INSTALL='holds_s'
+		WARNING_STATUS='status_s'
+	elif [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
 	then
 		SYSTEM_BASE='testing'
 		WARNING_BODY='warning_message_t'
@@ -2170,7 +2181,7 @@ print_install_information()
 	echo "${S}Last apt-get package database update: ${C}$DPKG_UPDATE${S}"
 	echo "${S}Last apt-get package install or upgrade: ${C}$dpkgInstall${S}"
 	echo "${S}Last use of $SCRIPT_NAME: ${C}$ScriptLastRun${S}"
-	echo "${S}Last dist-upgrade using $SCRIPT_NAME: ${C}$ScriptLastDu${S}"
+	echo "${S}Last $DU_UPGRADE using $SCRIPT_NAME: ${C}$ScriptLastDu${S}"
 	echo $LINE
 	echo "${S}If something scrolls by in the script before you can read it, you can move up or down"
 	echo "in your terminal window by hitting ${C}Shift + Page Up${S} or ${C}Page Down${S}.${N}"
@@ -2275,35 +2286,37 @@ pre_du_tasks()
 {
 	# begin update tasks
 	apt_update_handler 'pre-du'
-
-	echo $LINE
-	echo "${S}These are assorted tasks the script will do before the upgrade:${N}"
-	
-	set_hold_install hold
-	
-	# RUN FIRST CRITICAL FIXES. Must run before other fixes to avoid errors in apt
-	# generally, these are fixes for kernels, core libs etc, that a new kernel might
-	# make needed, like libncurses, libc6, and so on.
-	if [ "$DISTRO_LEVEL" -lt 14 ]
+	if [ "$SYSTEM_BASE" != 'stable' ]
 	then
-		libc6_fix_1 'pre-du' # ongoing fix, update as needed
+		echo $LINE
+		echo "${S}These are assorted tasks the script will do before the upgrade:${N}"
+		
+		set_hold_install hold
+		
+		# RUN FIRST CRITICAL FIXES. Must run before other fixes to avoid errors in apt
+		# generally, these are fixes for kernels, core libs etc, that a new kernel might
+		# make needed, like libncurses, libc6, and so on.
+		if [ "$DISTRO_LEVEL" -lt 14 ]
+		then
+			libc6_fix_1 'pre-du' # ongoing fix, update as needed
+		fi
+		# load the 2007 fixes
+		if [ "$DISTRO_LEVEL" -lt 10 ]
+		then
+			run_script_import $LIB_2007_FIXES
+			run_2007_fixes 'pre'
+		fi
+		# load the 2008 fixes
+		if [ "$DISTRO_LEVEL" -lt 14 ]
+		then
+			run_script_import $LIB_2008_FIXES
+			run_2008_fixes 'pre'
+		fi
+		# set xorg version pre upgrade, either unset or like 6. or 7. etc
+		test_xorg_version pre
+		echo $LINE
+		echo "${S}Finished with the pre-upgrade tasks.${N}"
 	fi
-	# load the 2007 fixes
-	if [ "$DISTRO_LEVEL" -lt 10 ]
-	then
-		run_script_import $LIB_2007_FIXES
-		run_2007_fixes 'pre'
-	fi
-	# load the 2008 fixes
-	if [ "$DISTRO_LEVEL" -lt 14 ]
-	then
-		run_script_import $LIB_2008_FIXES
-		run_2008_fixes 'pre'
-	fi
-	# set xorg version pre upgrade, either unset or like 6. or 7. etc
-	test_xorg_version pre
-	echo $LINE
-	echo "${S}Finished with the pre-upgrade tasks.${N}"
 }
 
 # main dist-upgrade/ update etc function
@@ -2316,7 +2329,12 @@ install_dist_upgrade()
 	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
-	local options="use-install-f dist-upgrade-again check-services continue $reboot"
+	local options="use-install-f $DU_UPGRADE-again check-services continue $reboot"
+	
+	if [ "$SYSTEM_BASE" != 'stable' ]
+	then
+		duUpgrade='upgrade'
+	fi
 	
 	# set the trap here
 	trap 'du_trap_handler $FUNCNAME' INT TERM
@@ -2327,7 +2345,7 @@ install_dist_upgrade()
 		reboot='reboot'
 		options="$options $reboot"
 		rebootNo=$( echo $options | wc -w )
-		rebootTopText='echo -e "$MLINE\n${M}You are using ${C}kernel metapackages${M} and your ${C}dist-upgrade${M} installed a new kernel.\nYou can reboot to make your new ${C}$CURRENT_APT_KERNEL${M} kernel active,\nor continue on to install graphics driver if needed."'
+		rebootTopText='echo -e "$MLINE\n${M}You are using ${C}kernel metapackages${M} and your ${C}$DU_UPGRADE${M} installed a new kernel.\nYou can reboot to make your new ${C}$CURRENT_APT_KERNEL${M} kernel active,\nor continue on to install graphics driver if needed."'
 		rebootText='echo -e "${C}$rebootNo - reboot${M} Reboot into your new ${C}$CURRENT_APT_KERNEL${M} kernel."'
 		KERNEL_INSTALL_TO=$CURRENT_APT_KERNEL
 		if	[ "$TESTING" == 'true' ]
@@ -2346,7 +2364,7 @@ install_dist_upgrade()
 	then
 		if [ "$DISTRO_LEVEL" -lt 2 ]
 		then
-			ConnectionDropped='echo -e "${W}After your dist-upgrade you may lose your network connection.${S}\nIf this happens some parts of the script will not work. To fix this,\nsimply restart the script, and it will restart your connection for you\nif there is no connection present.\n$LINE"'
+			ConnectionDropped='echo -e "${W}After your $DU_UPGRADE you may lose your network connection.${S}\nIf this happens some parts of the script will not work. To fix this,\nsimply restart the script, and it will restart your connection for you\nif there is no connection present.\n$LINE"'
 		fi
 	fi
 	
@@ -2364,9 +2382,9 @@ install_dist_upgrade()
 		then
 			get_configs # print out any keep config stuff
 		fi
-		echo "${S}Make sure your dist-upgrade goes all the way through"
+		echo "${S}Make sure your $DU_UPGRADE goes all the way through"
 		echo "If it exits with errors select one of the following options:"
-		echo "${C}2${S} - for doing ${C}dist-upgrade${S} again. Try the ${C}2${S} option first."
+		echo "${C}2${S} - for doing ${C}$DU_UPGRADE${S} again. Try the ${C}2${S} option first."
 		echo "${C}1${S} - for ${C}apt-get install -f${S}. Only select ${C}1${S} if ${C}2${S} returns errors"
 		echo "That will force apt to install the parts that returned errors."
 		
@@ -2375,14 +2393,14 @@ install_dist_upgrade()
 		then
 			echo $LINE
 		fi
-		#echo "${Q}Please hit ${C}enter${Q} to start ${C}dist-upgrade${S}."
+		#echo "${Q}Please hit ${C}enter${Q} to start ${C}$DU_UPGRADE${S}."
 		print_hec
 		if [ "$USE_LOG" != 'true' ]
 		then
-			apt-get dist-upgrade
+			apt-get $DU_UPGRADE
 		else
 			logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$DU_LOG'du1'
-			apt-get dist-upgrade 2>$logfile 2>&1 | tee $logfile
+			apt-get $DU_UPGRADE 2>$logfile 2>&1 | tee $logfile
 		fi
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
@@ -2391,40 +2409,40 @@ install_dist_upgrade()
 	if [ "$exitStatus" -eq 0 ]
 	then
 		echo $MLINE
-		echo "${M}Your dist-upgrade appears to have completed with no errors."
+		echo "${M}Your $DU_UPGRADE appears to have completed with no errors."
 		echo "${S}You can continue on safely to do the rest of the script now."
 		echo
-		echo "It does not hurt to run ${C}dist-upgrade-again${S} [option ${C}2${S}] once after a"
-		echo "successful dist-upgrade just to makes sure things are fine though."
+		echo "It does not hurt to run ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] once after a"
+		echo "successful $DU_UPGRADE just to makes sure things are fine though."
 	else
 		echo $EBAR
-		echo "${E}Your dist-upgrade is reporting errors!"
+		echo "${E}Your $DU_UPGRADE is reporting errors!"
 		echo $EBAR
 		echo "${S}Please make sure to do the following to correct the errors reported:"
 		echo "${C}apt-get install -f ${S}[option ${C}1${S}] - Use this first if you got errors!"
 		
 		echo
-		echo "Run the ${C}dist-upgrade-again${S} [option ${C}2${S}] to make sure the dist-upgrade completes."
+		echo "Run the ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] to make sure the $DU_UPGRADE completes."
 		echo "If errors do not get resolved, you'll need to get help from sidux irc or the forums."
 		echo
 		echo "${M}NOTE: Please run ${C}1${M} and ${C}2${M} as many times as necessary to get rid of the errors."
-		echo "${S}Make sure to write down the package error in the dist-upgrade messages."
+		echo "${S}Make sure to write down the package error in the $DU_UPGRADE messages."
 		echo
 		echo "Once you are sure the upgrade is done, you can continue, check services, or exit."
 	fi
 	eval "$rebootTopText"
 	echo $LINE
-	echo "${C}1 - use-install-f${S} Use this to try to resolve error in dist-upgrade."
-	echo "${C}2 - dist-upgrade-again${S} Run this after correcting an error with ${C}1${S}."
+	echo "${C}1 - use-install-f${S} Use this to try to resolve error in $DU_UPGRADE."
+	echo "${C}2 - $DU_UPGRADE-again${S} Run this after correcting an error with ${C}1${S}."
 	echo
 	echo "${C}3 - check-services${S} Runs ${C}rcconf${S} to let you turn back off any services that might "
-	echo "    have been turned on during the ${C}dist-upgrade${S} (more options in the future)."
+	echo "    have been turned on during the ${C}$DU_UPGRADE${S} (more options in the future)."
 	echo
-	echo "${C}4 - continue${S} Continue on with script, do this when dist-upgrade is successful."
+	echo "${C}4 - continue${S} Continue on with script, do this when $DU_UPGRADE is successful."
 	eval "$rebootText"
 	
 	echo "${C}$exitNo - quit${S} If you need to fix error, you can exit here. In general, please"
-	echo "    do not exit unless you need to. The script often runs post dist-upgrade fixes"
+	echo "    do not exit unless you need to. The script often runs post $DU_UPGRADE fixes"
 	echo "    when you use ${C}continue${S}, and if you exit here, they will not run."
 	echo $LINE
 	echo -e $SLE
@@ -2446,13 +2464,13 @@ install_dist_upgrade()
 				# we will repeat this over and over until it's definitely done
 				repeat='true'
 				;;
-			dist-upgrade-again)
+			dist-upgrade-again|upgrade-again)
 				if [ "$USE_LOG" != 'true' ]
 				then
-					apt-get dist-upgrade
+					apt-get $DU_UPGRADE
 				else
 					logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$DU_LOG'du2'
-					apt-get dist-upgrade 2>$logfile 2>&1 | tee $logfile
+					apt-get $DU_UPGRADE 2>$logfile 2>&1 | tee $logfile
 				fi
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-2 $exitStatus
@@ -2521,30 +2539,33 @@ du_trap_handler()
 post_du_tasks()
 {
 	# set the trap here
-	trap 'du_trap_handler $FUNCNAME' INT TERM
-	
-	# this is all just debian conversion stuff
-	if [ "$CON_DEB" == 'true' ]
+	if [ "$SYSTEM_BASE" != 'stable' ]
 	then
-		run_script_import $LIB_SIDUX_CONVERSION
-		install_window_manager
-		install_sidux_components # test to make sure all sidux stuff is installed
-		sidux_graphics grub1
+		trap 'du_trap_handler $FUNCNAME' INT TERM
+		
+		# this is all just debian conversion stuff
+		if [ "$CON_DEB" == 'true' ]
+		then
+			run_script_import $LIB_SIDUX_CONVERSION
+			install_window_manager
+			install_sidux_components # test to make sure all sidux stuff is installed
+			sidux_graphics grub1
+		fi
+		
+		# load the 2007 fixes
+		if [ "$DISTRO_LEVEL" -lt 10 ]
+		then
+			run_2007_fixes 'post'
+		fi
+		# load the 2008 fixes
+		if [ "$DISTRO_LEVEL" -lt 14 ]
+		then
+			run_2008_fixes 'post'
+		fi
+		trap - INT TERM
+		## take the package(s) off hold if they were set
+		set_hold_install install
 	fi
-	
-	# load the 2007 fixes
-	if [ "$DISTRO_LEVEL" -lt 10 ]
-	then
-		run_2007_fixes 'post'
-	fi
-	# load the 2008 fixes
-	if [ "$DISTRO_LEVEL" -lt 14 ]
-	then
-		run_2008_fixes 'post'
-	fi
-	trap - INT TERM
-	## take the package(s) off hold if they were set
-	set_hold_install install
 }
 
 ###---------------------------------------------------------------------
@@ -2563,7 +2584,7 @@ libc6_fix_1()
 	local kernelMessage=' with your new kernel'
 	if [ "$1" == 'pre-du' ]
 	then
-		kernelMessage=' before you dist-upgrade'
+		kernelMessage=" before you $DU_UPGRADE"
 	fi
 	
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ]
@@ -2573,7 +2594,7 @@ libc6_fix_1()
 		#echo
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
-		#echo "it after your ${C}dist-upgrade${M} is done. This works fine.${N}"
+		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
 		package_installer 'libc6 libc6-dev tzdata locales util-linux' 'force-always' 
 		# let's only set this if needed
  		if [ "$smPref" -eq 0 ]
@@ -2680,9 +2701,9 @@ post_du_options()
 	echo "${M}POST DIST-UPGRADE FIXES"
 	echo $MLINE
 	echo "${S}This is a list of various things you can do at this point to"
-	echo "handle some loose ends after doing a ${C}dist-upgrade${S}."
+	echo "handle some loose ends after doing a ${C}$DU_UPGRADE${S}."
 	echo $LINE
-	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}dist-upgrade${S} if the upgrade "
+	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}$DU_UPGRADE${S} if the upgrade "
 	echo "    was really big, or if you haven't run it recently. This can fix some kde display issues."
 	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
 	
@@ -2802,6 +2823,7 @@ post_du_options()
 # must be before getopts
 print_usage()
 {
+	set_distro_data
 	local ErrorMessage=''
 	
 	if [ "$1" == 'err' ]
@@ -2820,7 +2842,7 @@ print_usage()
 	echo $LINE
 	
 	echo "${S}The following allow you skip parts of the du script:"
-	echo "${C}-d${S} Skips ${C}d${S}ist-upgrade if you also select the ${C}w${S} option."
+	echo "${C}-d${S} Skips $DU_UPGRADE if you also select the ${C}w${S} option."
 	echo "${C}-e${S} Skips some of the 'Please hit ${C}e${S}nter to continue' questions."
 	echo "${C}-g${S} Skips the ${C}g${S}raphics install question."
 	echo "${C}-i${S} Skips the system ${C}i${S}nformation section."
@@ -2832,20 +2854,20 @@ print_usage()
 	echo "   Avoid using this since it disables almost all script functionality."
 	echo "${C}-S${S} Skips the internet connection test. Use this if script fails connection test"
 	echo "   but you know your connection is fine."
-	echo "${C}-t${S} Skips the Post dist-upgrade op${C}t${S}ions section."
-	echo "${C}-w${S} Skips the du ${C}w${S}arnings section. Starts the pre-dist-upgrade fixes and"
-	echo "   dist-upgrade sections automatically if used without ${C}-d${S}. Be careful!"
+	echo "${C}-t${S} Skips the Post dist-uprade/upgrade op${C}t${S}ions section."
+	echo "${C}-w${S} Skips the du ${C}w${S}arnings section. Starts the pre-upgrade fixes and"
+	echo "   $DU_UPGRADE sections automatically if used without ${C}-d${S}. Be careful!"
 	echo 
 	echo "The following are advanced script options:"
 	echo "${C}-I${S} Sets different ${C}I${S}nit level for X restart. Requires this syntax:"
 	echo "   -I 3  Please note, the number is the init level you want the script to start x in."
 	echo "${C}-K${S} Advanced ${C}K${S}ernel Install. If newer test kernels are available, they will show "
 	echo "   in the kernel install options. ${W}Install advanced kernels at your own risk!"
-	echo "${C}-l${S} Creates time stamped ${C}l${S}ogs of all update and dist-upgrade data."
+	echo "${C}-l${S} Creates time stamped ${C}l${S}ogs of all update and $DU_UPGRADE data."
 	echo "   Logfiles are located in ${C}$SM_LOG_DIR${S}"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
-	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to dist-upgrade."
+	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
 	
 	echo "${C}-p${S} Runs apt-get update without using ${C}p${S}diffs. Good for fast connections."
 	echo "${C}-P${S} Run script with ${C}P${S}roxy settings for connection, requires this syntax:"
@@ -2857,7 +2879,7 @@ print_usage()
 	echo "${S}The following can be run in X/kde:"
 	echo "${C}-h${S} Prints this ${C}h${S}elp menu."
 	echo "${C}-v${S} Prints ${C}v${S}ersion and system information, including distro version,"
-	echo "  . current kernel, apt update and dist-upgrade last used, and last use of smxi."
+	echo "  . current kernel, apt update and $DU_UPGRADE last used, and last use of smxi."
 	echo $LINE
 	echo "${S}Remember: to scroll up or down in terminal window, use: ${C}shift+pageup/pagedown${N}"
 	echo $LINE
