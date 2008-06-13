@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.31.4
+####  version: 7.31.5
 ####  Date: June 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -284,7 +284,7 @@ CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
 CON_DEB=''
 CONNECTION_RETRY=''
-DISTRO_SOURCES=''
+SIDUX_SOURCES=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
 KERNEL_EQUAL_INSTALL=''
 KERNEL_FORCE_DU=''
@@ -988,7 +988,7 @@ set_distro_data()
 	
 	if [ -n "$distroSources" ]
 	then
-		DISTRO_SOURCES='true'
+		SIDUX_SOURCES='true'
 		DEFAULT_KERNEL='sidux'
 	else
 		DEFAULT_KERNEL='debian'
@@ -2999,7 +2999,7 @@ run_script_components()
 	fi
 	check_dpkg_update
 	test_app_exists
-	# must be set after check_distro_version to set DISTRO_SOURCES global
+	# must be set after check_distro_version to set SIDUX_SOURCES global
 	set_distro_data
 	# checks for first run or -m option to run change_debian_mirrors
 	launch_function_trigger 'debian-mirrors'
@@ -3007,7 +3007,7 @@ run_script_components()
 	
 	## checks for first run or -M option to run change_kernel_mirrors
 	## no reason to run this on livecd since users can't install kernels anyway
-	if [  "$IS_LIVE" != 'true' -a "$DISTRO_SOURCES" == 'true' ]
+	if [  "$IS_LIVE" != 'true' -a "$SIDUX_SOURCES" == 'true' ]
 	then
 		launch_function_trigger 'kernel-mirrors'
  	fi

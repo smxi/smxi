@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.1
+####  version: 1.11.2
 ####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -683,7 +683,7 @@ install_keyrings()
 	local smPref=$( sm_pref_tester $prefId )
 	
 	# this handles case where sources have now been updated to sidux only
-	if [ "$smPref" -eq 0 -a "$DISTRO_SOURCES" == 'true' ]
+	if [ "$smPref" -eq 0 -a "$SIDUX_SOURCES" == 'true' ]
 	then
 		echo $LINE
 		# this handles first load cases, and also errors on first du
@@ -1012,7 +1012,7 @@ force_kernel_mirror_change()
 # update kernel mirrors, -M option
 change_kernel_mirrors()
 {
-	if [ -n "$DISTRO_SOURCES" ]
+	if [ -n "$SIDUX_SOURCES" ]
 	then
 		local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
 		#local currentMirror=$( sm_pref_tester $prefId 'equal' )
@@ -1410,7 +1410,7 @@ get_current_apt_kernel()
 	esac
 	
 	# little trick here to present just debian kernels if not distro
-	if [ "$DISTRO_SOURCES" != 'true' ]
+	if [ "$SIDUX_SOURCES" != 'true' ]
 	then
 		kernelStringExtra=''
 		distro='Debian'

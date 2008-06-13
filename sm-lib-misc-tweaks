@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.2
+####  version: 1.15.3
 ####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -861,7 +861,7 @@ set_default_system_kernel()
 		altKernelSetting='Currently Unset'
 	fi
 	
-	if [ -n "$DISTRO_SOURCES" ]
+	if [ -n "$SIDUX_SOURCES" ]
 	then
 		options="$options sidux"
 	fi

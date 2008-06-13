@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 2.0.3
-####  Date: June 10 2008
+####  version: 2.0.4
+####  Date: June 12 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -314,7 +314,7 @@ update_to_sidux_sources()
 	else
 		echo "$SPACER${M}You already appear to have sidux sources installed, continuing...${N}"
 	fi
-	# we need to set the DISTRO_SOURCES global now to make sure it's correct
+	# we need to set the SIDUX_SOURCES global now to make sure it's correct
 	set_distro_data
 }
 
