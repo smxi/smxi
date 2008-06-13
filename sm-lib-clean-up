@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.4.9
+####  version: 2.4.10
 ####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -311,6 +311,12 @@ remove_kernels()
 	local KernDown='/usr/src/kernel-downloads' SubDirectories='' directory=''
 	local OldKernelDown='/var/local/kernel-current' kernelStringMatch=''
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+	local ssftCheck=$( package_tester 'ssft' )
+	
+	if [ -z "$ssftCheck" ]
+	then
+		package_installer 'ssft' 'install-missing'
+	fi
 	
 	# test to make sure that required scripts are installed, if not, install:
 	if [ -n "$SIDUX_SOURCES" ]
@@ -322,6 +328,7 @@ remove_kernels()
 		eval $KernelCommand
 	elif [ ! -x /usr/sbin/kernel-remover ]
 	then
+		
 		run_script_import $MOD_KM
 	fi
 	
