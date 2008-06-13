@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.0.6
-####  Date: June 11 2008
+####  version: 2.0.7
+####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -158,7 +158,7 @@ install_graphics()
 				then 
 					if [ "$X_VERSIONS_PRE" != "$X_VERSIONS_POST" ]
 					then
-						newX="It looks like ${C}Xorg${S} was upgraded in this dist-upgrade -"
+						newX="It looks like ${C}Xorg${S} was upgraded in this $DU_UPGRADE -"
 					else
 						newX="Although it looks like ${C}Xorg${S} was not updated, if you installed a new kernel,"
 					fi

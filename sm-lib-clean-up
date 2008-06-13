@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.4.10
+####  version: 2.4.11
 ####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -569,7 +569,7 @@ remove_xorg_modules()
 	elif [ "$back" == 'true' ]
 	then
 		echo $LINE
-		echo "${S}Returning to Post-dist-upgrade options.${N}"
+		echo "${S}Returning to post-$DU_UPGRADE options.${N}"
 	elif [ "$remove" == 'true' ]
 	then
 		remove_xorg_components

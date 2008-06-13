@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 2.0.4
-####  Date: June 12 2008
+####  version: 2.0.6
+####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -26,7 +26,17 @@
 # args: $1 - repeat
 check_debian()
 {
-	local opt='' options='' repeat=''
+	local opt='' options='' repeat='' 
+	local siduxSources='continue-sidux-sources continue-sidux-conversion'
+	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
+	
+	if [ "$SYSTEM_BASE" == 'stable' ]
+	then
+		siduxSources=''
+		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."
+	fi
+	options="continue-no-change $siduxSources quit"
+	quitNu=$( wc -w <<< $options )
 	
 	print_lib_info $LIB_SIDUX_CONVERSION
 	echo $MBAR
@@ -34,20 +44,23 @@ check_debian()
 	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
 	echo
 	echo "${W}There are no guarantees, support for all the options is still experimental.${S}"
-	echo "Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
+	echo -e "$altText1"
 	echo $LINE
 	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
 	echo "    Only ${C}$SCRIPT_NAME${S} fixes will run, and you can use the other script options too."
-	echo "${C}2${S} - ${C}continue-sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
-	echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-	echo "${C}3${S} - ${C}continue-sidux-conversion${S} Will proceed to attempt to convert your system to sidux."
-	echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
-	echo "${C}4${S} - ${C}quit${S} I don't want to proceed, I'm exiting now."
+	if [ "$SYSTEM_BASE" != 'stable' ]
+	then
+		echo "${C}2${S} - ${C}continue-sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
+		echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
+		echo "${C}3${S} - ${C}continue-sidux-conversion${S} Will proceed to attempt to convert your system to sidux."
+		echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
+	fi
+	echo "${C}$quitNu${S} - ${C}quit${S} I don't want to proceed, I'm exiting now."
 	echo $LINE
 	echo $SLE
 	echo $LINE
 	
-	options="continue-no-change continue-sidux-sources continue-sidux-conversion quit"
+	options="continue-no-change $siduxSources quit"
 	select opt in $options
 	do
 		case $opt in
@@ -65,8 +78,8 @@ check_debian()
 				update_to_sidux_sources
 				set_default_system_kernel 'conversion'
 				echo $MLINE
-				echo "${C}$SCRIPT_NAME${M} will now proceed to the dist-upgrade, which will bring your system into sync."
-				echo "Do not quit the script until the dist-upgrade and post dist-upgrade sidux conversion is completed!"
+				echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will bring your system into sync."
+				echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux conversion is completed!"
 				echo ""
 				print_hec
 				CON_DEB='true'
@@ -95,7 +108,7 @@ install_window_manager()
 	echo "${M}Window manager install process"
 	echo $LINE
 	echo "${S}After the sidux components are installed, please continue on to the"
-	echo "${C}Package Install${S} section which will come next, in ${C}Post dist-upgrade${S}."
+	echo "${C}Package Install${S} section which will come next, in ${C}Post $DU_UPGRADE${S}."
 	echo "Choose the ${C}display manager${S} option, then first install xorg, then your preferred."
 	echo "display manager. For older installs I recommend ${C}xfce${S} or ${C}fvwm crystal${S}.${N}"
 	print_hec
