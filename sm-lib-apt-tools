@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.7
+####  version: 1.11.8
 ####  Date: June 14 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1390,8 +1390,8 @@ list_distro_mirrors()
 # args: $1 - debian/sidux - optional, to get current sid kernel version if needed
 get_current_apt_kernel()
 {
-	local tempKernels='' platform='686' tempKernelCount='' kernelThird=0
-	local kernel1='' kernel2='' kernel1Greater='' slicePoint='' kernelStringExtra='' 
+	local tempKernels='' platform='686' kernelThird=0
+	local kernel1='' kernel2='' kernel1Greater='' kernelStringExtra='' 
 	local defaultKernel=$1 distro='' currentKernel=''
 	
 	if [ "$BITS" == '64' ]
@@ -1426,49 +1426,18 @@ get_current_apt_kernel()
 	# note: testing for kernel metapackages here, so only systems with metapackage kernels 
 	# can be tested with this method. The last slice handles a case with metapackages
 	tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
-	# get rid of the linebreaks if > 1 returned, that can happen if mirror and main repo 
-	# have different versions.
-	#echo tempKernels $tempKernels
-	tempKernels=$( echo $tempKernels )
-	tempKernelCount=$( wc -w <<< $tempKernels )
-	#echo tempKernelCount $tempKernelCount
-# 	if [ "$tempKernelCount" -gt 1 ]
-# 	then
-# 		# slice and compare the two
-# 		kernel1=$( cut -d ' ' -f 1 <<< $tempKernels )
-# 		kernel2=$( cut -d ' ' -f 2 <<< $tempKernels )
-# 		
-# 		dpkg --compare-versions $kernel1 gt $kernel2
-# 		
-# 		kernel1Greater=$?
-# 		#echo kernel1Greater $kernel1Greater
-# 		# if first is greater, we'll use it, else we'll use the second one
-# 		if [ "$kernel1Greater" -eq 0 ]
-# 		then
-# 			slicePoint=1
-# 		else
-# 			slicePoint=2
-# 		fi
 
-		for kernel1 in $tempKernels
-		do
-			dpkg --compare-versions "$kernel1" ge "$kernel2"
-			kernel1Greater=$?
-
-			if [ "$kernel1Greater" -eq 0 ]
-			then
-				kernel2=$kernel1
-			fi
-		done
-		currentKernel=$kernel2
+	for kernel1 in $tempKernels
+	do
+		dpkg --compare-versions "$kernel1" ge "$kernel2"
+		kernel1Greater=$?
 		#now, if 1 is greater than 2, use it, otherwise use 2
-# 	else
-# 		# this handles 1 or > 2, that's such a fringe case I don't want to bother with
-# 		# unless someone actually ever has that problem, or use kelmo's function instead
-# 		slicePoint=$tempKernelCount
-# 	fi 
-	# slice the right kernel out:
-	#currentKernel=$( echo $tempKernels | cut -d ' ' -f $slicePoint )
+		if [ "$kernel1Greater" -eq 0 ]
+		then
+			kernel2=$kernel1
+		fi
+	done
+	currentKernel=$kernel2
 
 	case "$defaultKernel" in
 		debian)
