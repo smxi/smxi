@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.0.7
+####  version: 2.0.8
 ####  Date: June 13 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -365,7 +365,7 @@ install_graphics()
 				;;
 			start-desktop)
 				final_graphics_install no-driver-install
-				start_default_dm full
+				start_stop_default_dm full start
 				;;
 			quit)
 				final_graphics_install no-driver-install
@@ -540,7 +540,7 @@ final_graphics_install()
 		# so sgfxi exits on quit/reboot with 100
 		if [ "$?" -eq 0 ]
 		then
-			start_default_dm nowmstart
+			start_stop_default_dm nowmstart start
 		fi
 	fi
 	

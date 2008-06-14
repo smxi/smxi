@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.32.4
-####  Date: June 13 2008
+####  version: 7.32.5
+####  Date: June 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1371,21 +1371,22 @@ start_windows_manager()
 		case $opt in
 			start-desktop)
 				print_completed
-				start_default_dm full
+				start_stop_default_dm full start
 				;;
 			quit)
 				print_completed && exit 0
 				;;
 			*)
 				print_error opt
-				start_windows_manager
+				start_windows_manager 
 				;;
 		esac
 		break
 	done
 }
 
-start_default_dm()
+# arg: $1 - start/stop; $2 - stop/start
+start_stop_default_dm()
 {
 	local displayManager=$( cat /etc/X11/default-display-manager 2>/dev/null )
 	displayManager=$( basename $displayManager 2>/dev/null ) 
@@ -1397,40 +1398,24 @@ start_default_dm()
 		then
 			if [ -x /etc/init.d/kdm ]
 			then
-				if [ "$TESTING" == 'true' ]
-				then
-					echo 'kdm start'
-				fi
-				/etc/init.d/kdm start && success='true'
+				/etc/init.d/kdm $2 && success='true'
 			elif [ -x /etc/init.d/gdm ]
 			then
-				/etc/init.d/gdm start && success='true'
+				/etc/init.d/gdm $2 && success='true'
 			elif [ -x /etc/init.d/xdm ]
 			then
-				if [ "$TESTING" == 'true' ]
-				then
-					echo 'xdm start'
-				fi
-				/etc/init.d/xdm start && success='true'
+				/etc/init.d/xdm $2 && success='true'
 			fi
 		else
-			if [ "$TESTING" == 'true' ]
-			then
-				echo $displayManager' default start'
-			fi
 			# question: why is this in some cases not working? No init 5 is happening
 			if [ -x /etc/init.d/$displayManager ]
 			then
-				/etc/init.d/$displayManager start
+				/etc/init.d/$displayManager $2
 			fi
 			success='true'
 		fi
 	elif [ "$1" == 'nowmstart' ]
 	then
-		if [ "$TESTING" == 'true' ]
-		then
-			echo 'nwmstart'
-		fi
 		success='true'
 	elif [ "$1" == 'killroot' ]
 	then
@@ -1462,7 +1447,7 @@ start_default_dm()
 
 do_wm_pid_test()
 {
-	if [ -e /var/run/kdm.pid -o -e /var/run/gdm.pid -o -e /var/run/xdm.pid -o  -e /var/run/wdm.pid ]
+	if [ -e /var/run/kdm.pid -o -e /var/run/gdm.pid -o -e /var/run/xdm.pid -o  -e /var/run/wdm.pid -o /var/run/slim.lock ]
 	then
 		return 1
 	else
@@ -1637,30 +1622,10 @@ check_display_and_x()
 
 				if [ "$wmRunning" == 'true' ]
 				then
-					echo "${S}Shutting down all instances of ${C}kdm/gdm/xdm/wdm${S} now...${N}"
-					if [ -e /var/run/kdm.pid ]
-					then
-						/etc/init.d/kdm stop
-					fi
-					if [ -e /var/run/gdm.pid ]
-					then
-						/etc/init.d/gdm stop
-					fi
-					if [ -e /var/run/xdm.pid ]
-					then
-						/etc/init.d/xdm stop
-					fi
-					if [ -e /var/run/wdm.pid ]
-					then
-						/etc/init.d/wdm stop
-					fi
-					if [ -e /etc/init.d/slim ]
-					then
-						/etc/init.d/slim stop
-					fi
+					echo "${S}Shutting down your display manager now...${N}"
+					start_stop_default_dm full stop
 				fi
 				;;
-				
 			n)	
 				if [ "$defaultRunlevel" == 5 ]
 				then
@@ -2814,7 +2779,7 @@ post_du_options()
 				;;
 			start-desktop)
 				print_completed
-				start_default_dm full
+				start_stop_default_dm full start
 				;;
 			quit)
 				print_completed
