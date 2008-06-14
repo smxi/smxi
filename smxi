@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.32.7
+####  version: 7.32.8
 ####  Date: June 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1706,11 +1706,11 @@ check_distro_version()
 	then
 		DISTRO_LEVEL=$( cat $SMDL )
 		# if [ -f $SMDV ]
-		if [ -f /etc/issue ]
-		then
-			# DISTRO_VERSION=$( cat $SMDV )
-			DISTRO_VERSION=$( cat /etc/issue )
-		elif [ -f $DEB ]
+# 		if [ -f /etc/issue ]
+# 		then
+# 			# DISTRO_VERSION=$( cat $SMDV )
+# 			DISTRO_VERSION=$( cat /etc/issue )
+		if [ -f $DEB ]
 		then
 			DISTRO_VERSION=$( cat $DEB )
 		elif [ -f $SMDV ]
