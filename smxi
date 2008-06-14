@@ -1551,7 +1551,7 @@ check_display_and_x()
 				runlevelText2=" enter runlevel $runlevelUse and"
 				runlevelText3='echo "${S}Entering ${C}runlevel $runlevelUse${S}. Please wait, this takes a few seconds...${N}"'
 			else
-				unlevelUse=$defaultRunlevel
+				runlevelUse=$defaultRunlevel
 			fi
 			;;
 		*)
