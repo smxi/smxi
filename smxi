@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.32.3
+####  version: 7.32.4
 ####  Date: June 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1653,6 +1653,10 @@ check_display_and_x()
 					if [ -e /var/run/wdm.pid ]
 					then
 						/etc/init.d/wdm stop
+					fi
+					if [ -e /etc/init.d/slim ]
+					then
+						/etc/init.d/slim stop
 					fi
 				fi
 				;;
