@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.6
-####  Date: June 13 2008
+####  version: 1.11.7
+####  Date: June 14 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1432,31 +1432,43 @@ get_current_apt_kernel()
 	tempKernels=$( echo $tempKernels )
 	tempKernelCount=$( wc -w <<< $tempKernels )
 	#echo tempKernelCount $tempKernelCount
-	if [ "$tempKernelCount" -eq 2 ]
-	then
-		# slice and compare the two
-		kernel1=$( cut -d ' ' -f 1 <<< $tempKernels )
-		kernel2=$( cut -d ' ' -f 2 <<< $tempKernels )
-		
-		dpkg --compare-versions $kernel1 gt $kernel2
-		
-		kernel1Greater=$?
-		#echo kernel1Greater $kernel1Greater
-		# if first is greater, we'll use it, else we'll use the second one
-		if [ "$kernel1Greater" -eq 0 ]
-		then
-			slicePoint=1
-		else
-			slicePoint=2
-		fi
+# 	if [ "$tempKernelCount" -gt 1 ]
+# 	then
+# 		# slice and compare the two
+# 		kernel1=$( cut -d ' ' -f 1 <<< $tempKernels )
+# 		kernel2=$( cut -d ' ' -f 2 <<< $tempKernels )
+# 		
+# 		dpkg --compare-versions $kernel1 gt $kernel2
+# 		
+# 		kernel1Greater=$?
+# 		#echo kernel1Greater $kernel1Greater
+# 		# if first is greater, we'll use it, else we'll use the second one
+# 		if [ "$kernel1Greater" -eq 0 ]
+# 		then
+# 			slicePoint=1
+# 		else
+# 			slicePoint=2
+# 		fi
+
+		for kernel1 in $tempKernels
+		do
+			dpkg --compare-versions "$kernel1" ge "$kernel2"
+			kernel1Greater=$?
+
+			if [ "$kernel1Greater" -eq 0 ]
+			then
+				kernel2=$kernel1
+			fi
+		done
+		currentKernel=$kernel2
 		#now, if 1 is greater than 2, use it, otherwise use 2
-	else
-		# this handles 1 or > 2, that's such a fringe case I don't want to bother with
-		# unless someone actually ever has that problem, or use kelmo's function instead
-		slicePoint=$tempKernelCount
-	fi 
+# 	else
+# 		# this handles 1 or > 2, that's such a fringe case I don't want to bother with
+# 		# unless someone actually ever has that problem, or use kelmo's function instead
+# 		slicePoint=$tempKernelCount
+# 	fi 
 	# slice the right kernel out:
-	currentKernel=$( echo $tempKernels | cut -d ' ' -f $slicePoint )
+	#currentKernel=$( echo $tempKernels | cut -d ' ' -f $slicePoint )
 
 	case "$defaultKernel" in
 		debian)
