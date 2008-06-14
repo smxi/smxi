@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.32.6
+####  version: 7.32.7
 ####  Date: June 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1447,7 +1447,7 @@ start_stop_default_dm()
 
 do_wm_pid_test()
 {
-	if [ -e /var/run/kdm.pid -o -e /var/run/gdm.pid -o -e /var/run/xdm.pid -o  -e /var/run/wdm.pid -o /var/run/slim.lock ]
+	if [ -e /var/run/kdm.pid -o -e /var/run/gdm.pid -o -e /var/run/xdm.pid -o  -e /var/run/wdm.pid -o -e /var/run/slim.lock ]
 	then
 		return 1
 	else
