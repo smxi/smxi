@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.7
+####  version: 7.34.8
 ####  Date: June 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -35,6 +35,7 @@
 ####  downloaded automatically when required:
 ####  sm-lib-apt-tools - all apt functions, package tests, etc
 ####  sm-lib-clean-up - cleanup functions for installs
+####  sm-lib-distro-conversion - various smxi distro options for conversion, run
 ####  sm-lib-graphics - graphics installer question and functions
 ####  sm-lib-kernel - kernel installer question and utilities
 ####  -- sm-lib-kernel-install - submodule of sm-lib-kernel
@@ -42,7 +43,7 @@
 ####  sm-lib-misc-tweaks - all the misc tweaks, plus fix fonts stuff
 ####  sm-lib-package-install - various package install options
 ####  sm-lib-package-removal - options to remove packages
-####  sm-lib-sidux-conversion - upgrade to sidux functions
+
 ####  sm-lib-warning - warning section
 ####  sm-lib-2006-fixes- legacy fixes for distro version < 5
 ####  sm-lib-2007-fixes- fixes for distro version < 10
@@ -218,7 +219,7 @@ INTEL=''
 # script library files:
 LIB_APT_TOOLS='sm-lib-apt-tools'
 LIB_CLEAN_UP='sm-lib-clean-up'
-LIB_DISTRO_CONVERSION='sm-lib-sidux-conversion'
+LIB_DISTRO_CONVERSION='sm-lib-distro-conversion'
 LIB_GRAPHICS='sm-lib-graphics'
 LIB_KERNEL='sm-lib-kernel'
 LIB_KERNEL_INSTALL='sm-lib-kernel-install'
