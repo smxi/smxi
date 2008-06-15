@@ -390,9 +390,9 @@ update_to_new_sources()
 	if [ "$?" -eq 0 ]
 	then
 		UPDATED=''
-		print_update_message 'true' $whichUpdate
+		update_completion_handler 'true' $whichUpdate
 	else
-		print_update_message 'false' $whichUpdate
+		update_completion_handler 'false' $whichUpdate
 	fi
 
 	# we need to set the SIDUX_SOURCES global now to make sure it's correct
@@ -400,7 +400,7 @@ update_to_new_sources()
 }
 
 # args: $1 - doUpdate; $2 - which update
-print_update_message()
+update_completion_handler()
 {
 	local doUpdate=$1 whichUpdate=$2
 	
