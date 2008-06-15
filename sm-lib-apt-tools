@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.11.8
-####  Date: June 14 2008
+####  version: 1.12.0
+####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -927,12 +927,13 @@ update_to_nonfree_sources()
 #update_to_nonfree_sources
 
 # will test for and create either new sub apt source list or add to sources.list as needed
-# args: $1 - grepSearch; $2 - sourceFile; $3 - sourcesData
+# args: $1 - grepSearch; $2 - sourceFile; $3 - sourcesData; $4 - searchIdentifier
 create_apt_source_item()
 {
 	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
+	local searchIdentifier=$4
 	
-	sourcePresent=$( grep -iRl "$grepSearch" $EAS $EAS.d/* 2>/dev/null )
+	sourcePresent=$( egrep -iRl "^deb[[:space:]].*$grepSearch" $EAS $EAS.d/* 2>/dev/null )
 	if [ -z "$sourcePresent" ]
 	then
 		# handle cases where users prefer single sources.list
@@ -942,15 +943,15 @@ create_apt_source_item()
 		fi
 		
 		echo $LINE
-		echo "${S}Adding ${C}$grepSearch${S} to sourcefile: ${C}$sourceFile${N}"
+		echo "${S}Adding ${C}$searchIdentifier${S} to sourcefile: ${C}$sourceFile${N}"
 		if [ ! -f "$sourceFile" ]
 		then
-			echo "# $grepSearch sources added by $SCRIPT_NAME" > $sourceFile
+			echo "# $searchIdentifier sources added by $SCRIPT_NAME" > $sourceFile
 			echo -e "$sourcesData" >> $sourceFile
 			echo >> $sourceFile
 		else
 			echo >> $sourceFile
-			echo "# $grepSearch sources added by $SCRIPT_NAME" >> $sourceFile
+			echo "# $searchIdentifier sources added by $SCRIPT_NAME" >> $sourceFile
 			echo -e "$sourcesData" >> $sourceFile
 			echo >> $sourceFile
 		fi
@@ -1394,70 +1395,80 @@ get_current_apt_kernel()
 	local kernel1='' kernel2='' kernel1Greater='' kernelStringExtra='' 
 	local defaultKernel=$1 distro='' currentKernel=''
 	
-	if [ "$BITS" == '64' ]
+	if [ "$defaultKernel" != 'no-kernel' ]
 	then
-		platform='amd64'
-	fi
-	
-	case $defaultKernel in
-		debian)
-			distro='Debian'
-			;;
-		sidux)
-			kernelStringExtra='-sidux'
-			distro='sidux'
-			;;
-	esac
-	
-	# little trick here to present just debian kernels if not distro
-	if [ "$SIDUX_SOURCES" != 'true' ]
-	then
-		kernelStringExtra=''
-		distro='Debian'
-		defaultKernel='debian'
-	fi
-	
-	# first we run the update, if needed
-	apt_update_handler 'kernel'
-	# then we'll slice out the latest apt kernel
-	echo
-	echo "${S}Calculating latest ${C}$distro${S} kernel version now...${N}"
-	# need to make sure it's not a bigmem kernel from debian too, ends in  $platform
-	# note: testing for kernel metapackages here, so only systems with metapackage kernels 
-	# can be tested with this method. The last slice handles a case with metapackages
-	tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
-
-	for kernel1 in $tempKernels
-	do
-		dpkg --compare-versions "$kernel1" ge "$kernel2"
-		kernel1Greater=$?
-		#now, if 1 is greater than 2, use it, otherwise use 2
-		if [ "$kernel1Greater" -eq 0 ]
+		if [ "$BITS" == '64' ]
 		then
-			kernel2=$kernel1
+			platform='amd64'
 		fi
-	done
-	currentKernel=$kernel2
-
-	case "$defaultKernel" in
-		debian)
-			CURRENT_DEBIAN_KERNEL=$currentKernel
-			;;
-		sidux)
-			CURRENT_SIDUX_KERNEL=$currentKernel
-			;;
-	esac
+		
+		case $defaultKernel in
+			debian)
+				distro='Debian'
+				;;
+			sidux)
+				kernelStringExtra='-sidux'
+				distro='sidux'
+				;;
+			mepis)
+				kernelStringExtra='-mepis'
+				platform='smp'
+				distro='Mepis'
+				;;
+		esac
+		
+		# little trick here to present just debian kernels if not distro
+		if [ "$SIDUX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' ]
+		then
+			kernelStringExtra=''
+			distro='Debian'
+			defaultKernel='debian'
+		fi
+		
+		# first we run the update, if needed
+		apt_update_handler 'kernel'
+		# then we'll slice out the latest apt kernel
+		echo
+		echo "${S}Calculating latest ${C}$distro${S} kernel version now...${N}"
+		# need to make sure it's not a bigmem kernel from debian too, ends in  $platform
+		# note: testing for kernel metapackages here, so only systems with metapackage kernels 
+		# can be tested with this method. The last slice handles a case with metapackages
+		tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
 	
-	# only set this for cases where it's user defaults being set, not for alt kernels
-	if [ "$defaultKernel" == "$DEFAULT_KERNEL" ]
-	then
-		CURRENT_APT_KERNEL=$currentKernel
-		kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
-		# now just slice out the major version, and add 1 so it's always 1 > than current
-		KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
-		# global will handle alert to metapackage users to reboot post du
-		# global will handle alert to metapackage users to reboot post du
-		CURRENT_APT_KERNEL_GRUB=$( grep -i -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
+		for kernel1 in $tempKernels
+		do
+			dpkg --compare-versions "$kernel1" ge "$kernel2"
+			kernel1Greater=$?
+			#now, if 1 is greater than 2, use it, otherwise use 2
+			if [ "$kernel1Greater" -eq 0 ]
+			then
+				kernel2=$kernel1
+			fi
+		done
+		currentKernel=$kernel2
+	
+		case "$defaultKernel" in
+			debian)
+				CURRENT_DEBIAN_KERNEL=$currentKernel
+				;;
+			sidux)
+				CURRENT_SIDUX_KERNEL=$currentKernel
+				;;
+		esac
+		
+		# only set this for cases where it's user defaults being set, not for alt kernels
+		if [ "$defaultKernel" == "$DEFAULT_KERNEL" ]
+		then
+			CURRENT_APT_KERNEL=$currentKernel
+			kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
+			# now just slice out the major version, and add 1 so it's always 1 > than current
+			KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
+			# global will handle alert to metapackage users to reboot post du
+			# global will handle alert to metapackage users to reboot post du
+			CURRENT_APT_KERNEL_GRUB=$( grep -i -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
+		fi
+	else
+		CURRENT_APT_KERNEL='no-apt-kernel-available'
 	fi
 }
 

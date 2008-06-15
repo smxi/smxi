@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.4.4
-####  Date: June 13 2008
+####  version: 2.5.0
+####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -37,7 +37,8 @@ advanced_kernel_install()
 {
 	local kernel='' options='' opt='' userSelection=''
 	local text_1='' text_2=''  rcMessage='' altKernelOption='' altKernelText1=''
-	local optionList='' listCount='' altKernOpt='' altKernelOption=''
+	local optionList='' listCount='' 
+	local altKernOpt='' altKernelOption='' altKernOpt2='' altKernelOption2=''
 	
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
@@ -49,15 +50,22 @@ advanced_kernel_install()
 	# add the list closer items
 	local kernelCount=$( wc -w <<< $KERNEL_LIST )
 	
-	if [ "$DEFAULT_KERNEL" != 'debian' ]
+	if [ "$DEFAULT_KERNEL" != 'debian' -a "$DEFAULT_KERNEL" != 'no-kernel' ]
 	then
 		altKernelOption='install-debian-kernel'
 		altKernelText1='Debian'
-	elif [ -n "$SIDUX_SOURCES" -a "$DEFAULT_KERNEL" != 'sidux' ]
+	elif [ -n "$SIDUX_SOURCES" -a "$DEFAULT_KERNEL" != 'sidux'  ]
 	then
 		altKernelOption='install-sidux-kernel'
 		altKernelText1='sidux'
 	fi
+	# this is inactive currently, but can be switched on with more testing
+	if [ -n "$MEPIS_SOURCES" -a "$DEFAULT_KERNEL" != 'mepis'  ]
+	then
+		altKernelOption2='install-mepis-kernel'
+		altKernelText2='Mepis'
+	fi
+
 	optionList="$KERNEL_LIST $altKernelOption kernel-metapackage-options back-to-main-menu"
 	
 	listCount=$( wc -w <<< $optionList )
@@ -105,7 +113,7 @@ advanced_kernel_install()
 						# KERNEL_FILE_RESET is set in set_32_64_bit
 						KERNEL_FILE=$KERNEL_FILE_RESET
 						;;
-					install-debian-kernel|install-sidux-kernel)
+					install-debian-kernel|install-mepis-kernel|install-sidux-kernel)
 						:
 						;;
 					kernel-metapackage-options)
@@ -136,6 +144,10 @@ advanced_kernel_install()
 			get_current_apt_kernel debian
 			double_check_kernel apt-debian
 			;;
+		install-mepis-kernel)
+			get_current_apt_kernel mepis
+			double_check_kernel apt-mepis
+			;;
 		install-sidux-kernel)
 			get_current_apt_kernel sidux
 			double_check_kernel apt-sidux
@@ -164,6 +176,10 @@ double_check_kernel()
 		apt-debian)
 			kernelFile="$CURRENT_DEBIAN_KERNEL" 
 			extraText='Debian'
+			;;
+		apt-mepis)
+			kernelFile="$CURRENT_MEPIS_KERNEL" 
+			extraText='Mepis'
 			;;
 		apt-sidux)
 			kernelFile="$CURRENT_SIDUX_KERNEL" 
@@ -199,6 +215,9 @@ double_check_kernel()
 						;;
 					apt-debian)
 						install_apt_kernel debian
+						;;
+					apt-mepis)
+						install_apt_kernel mepis
 						;;
 					apt-sidux)
 						install_apt_kernel sidux
@@ -426,6 +445,9 @@ install_apt_kernel()
 	case "$1" in
 		debian)
 			currentAptKernel=$CURRENT_DEBIAN_KERNEL
+			;;
+		mepis)
+			currentAptKernel=$CURRENT_MEPIS_KERNEL
 			;;
 		sidux)
 			currentAptKernel=$CURRENT_SIDUX_KERNEL

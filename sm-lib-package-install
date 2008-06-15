@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.7.4
-####  Date: June 12 2008
+####  version: 2.7.5
+####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -133,23 +133,26 @@ update_sources()
 	local skypeApt="$EAS.d/skype.list"
 	local swiftSources='deb http://getswiftfox.com/builds/debian unstable non-free'
 	local swiftApt="$EAS.d/swiftfox.list"
-	local extraFunctions='' grepSearch='' sourceFile='' sourcesData=''
+	local extraFunctions='' grepSearch='' sourceFile='' sourcesData='' searchIdentifier=''
 	
 	case $1 in 
 		opera)
 			# opera keyrings
 			extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
 			grepSearch='deb.opera.com'
+			searchIdentifier='Opera'
 			sourceFile=$operaApt
 			sourcesData=$operaSources
 			;;
 		skype)
 			grepSearch='download.skype.com'
+			searchIdentifier='Skype'
 			sourceFile=$skypeApt
 			sourcesData=$skypeSources
 			;;
 		swiftfox)
 			grepSearch='getswiftfox.com'
+			searchIdentifier='Swiftfox'
 			sourceFile=$swiftApt
 			sourcesData=$swiftSources
 			;;
@@ -161,7 +164,7 @@ update_sources()
 			;;
 	esac
 	
-	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData"
+	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData" "$searchIdentifier"
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff

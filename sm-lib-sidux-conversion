@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 2.0.6
-####  Date: June 13 2008
+####  version: 3.0.0
+####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -26,16 +26,23 @@
 # args: $1 - repeat
 check_debian()
 {
-	local opt='' options='' repeat='' 
-	local siduxSources='continue-sidux-sources continue-sidux-conversion'
+	local opt='' options='' repeat='' optionSet='debian'
+	local conversionOptions='sidux-sources sidux-conversion'
 	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
 	
 	if [ "$SYSTEM_BASE" == 'stable' ]
 	then
-		siduxSources=''
+		conversionOptions=''
 		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."
+		optionSet='stable'
 	fi
-	options="continue-no-change $siduxSources quit"
+	if [ -f $ANX ]
+	then
+		conversionOptions='antix-sid antix-sid-sidux antix-sidux-conversion'
+		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."
+		optionSet='antix'
+	fi
+	options="continue-no-change $conversionOptions quit"
 	quitNu=$( wc -w <<< $options )
 	
 	print_lib_info $LIB_SIDUX_CONVERSION
@@ -48,19 +55,29 @@ check_debian()
 	echo $LINE
 	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
 	echo "    Only ${C}$SCRIPT_NAME${S} fixes will run, and you can use the other script options too."
-	if [ "$SYSTEM_BASE" != 'stable' ]
-	then
-		echo "${C}2${S} - ${C}continue-sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
-		echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-		echo "${C}3${S} - ${C}continue-sidux-conversion${S} Will proceed to attempt to convert your system to sidux."
-		echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
-	fi
+	
+	case "$optionSet" in
+		debian)
+			echo "${C}2${S} - ${C}sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
+			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
+			echo "${C}3${S} - ${C}sidux-conversion${S} Will proceed to attempt to convert your system to sidux."
+			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
+			;;
+		antix)
+			echo "${C}2${S} - ${C}antix-sid${S} Adds sid sources to your apt repos, otherwise no change."
+			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
+			echo "${C}3${S} - ${C}antix-sid-sidux${S} Adds sid sources, sidux sources, no conversion."
+			echo "${C}4${S} - ${C}antix-sidux-conversion${S} Adds sid sources, sidux sources, runs conversion."
+			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
+			;;
+	esac
+
 	echo "${C}$quitNu${S} - ${C}quit${S} I don't want to proceed, I'm exiting now."
 	echo $LINE
 	echo $SLE
 	echo $LINE
 	
-	options="continue-no-change $siduxSources quit"
+	options="continue-no-change $conversionOptions quit"
 	select opt in $options
 	do
 		case $opt in
@@ -68,20 +85,34 @@ check_debian()
 				update_smxi_data
 				echo "${S}Ok, you can use ${C}$SCRIPT_NAME${S} with no changes to your system, proceed.${N}"
 				;;
-			continue-sidux-sources)
+			antix-sid)
+				update_smxi_data
+				check_antix_sid_sources
+				;;
+			antix-sid-sidux)
+				update_smxi_data
+				check_antix_sid_sources
+				update_to_sidux_sources
+				set_default_system_kernel 'conversion'
+				;;
+			antix-sidux-conversion)
+				update_smxi_data
+				check_antix_sid_sources
+				update_to_sidux_sources
+				set_default_system_kernel 'conversion'
+				print_conversion_information
+				CON_DEB='true'
+				;;
+			sidux-sources)
 				update_smxi_data
 				update_to_sidux_sources
 				set_default_system_kernel 'conversion'
 				;;
-			continue-sidux-conversion)
+			sidux-conversion)
 				update_smxi_data
 				update_to_sidux_sources
 				set_default_system_kernel 'conversion'
-				echo $MLINE
-				echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will bring your system into sync."
-				echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux conversion is completed!"
-				echo ""
-				print_hec
+				print_conversion_information
 				CON_DEB='true'
 				;;
 			quit)
@@ -100,6 +131,15 @@ check_debian()
 	then
 		check_debian 'repeat'
 	fi
+}
+
+print_conversion_information()
+{
+	echo $MLINE
+	echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will bring your system into sync."
+	echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux conversion is completed!"
+	echo ""
+	print_hec
 }
 
 install_window_manager()
@@ -304,31 +344,59 @@ distro_number_calculator()
 	fi
 }
 
-update_to_sidux_sources()
+# args: $1 - which source update
+update_to_new_sources()
 {
-	local doUpdate=''
-	local grepSearch='sidux'
-	local sourceFile='sidux.list'
-	local sourcesData='deb http://sidux.com/debian/ sid main fix.main\n#deb-src http://sidux.com/debian/ sid main fix.main'
+	local grepSearch=''
+	local searchIdentifier=''
+	local sourceFile=''
+	local sourcesData=''
+	local whichUpdate=''
 	
-	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData"
+	case $1 in
+		sidux)
+			grepSearch='sidux.*[[:space:]](sid|unstable)'
+			searchIdentifier='sidux'
+			sourceFile='sidux.list'
+			sourcesData='deb http://sidux.com/debian/ sid main fix.main\n#deb-src http://sidux.com/debian/ sid main fix.main'
+			whichUpdate='sidux'
+			;;
+		antix)
+			grepSearch='debian\.org.*[[:space:]](sid|unstable)'
+			searchIdentifier='Debian Sid'
+			sourceFile='antix.list'
+			sourcesData='deb http://ftp.uk.debian.org/debian unstable main contrib non-free'
+			whichUpdate='Debian Sid'
+			;;
+	esac
+	
+	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData" "$searchIdentifier"
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff
 	if [ "$?" -eq 0 ]
 	then
-		doUpdate='true'
 		UPDATED=''
+		print_update_message 'true' $whichUpdate
+	else
+		print_update_message 'false' $whichUpdate
 	fi
 
+	# we need to set the SIDUX_SOURCES global now to make sure it's correct
+	set_distro_data
+}
+
+# args: $1 - doUpdate; $2 - which update
+print_update_message()
+{
+	local doUpdate=$1 whichUpdate=$2
+	
 	if [ "$doUpdate" == 'true' ]
 	then
 		apt_update_handler 'sidux-conversion'
 	else
-		echo "$SPACER${M}You already appear to have sidux sources installed, continuing...${N}"
+		echo "$SPACER${M}You already appear to have $whichUpdate sources installed, continuing...${N}"
 	fi
-	# we need to set the SIDUX_SOURCES global now to make sure it's correct
-	set_distro_data
 }
 
 ###**EOF**###
