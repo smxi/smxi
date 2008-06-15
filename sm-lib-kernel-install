@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.5.0
+####  version: 2.5.1
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -50,7 +50,7 @@ advanced_kernel_install()
 	# add the list closer items
 	local kernelCount=$( wc -w <<< $KERNEL_LIST )
 	
-	if [ "$DEFAULT_KERNEL" != 'debian' -a "$DEFAULT_KERNEL" != 'no-kernel' ]
+	if [ "$DEFAULT_KERNEL" != 'debian' -a "$DEFAULT_KERNEL" != 'no-kernel' -a ! -f $ATX ]
 	then
 		altKernelOption='install-debian-kernel'
 		altKernelText1='Debian'
