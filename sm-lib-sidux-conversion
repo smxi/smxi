@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 3.0.2
+####  version: 3.0.3
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -253,7 +253,7 @@ set_distro_version()
 	debian-other
 	'
 	
-	if [ ! -f $SMDV ]
+	if [ ! -f $SMDV -a ! -f $ATX ]
 	then
 		echo $MLINE
 		echo "${M}Set Distro Version Data"
@@ -273,7 +273,7 @@ set_distro_version()
 		select opt in $distros
 		do
 			case $opt in
-				debian-stable|debian-testing|debian-sid|mepis|anti-x|debian-other)
+				debian-stable|debian-testing|debian-sid|debian-other)
 					fullIdString="$opt-sc:$timeStamp"
 					echo $fullIdString > $SMDV
 					DISTRO_VERSION=$fullIdString
@@ -290,6 +290,11 @@ set_distro_version()
 		then
 			set_distro_version
 		fi
+	elif [ ! -f $SMDV -a -f $ATX ]
+	then
+		fullIdString="anti-x-sc:$timeStamp"
+		echo $fullIdString > $SMDV
+		DISTRO_VERSION=$fullIdString
 	fi
 }
 
