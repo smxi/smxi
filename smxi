@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.33.0
-####  Date: June 14 2008
+####  version: 7.33.1
+####  Date: June 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1391,40 +1391,42 @@ start_stop_default_dm()
 	local displayManager=$( get_default_display_manager )
 	local success=''
 	local dmList='kdm gdm xdm wdm slim' dm=''
-
-	if [ "$1" == 'full' ]
-	then
-		if [ -z "$displayManager" ] 
-		then
-			for dm in $dmList
-			do
-				if [ -x /etc/init.d/$dm ]
-				then
-					/etc/init.d/$dm $2 && success='true'
-					break
-				fi
-			done
-		else
-			# question: why is this in some cases not working? No init 5 is happening
-			if [ -x /etc/init.d/$displayManager ]
+	
+	case $1 in
+		full)
+			if [ -z "$displayManager" ] 
 			then
-				/etc/init.d/$displayManager $2 && success='true'
+				for dm in $dmList
+				do
+					if [ -x /etc/init.d/$dm ]
+					then
+						/etc/init.d/$dm $2 && success='true'
+						break
+					fi
+				done
+			else
+				# question: why is this in some cases not working? No init 5 is happening
+				if [ -x /etc/init.d/$displayManager ]
+				then
+					/etc/init.d/$displayManager $2 && success='true'
+				fi
+				# success='true'
 			fi
-			# success='true'
-		fi
-	elif [ "$1" == 'nowmstart' ]
-	then
-		success='true'
-	elif [ "$1" == 'killroot' ]
-	then
-		if [ -n "$LOGIN_PID" ]
-		then
-			kill $LOGIN_PID && exit 0
-		else
-			echo "${E}No login Pid found to kill, exiting script.${N}"
-			exit 0
-		fi
-	fi
+			;;
+		nowmstart)
+			success='true'
+			;;
+		killroot)
+			if [ -n "$LOGIN_PID" ]
+			then
+				kill $LOGIN_PID && exit 0
+			else
+				echo "${E}No login Pid found to kill, exiting script.${N}"
+				exit 0
+			fi
+			;;
+	esac
+	
 	if [ "$success" == 'true' ]
 	then
 		if [ -n "$LOGIN_PID" ]
