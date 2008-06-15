@@ -365,6 +365,7 @@ update_to_new_sources()
 	local sourceFile=''
 	local sourcesData=''
 	local whichUpdate=''
+	local doUpdate=''
 	
 	case $1 in
 		sidux)
@@ -389,11 +390,11 @@ update_to_new_sources()
 	# won't update the stuff
 	if [ "$?" -eq 0 ]
 	then
-		UPDATED=''
-		update_completion_handler 'true' $whichUpdate
+		doUpdate='true'
 	else
-		update_completion_handler 'false' $whichUpdate
+		doUpdate='false'
 	fi
+	update_completion_handler "$doUpdate" $whichUpdate
 
 	# we need to set the SIDUX_SOURCES global now to make sure it's correct
 	set_distro_data
@@ -406,6 +407,7 @@ update_completion_handler()
 	
 	if [ "$doUpdate" == 'true' ]
 	then
+		UPDATED=''
 		apt_update_handler 'sidux-conversion'
 	else
 		echo "$SPACER${M}You already appear to have $whichUpdate sources installed, continuing...${N}"
