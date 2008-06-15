@@ -410,7 +410,7 @@ update_completion_handler()
 		UPDATED=''
 		apt_update_handler 'sidux-conversion'
 	else
-		echo "$SPACER${M}You already appear to have $whichUpdate sources installed, continuing...${N}"
+		echo "$SPACER${M}You already appear to have ${C}$whichUpdate${M} sources installed, continuing...${N}"
 	fi
 }
 
