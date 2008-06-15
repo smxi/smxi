@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.12.0
+####  version: 1.12.1
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -257,7 +257,7 @@ apt_error_handling()
 			pText='install -f'
 			distUpgrade='true'
 			;;
-		up-du-1|up-du-key1|up-du-key2|up-err-1|up-mirror-1|up-kernel-1|up-package-1|up-app|up-kern-tools|sidux-conversion)
+		up-du-1|up-du-key1|up-du-key2|up-err-1|up-mirror-1|up-kernel-1|up-package-1|up-app|up-kern-tools|distro-conversion)
 			pText='apt-get update'
 			aptUpdate='true'
 			;;
@@ -636,8 +636,8 @@ apt_update_handler()
 			aehv='up-err-1'
 			forceUpdate='true'
 			;;
-		sidux-conversion)
-			aehv='sidux-conversion'
+		distro-conversion)
+			aehv='distro-conversion'
 			forceUpdate='true'
 			;;
 		update-apps)

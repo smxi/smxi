@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 3.0.7
+####  version: 3.0.8
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -408,7 +408,7 @@ update_completion_handler()
 	if [ "$doUpdate" == 'true' ]
 	then
 		UPDATED=''
-		apt_update_handler 'sidux-conversion'
+		apt_update_handler 'distro-conversion'
 	else
 		echo "$SPACER${M}You already appear to have ${C}$whichUpdate${M} sources installed, continuing...${N}"
 	fi
