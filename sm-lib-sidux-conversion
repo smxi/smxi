@@ -66,8 +66,8 @@ check_debian()
 		antix)
 			echo "${C}2${S} - ${C}antix-sid${S} Adds sid sources to your apt repos, otherwise no change."
 			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-			echo "${C}3${S} - ${C}antix-sid-sidux${S} Adds sid sources, sidux sources, no conversion."
-			echo "${C}4${S} - ${C}antix-sidux-conversion${S} Adds sid sources, sidux sources, runs conversion."
+			echo "${C}3${S} - ${C}antix-sid-sidux${S} Adds sid sources and sidux sources, no conversion."
+			echo "${C}4${S} - ${C}antix-sidux-conversion${S} Adds sid sources and sidux sources, runs conversion."
 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
 			;;
 	esac
@@ -87,30 +87,30 @@ check_debian()
 				;;
 			antix-sid)
 				update_smxi_data
-				check_antix_sid_sources
+				update_to_new_sources 'antix'
 				;;
 			antix-sid-sidux)
 				update_smxi_data
-				check_antix_sid_sources
-				update_to_sidux_sources
+				update_to_new_sources 'antix'
+				update_to_new_sources 'sidux'
 				set_default_system_kernel 'conversion'
 				;;
 			antix-sidux-conversion)
 				update_smxi_data
-				check_antix_sid_sources
-				update_to_sidux_sources
+				update_to_new_sources 'antix'
+				update_to_new_sources 'sidux'
 				set_default_system_kernel 'conversion'
 				print_conversion_information
 				CON_DEB='true'
 				;;
 			sidux-sources)
 				update_smxi_data
-				update_to_sidux_sources
+				update_to_new_sources 'sidux'
 				set_default_system_kernel 'conversion'
 				;;
 			sidux-conversion)
 				update_smxi_data
-				update_to_sidux_sources
+				update_to_new_sources 'sidux'
 				set_default_system_kernel 'conversion'
 				print_conversion_information
 				CON_DEB='true'
