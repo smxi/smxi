@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.7
+####  version: 1.15.8
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -850,26 +850,22 @@ set_default_system_kernel()
 {
 	local smPref='distro-kernel'
 	local altKernelSet=$( sm_pref_tester $smPref 'equal' )
-	local typeData='' altKernelSetting='' opt='' options='no-kernel'
+	local typeData='' altKernelSetting='' opt='' options=''
 	local defaultCount=0 contCount='' repeat='' debianKernel='debian'
 	local continueText='return to main menu' continueText2='returning to main menu'
 	local startNu='1-'
 	
-	if [ -f $ATX ]
+	if [ "$USE_DEBIAN_KERNEL" != 'true' ]
 	then
 		debianKernel=''
 	fi
+	options="no-kernel $debianKernel"
 	
 	if [ -n "$altKernelSet"  ]
 	then
 		altKernelSetting=$altKernelSet
 	else
 		altKernelSetting='Currently Unset'
-	fi
-	
-	if [ "$DEFAULT_KERNEL" != 'no-kernel' -o ! -f $ATX ]
-	then
-		options="$options $debianKernel"
 	fi
 	
 	if [ -n "$SIDUX_SOURCES" ]
