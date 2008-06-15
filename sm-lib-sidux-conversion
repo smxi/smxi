@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 3.0.3
+####  version: 3.0.4
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -93,12 +93,14 @@ check_debian()
 				update_smxi_data
 				update_to_new_sources 'antix'
 				update_to_new_sources 'sidux'
+				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				;;
 			antix-sidux-conversion)
 				update_smxi_data
 				update_to_new_sources 'antix'
 				update_to_new_sources 'sidux'
+				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				print_conversion_information
 				CON_DEB='true'
@@ -106,11 +108,13 @@ check_debian()
 			sidux-sources)
 				update_smxi_data
 				update_to_new_sources 'sidux'
+				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				;;
 			sidux-conversion)
 				update_smxi_data
 				update_to_new_sources 'sidux'
+				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				print_conversion_information
 				CON_DEB='true'
