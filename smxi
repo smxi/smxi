@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.5
+####  version: 7.34.7
 ####  Date: June 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -218,6 +218,7 @@ INTEL=''
 # script library files:
 LIB_APT_TOOLS='sm-lib-apt-tools'
 LIB_CLEAN_UP='sm-lib-clean-up'
+LIB_DISTRO_CONVERSION='sm-lib-sidux-conversion'
 LIB_GRAPHICS='sm-lib-graphics'
 LIB_KERNEL='sm-lib-kernel'
 LIB_KERNEL_INSTALL='sm-lib-kernel-install'
@@ -225,7 +226,6 @@ LIB_KERNEL_INSTALL='sm-lib-kernel-install'
 LIB_MISC_TWEAKS='sm-lib-misc-tweaks'
 LIB_PACKAGE_INSTALL='sm-lib-package-install'
 LIB_PACKAGE_REMOVAL='sm-lib-package-removal'
-LIB_SIDUX_CONVERSION='sm-lib-sidux-conversion'
 LIB_WARNING='sm-lib-warning'
 LIB_2006_FIXES='sm-lib-2006-fixes'
 LIB_2007_FIXES='sm-lib-2007-fixes'
@@ -580,6 +580,13 @@ run_script_import()
 				SET_CLEAN_UP='true'
 			fi
 			;;
+		$LIB_DISTRO_CONVERSION)
+			if [ "$SET_SIDUX_CONV" != 'true' ]
+			then
+				loadIt='true'
+				SET_SIDUX_CONV='true'
+			fi
+			;;
 		$LIB_GRAPHICS)
 			if [ "$SET_GRAPHICS" != 'true' ]
 			then
@@ -624,13 +631,6 @@ run_script_import()
 			then
 				loadIt='true'
 				SET_PACKAGE_REMOVAL='true'
-			fi
-			;;
-		$LIB_SIDUX_CONVERSION)
-			if [ "$SET_SIDUX_CONV" != 'true' ]
-			then
-				loadIt='true'
-				SET_SIDUX_CONV='true'
 			fi
 			;;
 		$LIB_WARNING)
@@ -1801,7 +1801,7 @@ check_distro_version()
 	# non supported tests have already been run in  start_up_tests
 	elif [ ! -f $SID -a -e $DEB ]
 	then
-		run_script_import $LIB_SIDUX_CONVERSION
+		run_script_import $LIB_DISTRO_CONVERSION
 		check_debian
 	fi
 }
@@ -2099,6 +2099,10 @@ print_lib_info()
 			scriptText='CLEAN UP OPTIONS'
 			printIt='true'
 			;;
+		$LIB_DISTRO_CONVERSION)
+			scriptText="SMXI DISTRO OPTIONS"
+			printIt='true'
+			;;
 		$LIB_GRAPHICS)
 			scriptText='GRAPHICS QUESTION'
 			printIt='true'
@@ -2127,10 +2131,6 @@ print_lib_info()
 # 			scriptText='TEST GFX INSTALLER'
 # 			printIt='true'
 # 			;;
-		$LIB_SIDUX_CONVERSION)
-			scriptText="SMXI DISTRO OPTIONS"
-			printIt='true'
-			;;
 # 		$LIB_WARNING)
 # 			scriptText='WARNING SECTION'
 # 			printIt='true'
@@ -2623,7 +2623,7 @@ post_du_tasks()
 		# this is all just debian conversion stuff
 		if [ "$CON_DEB" == 'true' ]
 		then
-			run_script_import $LIB_SIDUX_CONVERSION
+			run_script_import $LIB_DISTRO_CONVERSION
 			install_window_manager
 			install_sidux_components # test to make sure all sidux stuff is installed
 			sidux_graphics grub1

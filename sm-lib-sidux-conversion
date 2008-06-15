@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 3.0.8
+####  version: 3.0.9
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -45,7 +45,7 @@ check_debian()
 	options="continue-no-change $conversionOptions quit"
 	quitNu=$( wc -w <<< $options )
 	
-	print_lib_info $LIB_SIDUX_CONVERSION
+	print_lib_info $LIB_DISTRO_CONVERSION
 	echo $MBAR
 	echo "${M}You appear to be using Debian or a Debian derived distro."
 	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
