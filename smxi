@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.3
+####  version: 7.34.4
 ####  Date: June 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1032,7 +1032,7 @@ set_distro_data()
 	then
 		MEPIS_SOURCES='true'
 		DEFAULT_KERNEL='mepis'
-	elif [ -f $ANX ]
+	elif [ -f $ATX ]
 	then
 		DEFAULT_KERNEL='no-kernel'
 		USE_DEBIAN_KERNEL='false'

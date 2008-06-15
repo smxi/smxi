@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-sidux-conversion
-####  version: 3.0.4
+####  version: 3.0.5
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -36,7 +36,7 @@ check_debian()
 		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."
 		optionSet='stable'
 	fi
-	if [ -f $ANX ]
+	if [ -f $ATX ]
 	then
 		conversionOptions='antix-sid antix-sid-sidux antix-sidux-conversion'
 		altText1="${M}Here are your options for your Anti-X system:"
