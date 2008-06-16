@@ -379,7 +379,7 @@ update_to_new_sources()
 			grepSearch='sidux.*[[:space:]](sid|unstable)'
 			searchIdentifier='sidux'
 			sourceFile='sidux.list'
-			sourcesData='deb http://sidux.com/debian/ sid main fix.main\n#deb-src http://sidux.com/debian/ sid main fix.main'
+			sourcesData='deb http://sidux.com/debian/ sid main contrib non-free fix.main fix.contrib fix.non-free\n#deb-src http://sidux.com/debian/ sid main fix.main'
 			whichUpdate='sidux'
 			;;
 		debian-sid)
