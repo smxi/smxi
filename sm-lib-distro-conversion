@@ -412,6 +412,7 @@ tweak_antix_sources()
 	
 	if [ -n "$fixDM" ]
 	then
+		echo "${S}Removing uncommented unstable source...${N}"
 		sed -i -r 's%^##.*(deb[[:space:]].*ian-mult.*unstable.*)%\1%g' $EAS
 	fi
 }
