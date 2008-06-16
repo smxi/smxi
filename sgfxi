@@ -707,7 +707,7 @@ print_information()
 	fi
 	if [ -n "$cardRam" ]
 	then
-		echo "   ${B}ram:    ${C}$cardRam MegaBytes"
+		echo "   ${B}ram:    ${C}$cardRam MegaBytes ${B}(note: for built in graphics, this number is not accurate)"
 	fi
 	echo ${M}$LINE${N}
 }
