@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.7
-####  Date: June 15 2008
+####  version: 1.3.8
+####  Date: June 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -70,9 +70,9 @@ libavutil_fix_1()
 	
 	if [ "$smPref" -eq 0 ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
 	then
-		#package_remover 'gstreamer0.10-ffmpeg'
-		#package_installer 'install-missing' 'gstreamer0.10-ffmpeg-full'
+		echo $LINE
 		package_installer 'libavutil49 libavcodec51' 'install-always' '-d'
+		echo "${S}Forcing overwrite of broken packages...${N}"
 		dpkg -i --force-overwrite /var/cache/apt/archives/libavutil49*.deb
 		dpkg -i --force-overwrite /var/cache/apt/archives/libavcodec51*.deb
 		set_sticky_prefs $prefId 
