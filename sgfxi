@@ -233,7 +233,7 @@ error_handler()
 	case $errorCode in
 		# general system checks
 		254) 
-			errorData="No $CARD card found!"
+			errorData="No supported $CARD card found!"
 			;;
 		253) 
 			errorData="No supported $CARD card found!\nYou can use this script to install the native Xorg drivers: $SCRIPT_NAME -n"
