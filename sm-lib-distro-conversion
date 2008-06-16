@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.0.15
-####  Date: June 15 2008
+####  version: 3.0.16
+####  Date: June 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -82,6 +82,7 @@ check_debian()
 	do
 		case $opt in
 			continue-no-change)
+				tweak_antix_vb_source # only runs if detected so fine for general use
 				update_smxi_data
 				echo "${S}Ok, you can use ${C}$SCRIPT_NAME${S} with no changes to your system, proceed.${N}"
 				;;
@@ -406,11 +407,21 @@ update_to_new_sources()
 	set_distro_data
 }
 
+tweak_antix_vb_source()
+{
+	local fixVB=$( egrep '^deb[[:space:]].*virtualbox.*' $EAS )
+	
+	if [ -n "$fixVB" ]
+	then
+		echo "${S}Commenting out broken virtualbox repo ...${N}"
+		sed -i -r 's%^(deb[[:space:]].*virtualbox.*)%##\1%g' $EAS
+	fi
+}
+
 tweak_antix_sources()
 {
 	local fixDM=$( egrep '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
 	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
-	local fixVB=$( egrep '^deb[[:space:]].*virtualbox.*' $EAS )
 	local doUpdate=''
 	
 	if [ -n "$fixDM" ]
@@ -425,11 +436,7 @@ tweak_antix_sources()
 		sed -i -r 's%^#.*(deb[[:space:]].*debian\.org.*unstable.*)%\1%g' $EAS
 		doUpdate='true'
 	fi
-	if [ -n "$fixVB" ]
-	then
-		echo "${S}Commenting out broken virtualbox repo ...${N}"
-		sed -i -r 's%^(deb[[:space:]].*virtualbox.*)%##\1%g' $EAS
-	fi
+	tweak_antix_vb_source
 	
 	update_completion_handler "$doUpdate" 'anti-X unstable'
 }
