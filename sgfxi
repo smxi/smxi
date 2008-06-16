@@ -696,7 +696,7 @@ print_information()
 	echo " ${M}$SCRIPT_NAME${B} :: version: ${C}$scriptVersion${B} :: last updated: ${C}$scriptDate"
 	echo ${M}$LINE
 	echo " ${B}graphics card: ${C}$cardInfo"
-	if [ -n "$cardRam" ]
+	if [ -n "$cardRam" -o "$TESTING" == 'true' ]
 	then
 		echo " ${B}graphics ram:  ${C}$cardRam"
 	fi
