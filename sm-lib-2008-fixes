@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.2
-####  Date: June 8 2008
+####  version: 1.3.3
+####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -44,6 +44,7 @@ run_2008_fixes()
 			amsn_fix_1
 			console_tools_kbd_fix_1
 			b43_fwcutter_fix_1
+			libavutil_fix_1
 		fi
 		if [ "$DISTRO_LEVEL" -lt 12 ]
 		then
@@ -59,6 +60,22 @@ run_2008_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+libavutil_fix_1()
+{
+	local prefId='libavutil-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'libavutilcvs49'  )
+	local isInstalled2=$( package_tester 'libavcodeccvs51'  )
+	local isInstalled3=$( package_tester 'gstreamer0.10-ffmpeg' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled3" ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
+	then
+		package_remover 'gstreamer0.10-ffmpeg'
+		package_installer 'install-missing' 'gstreamer0.10-ffmpeg-full'
+		set_sticky_prefs $prefId 
+	fi
+}
 b43_fwcutter_fix_1()
 {
 	local prefId='b43-fwcutter-fix-1'
