@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.5
+####  version: 1.3.6
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -72,7 +72,7 @@ libavutil_fix_1()
 	then
 		#package_remover 'gstreamer0.10-ffmpeg'
 		#package_installer 'install-missing' 'gstreamer0.10-ffmpeg-full'
-		package_installer 'install-always' 'libavutilcvs49 libavcodeccvs51' '-d'
+		package_installer 'libavutilcvs49 libavcodeccvs51' 'install-always' '-d'
 		dpkg -i --force-overwrite /var/cache/apt/archives/libavutil49*.deb
 		dpkg -i --force-overwrite /var/cache/apt/archives/libavcodec51*.deb
 		set_sticky_prefs $prefId 
