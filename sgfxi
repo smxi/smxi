@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.14
+####  version: 3.1.15
 ####  Date: June 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -690,13 +690,15 @@ print_information()
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
 	#local cardInfo=$( lspci | gawk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\sTechnologies\sInc\s|nVidia\sCorporation\s)(.*)%\2%'  )
 	local cardInfo=$( lspci | awk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\s|nVidia\s|Intel\s)(Technologies\sInc\s|Corporation\s|Unknown\sdevice){1,2}(.*)%\1\3%g' )
-	local cardRam=$( lspci -v -s $BUS_ID | egrep '.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]' | sed -r 's/.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]/\1/' )
+	# we need the real busid, not the xorg one
+	busId=$( lspci -n | grep $CARD_DATA | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' )
+	local cardRam=$( lspci -v -s $busId | egrep '.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]' | sed -r 's/.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]/\1/' )
 	
 	echo ${M}$LINE
 	echo " ${M}$SCRIPT_NAME${B} :: version: ${C}$scriptVersion${B} :: last updated: ${C}$scriptDate"
 	echo ${M}$LINE
 	echo " ${B}graphics card: ${C}$cardInfo"
-	if [ -n "$cardRam" -o "$TESTING" == 'true' ]
+	if [ -n "$cardRam" ]
 	then
 		echo " ${B}graphics ram:  ${C}$cardRam"
 	fi
