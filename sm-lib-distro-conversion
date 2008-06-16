@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.0.11
+####  version: 3.0.12
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -87,11 +87,13 @@ check_debian()
 				;;
 			antix-sid)
 				update_smxi_data
+				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
 				antix_fix_1
 				;;
 			antix-sid-sidux)
 				update_smxi_data
+				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
 				update_to_new_sources 'sidux'
 				run_script_import $LIB_MISC_TWEAKS
@@ -100,6 +102,7 @@ check_debian()
 				;;
 			antix-sidux-conversion)
 				update_smxi_data
+				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
 				update_to_new_sources 'sidux'
 				run_script_import $LIB_MISC_TWEAKS
@@ -401,6 +404,16 @@ update_to_new_sources()
 
 	# we need to set the SIDUX_SOURCES global now to make sure it's correct
 	set_distro_data
+}
+
+tweak_antix_sources()
+{
+	local fixDM=$( egrep '^##deb[[:space:]].*ian-mult.*unstable.*' $EAS )
+	
+	if [ -n "$fixDM" ]
+	then
+		sed -i -r 's%^##.*(deb[[:space:]].*ian-mult.*unstable.*)%\1%g' $EAS
+	fi
 }
 
 # args: $1 - doUpdate; $2 - which update
