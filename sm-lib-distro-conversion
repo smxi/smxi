@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.0.12
+####  version: 3.0.13
 ####  Date: June 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -408,12 +408,18 @@ update_to_new_sources()
 
 tweak_antix_sources()
 {
-	local fixDM=$( egrep '^##deb[[:space:]].*ian-mult.*unstable.*' $EAS )
+	local fixDM=$( egrep '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
+	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
 	
 	if [ -n "$fixDM" ]
 	then
 		echo "${S}Removing uncommented unstable source...${N}"
-		sed -i -r 's%^##.*(deb[[:space:]].*ian-mult.*unstable.*)%\1%g' $EAS
+		sed -i -r 's%^#.*(deb[[:space:]].*ian-mult.*unstable.*)%\1%g' $EAS
+	fi
+	if [ -n "$fixDS" ]
+	then
+		echo "${S}Removing uncommented Debian unstable source...${N}"
+		sed -i -r 's%^#.*(deb[[:space:]].*debian\.org.*unstable.*)%\1%g' $EAS
 	fi
 }
 
