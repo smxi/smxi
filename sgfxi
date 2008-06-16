@@ -700,7 +700,7 @@ print_information()
 	echo " ${B}graphics card: ${C}$cardInfo"
 	if [ -n "$cardRam" ]
 	then
-		echo " ${B}graphics ram:  ${C}$cardRam"
+		echo " ${B}graphics ram:  ${C}$cardRam MegaBytes"
 	fi
 	echo ${M}$LINE${N}
 }
