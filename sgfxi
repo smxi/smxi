@@ -693,7 +693,7 @@ print_information()
 	# we need the real busid, not the xorg one
 	busId=$( lspci -n | grep $CARD_DATA | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' )
 	local cardRam=$( lspci -v -s $busId | egrep '.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]' | sed -r 's/.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]/\1/' )
-	local cardVendor=$( lspci -v -s $busId | egrep '.*Subsystem:[[:space:]]*(.*)' | sed -r 's/.*Subsystem:[[:space:]]*(.*)/\1/' )
+	local cardVendor=$( lspci -v -s $busId | egrep '.*Subsystem:[[:space:]]*(.*)' | sed -r 's/.*Subsystem:[[:space:]]*(.*)(unknown.*|Unknown.*|Device.*|device.*)+/\1/' )
 	
 	echo ${M}$LINE
 	echo " ${M}$SCRIPT_NAME${B} :: version: ${C}$scriptVersion${B} :: last updated: ${C}$scriptDate"
