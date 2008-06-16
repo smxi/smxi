@@ -410,17 +410,22 @@ tweak_antix_sources()
 {
 	local fixDM=$( egrep '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
 	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
+	local doUpdate=''
 	
 	if [ -n "$fixDM" ]
 	then
 		echo "${S}Removing uncommented unstable source...${N}"
 		sed -i -r 's%^#.*(deb[[:space:]].*ian-mult.*unstable.*)%\1%g' $EAS
+		doUpdate='true'
 	fi
 	if [ -n "$fixDS" ]
 	then
 		echo "${S}Removing uncommented Debian unstable source...${N}"
 		sed -i -r 's%^#.*(deb[[:space:]].*debian\.org.*unstable.*)%\1%g' $EAS
+		doUpdate='true'
 	fi
+	
+	update_completion_handler "$doUpdate" 'anti-X unstable'
 }
 
 # args: $1 - doUpdate; $2 - which update
