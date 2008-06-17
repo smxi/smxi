@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.20
+####  version: 3.1.21
 ####  Date: June 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2404,9 +2404,10 @@ create_driver_entry()
 {
 	# since this is set in the above function, it must exist, but I'll check to make sure
 	local deviceLineNu=$( egrep -in 'Section[[:space:]]*"Device"' $EXXC | cut -d ':' -f 1 )
-	# echo deviceLineNu: $deviceLineNu
 	
-	if [ -n "$deviceLineNu" ]
+	# echo deviceLineNu: $deviceLineNu
+	# make sure it's numeric, and that only one device section number was returned (space)
+	if [ -n "$( egrep '^[0-9]+$' <<< $deviceLineNu )" ]
 	then
 		# this is a trick to only grep within a block delimited by start/EndSection
 		local isDriver=$( sed -n ''$deviceLineNu',/EndSection/ p' $EXXC | egrep 'Driver[[:space:]]*".*"' )
