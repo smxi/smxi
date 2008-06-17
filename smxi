@@ -25,9 +25,9 @@
 ########################################################################
 ####  FEATURES:
 ####  This script installs all the stuff you need to upgrade, and has all the current fixes.
-####  Updates any sidux from 2005-4 and on to latest sid packages,
+####  Updates any Debian Sid/sidux or Debian Testing to latest system,
 ####  including many fixes etc to help ease the bumps of upgrades.
-####  Includes full support for 32/64 bit sidux
+####  Includes full support for 32/64 bit sidux, Debian Sid, Testing, and Stable
 ####  including kernel installs etc. Script Updates itself automatically when
 ####  you run it, and remembers some selections so you don't see them over and over.
 ########################################################################
