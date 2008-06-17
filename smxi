@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.8
-####  Date: June 15 2008
+####  version: 7.34.9
+####  Date: June 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1292,22 +1292,12 @@ set_sticky_prefs()
 
 sort_sticky_prefs()
 {
-	local tempFile='' i='' holder=''
+	local tempFile='/etc/ljsdflsjf5848sljf4'
 	
-	# sort the file afterwards, then create a clean config file
-	tempFile=$( sort -f -b $SM_CONFIG_FILE )
-	rm -f $SM_CONFIG_FILE
-	touch $SM_CONFIG_FILE
-	# using a loop here gets rid of blank lines automatically
-	for i in $tempFile
-	do
-		# check for duplicates
-		if [ "$holder" != "$i" ]
-		then
-			echo $i >> $SM_CONFIG_FILE
-		fi
-		holder=$i
-	done
+	# sort the file, test/clean for unique entries, then mv to smxi.conf
+	# note; you cannot write the file to itself in a one liner, it becomes null
+	sort -f -b $SM_CONFIG_FILE | uniq > $tempFile
+	mv -f $tempFile $SM_CONFIG_FILE
 }
 
 # args: $1 - pref name; $2 - pref value, eg: <name>=<value>

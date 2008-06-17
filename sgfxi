@@ -2395,6 +2395,12 @@ create_section_device()
 	fi
 }
 
+create_driver_entry()
+{
+	local isDevice=$( egrep -i 'Section[[:space:]]*"Device"' $EXXC
+	local isDriver=$( egrep -i 'Driver[[:space:]]*".*"' $EXXC
+}
+
 # this will handle cases where user is changing from one card to another
 update_xorgconf_driver_version()
 {
