@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.17
-####  Date: June 16 2008
+####  version: 3.1.18
+####  Date: June 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -2388,17 +2388,50 @@ create_section_device()
 		echo -e 'Section "Device"' >> $EXXC
 		echo -e '\tIdentifier "Card0"' >> $EXXC
 		# the vesa is a just a failsafe, the actual driver will be set in driver version
-		echo -e '\tDriver "vesa"' >> $EXXC
-		echo -e '\tBusID "PCI:'$BUS_ID'"' >> $EXXC
+# 		echo -e '\tDriver "vesa"' >> $EXXC
+# 		echo -e '\tBusID "PCI:'$BUS_ID'"' >> $EXXC
 		echo 'EndSection' >> $EXXC
 		echo  >> $EXXC
 	fi
+	# now fill it if needed
+	create_driver_entry
 }
 
+# some rough code, will write driver / pciid if required,this is mainly for systems
+# that are using the new xorg, and may not have a driver/busid entry.
+# if all goes well, will only create a driver / busid entry if missing
 create_driver_entry()
 {
-	local isDevice=$( egrep -i 'Section[[:space:]]*"Device"' $EXXC
-	local isDriver=$( egrep -i 'Driver[[:space:]]*".*"' $EXXC
+	# since this is set in the above function, it must exist, but I'll check to make sure
+	local deviceLineNu=$( egrep -in 'Section[[:space:]]*"Device"' $EXXC | cut -d ':' -f 1 )
+	# echo deviceLineNu: $deviceLineNu
+	
+	if [ -n "$deviceLineNu" ]
+	then
+		# this is a trick to only grep within a block delimited by start/EndSection
+		local isDriver=$( sed -n ''$deviceLineNu',/EndSection/ p' $EXXC | egrep 'Driver[[:space:]]*".*"' )
+		local isBusId=$( sed -n ''$deviceLineNu',/EndSection/ p' $EXXC | egrep 'BusID[[:space:]]*".*"' )
+
+		# echo isBusId: $isBusId
+		# echo isDriver: $isDriver
+		
+		# the vesa is a just a failsafe, the actual driver will be set in driver version
+		# this logic is complicated but seems to work, check the range in section device
+		# line number to EndSection, then update the driver and busid if needed, as per
+		# tests above already done
+		# I'm not sure why -r didn't work, but it didn't in this case.
+		if [ -z "$isDriver" ]
+		then
+			sed -i ''${deviceLineNu}',/EndSection/ s/Section[[:space:]]*"Device"/Section "Device"\
+\tDriver "vesa"/' $EXXC
+		fi
+		# only adding busid if driver is missing, otherwise mistakes will happen
+		if [ -z "$isBusId" ]
+		then
+			sed -i ''${deviceLineNu}',/EndSection/ s/Driver[[:space:]]"vesa"/Driver "vesa"\
+\tBusID "PCI:'${BUS_ID}'"/' $EXXC
+		fi
+	fi
 }
 
 # this will handle cases where user is changing from one card to another
