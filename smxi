@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.11
+####  version: 7.34.12
 ####  Date: June 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2545,14 +2545,7 @@ install_dist_upgrade()
 				repeat='true' # reset so no log if no error
 				;;
 			check-services)
-				local rcconfCheck=$( package_tester 'rcconf' )
-	
-				if [ -z "$rcconfCheck" ]
-				then
-					package_installer 'rcconf' 'install-missing'
-				fi
-				echo "${S}Starting ${C}rcconf${S} now...${N}"
-				rcconf
+				check_install_run_package 'rcconf' 'run'
 				repeat='true' 
 				;;
 			continue)
