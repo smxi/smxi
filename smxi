@@ -1436,7 +1436,7 @@ start_stop_default_dm()
 			;;
 	esac
 	# only kill on dm start 
-	if [ "$success" == 'true' -a "$2" != 'stop' ]
+	if [ "$success" == 'true' -a "$2" == 'start' ]
 	then
 		if [ -n "$LOGIN_PID" ]
 		then
