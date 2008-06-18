@@ -67,7 +67,7 @@ START_OPTIONS=''
 TESTING='' # for dev
 TRIPLE_BUFFER=''
 TWINVIEW=''
-USE_DEBIAN_SID=''
+USE_DEBIAN_DRIVER=''
 # triggers above automatically if required
 SID_FLAG=''
 
@@ -125,8 +125,8 @@ NV_TESTING=''
 NV_OTHERS='173.14.05:173.08:171.06:100.14.23:100.14.19'
 
 # debian sid legacies:
-NV_DEB_SID_LEGACY_1='71xx'
-NV_DEB_SID_LEGACY_2='96xx'
+NV_DEBIAN_LEGACY_1='71xx'
+NV_DEBIAN_LEGACY_2='96xx'
 
 # other options: nothing now
 # IMPORTANT: on function set_download_info the actual path file name is set:
@@ -622,7 +622,7 @@ detect_card_version()
 					# if [ "$SID_FLAG" == 'true' -a "$TESTING" != 'true' ]
 					if [ "$SID_FLAG" == 'true' ]
 					then
-						USE_DEBIAN_SID='true' 
+						USE_DEBIAN_DRIVER='true' 
 					fi
 					;;
 			esac
@@ -1391,7 +1391,7 @@ set_version()
 	if [ "$PRINT_VER" == 'true' ]
 	then
 		# echo the basic list:
-		if [ "$USE_DEBIAN_SID" != 'true' ]
+		if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 		then
 			echo $DRIVER_DEFAULT':'$VERSIONS
 		else
@@ -1405,7 +1405,7 @@ set_version()
 		DRIVER_DEFAULT=$DRIVER_OVERRIDE
 	fi
 	# error_handler 246 $DRIVER_DEFAULT # for unsupported cards
-	if [ "$USE_DEBIAN_SID" != 'true' ]
+	if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 	then
 		check_supported_driver last-check
 	else
@@ -1810,7 +1810,7 @@ apply_module_patch()
 	local bccx=$( grep -i 'CONFIG_XEN=y' /boot/config-$KERNEL_VERSION )
 	
 	# the debian sid nvidia drivers are now working fine with xen enabled sid kernels
-	if [ "$USE_DEBIAN_SID" != 'true' ] && [ -d "$lmkv" -a -n "$bccx" ]
+	if [ "$USE_DEBIAN_DRIVER" != 'true' ] && [ -d "$lmkv" -a -n "$bccx" ]
 	then
 		# patch source: http://blog.creonfx.com/linux/how-to-install-nvidia-driver-on-2625-2-debian-kernel-with-xen
 		cd $lmkv
@@ -1941,12 +1941,12 @@ install_debian_drivers()
 				# nvidiaGlx='nvidia-glx-legacy'
 				# nvidiaSource='nvidia-kernel-legacy-source'
 				# if the two lines below don't work, comment them and uncomment the ones above
-				nvidiaGlx="nvidia-glx-legacy-$NV_DEB_SID_LEGACY_1"
-				nvidiaSource="nvidia-kernel-legacy-$NV_DEB_SID_LEGACY_1-source"
+				nvidiaGlx="nvidia-glx-legacy-$NV_DEBIAN_LEGACY_1"
+				nvidiaSource="nvidia-kernel-legacy-$NV_DEBIAN_LEGACY_1-source"
 			elif [ "$IS_LEGACY_2" == 'true' ]
 			then
-				nvidiaGlx="nvidia-glx-legacy-$NV_DEB_SID_LEGACY_2"
-				nvidiaSource="nvidia-kernel-legacy-$NV_DEB_SID_LEGACY_2-source"
+				nvidiaGlx="nvidia-glx-legacy-$NV_DEBIAN_LEGACY_2"
+				nvidiaSource="nvidia-kernel-legacy-$NV_DEBIAN_LEGACY_2-source"
 			else
 				nvidiaGlx='nvidia-glx'
 				nvidiaSource='nvidia-kernel-source'
@@ -2871,9 +2871,9 @@ do
 			;;
 		R) SKIP_RESTART='true'
 			;;
-		s)	USE_DEBIAN_SID='true'
+		s)	USE_DEBIAN_DRIVER='true'
 			START_OPTIONS=$START_OPTIONS's'
-			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -s - Install debian sid driver. (ATI fglrx or nVidia)\n"
+			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -s - Install Debian driver. (ATI fglrx or nVidia)\n"
 			;;
 		S) SKIP_AUTOSTART='true'
 			START_OPTIONS=$START_OPTIONS'S'
@@ -2985,7 +2985,7 @@ then
 	install_native_driver
 fi
 ### ready to set the data for version/system info
-if [ "$USE_DEBIAN_SID" != 'true' ]
+if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 then
 	check_supported_driver # make sure user entered data is correct
 	set_cpu_data
@@ -2993,7 +2993,7 @@ fi
 # needs to be out to give print version
 set_version
 
-if [ "$USE_DEBIAN_SID" != 'true' ]
+if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 then
 	set_download_info # also triggers the download / extract function
 	# must be after set_version for output of data to smxi
@@ -3009,7 +3009,7 @@ preinstall_cleanup
 
 ### this is going to run either the fglrx or nvidia patch library file function
 ### both have same function name, so no detection is required, we did it already
-if [ "$USE_DEBIAN_SID" != 'true' ]
+if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 then
 	# note this must occur before binary driver install
 	run_patches
