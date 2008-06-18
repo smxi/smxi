@@ -1395,6 +1395,8 @@ set_version()
 		then
 			echo $DRIVER_DEFAULT':'$VERSIONS
 		else
+			# note: because sometimes I'm turning off fglrx run install due to failure
+			# that leaves only debian fglrx to install
 			echo $DEBIAN_FGLRX
 		fi
 		exit 0
