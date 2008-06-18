@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.0.9
-####  Date: June 14 2008
+####  version: 2.0.10
+####  Date: June 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -74,8 +74,8 @@ install_graphics()
 	local NvTest1='' NvTest2='' NvTest3='' NvTest4=''
 	local NvDefaultMathTemp='' NvLatestMathTemp='' NvPreviousMathTemp=''
 	local NvOldestMathTemp='' 
-	local nvDebSidId='debian-sid-nvidia'
-	local nvDebianSidText="${C}debian-sid-fglrx${S} - Debian nVidia driver install.\n\t${S}The script will install this nvidia driver: ${C}$nvDebSidId${S}\n"
+	local nvDebId='debian-nvidia'
+	local nvDebianText="${C}debian-nvidia${S} - Debian nVidia driver install.\n\t${S}The script will install this nvidia driver: ${C}$nvDebId${S}\n"
 	#local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1\.[0-9]-[0-9]\{4\}|1[0-9]\{2\}\.[0-9]\{2\})' )
 	#local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1\.[0-9]-[0-9]\{4\}|1[0-9]\{2\}\.[0-9]\{2\})' )
 	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1[0-9]{2}\.[0-9]{2}\.?[0-9]{0,2}|1\.[0-9]-[0-9]{4})' )
@@ -85,8 +85,8 @@ install_graphics()
 	local FgDefaultMathTemp='' FgLatestMathTemp='' FgPreviousMathTemp='' FgOlderMathTemp=''
 	local FgTest1='' FgTest2='' FgTest3='' fgXorgError='' fgXorgText=''
 	local FgCurrentDriver=$( dmesg | grep -i 'fglrx' | grep -o -m 1 '8\.[0-9]\{2\}\.[0-9]\{1,2\}' )
-	local FgDebSidId='debian-sid-fglrx'
-	local FgDebianSidText="${C}debian-sid-fglrx${S} - Debian fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDebSidId${S}\n"
+	local FgDebId='debian-fglrx'
+	local FgDebianText="${C}debian-fglrx${S} - Debian fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDebId${S}\n"
 	
 	# intel stuff
 	local optIntel='' 
@@ -217,11 +217,11 @@ install_graphics()
 				OptNvLatest='new-nvidia-c newest-nvidia-c'
 				NvAdvancedText="${C}new-nvidia-c${S} - Newer series nVidia driver, with ${C}-c${S} option.\n\t${W}Only supports nVidia cards version 5200 or greater.\n\t${S}This will install this nVidia driver: ${C}$NvPrevious${S}\n${C}newest-nvidia-c${S} - ${M}Recommended for Newer cards${S} Newest nVidia driver, with ${C}-c${S} option.\n\t${W}Only supports nVidia cards version 5200 or greater.\n\t${S}This will install this nVidia driver: ${C}$NvLatest${S}\n"
 			fi
-			OptNv="$OptNv $nvDebSidId oldest-nvidia older-nvidia-c $OptNvLatest"
-			NvOptionText='echo -e "$nvDebianSidText${C}oldest-nvidia${S} - Use if you have problems with stable/ or newer nVidia install. Recommended for legacy nvidia cards.\n\t${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia-c${S} ${M}Recommended for midrange cards${S} nVidia driver installed with ${C}-c${S} option.\n\t${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText"'
+			OptNv="$OptNv $nvDebId oldest-nvidia older-nvidia-c $OptNvLatest"
+			NvOptionText='echo -e "$nvDebianText${C}oldest-nvidia${S} - Use if you have problems with stable/ or newer nVidia install. Recommended for legacy nvidia cards.\n\t${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia-c${S} ${M}Recommended for midrange cards${S} nVidia driver installed with ${C}-c${S} option.\n\t${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText"'
 		else
-			OptNv="$OptNv $nvDebSidId legacy-nvidia"
-			NvOptionText='echo -e "$nvDebianSidText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"'
+			OptNv="$OptNv $nvDebId legacy-nvidia"
+			NvOptionText='echo -e "$nvDebianText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"'
 		fi
 	fi
 	
@@ -233,7 +233,7 @@ install_graphics()
 			CurrentDriverText='echo -e "${M}Your currently Installed Fglrx/Ati Driver is: ${C}$FgCurrentDriver${S}\n"'
 		fi
 		
-		FgDebianSid=$( echo $sgfxiData | grep -o $FgDebSidId )
+		FgDebianSid=$( echo $sgfxiData | grep -o $FgDebId )
 		
 		if [ -z "$FgDebianSid" ]
 		then
@@ -265,13 +265,13 @@ install_graphics()
 
 		if [ -n "$FgDebianSid" ]
 		then
-			OptFg="$OptFg $FgDebSidId"
-			FgOptionText='echo -e $FgDebianSidText'
+			OptFg="$OptFg $FgDebId"
+			FgOptionText='echo -e $FgDebianText'
 		# this case handles the standard scenario where only one ati driver works
 		elif [ "$FgTest2" -eq 1 -a "$FgPrevious" == '' ]
 		then
-			OptFg="$OptFg $FgDebSidId current-fglrx"
-			FgOptionText='echo -e "$FgDebianSidText${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
+			OptFg="$OptFg $FgDebId current-fglrx"
+			FgOptionText='echo -e "$FgDebianText${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
 		elif [ "$FgTest1" -eq 0 -a "$FgTest2" -le 1 -a "$FgTest3" -eq 2 -a -n "$FgOlder" ]
 		then
 			if [ "$FgTest2" -eq 0 ]
@@ -280,11 +280,11 @@ install_graphics()
 				FgLatestText="\n${C}latest-fglrx${S} - Installs the very latest test/beta fglrx driver: ${C}$FgLatest"
 			fi
 			### note: sometimes only 2 fglrx drivers may be useable, switch comments if needed
-			OptFg="$OptFg $FgDebSidId older-fglrx previous-fglrx current-fglrx $OptFgLatest"
+			OptFg="$OptFg $FgDebId older-fglrx previous-fglrx current-fglrx $OptFgLatest"
 			#OptFg="$OptFg previous-fglrx current-fglrx $OptFgLatest"
 			# OptFg="previous-fglrx current-fglrx $OptFgLatest"
 			
-			FgOptionText='echo -e "$FgDebianSidText${C}older-fglrx${S} - Installs ${C}$FgOlder${S} fglrx driver.\n\tOnly use this if you have problems with current fgrlx drivers.\n${C}previous-fglrx${S} - Installs ${C}$FgPrevious${S} Radeon/fglrx driver.\n\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
+			FgOptionText='echo -e "$FgDebianText${C}older-fglrx${S} - Installs ${C}$FgOlder${S} fglrx driver.\n\tOnly use this if you have problems with current fgrlx drivers.\n${C}previous-fglrx${S} - Installs ${C}$FgPrevious${S} Radeon/fglrx driver.\n\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
 			
 			#FgOptionText='echo -e "${C}previous-fglrx${S} - Installs ${C}$FgOlder${S} Radeon/fglrx driver.\n\t\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
 			
@@ -293,8 +293,8 @@ install_graphics()
 		# this is a special case to handle cases where 2 drivers are working
 		elif [ "$FgTest2" -eq 1 ]
 		then
-			OptFg="$OptFg $FgDebSidId previous-fglrx current-fglrx"
-			FgOptionText='echo -e "$FgDebianSidText${C}previous-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgPrevious${S}\n${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
+			OptFg="$OptFg $FgDebId previous-fglrx current-fglrx"
+			FgOptionText='echo -e "$FgDebianText${C}previous-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgPrevious${S}\n${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
 # 		else
 # 			OptFg="$OptFg legacy-fglrx"
 # 			FgOptionText='echo -e "${C}legacy-fglrx${S} - ${W}Legacy driver install!${S} script will install an older driver.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
@@ -327,8 +327,8 @@ install_graphics()
 			install-xorg-radeonhd)
 				final_graphics_install radeonhd
 				;;
-			$nvDebSidId)
-				final_graphics_install nvc $nvDebSidId
+			$nvDebId)
+				final_graphics_install nvc $nvDebId
 				;;
 			legacy-nvidia)
 				final_graphics_install nv $NvDefault
@@ -348,8 +348,8 @@ install_graphics()
 			newest-nvidia-c)
 				final_graphics_install nvco $NvLatestMath
 				;;
-			$FgDebSidId)
-				final_graphics_install fglrx $FgDebSidId
+			$FgDebId)
+				final_graphics_install fglrx $FgDebId
 				;;
 			older-fglrx)
 				final_graphics_install fglrx-o $FgOlder
@@ -463,7 +463,7 @@ final_graphics_install()
 			;;
 		nvc)
 			installMess="${S}installing nVidia driver ${C}$2${S} with -c option now...${N}"
-			if [ "$2" == 'debian-sid-nvidia' ]
+			if [ "$2" == 'debian-nvidia' ]
 			then
 				extraArgs=' -s '
 			fi
@@ -486,7 +486,7 @@ final_graphics_install()
 				FglrxFlag=' -r '
 			fi
 			# this will force, for ati, debian sid package install instead of ati junk
-			if [ "$2" == 'debian-sid-fglrx' ]
+			if [ "$2" == 'debian-fglrx' ]
 			then
 				extraArgs=' -s '
 			fi
