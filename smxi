@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.12
-####  Date: June 17 2008
+####  version: 7.34.13
+####  Date: June 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1087,6 +1087,10 @@ cleanup_extra_files()
 	if [ -f sm ]
 	then
 		rm -f sm
+	fi
+	if [ -f smxi.zip ]
+	then
+		rm -f smxi.zip
 	fi
 	# just in case a legacy user comes, don't want to lose the configs
 	if [ -f /etc/du-fixes.conf ]
