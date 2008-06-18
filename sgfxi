@@ -1,7 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
-####  Only use for Debian Sid/Testing and sidux, no support for any other distro
+####  Use for Debian Sid/sidux and Testing graphic driver install.
+####  Only supports true Debian based distros.
 ####  version: 3.1.23
 ####  Date: June 17 2008
 ########################################################################
