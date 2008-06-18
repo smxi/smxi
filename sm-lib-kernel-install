@@ -937,7 +937,7 @@ reboot_now_question()
 		echo $LINE
 		echo "${C}1 - reboot-now${S} Reboot system now to start new kernel, if you are all done"
 		echo "    with your $DU_UPGRADE and system maintenance."
-		echo -e "${C}2 - $continueOpt${S} Continue on to the $DU_UPGRADE$altText1 and other ${C}$SCRIPT_NAME${S} functions."
+		echo -e "${C}2 - $continueOpt${S} Proceed to $DU_UPGRADE$altText1 and other ${C}$SCRIPT_NAME${S} functions."
 		echo "${C}3 - quit${S} Exit script now."
 		
 		echo $LINE
