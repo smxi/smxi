@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Only use for Debian Sid/Testing and sidux, no support for any other distro
-####  version: 3.1.22
+####  version: 3.1.23
 ####  Date: June 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2780,7 +2780,7 @@ show_options()
 	echo "-r Remove mode lines from xorg.conf"
 	echo "-t Enables dynamic twinview (nVidia only) - LEGACY, unused now. Default is on, enabled."
 	echo "-R Skips self updating feature. No restart."
-	echo "-s Installs Debian Sid fglrx drivers. ATI/nVidia cards only."
+	echo "-s Installs Debian nVidia/fglrx drivers. ATI/nVidia cards only."
 	echo "-S Skips automatic logout and X startup when script is run in standalone mode."
 	echo "-U Forces $SCRIPT_NAME to update itself, must be root, but can be in x. Exits after."
 	echo "-v Prints $SCRIPT_NAME current version information. Exits after."
