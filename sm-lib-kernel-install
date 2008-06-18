@@ -916,7 +916,7 @@ reboot_now_question()
 		altText2='echo -e "${M}NEW!${S} If you continue, you can finish up the $DU_UPGRADE, and install ${C}$driverReinstall${S} graphics\ndrivers to your new kernel ${C}$1${S} without rebooting first.\n"'
 		altText1=" / $driverReinstall graphics\n   driver re-install"
 	else
-		altText2='echo -e "${S}If you continue, you can finish up the $DU_UPGRADE and other options before rebooting.\n${M}NEW: install nvidia/fglrx drivers before you reboot if required${S}.\n"'
+		altText2='echo -e "${S}If you continue, you can finish up the $DU_UPGRADE and other options before rebooting.\n${M}NEW: install nvidia/fglrx drivers before you reboot if required${S}\n"'
 	fi
 	
 	local repeat='' options="reboot-now $continueOpt quit"
