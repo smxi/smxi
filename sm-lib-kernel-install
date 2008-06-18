@@ -914,7 +914,7 @@ reboot_now_question()
 		continueOpt='continue-reinstall-graphics-driver'
 		nonfreeText='echo -e "\n${M}When you are finished reinstalling your ${C}$driverReinstall${S} graphics driver, the script\n will give you the option to reboot into your new kernel."'
 		altText2='echo -e "${M}NEW!${S} If you continue, you can finish up the $DU_UPGRADE, and install ${C}$driverReinstall${S} graphics drivers\nto your new kernel ${C}$1${S} without rebooting first.\n"'
-		altText1=" / $driverReinstall graphics driver re-install\n    "
+		altText1=" / $driverReinstall graphics\n   driver re-install"
 	else
 		altText2='echo -e "${S}If you continue, you can finish up the $DU_UPGRADE and other options,\nwithout rebooting first.\n"'
 	fi
