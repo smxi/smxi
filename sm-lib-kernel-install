@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.5.3
-####  Date: June 16 2008
+####  version: 2.6.0
+####  Date: June 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -888,18 +888,7 @@ backup_grub()
 
 post_install_messages()
 {
-	local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
-	local isFglrx=$( egrep -io 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
-	local driverReinstall=''
-	
-	if [ -n "$isNvidia" ]
-	then
-		driverReinstall='nVidia'
-	fi
-	if [ -n "$isFglrx" ]
-	then
-		driverReinstall='ATI/fglrx'
-	fi
+	local driverReinstall=$( nonfree_driver_reinstall )
 	
 	# note: latino idea: m-a --text-mode --non-inter -l "${VER}" a-i fglrx 
 	if [ -n "$driverReinstall" ]
@@ -914,10 +903,23 @@ post_install_messages()
 	fi
 }
 
-# args: $1 - which kernel was installed
+# args: $1 - which kernel was installed; $2 - non free info
 reboot_now_question()
 {
-	local repeat='' options='reboot-now continue quit'
+	local driverReinstall=$( nonfree_driver_reinstall )
+	local continueOpt='continue' nonfreeText='' altText2='' altText1=''
+ 
+	if [ -n "$driverReinstall" ]
+	then
+		continueOpt='continue-reinstall-graphics-driver'
+		nonfreeText='echo -e "\n${M}When you are finished reinstalling your ${C}$driverReinstall${S} graphics driver, the script\n will give you the option to reboot into your new kernel."'
+		altText2='echo -e "${M}NEW!${S} If you continue, you can finish up the $DU_UPGRADE, and install ${C}$driverReinstall${S} graphics drivers\nto your new kernel ${C}$1${S} without rebooting first.\n"'
+		altText1=" / $driverReinstall graphics driver re-install\n    "
+	else
+		altText2='echo -e "${S}If you continue, you can finish up the $DU_UPGRADE and other options,\nwithout rebooting first.\n"'
+	fi
+	
+	local repeat='' options="reboot-now $continueOpt quit"
 	
 	cd $SCRIPT_HOME # needed to make sure user is back in correct directory
 	# sets KERNEL_EQUAL_INSTALL
@@ -926,16 +928,13 @@ reboot_now_question()
 	if [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
 	then
 		echo $LINE
-		echo "${S}If you reboot now, run this script again after rebooting if you want to do more things."
-		echo 
-		echo "${S}To start right into init 3 just type the number ${C}3${S} in grub, then hit enter."
-		echo "Once you are in init 3, rerun ${C}$SCRIPT_NAME${S} and finish the rest of the process."
-		echo
-		echo "${M}NEW!${S} If you continue, you can finish up the $DU_UPGRADE, and install graphics drivers"
-		echo "to your new kernel ${C}$1${S} if you need to do that, without rebooting first."
+		eval $altText2
+		echo "${S}If you're all done, and just want to start your new kernel, then just reboot now."
+		eval $nonfreeText
 		echo $LINE
-		echo "${C}1 - reboot-now${S} Reboot system now, do not install graphics drivers."
-		echo "${C}2 - continue${S} Continue on to do the $DU_UPGRADE / graphics driver install."
+		echo "${C}1 - reboot-now${S} Reboot system now to start new kernel, if you are all done"
+		echo "    with your $DU_UPGRADE and system maintenance."
+		echo -e "${C}2 - $continueOpt${S} Continue on to the $DU_UPGRADE$altText1 and other ${C}$SCRIPT_NAME${S} functions."
 		echo "${C}3 - quit${S} Exit script now."
 		
 		echo $LINE
@@ -946,14 +945,13 @@ reboot_now_question()
 		do
 			case $opt in
 				reboot-now)
-					echo "${S}Rebooting now. Remember, type ${C}3${S} at grub to start into ${C}init 3${S} directly."
+					echo "${S}Rebooting now into your new ${C}$1${S} kernel...${N}"
 					print_quit
 					reboot
 					;;
-				continue)
-					echo "${S}Continuing on to rest of script. You can now install your graphics driver"
-					echo "before rebooting to your new ${C}$1${S} kernel"
-					echo "${M}Remember your new kernel will not be active yet until you reboot.${N}"
+				$continueOpt)
+					echo "${S}Continuing on to finish your system maintenance."
+					echo "${M}Remember your new kernel will not be active until you reboot.${N}"
 					KERNEL_INSTALL_TO=$1
 					if [ "$TESTING" == 'true' ]
 					then
@@ -986,6 +984,25 @@ reboot_now_question()
 		echo "${S}Feel free to continue on doing things in ${C}$SCRIPT_NAME${S} if you want.${N}"
 		print_hec
 	fi
+}
+
+# returns driver or null if no nonfree used
+nonfree_driver_reinstall()
+{
+	local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
+	local isFglrx=$( egrep -io 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
+	local driverReinstall=''
+	
+	if [ -n "$isNvidia" ]
+	then
+		driverReinstall='nVidia'
+	fi
+	if [ -n "$isFglrx" ]
+	then
+		driverReinstall='ATI/fglrx'
+	fi
+	
+	echo $driverReinstall
 }
 
 # args: $1 - kernel string
