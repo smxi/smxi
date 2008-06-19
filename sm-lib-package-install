@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.1
+####  version: 2.8.2
 ####  Date: June 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -45,8 +45,8 @@ package_group_installer()
 	# package groups
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local fluxPackages='fluxbox dillo leafpad nano pcmanfm xchat xchat-common'
-	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'
+	local fluxPackages='fluxbox dillo leafpad nano pcmanfm sudo xchat xchat-common xterm'
+	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-support habak imagemagick rxvt-unicode sudo xterm xscreensaver'
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras='kdeaddons kdemultimedia-kio-plugins konq-plugins'
 	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse"
