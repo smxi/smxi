@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.7.6
-####  Date: June 17 2008
+####  version: 2.8.1
+####  Date: June 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -23,6 +23,8 @@
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 
+DEFAULT_DM=''
+
 ########################################################################
 ####  FUNCTIONS 
 ########################################################################
@@ -35,20 +37,19 @@
 # installer also handles metapackage assignments
 package_group_installer()
 {
-	local dmUse='' packageName='' 
-	local itemName=$2
-	# this handles cases where no kde exists, we'll use the xdm manager for that
-	if [ ! -e /etc/init.d/kdm -a ! -e /etc/init.d/gdm ]
-	then
-		dmUse=' wdm'
-	fi
+	local itemName=$2 packageName='' 
+	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
+	# unless other default override is set
+	local dmUse=$( assign_display_manager $itemName )
+	
 	# package groups
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
+	local fluxPackages='fluxbox dillo leafpad nano pcmanfm xchat xchat-common'
 	local fvwmCrystal='fvwm fvwm-crystal fvwm-icons rox-filer audacious audacious-plugins mpd trayer quodlibet cdcd debhelper dpatch xsltproc docbook-xsl python python-dev python-support habak imagemagick rxvt-unicode xterm xscreensaver sudo'
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras='kdeaddons kdemultimedia-kio-plugins konq-plugins'
-	local kdePackages='kdebase kdebase-kio-plugins kde-core kdelibs kdm konqueror konversation kpdf ksvg'
+	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse"
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local streamTuner='streamtuner streamripper kstreamripper'
@@ -66,11 +67,17 @@ package_group_installer()
 		console-browsers)
 			packageName="$consoleBrowsers"
 			;;
+		fluxbox)
+			packageName="$fluxPackages $dmUse"
+			;;
+		fluxbox-full)
+			packageName="$fluxPackages $systemUtils $xorgPackages $dmUse"
+			;;
 		fvwm-crystal)
-			packageName="$fvwmCrystal"
+			packageName="$fvwmCrystal $dmUse"
 			;;
 		fvwm-crystal-full)
-			packageName="$fvwmCrystal  $systemUtils $xorgPackages $dmUse"
+			packageName="$fvwmCrystal $systemUtils $xorgPackages $dmUse"
 			;;
 		kde)
 			packageName="$kdePackages"
@@ -94,7 +101,7 @@ package_group_installer()
 			packageName="$systemUtils"
 			;;
 		xfce)
-			packageName="$xfcePackages"
+			packageName="$xfcePackages $dmUse"
 			;;
 		xfce-full)
 			packageName="$xfcePackages $systemUtils $xorgPackages $dmUse"
@@ -520,8 +527,14 @@ utilities_installer()
 
 display_manager_installer()
 {
+	local displayManager=$( get_default_display_manager )
 	local repeat='' options='' opt=''
 	local xorgPackages=''
+	
+	if [ -z "$displayManager" ]
+	then
+		displayManager='none detected'
+	fi
 
 	echo $MLINE
 	echo "${M} Desktop / Window Manager Installer"
@@ -529,28 +542,49 @@ display_manager_installer()
 	echo "${S}Get started if you're building this from nothing at all, or just add some extras."
 	echo "${M}Recommendation:${S} if you are starting from no desktop installed, use the ${C}full${S} option."
 	echo "If you have ${C}xorg${S} already installed, then the standard is probably fine."
+	echo
+	if [ -z "$DEFAULT_DM" ]
+	then
+		echo "Note: Use option ${C}1${S} first if you have a preference and have no display manager installed."
+		echo "If you do not run ${C}1${S} prior to creating your desktop, it will default to use ${C}wdm${S} if you"
+		echo "currently have no display manager. Your current default is: ${C}$displayManager${S}"
+		echo "(The display manager is the login screen you see when starting up your desktop)"
+		echo
+		echo "Note: kde defaults to use ${C}kdm${S} if you have no current default and you have not"
+		echo "picked an alternate in ${C}1${S}."
+	else
+		echo "${S}You have chosen to use this display manager: ${C}$DEFAULT_DM${S}"
+	fi
+	
 	echo $LINE
-	echo "${C}1${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
-	echo "${C}2${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
-	echo "${C}3${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
-	echo "${C}4${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
-	echo "${C}5${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
-	echo "${C}6${S} - ${C}kde${S} Base packages for kde desktop + kpdf, konversation, konqueror."
-	echo "${C}7${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
-	echo "${C}8${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, kde addons."
-	echo "${C}9${S} - ${C}kde-pim${S} karm, kontact, korganizer, kalarm."
-	echo "${C}10${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
-	echo "${C}11${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies + wdm if kdm/gdm not present"
-	echo "${C}12${S} - ${C}back-to-install-menu${S}"
+	echo "${C}1${S} - ${C}select-display-manager${S} Select an alternate display manager to use"
+	echo "${C}2${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
+	echo "${C}3${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
+	echo "${C}4${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
+	echo "${C}5${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo "${C}6${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
+	echo "${C}7${S} - ${C}kde${S} Base packages for kde desktop + kpdf, konversation, konqueror."
+	echo "${C}8${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
+	echo "${C}9${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, kde addons."
+	echo "${C}10${S} - ${C}kde-pim${S} karm, kontact, korganizer, kalarm."
+	echo "${C}11${S} - ${C}fluxbox${S} Installs basic packages needed, plus some small apps (experimental package set)."
+	echo "${C}12${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies + display manager."
+	echo "${C}13${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
+	echo "${C}14${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies + display manager."
+	echo "${C}15${S} - ${C}back-to-install-menu${S}"
 	
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fvwm-crystal fvwm-crystal-full back-to-install-menu"
+	options="select-display-manager system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fluxbox fluxbox-full fvwm-crystal fvwm-crystal-full back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
+			select-display-manager)
+				select_display_manager
+				repeat='true'
+				;;
 			system-utilities)
 				package_group_installer plain system-utilities
 				repeat='true'
@@ -587,6 +621,14 @@ display_manager_installer()
 				package_group_installer plain kde-pim
 				repeat='true'
 				;;
+			fluxbox)
+				package_group_installer plain fluxbox
+				repeat='true'
+				;;
+			fluxbox-full)
+				package_group_installer plain fluxbox-full
+				repeat='true'
+				;;
 			fvwm-crystal)
 				package_group_installer plain fvwm-crystal
 				repeat='true'
@@ -610,6 +652,92 @@ display_manager_installer()
 	then
 		display_manager_installer
 	fi
+}
+
+select_display_manager()
+{
+	local displayManager=$( get_default_display_manager )
+	local repeat='' options='kdm gdm xdm wdm slim back-to-desktop-install' opt=''
+	
+	echo $MLINE
+	echo "${M}Display Manager Selector"
+	echo $MLINE
+	if [ -z "$displayManager" ]
+	then
+		displayManager='none detected'
+	
+		echo "Please select from the following list. Note that xdm, wdm, and slim, sometimes"
+		echo "require extra configurations to allow user shutdown from desktop."
+		echo "Your current default is: ${C}$displayManager${S}"
+		echo $LINE
+		echo "${C}1 - kdm${S} Default display / login manager for kde."
+		echo "${C}2 - gdm${S} Default display / login manager for gnome."
+		echo "${C}3 - xdm${S} Default display / login manager for X11/xorg (very plain and basic)."
+		echo "    For non gnome/kde desktops."
+		echo "${C}4 - wdm${S} Alternate display / login manager for non kde/gnome desktops."
+		echo "${C}5 - slim${S} Alternate display / login manager for non kde/gnome desktops."
+		echo "    Very light weight, thus the name."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+	
+		select opt in $options
+		do
+			case $opt in
+				kdm|gdm|xdm|wdm|slim)
+					echo "${S}Your default display manager for your desktop install is now: ${C}$opt${N}"
+					DEFAULT_DM=$opt
+					print_hec
+					;;
+				back-to-desktop-install)
+					echo "${S}Returning to desktop selections...${N}"
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+		
+		if [ "$repeat" == 'true' ]
+		then
+			select_display_manager
+		fi
+	else
+		echo "${S}Your system already has a default display manager: ${C}$displayManager${N}"
+		print_hec
+	fi
+}
+
+# returns proper dm to use in installer function
+# args: $1 - item from package group installer
+assign_display_manager()
+{
+	local displayManager=$( get_default_display_manager )
+	local itemName=$1
+	
+	if [ -z "$displayManager" ]
+	then
+		# assign the user set one
+		if [ -n "$DEFAULT_DM" ]
+		then
+			displayManager=$DEFAULT_DM
+		else
+			case $itemName in
+				kde|kde-full)
+					dmUse='kdm'
+					;;
+				gnome|gnome-full)
+					dmUse='gdm'
+					;;
+				*)
+					displayManager='wdm'
+					;;
+			esac
+		fi
+	fi
+	echo $displayManager
 }
 
 ###---------------------------------------------------------------------
