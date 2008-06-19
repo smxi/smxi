@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.6
+####  version: 2.8.7
 ####  Date: June 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -50,7 +50,7 @@ package_group_installer()
 	fi
 	
 	# package groups
-	local baseLightPackages="dillo elinks epdfview htop irssi leafpad libpoppler1 links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
+	local baseLightPackages="dillo elinks htop irssi leafpad links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local fluxPackages="$baseLightPackages fluxbox"
