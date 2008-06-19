@@ -3,7 +3,7 @@
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Use for Debian Sid/sidux and Testing graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.25
+####  version: 3.1.26
 ####  Date: June 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1377,7 +1377,7 @@ check_supported_driver()
 
 set_version()
 {
-	local response='' printDriver=''
+	local response='' printDriver='' newKernelText=''
 	
 	log_info $FUNCNAME s
 	# I'm forcing special cases to override the defaults so the data
@@ -1426,10 +1426,10 @@ set_version()
 		print_information_continue 'info' "You are using the following options:\n$START_OPTIONS_PRINT" $FUNCNAME
 	elif [ "$SM_INSTALL" == 'true' -a -n "$INSTALL_TO_KERNEL" ]
 	then
-		print_information_continue 'info' "You are installing a graphic driver onto the kernel: $INSTALL_TO_KERNEL"
+		newKernelText="\n${B}onto the kernel: ${C}$INSTALL_TO_KERNEL${N}"
 	fi
 	echo -e "Driver installed using options:\n$START_OPTIONS_PRINT" >> $LOG_FILE
-	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}" $FUNCNAME
+	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}$newKernelText" $FUNCNAME
 
 	echo "Installing this driver: $DRIVER_DEFAULT" >> $LOG_FILE
 	
