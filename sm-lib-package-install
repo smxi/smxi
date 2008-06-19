@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.8
+####  version: 2.8.9
 ####  Date: June 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -693,8 +693,15 @@ select_display_manager()
 		do
 			case $opt in
 				kdm|gdm|xdm|wdm|slim)
-					echo "${S}Your default display manager for your desktop install is now: ${C}$opt${N}"
-					DEFAULT_DM=$opt
+					# note: epdfview is not in stable currently
+					if [ "$SYSTEM_BASE" == 'stable' -a "$opt" == 'slim' ]
+					then
+						echo "${E}The display manager ${C}$opt${E} is not currently in Debian Stable. Please select another one.${N}"
+						repeat='true'
+					else
+						echo "${S}Your default display manager for your desktop install is now: ${C}$opt${N}"
+						DEFAULT_DM=$opt
+					fi
 					print_hec
 					;;
 				back-to-desktop-install)
