@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.8
-####  Date: June 15 2008
+####  version: 1.15.9
+####  Date: June 18 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -884,7 +884,7 @@ set_default_system_kernel()
 	echo $LINE
 	echo "${S}Select from list of possible default kernel options for your system, and ${C}$SCRIPT_NAME${S} will then use"
 	echo "that option as the primary kernel install option. If there is only one option listed,"
-	echo "that is already your default. If 2 are or more are listed, you can install the non-default"
+	echo "that is already your default. If 2 or more are listed, you can install the non-default"
 	echo "option manually using advanced kernel install options if you want to check it out."
 	echo
 	echo "Your current default kernel setting is: ${C}$altKernelSetting${S}"
