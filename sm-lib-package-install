@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.5
+####  version: 2.8.6
 ####  Date: June 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -41,9 +41,16 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
+	local pdfLight='epdfview libpoppler1'
+	
+	# note: epdfview is not in stable currently
+	if [ "$SYSTEM_BASE" == 'stable' ]
+	then
+		pdfLight='xpdf'
+	fi
 	
 	# package groups
-	local baseLightPackages='dillo elinks epdfview htop irssi leafpad libpoppler1 links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm'
+	local baseLightPackages="dillo elinks epdfview htop irssi leafpad libpoppler1 links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local fluxPackages="$baseLightPackages fluxbox"
