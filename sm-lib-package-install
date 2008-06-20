@@ -50,7 +50,7 @@ package_group_installer()
 	fi
 	
 	# package groups
-	local baseLightPackages="dillo elinks htop irssi leafpad links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
+	local baseLightPackages="aterm dillo elinks htop irssi leafpad links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
