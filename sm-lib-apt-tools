@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.12.8
+####  version: 1.12.9
 ####  Date: June 20 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1423,6 +1423,10 @@ get_current_apt_kernel()
 		if [ "$BITS" == '64' ]
 		then
 			platform='amd64'
+		# for legacy slh kernel syntax only
+		elif [ "$BITS" == '32' -a -z "$platform" ]
+		then
+			platform='686'
 		fi
 		
 		case $defaultKernel in
