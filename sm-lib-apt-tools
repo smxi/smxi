@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.12.9
-####  Date: June 20 2008
+####  version: 1.12.10
+####  Date: June 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -24,7 +24,7 @@
 ########################################################################
 
 # one global here just for convenience
-CHECK_HOLD_PACKAGES='amule:amule-common elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common k3b:k3b-data pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xsane:xsane-common'
+CHECK_HOLD_PACKAGES='amule:amule-common elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xsane:xsane-common'
 #egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
@@ -471,8 +471,8 @@ broken_dependency_handler()
 		then
 			# determine whether to do full or partial version number tests
 			# using cut -f 2-4 to handle cases of numbering like 1:2.5.6-3
-			case $package1 in
-				amule|gnucash|rosegarden|thunar|xfdesktop4|xsane)
+			case $package1 in 
+				amule|gnucash|libgnokii3|rosegarden|thunar|xfdesktop4|xsane)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageTemp=$( apt-cache policy $package1 $package2 | grep 'Candidate:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 )
 					;;
