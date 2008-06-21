@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.13
+####  version: 7.34.14
 ####  Date: June 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -3037,6 +3037,7 @@ do
 		u|U)	FORCE_UPDATE='true'
 			;;
 		v)	PRINT_VERSION='true'
+			set_distro_data # need some of the distro data here
 			check_dpkg_update # need to set the update data
 			print_install_information
 			exit 0
