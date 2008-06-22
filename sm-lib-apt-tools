@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.13.1
+####  version: 1.13.2
 ####  Date: June 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1378,7 +1378,7 @@ get_current_apt_kernel()
 	local defaultKernel=$1 distro='' currentKernel=''
 	# needed for alt platforms, no easy way to handle say move from 486 to 686, so 
 	# we'll just respect the user initial preference and make them change manually if desired
-	local platform=$( egrep -o '\-(486|686|686-bigmem|xen-686|smp)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2 )
+	local platform=$( egrep -o '\-(486|686|686-bigmem|xen-686)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2 )
 	
 	if [ "$defaultKernel" != 'no-kernel' ]
 	then
@@ -1402,6 +1402,7 @@ get_current_apt_kernel()
 			mepis)
 				kernelStringExtra='-mepis'
 				distro='Mepis'
+				platform='smp'
 				;;
 		esac
 		
