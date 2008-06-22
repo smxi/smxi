@@ -768,7 +768,7 @@ update_scripts()
 		download_test_file "$1" "$2"
 		success="$?"
 	else
-		else success=0 # hard code success, do not actually update
+		success=0 # hard code success, do not actually update
 	fi
 	
 	return $success
