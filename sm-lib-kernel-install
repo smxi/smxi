@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.6.2
-####  Date: June 17 2008
+####  version: 2.6.3
+####  Date: June 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -191,67 +191,72 @@ double_check_kernel()
 			;;
 	esac
 	
-	echo $LINE
-	echo "${S}You will be installing the current ${C}$extraText${S} kernel: ${C}$kernelFile${S}"
-	echo "${Q}Is this correct?"
-	echo $LINE
-	echo "${C}1${S} - Yes, install this kernel now."
-	echo "${C}2${S} - No, let me go back to the menu to make a new selection."
-	echo "${C}3${S} - Continue with the $DU_UPGRADE without installing a new kernel."
-	echo $LINE
-	echo $SLE
-	echo $LINE
-	
-	options="yes-install-kernel no-return-to-menu continue-no-kernel"
-
-	select opt in $options
-	do
-		case $opt in
-			yes-install-kernel)
-				echo "${S}OK, now the script will install kernel ${C}$kernelFile${S} for you.${N}"
-				case $1 in 
-					apt)
-						install_apt_kernel $DEFAULT_KERNEL
-						;;
-					apt-debian)
-						install_apt_kernel debian
-						;;
-					apt-mepis)
-						install_apt_kernel mepis
-						;;
-					apt-sidux)
-						install_apt_kernel sidux
-						;;
-					advanced)
-						update_kernel
-						echo $LINE
-						;;
-				esac
-				;;
-			no-return-to-menu)
-				echo "${S}Ok, let's try it again, please make your selection.${N}"
-				case $1 in 
-					advanced|apt-debian|apt-sidux)
-						advanced_kernel_install
-						;;
-					*)
-						kernel_question
-						;;
-				esac
-				;;
-			continue-no-kernel)
-				echo "${S}OK, continuing with script without installing new kernel."
-				;;
-			*)
-				print_error opt
-				repeat='true'
-				;;
-		esac
-		break
-	done
-	if [ "$repeat" == 'true' ]
+	if [ -n "$kernelFile" ]
 	then
-		double_check_kernel $1
+		echo $LINE
+		echo "${S}You will be installing the current ${C}$extraText${S} kernel: ${C}$kernelFile${S}"
+		echo "${Q}Is this correct?"
+		echo $LINE
+		echo "${C}1${S} - Yes, install this kernel now."
+		echo "${C}2${S} - No, let me go back to the menu to make a new selection."
+		echo "${C}3${S} - Continue with the $DU_UPGRADE without installing a new kernel."
+		echo $LINE
+		echo $SLE
+		echo $LINE
+		
+		options="yes-install-kernel no-return-to-menu continue-no-kernel"
+	
+		select opt in $options
+		do
+			case $opt in
+				yes-install-kernel)
+					echo "${S}OK, now the script will install kernel ${C}$kernelFile${S} for you.${N}"
+					case $1 in 
+						apt)
+							install_apt_kernel $DEFAULT_KERNEL
+							;;
+						apt-debian)
+							install_apt_kernel debian
+							;;
+						apt-mepis)
+							install_apt_kernel mepis
+							;;
+						apt-sidux)
+							install_apt_kernel sidux
+							;;
+						advanced)
+							update_kernel
+							echo $LINE
+							;;
+					esac
+					;;
+				no-return-to-menu)
+					echo "${S}Ok, let's try it again, please make your selection.${N}"
+					case $1 in 
+						advanced|apt-debian|apt-sidux)
+							advanced_kernel_install
+							;;
+						*)
+							kernel_question
+							;;
+					esac
+					;;
+				continue-no-kernel)
+					echo "${S}OK, continuing with script without installing new kernel."
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+		if [ "$repeat" == 'true' ]
+		then
+			double_check_kernel $1
+		fi
+	else
+		error_handler 'null-kernel-file-data' "$FUNCNAME" "$1" 
 	fi
 }
 # kernel_question
