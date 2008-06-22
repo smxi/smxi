@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.12.10
+####  version: 1.13.0
 ####  Date: June 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -995,7 +995,9 @@ force_kernel_mirror_change()
 	local smPref=$( sm_pref_tester $prefId )
 	#local isBorked=$( echo $( get_set_mirror 'get' 'mirrors' ) | egrep '(http://ftp.spline.de/pub/sidux/debian/)' )
 	local borkedMirror='http://ftp.spline.de/pub/sidux/debian/'
-	local isBorked=$( grep -Ro -m1 "$borkedMirror" /etc/apt/ 2>/dev/null )
+	# this method is tighter, and will let me also just replace the stuff if required 
+	# at some other point. This gets all relevant files to update for sed
+	local isBorked=$( grep -Rls "$borkedMirror" $EAS $EAS.d* )
 	local reply=''
 	
 	if [ -n "$isBorked" -a "$smPref" -eq 0 ]
@@ -1038,27 +1040,17 @@ change_kernel_mirrors()
 		local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
 		#local currentMirror=$( sm_pref_tester $prefId 'equal' )
 		local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
-		local currentMirror="$( get_set_mirror 'get' 'mirrors' )"
+		local currentMirror="$( get_sidux_mirrors 'all' )"
 		local plural1='' plural2='is'
 		local noMirrorString='No mirrors were detected that fit the search pattern.'
-		
-		local siduxMirrors="
-		$( list_distro_mirrors )
-		$noChange
-		"
+		local siduxMirrors="$( list_sidux_mirrors ) $noChange"
 		local cont=$( wc -w <<< $siduxMirrors )
 		local mirrorCount=$(( $cont - 1 ))
 	
 		currentMirrorText="$currentMirror"
-	# 	if [ "$smPref" -eq 0 ]
-	# 	then
-	# 		currentMirrorText='UNSET.'
-	# 		noChange=''
-	# 	else
-	# 		currentMirrorText=$currentMirror
-	# 	fi
+
 		# we'll set some singular/plural stuff, and some logic using count
-		local countMirrors=$( echo $currentMirror | wc -w )
+		local countMirrors=$( wc -w <<< $currentMirror )
 		
 		if [ "$countMirrors" -gt 1 ]
 		then
@@ -1135,27 +1127,15 @@ change_kernel_mirrors()
 			then
 				if [ "$currentMirror" != "$noMirrorString" ]
 				then
-					#sed -i "s%"$prefId".*%"$prefId"="$mirrorUrl"%" $SM_CONFIG_FILE
-					get_set_mirror 'set' 'mirrors' "$mirrorUrl"
+					set_sidux_mirror "$mirrorUrl"
 					change_kernel_mirrors
 				else
 					echo "${M}$noMirrorString${N}"
 				fi
 			else
-				# retest for the new mirror
-	# 			currentMirror=$( get_set_mirror 'get' 'mirrors' 'single' )
-	# 
-	# 			if [ "$currentMirror" != "$mirrorUrl" ]
-	# 			then
-	# 				echo "${E}You MUST select a mirror to use for kernel downloads, it is not optional."
-	# 				echo "Please select one from the list again. Restarting mirror selector now${N}"
-	# 				print_hec
-	# 				change_kernel_mirrors
-	# 			else
 					echo "${S}Continuing on to main script. Remember, you can change your ${C}sidux apt mirrors${S}"
 					echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
 					apt_update_handler 'post-mirror'
-	# 			fi
 			fi
 		else
 			print_error opt
@@ -1170,235 +1150,217 @@ change_kernel_mirrors()
 ## DEBUGGER
 #script_debugger 'change_kernel_mirrors prefs'
 
-# args: $1 get/set; $2 - primary/mirrors; $3 - set to this mirror, optional, or 'single'
-# NOTE: this should handle all current and legacy sidux apt sources issues, including dual
-# source entries, sidux.com + alt mirror
-# $3 -get-them/null whether to reload mirrors
-get_set_mirror()
+# args: $1 - all/get-them/non-core
+get_sidux_mirrors()
 {
-	local siduxMirrors="$( list_distro_mirrors )"
-	local debianMirror='' mirrorsFound='' mirror='' sourceFile=''
-	local mirrorTemp='' entryExists='' currentMirror=''
+	local siduxMirrors="$( list_sidux_mirrors )"
+	local badSiduxMirrors="$( list_bad_sidux_mirrors )"
 	local noMirrorString='No mirrors were detected that fit the search pattern.'
-	local currentMirror='' isSiduxMulti='' currentIsSidux='' siduxTempHolder='' 
-	local siduxSpecs='' updateIt='' siduxTempMainHolder='' sources='' 
-	local counter=0 sourcesCount=0
-	# this is needed to handle bad mirror cases in get
-	local badMirrors='core-eu-4:http://ftp.spline.de/pub/sidux/debian/  '
-	# can't loop this endlessly
-	if [ "$3" != 'get-them' ]
+	local mirrorTemp='' mirror='' mirrorsFound='' mirrorFiles='' singleTest=''
+	local currentMirrors=''
+	
+	# needed to avoid infinite loop from function calling itself
+	if [ "$1" != 'get-them' ]
 	then
-		currentMirror="$( get_set_mirror 'get' 'mirrors' 'get-them' )"
+		currentMirrors="$( get_sidux_mirrors 'get-them' )"
 	fi
-	# we'll set some singular/plural stuff, and some logic using count
-	countMirrors=$( echo $currentMirror | wc -w )
-	if [ "$countMirrors" -gt 1 ]
-	then
-		plural1='s' 
-		plural2='are'
-	fi
+
+	local countMirrors=$( wc -w <<< $currentMirrors )
 	
-	case $2 in
-		primary)
-			debianMirror=$EASDL
-			;;
-		mirrors)
-			:
-			;;
-	esac
-	
-	sources="$debianMirror $EASSL $EAS"
-	sourcesCount=$( echo $sources | wc -w )
-	
-	for sourceFile in $sources 
+	for mirror in $siduxMirrors $badSiduxMirrors
 	do
-		if [ -f "$sourceFile" ]
+		mirrorTemp=$( echo $mirror | cut -d ':' -f 2-4 )
+		# it's very important here to search only for start deb, no #
+		# echo mirrorTemp: $mirrorTemp
+		mirrorFiles="$( egrep -ls "^(deb|deb-src)[[:space:]]*$mirrorTemp" $EAS $EAS.d/* )"
+
+		if [ -n "$mirrorFiles" ]
 		then
+			# case one we return a list of all found mirrors
 			case $1 in
-				get)
-					counter=$(( $counter + 1 ))
-					for mirror in $siduxMirrors $badMirrors
-					do
-						mirrorTemp=$(echo $mirror | cut -d ':' -f 2-4 )
-						# it's very important here to search only for start deb, no #
-						mirrorTemp="$( egrep -o -m 1 "^(deb|deb-src)[[:space:]]*$mirrorTemp" $sourceFile | grep -o "$mirrorTemp" )"
-# 						echo mirrorTemp: $mirrorTemp
-# 						echo sourcefile: $sourceFile
-						if [ -n "$mirrorTemp" ]
-						then
-# 							echo mirrorTemp: $mirrorTemp
-# 							echo mirror: $mirror
-# 							echo 3: $3
-							# case one we return a list of all found mirrors
-							if [ "$3" != 'single' ]
-							then
-								mirrorsFound="$mirrorsFound $mirrorTemp"
-							# case 2 we return only current non sidux mirror (hopefully anyway)
-							elif [ "$3" == 'single' ]
-							then
-								if [ -z "$( echo $mirrorTemp | egrep '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' )" ] || [ "$countMirrors" -eq 1 ]
-								then
-									mirrorsFound="$mirrorTemp"
-									break
-								fi
-							fi
-							mirrorTemp=''
-						fi
-					done
-	
-					# because this loop is in a loop, it requires special handling
-					if [  -n "$mirrorsFound" ]
-					then
-						echo "$mirrorsFound"
-						break
-					elif [ "$counter" -eq "$sourcesCount" ]
-					then
-						echo $noMirrorString
-					fi
+				all|get-them)
+					mirrorsFound="$mirrorsFound $mirrorTemp"
 					;;
-				set)
-					counter=$(( $counter + 1 ))
-					# get filtered, non sidux mirror repo
-					currentMirror=$( get_set_mirror 'get' 'mirrors' 'single' )
-					# we only want to overwrite sidux stuff it's not a dual apt sources...
-					isSiduxMulti=$(  egrep -o "^(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" "$sourceFile" )
-					currentIsSidux="$( echo "$3" | egrep '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
-					
-					# handle multiple entries in sources
-					# make sure the current mirror only is selected
-					# this step is critical, it is required to correctly set entryExists
-					# for case of multiple mirror entries AND correctly setting mirror
-					if [ -n "$currentIsSidux" ]
+				# here we return only current non sidux mirror (hopefully anyway)
+				non-core)
+					singleTest=$( egrep -v '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' <<< $mirrorTemp )
+					# echo singleTest: $singleTest
+					# if a core mirror is not found, or if there is only one sidux mirror
+					if [ -n "$singleTest" ] || [ "$countMirrors" -eq 1 ]
 					then
-						# this handles a really weird case where sidux.list is commented out
-						entryExists=$( cat $sourceFile | grep '^[^#]' | awk '/^(deb)[ ]*(((http|ftp):\/\/)(sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de))/{print $2}' )
-					else
-						entryExists=$( egrep -o -m1 "^(deb|deb-src)[[:space:]]*$currentMirror" "$sourceFile" | grep -o "$currentMirror" )
-					fi
-					if [ "$TESTING" == 'true' ]
-					then
-						echo
-						echo ${M}BEGIN DEBUGGING OUTPUT:
-						echo mirror to install: ${C}$3${M}
-						echo currentAltMirror: ${C}$currentMirror${M}
-						echo entryExists: ${C}$entryExists${M}
-						echo writing to: ${C}$sourceFile${M}
-						echo countMirrors: ${C}$countMirrors${M}
-						echo ism: ${C}$isSiduxMulti${M}
-						echo cis: ${C}$currentIsSidux${M}
-						echo END DEBUGGING OUTPUT${N}
-						echo
-					fi
-					# note: we don't need any special regex because we already know
-					# we're in the right place, with a matching syntax, so things should be good
-					if [ -n "$entryExists" ] 
-					then
-						
-						if [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" ] || [ "$countMirrors" -eq 1 -a -n "$currentIsSidux" ]
-						then
-							echo "${SPACER}${S}Updating ${C}$sourceFile${S} now...${N}"
-							sed -i -r "s%(#?(deb|deb-src)[[:space:]]*)$entryExists%\1$3%" $sourceFile
-							echo
-							currentMirror="$( get_set_mirror 'get' 'mirrors' )"
-							echo "${SPACER}${S}Your system will now use sidux-apt/kernel mirror(s):"
-							echo "${SPACER}${C}$currentMirror${N}"
-							updateIt='true'
-# 						elif [ "$countMirrors" -gt 1 -a -n "$currentIsSidux" ]
-# 						then
-# 							echo "${SPACER}${S}Updating ${C}$sourceFile${S} now...${N}"
-# 							sed -i -r "s%(#?(deb|deb-src)[[:space:]]*)$currentIsSidux%\1$3%" $sourceFile
-# 							echo
-# 							echo "${SPACER}${S}Your system will now use this sidux-apt/kernel mirror:"
-# 							echo "${SPACER}${C}$3${N}"
-# 							updateIt='true'
-						# only when not a core mirror and sources are not yet upgraded to multi
-						elif [ "$countMirrors" -eq 1 -a -z "$currentIsSidux" ]
-						then
-							
-							siduxTempHolder=$( egrep -m1 "(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" "$sourceFile"  )
-							# we need to replace whitespace for sed here
-							siduxTempMainHolder=$( echo "$siduxTempHolder" | sed -r 's%(\s|\t)%\\s%g' )
-							# we want the same stuff after the mirror as the primary has
-							siduxSpecs=$( echo $siduxTempHolder | sed -r 's%.*((sid|unstable).*)%\1%' )
-							if [ "$TESTING" == 'true' ]
-							then
-								echo
-								echo ${M}BEGIN DEBUGGING OUTPUT:
-								echo sth: ${C}$siduxTempHolder${M}
-								echo stmh: ${C}$siduxTempMainHolder${M}
-								echo sspec: ${C}$siduxSpecs${M}
-								echo END DEBUGGING OUTPUT${N}
-								echo
-							fi
-							
-							echo "${S}Prepending the mirror:${C} $3"
-							echo "${S}to current deb repo:${C}$siduxTempHolder${N}"
-							sed -i "s%$siduxTempMainHolder%deb $3 $siduxSpecs\n$siduxTempHolder%" $sourceFile
-							currentMirror="$( get_set_mirror 'get' 'mirrors' )"
-							echo "${SPACER}${S}Your system will now use sidux-apt/kernel mirror(s):"
-							echo "${SPACER}${C}$currentMirror${N}"
-							updateIt='true'
-						# this case should never happen any more with above modifications
-						elif [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" -a -n "$currentIsSidux" ]
-						then
-							echo "${E}You cannot overwrite your primary ${C}sidux.com${E} apt source:"
-							echo "${C}$currentIsSidux"
-							echo "${E}only your alternate mirror.${N}"
-						# and not this one either, but good to test for bugs
-						else
-							echo "${E}Unhandled case in $FUNCNAME...${N}"
-						fi
-						
-						# either multi update or single core update
-					# only do this at the true end
-					elif [ "$counter" -eq "$sourcesCount" -a -z "$entryExists" ]
-					then
-						echo "${E}Unable to properly match your ${C}sidux.com${E} repo, sorry.${N}"
-						print_hec
-						return 1
-					fi
-					
-					if [ "$updateIt" == 'true' ]
-					then
-						print_hec
-						return 0
-						# break out of the top loop since we found the item in this file
-						# this is redundant since return kills this, but I'm not positive...
-						break 
+						mirrorsFound="$mirrorTemp"
+						# echo mirrorsFound: $mirrorsFound
+						break
 					fi
 					;;
 			esac
+			mirrorTemp=''
 		fi
 	done
+
+	# return the output
+	if [ -n "$mirrorsFound" ]
+	then
+		echo "$mirrorsFound"
+	else
+		echo $noMirrorString
+	fi
+}
+
+# args: $1 - which mirror to update
+set_sidux_mirror()
+{
+	local siduxSources='' siduxSource='' mirrorTemp='' nonCoreSiduxRepo='' isCoreSiduxRepo=''
+	local entryExists='' siduxSpecs='' isSiduxMulti='' siduxTempHolder='' siduxTempRepo=''
+	local updateIt=''
+	local currentMirrors="$( get_sidux_mirrors 'get-them' )"
+	local countMirrors=$( wc -w <<< $currentMirrors )
+	
+	# get filtered, non sidux mirror repo
+	nonCoreSiduxRepo=$( get_sidux_mirrors 'non-core' )
+	
+	# we only want to overwrite sidux stuff it's not a dual apt sources...
+	isSiduxMulti=$(  egrep "^(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/* | cut -d ':' -f 2-6 )
+	isCoreSiduxRepo="$( echo "$1" | egrep '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
+	
+	# handle multiple entries in sources
+	# make sure the current mirror only is selected
+	# this step is critical, it is required to correctly set entryExists
+	# for case of multiple mirror entries AND correctly setting mirror
+	if [ -n "$isCoreSiduxRepo" ]
+	then
+		# this handles a really weird case where sidux.list is commented out
+		# because we're checking multiple files, we need to slice out the file : 
+		# separator before awk
+		entryExists=$( grep -s '^[^#]' $EAS $EAS.d/* | cut -d ':' -f 2-6 | awk '/^(deb)[ ]*(((http|ftp):\/\/)(sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de))/{print $2}' )
+	else
+		entryExists=$( egrep -os -m1 "^(deb|deb-src)[[:space:]]*$nonCoreSiduxRepo" $EAS $EAS.d/* | grep -o "$nonCoreSiduxRepo" )
+	fi
+	
+	if [ "$TESTING" == 'true' ]
+	then
+		echo
+		echo ${M}BEGIN DEBUGGING OUTPUT:
+		echo mirror to install: ${C}$1${M}
+		echo nonCoreSiduxRepo: ${C}$nonCoreSiduxRepo${M}
+		echo entryExists: ${C}$entryExists${M}
+		echo writing to: ${C}$sourceFile${M}
+		echo countMirrors: ${C}$countMirrors${M}
+		echo isSiduxMulti: ${C}$isSiduxMulti${M}
+		echo isCoreSiduxRepo: ${C}$isCoreSiduxRepo${M}
+		echo END DEBUGGING OUTPUT${N}
+		echo
+	fi
+	
+	# note: we don't need any special regex because we already know
+	# we're in the right place, with a matching syntax, so things should be good
+	if [ -n "$entryExists" ] 
+	then
+		if [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" ] || [ "$countMirrors" -eq 1 -a -n "$isCoreSiduxRepo" ]
+		then
+			siduxSources=$( grep -ls "$entryExists" $EAS $EAS.d/* )
+			echo "${SPACER}${S}Updating ${C}$siduxSources${S} now...${N}"
+			sed -i -r "s%(#?(deb|deb-src)[[:space:]]*)$entryExists%\1$1%" $siduxSources
+			echo
+			echo "${SPACER}${S}Your system will now use sidux-apt/kernel mirror(s):"
+			echo "${SPACER}${C}$( get_sidux_mirrors 'all' )${N}"
+			updateIt='true'
+		# only when not a core mirror and sources are not yet upgraded to multi
+		elif [ "$countMirrors" -eq 1 -a -z "$isCoreSiduxRepo" ]
+		then
+			#note: we only want to prepend to sources NOT commented out
+			siduxSources=$( grep -ls "^deb.*$entryExists" $EAS $EAS.d/* )
+			# we need to loop it here because of possible multi source files
+			for siduxSource in $siduxSources
+			do
+				siduxTempHolder=$( egrep -m1 "(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $siduxSource )
+				# for presentation, just use the repo name
+				siduxTempRepo=$( cut -d ' ' -f 2 <<< $siduxTempHolder )
+				# we need to replace whitespace for sed here
+				siduxTempMainHolder=$( echo "$siduxTempHolder" | sed -r 's%(\s|\t)%\\s%g' )
+				# we want the same stuff after the mirror as the primary has
+				siduxSpecs=$( echo $siduxTempHolder | sed -r 's%.*((sid|unstable).*)%\1%' )
+				
+				if [ "$TESTING" == 'true' ]
+				then
+					echo
+					echo ${M}BEGIN DEBUGGING OUTPUT:
+					echo siduxTempHolder: ${C}$siduxTempHolder${M}
+					echo siduxTempMainHolder: ${C}$siduxTempMainHolder${M}
+					echo siduxSpecs: ${C}$siduxSpecs${M}
+					echo END DEBUGGING OUTPUT${N}
+					echo
+				fi
+
+				echo "${S}Prepending the mirror:${C} $1"
+				echo "${S}to current sidux repo: ${C}$siduxTempRepo${N}"
+				sed -i "s%$siduxTempMainHolder%deb $1 $siduxSpecs\n$siduxTempHolder%" $siduxSource
+			done
+			echo "${SPACER}${S}Your system will now use sidux-apt/kernel mirror(s):"
+			echo "${SPACER}${C}$( get_sidux_mirrors 'all' )${N}"
+			updateIt='true'
+		# this case should never happen any more with above modifications
+		elif [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" -a -n "$isCoreSiduxRepo" ]
+		then
+			echo "${E}You cannot overwrite your primary ${C}sidux.com${E} apt source:"
+			echo "${C}$isCoreSiduxRepo"
+			echo "${E}only your alternate mirror.${N}"
+		# and not this one either, but good to test for bugs
+		else
+			echo "${E}Unhandled case in $FUNCNAME...${N}"
+		fi
+	# either multi update or single core update
+	# only do this at the true end
+	elif [ -z "$entryExists" ]
+	then
+		echo "${E}Unable to properly match your ${C}sidux.com${E} repo, sorry.${N}"
+		print_hec
+		return 1
+	fi
+	
+	if [ "$updateIt" == 'true' ]
+	then
+		print_hec
+		return 0
+	fi
+}
+
+# bad mirrors for updates:
+list_bad_sidux_mirrors()
+{
+	# these are currently either dead or defective: 
+	local badMirrors='
+core-eu-4:http://ftp.spline.de/pub/sidux/debian/
+usa-2:http://lug01.eecs.wsu.edu/sidux/
+usa-1:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/
+new-zealand-1:ftp://debian.co.nz/Sidux/debian/
+'
+	echo $badMirrors
 }
 
 # I want to keep this out of globals, so we'll just echo it to functions
-list_distro_mirrors()
+list_sidux_mirrors()
 {
-	# these are currently either dead or defective: 
-	# usa-2:http://lug01.eecs.wsu.edu/sidux/ 
-	# usa-1:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/ 
-	# new-zealand-1:ftp://debian.co.nz/Sidux/debian/  
-	# core-eu-4:http://ftp.spline.de/pub/sidux/debian/  
+	
 	local siduxMirrors="
-	core-eu-1:http://debian.tu-bs.de/project/sidux/debian/  
-	core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/  
-	core-eu-3:ftp://ftp.spline.de/pub/sidux/debian/  
-	core-eu-4:http://sidux.com/debian/  
-	core-eu-5:http://sidux.net/debian/  
-	alt-africa-1:http://ftp.leg.uct.ac.za/pub/linux/sidux/debian/ 
-	alt-asia-1:http://ftp.tw.debian.org/pub/Sidux/debian/ 
-	alt-asia-2:ftp://ftp.tw.debian.org/pub/Sidux/debian/ 
-	alt-australia-1:http://mirror.aarnet.edu.au/pub/sidux/debian/  
-	alt-australia-2:ftp://mirror.aarnet.edu.au/pub/sidux/debian/  
-	alt-eu-1:http://www.mirrorservice.org/sites/sidux.com/sidux/debian/  
-	alt-eu-2:ftp://ftp.mirrorservice.org/sites/sidux.com/sidux/debian/  
-	alt-eu-3:http://ftp.heanet.ie/pub/sidux/debian/  
-	alt-eu-4:ftp://ftp.heanet.ie/pub/sidux/debian/  
-	alt-usa-1:http://ftp-mirror.internap.com/pub/sidux/debian/ 
-	alt-usa-2:ftp://ftp-mirror.internap.com/pub/sidux/debian/ 
-	alt-usa-3:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/  
-	"
+core-eu-1:http://debian.tu-bs.de/project/sidux/debian/
+core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/
+core-eu-3:ftp://ftp.spline.de/pub/sidux/debian/
+core-eu-4:http://sidux.com/debian/
+core-eu-5:http://sidux.net/debian/
+alt-africa-1:http://ftp.leg.uct.ac.za/pub/linux/sidux/debian/
+alt-asia-1:http://ftp.tw.debian.org/pub/Sidux/debian/
+alt-asia-2:ftp://ftp.tw.debian.org/pub/Sidux/debian/
+alt-australia-1:http://mirror.aarnet.edu.au/pub/sidux/debian/
+alt-australia-2:ftp://mirror.aarnet.edu.au/pub/sidux/debian/
+alt-eu-1:http://www.mirrorservice.org/sites/sidux.com/sidux/debian/
+alt-eu-2:ftp://ftp.mirrorservice.org/sites/sidux.com/sidux/debian/
+alt-eu-3:http://ftp.heanet.ie/pub/sidux/debian/
+alt-eu-4:ftp://ftp.heanet.ie/pub/sidux/debian/
+alt-usa-1:http://ftp-mirror.internap.com/pub/sidux/debian/
+alt-usa-2:ftp://ftp-mirror.internap.com/pub/sidux/debian/
+alt-usa-3:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/
+"
 	
 	echo "$siduxMirrors"
 }
