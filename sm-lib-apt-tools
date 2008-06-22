@@ -1385,7 +1385,7 @@ get_current_apt_kernel()
 		if [ "$BITS" == '64' ]
 		then
 			platform='amd64'
-		# for legacy slh kernel syntax only
+		# for odd 32 bit kernel names, yet known
 		elif [ "$BITS" == '32' -a -z "$platform" ]
 		then
 			platform='686'
