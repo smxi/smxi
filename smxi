@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.15
+####  version: 7.34.16
 ####  Date: June 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2744,7 +2744,7 @@ post_du_options()
 {
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
 	local  advanced1Option='' advanced2Option='' initX=''
-	local options='fixfonts package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
+	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
 	
 	local tempCount=$( echo $options | wc -w )
 	
@@ -2778,31 +2778,31 @@ post_du_options()
 	echo "${S}This is a list of various things you can do at this point to"
 	echo "handle some loose ends after doing a ${C}$DU_UPGRADE${S}."
 	echo $LINE
-	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}$DU_UPGRADE${S} if the upgrade "
-	echo "    was really big, or if you haven't run it recently. This can fix some kde display issues."
-	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
+# 	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}$DU_UPGRADE${S} if the upgrade "
+# 	echo "    was really big, or if you haven't run it recently. This can fix some kde display issues."
+# 	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
 	
-	echo "${C}2${S} - ${C}package-install${S} are options of packages to install."
+	echo "${C}1${S} - ${C}package-install${S} are options of packages to install."
 	echo "    Has for main categories - 1: office suites, like openoffice.org, with language pack selections;"
 	echo "    2: non-free: flash, msttcorefonts, opera, google earth; 3: Utilities, swiftfox, other good stuff;"
 	echo "    4: Desktop/window managers. These sections will grow over time, basic now."
 	
-	echo "${C}3${S} - ${C}package-removal${S} is a way to totally remove packages/programs you don't want."
+	echo "${C}2${S} - ${C}package-removal${S} is a way to totally remove packages/programs you don't want."
 	echo "    Check it out to see if any of the packages listed are things you don't need."
 	echo "    One option is to remove all the german language packages from your system."
 	
-	echo "${C}4${S} - ${C}clean-up-stuff${S} This feature has a variety of clean up options:"
+	echo "${C}3${S} - ${C}clean-up-stuff${S} This feature has a variety of clean up options:"
 	echo "    1: apt-get clean; 2: apt-get autoclean, clean up only non-current deb files;"
 	echo "    3: kernel removal options, remove all non-current kernels; 4: kernel module remover;"
 	echo "    5: backup file cleanup; 6: clean kanotix conversion packages; 7: clean unused xorg modules"
 	
-	echo "${C}5${S} - ${C}miscellaneous-tweaks${S} Current options are: mozilla-tweaks,"
+	echo "${C}4${S} - ${C}miscellaneous-tweaks${S} Current options are: mozilla-tweaks,"
 	echo "    which gets rid of gtk filehandlers and other annoyances in Mozilla products;"
 	echo "    sidux-artwork - add sidux graphics - kmenu, icon, grub; and misc system config tweaks."
 	echo "    A legacy tweaks section has older, deprecated tweaks like alsaconf and some cleanup stuff."
 	echo "    ${M}New!${S} ${C}openoffice.org hold/install/update${S} feature. Lets you hold or remove hold easily."
 	
-	echo "${C}6${S} - ${C}virtual-machine-installer${S} Installs vbox (OSE or non-ose), vbox modules, sets up users."
+	echo "${C}5${S} - ${C}virtual-machine-installer${S} Installs vbox (OSE or non-ose), vbox modules, sets up users."
 	echo "    Also has any-any script install, and basic vmware install."
 	
 	eval $advanced1
