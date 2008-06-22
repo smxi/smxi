@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.16
+####  version: 7.34.17
 ####  Date: June 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -288,6 +288,9 @@ CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
 CON_DEB=''
 CONNECTION_RETRY=''
+# setting to 'true' turns off script self-updater. You must have ALL script components
+# in $SCRIPT_HOME (/usr/local/bin) here already to use this without having error occur.
+DEV_FLAG=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
 DU_UPGRADE='dist-upgrade'
 KERNEL_EQUAL_INSTALL=''
@@ -758,13 +761,16 @@ update_scripts()
 # 	check_for_wget_file $TECH_PATTERNS_DISTRO$WGT
 # 	wgetTest="$?"
 # 	
-# 	if [ "$wgetTest" -eq 0 ]
-# 	then
+	# for devs only, this switches off/on updates, so you can work
+	# on a local test version without overwrites happening
+	if [ "$DEV_FLAG" != 'true' ]
+	then
 		download_test_file "$1" "$2"
-# 	else
-# 		file_download_error "$1" 'server-problem'
-# 	fi
-	success="$?"
+		success="$?"
+	else
+		else success=0 # hard code success, do not actually update
+	fi
+	
 	return $success
 }
 
