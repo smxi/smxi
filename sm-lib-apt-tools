@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.13.0
+####  version: 1.13.1
 ####  Date: June 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -953,11 +953,11 @@ create_apt_source_item()
 	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
 	local searchIdentifier=$4
 	
-	sourcePresent=$( egrep -iRl "^deb[[:space:]].*$grepSearch" $EAS $EAS.d/* 2>/dev/null )
+	sourcePresent=$( egrep -iRls "^deb[[:space:]].*$grepSearch" $EAS $EAS.d/* )
 	if [ -z "$sourcePresent" ]
 	then
 		# handle cases where users prefer single sources.list
-		if [ -z "$( ls $EAS.d )" -a -f $EAS ]
+		if [ -z "$( ls $EAS.d 2>/dev/null )" -a -f $EAS ]
 		then
 			sourceFile=$EAS
 		fi
@@ -1220,7 +1220,7 @@ set_sidux_mirror()
 	nonCoreSiduxRepo=$( get_sidux_mirrors 'non-core' )
 	
 	# we only want to overwrite sidux stuff it's not a dual apt sources...
-	isSiduxMulti=$(  egrep "^(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/* | cut -d ':' -f 2-6 )
+	isSiduxMulti=$(  egrep -s "^(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/* | cut -d ':' -f 2-6 )
 	isCoreSiduxRepo="$( echo "$1" | egrep '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
 	
 	# handle multiple entries in sources
