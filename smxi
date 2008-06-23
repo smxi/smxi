@@ -1003,16 +1003,16 @@ metapackage_launcher()
 
 set_distro_data()
 {
-	local siduxSources=$( grep -Ril '^deb.*sidux' $EAS $EAS.d/* 2>/dev/null )
-	local mepisSources=$( grep -Ril '^deb.*mepis' $EAS $EAS.d/* 2>/dev/null )
+	local siduxSources=$( grep -sil '^deb.*sidux' $EAS $EAS.d/*.list )
+	local mepisSources=$( grep -sil '^deb.*mepis' $EAS $EAS.d/*.list )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
 	
 	# these tests will be improved over time, but are ok for now
-	local isStable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(stable|etch)' )
-	local isTesting=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(testing|lenny)' )
-	local isUnstable=$( egrep -Riw '^deb' $EAS $EAS.d/* 2>/dev/null | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(sid|unstable)' )
+	local isStable=$( egrep -siw '^deb' $EAS $EAS.d/*.list | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(stable|etch)' )
+	local isTesting=$( egrep -siw '^deb' $EAS $EAS.d/*.list | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(testing|lenny)' )
+	local isUnstable=$( egrep -siw '^deb' $EAS $EAS.d/*.list | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(sid|unstable)' )
 	
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
