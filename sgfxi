@@ -3,7 +3,7 @@
 ####  Script Name: sid(ux) graphics installer: sgfxi
 ####  Use for Debian Sid/sidux and Testing graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.28
+####  version: 3.1.29
 ####  Date: June 24 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2432,10 +2432,12 @@ create_driver_entry()
 \tDriver "vesa"/' $EXXC
 		fi
 		# only adding busid if driver is missing, otherwise mistakes will happen
+		# not sure, why some users had issues with this, so it's now commented out
+		# unless required by dual card presence, in which case it will get uncommented
 		if [ -z "$isBusId" ]
 		then
 			sed -i ''${deviceLineNu}',/EndSection/ s/Driver[[:space:]]".*"/&\
-\tBusID "PCI:'${BUS_ID}'"/' $EXXC
+\t#BusID "PCI:'${BUS_ID}'"/' $EXXC
 		fi
 	fi
 }
