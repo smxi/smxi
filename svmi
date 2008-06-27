@@ -155,8 +155,8 @@ ANYANY_FILE_DASH=''
 # 	#ANYANY_FILE_DASH=''
 # fi
 
-case $KERNEL_THIRD in
-	24|25)
+# case $KERNEL_THIRD in
+# 	24|25)
 		# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
 		# vmware-any-any-update-116.tgz
 		ANYANY_PREFIX='http://download.rsbac.org/tmp/'
@@ -164,8 +164,8 @@ case $KERNEL_THIRD in
 		#ANYANY_ALT=''
 		ANYANY_NUMBER=117
 		#ANYANY_FILE_DASH=''
-		;;
-esac
+# 		;;
+# esac
 
 VBOX_VERSION='1.5.6'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
