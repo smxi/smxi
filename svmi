@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 1.1.6
+####  version: 1.1.7
 ####  Date: June 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -646,7 +646,7 @@ vm_main_selector()
 	echo "${M}For other vbox non-ose versions, use the ${C}svmi -V <vbox version>${M} option"
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
-	echo "${C}7${S} - ${C}install-vbox-non-ose${S} Installs the Debian Etch vbox deb. Module is built automatically."
+	echo "${C}7${S} - ${C}install-vbox-non-ose${S} Installs the Debian Etch vbox deb. Module is built automatically (${M}broken for now${S}."
 	echo "${C}8${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
 	
 	
@@ -687,7 +687,8 @@ vm_main_selector()
 				repeat='true'
 				;;
 			install-vbox-non-ose)
-				install_vbox non-ose
+				echo "${M}Sorry, this vbox non ose is broken until Sun releases the new vbox for free distribution${N}"
+				# install_vbox non-ose
 				repeat='true'
 				;;
 			build-vbox-module-non-ose)
