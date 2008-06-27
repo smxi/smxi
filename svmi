@@ -646,7 +646,7 @@ vm_main_selector()
 	echo "${M}For other vbox non-ose versions, use the ${C}svmi -V <vbox version>${M} option"
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
-	echo "${C}7${S} - ${C}install-vbox-non-ose${S} Installs the Debian Etch vbox deb. Module is built automatically (${M}broken for now${S}."
+	echo "${C}7${S} - ${C}install-vbox-non-ose${S} Installs the Debian Etch vbox deb. Module is built automatically (${M}broken for now${S})."
 	echo "${C}8${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
 	
 	
