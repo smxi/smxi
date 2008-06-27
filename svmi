@@ -688,6 +688,7 @@ vm_main_selector()
 				;;
 			install-vbox-non-ose)
 				echo "${M}Sorry, this vbox non ose is broken until Sun releases the new vbox for free distribution${N}"
+				print_hec
 				# install_vbox non-ose
 				repeat='true'
 				;;
