@@ -17,10 +17,10 @@ Signed-off-by: Žilvinas Valinskas <zilvinas@wilibox.com>
  firegl_public.h |    8 +-
  2 files changed, 288 insertions(+), 375 deletions(-)
 
-diff --git a/firegl_public.c b/firegl_public.c
+diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 index d71700d..3c8e72a 100644
---- a/firegl_public.c
-+++ b/firegl_public.c
+--- common/lib/modules/fglrx/build_module/firegl_public.c
++++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 @@ -24,13 +24,13 @@
  // ============================================================
  #include <linux/version.h>
@@ -1745,10 +1745,10 @@ index d71700d..3c8e72a 100644
      if (plock == NULL)
      {
          __KE_ERROR("plock is NULL\n");
-diff --git a/firegl_public.h b/firegl_public.h
+diff -ru common/lib/modules/fglrx/build_module/firegl_public.h common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.h
 index fc49d6e..8cc18ed 100644
---- a/firegl_public.h
-+++ b/firegl_public.h
+--- common/lib/modules/fglrx/build_module/firegl_public.h
++++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.h
 @@ -78,7 +78,7 @@ do { \
      if (!pgd_present(*(pgd_p)))	\
      { \

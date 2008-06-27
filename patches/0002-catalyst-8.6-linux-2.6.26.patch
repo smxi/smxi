@@ -11,10 +11,10 @@ Signed-off-by: Žilvinas Valinskas <zilvinas@wilibox.com>
  firegl_public.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/firegl_public.c b/firegl_public.c
+diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 index 664b38c..d71700d 100644
---- a/firegl_public.c
-+++ b/firegl_public.c
+--- common/lib/modules/fglrx/build_module/firegl_public.c
++++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 @@ -3190,7 +3190,7 @@ int ATI_API_CALL __ke_register_ioctl32_conversion(unsigned int cmd, int (*handle
  void ATI_API_CALL __ke_unregister_ioctl32_conversion(unsigned int cmd)
  {

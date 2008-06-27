@@ -11,10 +11,10 @@ Signed-off-by: Žilvinas Valinskas <zilvinas@wilibox.com>
  firegl_public.c |   10 ++++++++--
  1 files changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/firegl_public.c b/firegl_public.c
+diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 index f2bea44..0916436 100644
---- a/firegl_public.c
-+++ b/firegl_public.c
+--- common/lib/modules/fglrx/build_module/firegl_public.c
++++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 @@ -4956,8 +4956,9 @@ static unsigned long kasSetExecutionLevel(unsigned long level)
  {
      unsigned long orig_level;

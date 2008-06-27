@@ -1778,19 +1778,27 @@ run_patches()
 			;;
 		$FGLRX)
 			case $KERNEL_THIRD in 
-				25)
+				25|26)
 					case $DRIVER_DEFAULT in
-						8-4|8-5)
-							# debian kernls work normally, no patch required
-							# note: due to concerns raised, this patch is not going to be used
-							if [ -n "$IS_SIDUX_KERNEL" ] 
-							then
-								# pre patch link required, just to keep the information for future reference:
-								ln -s arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1.0 arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1
-								ln -s arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1.0 arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1
-								patchFile=''
-								#apply_patch_file $patchFile
-							fi
+# 						8-4|8-5)
+# 							# debian kernls work normally, no patch required
+# 							# note: due to concerns raised, this patch is not going to be used
+# 							if [ -n "$IS_SIDUX_KERNEL" ] 
+# 							then
+# 								# pre patch link required, just to keep the information for future reference:
+# 								ln -s arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1.0 arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1
+# 								ln -s arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1.0 arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1
+# 								patchFile=''
+# 								#apply_patch_file $patchFile
+# 							fi
+# 							;;
+						8-5|8-6)
+							patchFile='0001-catalyst-8.6-linux-2.6.26.patch'
+							apply_patch_file $patchFile
+							patchFile='0002-catalyst-8.6-linux-2.6.26.patch'
+							apply_patch_file $patchFile
+							patchFile='0003-catalyst-8.6-linux-2.6.26.patch'
+							apply_patch_file $patchFile
 							;;
 					esac
 					;;
