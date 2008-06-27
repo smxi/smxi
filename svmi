@@ -140,22 +140,6 @@ ANYANY_DIR_DASH=''
 ANYANY_FILE_DASH=''
 
 # # # use alternate name and location for 2.6.24
-# if [ "$KERNEL_THIRD" -eq 24 ]
-# then
-# 	ANYANY_PREFIX='http://rtr.ca/vmware-2.6.24/'
-# 	ANYANY_Z='.tgz'
-# 	ANYANY_ALT='a'
-# elif [ "$KERNEL_THIRD" -eq 25 ]
-# then
-# 	# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
-# 	# vmware-any-any-update-116.tgz
-# 	ANYANY_PREFIX='http://download.rsbac.org/tmp/'
-# 	#ANYANY_Z='.tgz'
-# 	#ANYANY_ALT=''
-# 	ANYANY_NUMBER=117
-# 	#ANYANY_FILE_DASH=''
-# fi
-
 case $KERNEL_THIRD in
 	25)
 		# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
@@ -167,6 +151,7 @@ case $KERNEL_THIRD in
 		#ANYANY_FILE_DASH=''
 		;;
 	24)
+		# http://blog.creonfx.com/temp/vmware-any-any-update-116.tgz
 		ANYANY_PREFIX='http://techpatterns.com/downloads/distro/patches/'
 		ANYANY_Z='.tgz'
 		ANYANY_ALT='a'
