@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.18
-####  Date: June 23 2008
+####  version: 7.34.19
+####  Date: June 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1435,6 +1435,12 @@ start_stop_default_dm()
 				fi
 				# success='true'
 			fi
+			# this handles cases where somehow X is still running
+			# startx x starts can for example bypass kdm tests, etc
+			if [ "$2" == 'stop' -a "$( x_is_running )" -eq 0 ]
+			then
+				killall Xorg
+			fi
 			;;
 		nowmstart)
 			success='true'
@@ -1476,11 +1482,30 @@ do_display_manager_pid_test()
 		fi
 	done
 	
+	if [ "$( x_is_running )" -eq 0 ]
+	then
+		found='true'
+	fi
+
 	if [ "$found" == 'true' ]
 	then
 		return 0
 	else
 		return 1
+	fi
+}
+
+x_is_running()
+{
+	# we'll do one final X is running test here, note, handling a bunch of
+	# different possible X detections in etch, lenny, and sid, then filtering out the grep
+	local xIsRunning=$( ps aux | grep '/usr.*/X' | grep -vc 'grep' )
+	
+	if [ "$xIsRunning" -gt 0 ]
+	then
+		echo 0
+	else
+		echo 1
 	fi
 }
 # keep the lists here synced, do dm pid, and below: 
@@ -1587,7 +1612,7 @@ check_display_and_x()
 	# first get count of items, then use that count to extract the last item
 	local rlc=$( echo $( runlevel ) | wc -w ) response='' wmRunning='' facts=''
 	local currentRunlevel=$( echo $(runlevel) | cut -d " " -f $rlc ) sleepTime=6
-	local hasVM=$( ls /proc | grep vmnet ) # will be used to add sleep time for vm shutdown
+	local hasVM=$( ls /proc | grep 'vmnet' ) # will be used to add sleep time for vm shutdown
 	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
 	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
 	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
