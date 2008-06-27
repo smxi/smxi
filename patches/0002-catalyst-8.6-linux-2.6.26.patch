@@ -1,0 +1,29 @@
+From a94e42382fbf70d88d71c473b392a2e0656dcf0c Mon Sep 17 00:00:00 2001
+From: =?utf-8?q?=C5=BDilvinas=20Valinskas?= <zilvinas@wilibox.com>
+Date: Sat, 14 Jun 2008 02:10:00 +0300
+Subject: [PATCH] GCC complains `return' with a value, in function returning void
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Žilvinas Valinskas <zilvinas@wilibox.com>
+---
+ firegl_public.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/firegl_public.c b/firegl_public.c
+index 664b38c..d71700d 100644
+--- a/firegl_public.c
++++ b/firegl_public.c
+@@ -3190,7 +3190,7 @@ int ATI_API_CALL __ke_register_ioctl32_conversion(unsigned int cmd, int (*handle
+ void ATI_API_CALL __ke_unregister_ioctl32_conversion(unsigned int cmd)
+ {
+ #ifdef FIREGL_IOCTL_COMPAT
+-    return 0;
++    return;
+ #else
+     unregister_ioctl32_conversion(cmd);
+ #endif
+-- 
+1.5.6.rc2.45.gdc92c
+
