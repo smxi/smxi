@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 1.1.4
-####  Date: June 11 2008
+####  version: 1.1.5
+####  Date: June 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -138,22 +138,34 @@ ANYANY_ALT=''
 ANYANY_DIR_DASH=''
 ANYANY_FILE_DASH=''
 
-# # use alternate name and location for 2.6.24
-if [ "$KERNEL_THIRD" -eq 24 ]
-then
-	ANYANY_PREFIX='http://rtr.ca/vmware-2.6.24/'
-	ANYANY_Z='.tgz'
-	ANYANY_ALT='a'
-elif [ "$KERNEL_THIRD" -eq 25 ]
-then
-	# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
-	# vmware-any-any-update-116.tgz
-	ANYANY_PREFIX='http://download.rsbac.org/tmp/'
-	#ANYANY_Z='.tgz'
-	#ANYANY_ALT=''
-	ANYANY_NUMBER=117
-	#ANYANY_FILE_DASH=''
-fi
+# # # use alternate name and location for 2.6.24
+# if [ "$KERNEL_THIRD" -eq 24 ]
+# then
+# 	ANYANY_PREFIX='http://rtr.ca/vmware-2.6.24/'
+# 	ANYANY_Z='.tgz'
+# 	ANYANY_ALT='a'
+# elif [ "$KERNEL_THIRD" -eq 25 ]
+# then
+# 	# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
+# 	# vmware-any-any-update-116.tgz
+# 	ANYANY_PREFIX='http://download.rsbac.org/tmp/'
+# 	#ANYANY_Z='.tgz'
+# 	#ANYANY_ALT=''
+# 	ANYANY_NUMBER=117
+# 	#ANYANY_FILE_DASH=''
+# fi
+
+case $KERNEL_THIRD in
+	24|25)
+		# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
+		# vmware-any-any-update-116.tgz
+		ANYANY_PREFIX='http://download.rsbac.org/tmp/'
+		#ANYANY_Z='.tgz'
+		#ANYANY_ALT=''
+		ANYANY_NUMBER=117
+		#ANYANY_FILE_DASH=''
+		;;
+esac
 
 VBOX_VERSION='1.5.6'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
