@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sid(ux) virtual machine installer: sgfxi
 ####  Only use for Debian Sid and Sidux, no support for any other distro
-####  version: 1.1.5
+####  version: 1.1.6
 ####  Date: June 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -67,6 +67,7 @@ AUTORUN_VBOX=''
 AUTORUN_VBOX_MODULE=''
 AUTORUN_VMPLAYER=''
 AUTORUN_VMSERVER=''
+FORCE_UPDATE=''
 SKIP_CONNECT=''
 SKIP_FUNCTION=''
 SM_INSTALL=''
@@ -155,8 +156,8 @@ ANYANY_FILE_DASH=''
 # 	#ANYANY_FILE_DASH=''
 # fi
 
-# case $KERNEL_THIRD in
-# 	24|25)
+case $KERNEL_THIRD in
+	25)
 		# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
 		# vmware-any-any-update-116.tgz
 		ANYANY_PREFIX='http://download.rsbac.org/tmp/'
@@ -164,8 +165,14 @@ ANYANY_FILE_DASH=''
 		#ANYANY_ALT=''
 		ANYANY_NUMBER=117
 		#ANYANY_FILE_DASH=''
-# 		;;
-# esac
+		;;
+	24)
+		ANYANY_PREFIX='http://techpatterns.com/downloads/distro/patches/'
+		ANYANY_Z='.tgz'
+		ANYANY_ALT='a'
+		ANYANY_NUMBER=115
+		;;
+esac
 
 VBOX_VERSION='1.5.6'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
@@ -354,6 +361,11 @@ basic_startup_tests()
 		error_handler 252
 	fi
 	cleanup_temp_files 
+	# this allows users to update in x, for example, to see latest drivers
+	if [ "$FORCE_UPDATE" == 'true' ]
+	then
+		check_update_script $SCRIPT_NAME
+	fi
 	# there's no need to re-test connections for svmi module since that's redundant
 	# only run this for users on first attempt, script will exit if no connection
 	if [ "$SM_INSTALL" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECT" != 'true' ]
@@ -1261,7 +1273,7 @@ show_options()
 	fi
 }
 
-while getopts ABDFhMPRSTuvV:Z opt
+while getopts ABDFhMPRSTuUvV:Z opt
 do
 	case $opt in
 		A) AUTORUN_ANYANY='true'
@@ -1295,6 +1307,8 @@ do
 			START_OPTIONS=$START_OPTIONS'T'
 			;;
 		u) USER_NAME="$OPTARG"
+			;;
+		U) FORCE_UPDATE='true' 
 			;;
 		v) print_information
 			exit 0
