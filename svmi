@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
-####  Script Name: sid(ux) virtual machine installer: sgfxi
-####  Only use for Debian Sid and Sidux, no support for any other distro
+####  Script Name: system virtual machine installer: svmi
+####  Only use for Debian Sid, Testing and sidux, no support for any other distro
 ####  version: 1.1.7
 ####  Date: June 26 2008
 ########################################################################
@@ -18,7 +18,7 @@
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 ########################################################################
 ####  Script URL: http://techpatterns.com/downloads/distro/svmi
-####  Script Home page: http://techpatterns.com/forums/about----.html
+####  Script Home page: none
 ########################################################################
 ########################################################################
 #### DEFINE:
