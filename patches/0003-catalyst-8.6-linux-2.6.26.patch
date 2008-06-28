@@ -1,24 +1,4 @@
-From d6ef03ff417eb001653c51112c79e709ba8eaec9 Mon Sep 17 00:00:00 2001
-From: =?utf-8?q?=C5=BDilvinas=20Valinskas?= <zilvinas@wilibox.com>
-Date: Sat, 14 Jun 2008 03:54:38 +0300
-Subject: [PATCH] Linux 2.6.26.x kernels support.
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-
-o trailing white spaces/tabs removed.
-o VMA ->nopage() removed, go for ->fault()
-o compiles with warnings ...
-o most importantly ... WORKS on 2.6.26-rc6/amd64!
-
-Signed-off-by: Žilvinas Valinskas <zilvinas@wilibox.com>
----
- firegl_public.c |  655 ++++++++++++++++++++++++-------------------------------
- firegl_public.h |    8 +-
- 2 files changed, 288 insertions(+), 375 deletions(-)
-
 diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
-index d71700d..3c8e72a 100644
 --- common/lib/modules/fglrx/build_module/firegl_public.c
 +++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
 @@ -24,13 +24,13 @@
@@ -1746,7 +1726,6 @@ index d71700d..3c8e72a 100644
      {
          __KE_ERROR("plock is NULL\n");
 diff -ru common/lib/modules/fglrx/build_module/firegl_public.h common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.h
-index fc49d6e..8cc18ed 100644
 --- common/lib/modules/fglrx/build_module/firegl_public.h
 +++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.h
 @@ -78,7 +78,7 @@ do { \
@@ -1785,5 +1764,4 @@ index fc49d6e..8cc18ed 100644
          /* alternatively we could generate a NOPAGE_OOM "out of memory" */ \
      } \
  } while(0)
--- 
-1.5.6.rc2.45.gdc92c
+

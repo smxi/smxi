@@ -48,7 +48,7 @@ run_2008_fixes()
 		fi
 		if [ "$DISTRO_LEVEL" -lt 12 ]
 		then
-			gpm_fix_1
+			gpm_fix_1 # preview requires this fix, unfortunately
 		fi
 		
 	elif [ "$1" == 'post' ]
