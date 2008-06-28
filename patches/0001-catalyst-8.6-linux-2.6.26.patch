@@ -1,6 +1,6 @@
-diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
---- common/lib/modules/fglrx/build_module/firegl_public.c
-+++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
+diff -ru common/lib/modules/fglrx/build_mod/firegl_public.c common/lib/modules/fglrx/build_mod.2.6.26-8-6/firegl_public.c
+--- common/lib/modules/fglrx/build_mod/firegl_public.c
++++ common/lib/modules/fglrx/build_mod.2.6.26-8-6/firegl_public.c
 @@ -4956,8 +4956,9 @@ static unsigned long kasSetExecutionLevel(unsigned long level)
  {
      unsigned long orig_level;

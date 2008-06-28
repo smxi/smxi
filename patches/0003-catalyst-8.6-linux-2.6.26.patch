@@ -1,6 +1,6 @@
-diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
---- common/lib/modules/fglrx/build_module/firegl_public.c
-+++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.c
+diff -ru common/lib/modules/fglrx/build_mod/firegl_public.c common/lib/modules/fglrx/build_mod.2.6.26-8-6/firegl_public.c
+--- common/lib/modules/fglrx/build_mod/firegl_public.c
++++ common/lib/modules/fglrx/build_mod.2.6.26-8-6/firegl_public.c
 @@ -24,13 +24,13 @@
  // ============================================================
  #include <linux/version.h>
@@ -1725,9 +1725,9 @@ diff -ru common/lib/modules/fglrx/build_module/firegl_public.c common/lib/module
      if (plock == NULL)
      {
          __KE_ERROR("plock is NULL\n");
-diff -ru common/lib/modules/fglrx/build_module/firegl_public.h common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.h
---- common/lib/modules/fglrx/build_module/firegl_public.h
-+++ common/lib/modules/fglrx/build_module.2.6.26-8-6/firegl_public.h
+diff -ru common/lib/modules/fglrx/build_mod/firegl_public.h common/lib/modules/fglrx/build_mod.2.6.26-8-6/firegl_public.h
+--- common/lib/modules/fglrx/build_mod/firegl_public.h
++++ common/lib/modules/fglrx/build_mod.2.6.26-8-6/firegl_public.h
 @@ -78,7 +78,7 @@ do { \
      if (!pgd_present(*(pgd_p)))	\
      { \

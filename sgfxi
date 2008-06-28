@@ -207,16 +207,16 @@ set_test_data()
 		# latest script versions
 		
 		# rm -f sgfxi* 
-			# note: devs: double check this output to make sure it's your user name
-#			username=$( getent passwd 1000|cut -d \: -f1 )
-#  		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
-#  		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
-#  		cd $SCRIPT_HOME
-#  		CARD_DATA=1002:7280 # fake ati
-#			CARD_DATA=10de:0020 # fake nvidia legacy 
-#			CARD_DATA=10de:0322 # fake nvidia 
+		# note: devs: double check this output to make sure it's your user name
+# 		username=$( getent passwd 1000|cut -d \: -f1 )
+# 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
+# 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
+# 		cd $SCRIPT_HOME
+# 		CARD_DATA=1002:7280 # fake ati
+# 		CARD_DATA=10de:0020 # fake nvidia legacy 
+# 		CARD_DATA=10de:0322 # fake nvidia 
 		#CARD_DATA=10de:0020
-		#FG_DEFAULT='8.37.3 
+# 		FG_DEFAULT='8-5' 
 		:
 	fi
 }
@@ -1792,7 +1792,7 @@ run_patches()
 # 								#apply_patch_file $patchFile
 # 							fi
 # 							;;
-						8-5|8-6)
+						8-6)
 							# just temp hold until it's confirmed to work
 							if [ "$TESTING" == 'true' ]
 							then
