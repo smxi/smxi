@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.9
-####  Date: June 18 2008
+####  version: 1.15.10
+####  Date: June 29 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -353,10 +353,6 @@ swiftfox_link_tweak()
 	local uls='/usr/lib/swiftfox'
 
 	# remove swiftfox plugin directory if present
-	if [ -f $ulsp ]
-	then
-		rm -f $ulsp
-	fi
 	if [ -d $ulsp ]
 	then
 		rm -fR $ulsp
@@ -367,7 +363,8 @@ swiftfox_link_tweak()
 	then
 		if [ -d $uls ]
 		then
-			ln -s $ulip $ulsp
+			# remove any bad link swiftfox might try to make before creating the real one
+			ln -fs $ulip $ulsp
 			echo  "${S}Symbolic link from ${C}$ulip${S} to ${C}$ulsp${S} created.${N}"
 		else
 			echo "${E}No ${C}$uls${E} directory found.${N}"
