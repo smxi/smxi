@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.31
-####  Date: June 29 2008
+####  version: 3.1.32
+####  Date: June 30 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -208,11 +208,11 @@ set_test_data()
 		
 		# rm -f sgfxi* 
 		# note: devs: double check this output to make sure it's your user name
-# 		username=$( getent passwd 1000|cut -d \: -f1 )
-# 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
-# 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
-# 		cd $SCRIPT_HOME
-# 		CARD_DATA=1002:7280 # fake ati
+		username=$( getent passwd 1000|cut -d \: -f1 )
+		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
+		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
+		cd $SCRIPT_HOME
+		CARD_DATA=1002:7280 # fake ati
 # 		CARD_DATA=10de:0020 # fake nvidia legacy 
 # 		CARD_DATA=10de:0322 # fake nvidia 
 		#CARD_DATA=10de:0020
@@ -1597,7 +1597,7 @@ download_extract_driver()
 			errorTemp="$?"
 			;;
 		$FGLRX)
-			LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= sh ./$runPackage --extract 1>> $LOG_FILE 2>> $LOG_FILE
+			LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= bash ./$runPackage --extract 1>> $LOG_FILE 2>> $LOG_FILE
 			errorTemp="$?"
 			;;
 	esac
