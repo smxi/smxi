@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.20
-####  Date: June 26 2008
+####  version: 7.34.21
+####  Date: July 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -275,7 +275,7 @@ SKIP_ENTER=''
 SKIP_GRAPHICS=''
 SKIP_INFO=''
 SKIP_KERNEL=''
-SKIP_REFRESH=''
+SKIP_RESTART=''
 SKIP_TWEAKS=''
 SKIP_WARNING=''
 TESTING=''
@@ -3016,7 +3016,7 @@ do
 		k)	SKIP_KERNEL='true'
 			START_OPTIONS=$START_OPTIONS'k'
 			;;
-		r)	SKIP_REFRESH='true'
+		r)	SKIP_RESTART='true'
 			;;
 		s)	SKIP_CONNECTIONS='true'
 			START_OPTIONS=$START_OPTIONS's'
@@ -3115,7 +3115,7 @@ run_script_components()
 	
 	# this is mainly for wifi new kernel isntalls where the new kernel wifi module
 	# requires fresh install. Triggers install_wireless_modules if user wants
-	if [ "$SKIP_CONNECTIONS" != 'true' -a "$SKIP_REFRESH" != 'true' -a "$SKIP_CONNECTION_TEST" != 'true' ]
+	if [ "$SKIP_CONNECTIONS" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECTION_TEST" != 'true' ]
 	then
 		check_connection
 	fi
@@ -3125,7 +3125,7 @@ run_script_components()
 	update_scripts $VERSION_INFO # get the version info data file
 	
 	# check for latest version of script.
-	if [ "$SKIP_REFRESH" != "true" -a "$SKIP_CONNECTIONS" != 'true' ]
+	if [ "$SKIP_RESTART" != "true" -a "$SKIP_CONNECTIONS" != 'true' ]
 	then
 		check_version
 	fi

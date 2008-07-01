@@ -203,11 +203,11 @@ set_test_data()
 	local username=''
 	if [ "$TESTING" == 'true' ] # set testing directories etc
 	then
-		# this is required for testing to make sure we always are starting with true
-		# latest script versions
-		
-		# rm -f sgfxi* 
-		# note: devs: double check this output to make sure it's your user name
+## NOTE: it's important to start all comments in here at first character for cleanup updater
+#		# this is required for testing to make sure we always are starting with true
+#		# latest script versions
+#		rm -f sgfxi* 
+#		# note: devs: double check this output to make sure it's your user name
 # 		username=$( getent passwd 1000|cut -d \: -f1 )
 # 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
 # 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
@@ -215,9 +215,10 @@ set_test_data()
 # 		CARD_DATA=1002:7280 # fake ati
 # 		CARD_DATA=10de:0020 # fake nvidia legacy 
 # 		CARD_DATA=10de:0322 # fake nvidia 
-		#CARD_DATA=10de:0020
+#	CARD_DATA=10de:0020
 # 		FG_DEFAULT='8-5' 
-		:
+# leave this at first character or errors in updater tools will occur
+:
 	fi
 }
 
