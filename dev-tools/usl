@@ -1,0 +1,238 @@
+#!/bin/bash
+########################################################################
+####  Script Name: usl
+####  Development updating tool for smxi scripts
+####  Only supports true Debian based distros.
+####  version: 2.0.0
+####  Date: July 1 2008
+########################################################################
+####  Copyright (C) Harald Hope 2005-2008
+####  
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+####
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+####
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+########################################################################
+#### DEFINE:
+#### TRUE: -eq 0; == 'true'; function return 0
+#### FALSE: -gt 0; == ''; function return > 0
+########################################################################
+#### VARIABLES
+########################################################################
+
+# layout
+LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+
+# paths, change these to suite your needs
+ALT_DIR="$HOME/bin/scripts/sidux/"
+SVN_DIR="$HOME/bin/scripts/sidux/svn/trunk"
+GRAPHICS_DIR="$HOME/bin/scripts/graphics/"
+DEV_TOOLS_DIR="$HOME/bin/scripts/sidux"
+DEV_TOOLS_SVN_DIR="$SVN_DIR/dev-tools"
+KERNEL_DIR="$HOME/large/sidux-kernels"
+KERNEL_SVN_DIR="$SVN_DIR/kernel/"
+MAIN_DIR='/usr/local/bin/'
+SM_VERSIONS=$ALT_DIR'sm-versions'
+
+# scripts/libs
+SCRIPT_LIST_ALT='kremover svmi'
+SCRIPT_LIST_GRAPHICS="sgfxi"
+SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes"
+
+########################################################################
+#### FUNCTIONS
+########################################################################
+# args: $1 error nu; $2 - extra data
+error_handler()
+{
+	local message=''
+	
+	case $1 in
+		1)
+			message='You should not be root to run this script'
+			;;
+		2)
+			message="The directory: $2 does not exist, please fix this."
+			;;
+		3)
+			message="sed failed for some reason while removing dev flags in file: $2"
+			;;
+	esac
+	echo $LINE
+	echo $message
+	echo "Error $1 - Exiting script, please correct the error"
+	echo $LINE
+	exit $1
+}
+
+start_up_tests()
+{
+	local startDir=''
+	
+	echo $LINE
+	echo "Running initial startup tests..."
+	# don't want to use root for this script
+	if [ "$(whoami)" == 'root' ]
+	then
+		error_handler 1
+	fi
+	
+	# make sure the paths you made are right and exist
+	for startDir in $MAIN_DIR $GRAPHICS_DIR $ALT_DIR $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR $DEV_TOOLS_SVN_DIR $DEV_TOOLS_DIR
+	do
+		if [ ! -d "$startDir" ]
+		then
+			error_handler 2 $startDir
+		fi
+	done
+	echo "Start up tests passed."
+}
+
+make_sm_versions()
+{
+	if [ -f $SM_VERSIONS ]
+	then
+		rm -f $SM_VERSIONS
+	fi
+	touch $SM_VERSIONS
+}
+
+# make sure to turn to false all dev flags
+clean_dev_flags()
+{
+	local script='' scripts='smxi sgfxi svmi'
+	
+	echo "Cleaning dev flags up now..."
+	for script in $scripts
+	do
+		# important! only reset where line begins with variable name
+		sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SVN_DIR/$script || error_handler 3 $script
+	done
+}
+
+# this is for those times I forget to clean the -T flag data
+clean_gfx_test_data()
+{
+	local svnGfx="$SVN_DIR/sgfxi"
+	local setTestDataStart=$( grep -n '^set_test_data()' $svnGfx | cut -d ':' -f 1 )
+	# start 5 lines below
+	setTestDataStart=$(( $setTestDataStart + 6 ))
+	echo "Cleaning gfx test data, start line: $setTestDataStart..."
+	# add # before any line in the function starting with space
+	sed -i ''${setTestDataStart}',/fi/ s/^[[:space:]].*/#&/' $svnGfx
+}
+
+# trigger update_sm_data
+main_updater()
+{
+	echo $LINE
+	update_sm_data "$SCRIPT_LIST_MAIN" "$MAIN_DIR"
+	update_sm_data "$SCRIPT_LIST_GRAPHICS" "$GRAPHICS_DIR"
+	update_sm_data "$SCRIPT_LIST_ALT" "$ALT_DIR"
+	update_kernel_installers
+	update_dev_tools
+	finalize_sm_versions
+	clean_dev_flags
+	clean_gfx_test_data
+}
+
+# args: $1 - which data set to update; $2 - data dir
+update_sm_data()
+{
+	local script=''
+	
+	echo "Updating $2 group now"
+	
+	for script in $1
+	do
+		LocalVersion=$( grep -m 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+		LocalDate=$( grep -m 1 -o -G "Date:\ [A-Za-z0-9\ ]*" $2$script | cut -f 2-4 -d ' ' )
+		echo $script'='$LocalVersion':'$LocalDate >> $SM_VERSIONS
+		cp -f --preserve=timestamps $2$script $SVN_DIR/$script
+	done
+}
+
+# add closing steps for sm_versions file
+finalize_sm_versions()
+{
+	echo "Finalizing $SM_VERSIONS now..."
+	echo  >> $SM_VERSIONS
+	echo '###**EOF**###' >> $SM_VERSIONS
+	# add the versions file to the svn too
+	cp -f --preserve=timestamps $SM_VERSIONS $SVN_DIR
+}
+
+# extra scripts used in smxi, kernel installers for zipped sidux kernels
+update_kernel_installers()
+{
+	local sidux32='install-kernel-sidux-32.sh'
+	local sidux64='install-kernel-sidux-64.sh'
+	
+	# update kernel installers if needed
+	cp -f $KERNEL_DIR/64-installer/$sidux64 $KERNEL_SVN_DIR$sidux64
+	cp -f $KERNEL_DIR/32-installer/$sidux32 $KERNEL_SVN_DIR$sidux32
+}
+
+# developer scripts for creating smxi
+update_dev_tools()
+{
+	cp -f $DEV_TOOLS_DIR/usl $DEV_TOOLS_SVN_DIR/usl
+}
+
+# if you have write access to svn, this last step will update svn
+update_svn_data()
+{
+	local response='' response2='' 
+	
+	echo $LINE
+	echo "Please enter the svn commit message:"
+	read response
+	
+	echo "You entered this:"
+	echo $LINE
+	echo "$response"
+	echo $LINE
+	echo "Is this correct (y/n)"
+	read response2
+	
+	case $response2 in
+		y|Y)
+			echo "Ok, committing it now"
+			commit_to_svn "$response"
+			;;
+		*)
+			echo "Ok, let's try it again..."
+			update_svn_data
+			;;
+	esac
+}
+
+# args: $1 - message for commit
+commit_to_svn()
+{
+	cd $SVN_DIR 
+	svn commit -m "$1"
+}
+
+finish_it_up()
+{
+	echo $LINE
+	echo "OK, all finished. Remember to upload via ftp the changes to make it live."
+}
+
+########################################################################
+#### EXECUTE
+########################################################################
+
+start_up_tests
+make_sm_versions
+main_updater
+# comment this out if you do not have svn write access
+update_svn_data
+finish_it_up
+exit 0
