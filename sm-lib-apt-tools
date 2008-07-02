@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.13.6
-####  Date: June 26 2008
+####  version: 1.13.7
+####  Date: July 1 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -377,7 +377,7 @@ set_hold_install()
 	then
 		# get user set hold/install packages first, slice change separator to space
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
-		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$HOLD_INSTALL
+		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$HOLD_INSTALL
 		DPKG_HOLD_INSTALL="$( cat $HOLD_INSTALL ) $userPackages"
 		if [ -f "$HOLD_INSTALL" ]
 		then
