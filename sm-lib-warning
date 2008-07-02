@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sm-lib-warning
 ####  version: 1.2.2
-####  Date: June 13 2008
+####  Date: July 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -26,7 +26,7 @@
 # get remote server status
 get_status()
 {
-	wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$WARNING_STATUS
+	wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$WARNING_STATUS
 	
 	if [ -f $WARNING_STATUS ]
 	then
@@ -45,7 +45,7 @@ get_warning()
 {
 	if [ "$STATUS" == 'danger' -o "$STATUS" == 'danger-alert' -a "$1" == 'danger' ]
 	then
-		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$WARNING_BODY
+		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$WARNING_BODY
 		if [ -f $WARNING_BODY ]
 		then
 			cat $WARNING_BODY
@@ -58,7 +58,7 @@ get_warning()
 	fi
 	if [ "$STATUS" == 'alert' -o "$STATUS" == 'danger-alert' -a "$1" == 'alert' ]
 	then
-		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$ALERT_BODY
+		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$ALERT_BODY
 		if [ -f $ALERT_BODY ]
 		then
 			cat $ALERT_BODY
@@ -75,7 +75,7 @@ get_warning()
 # related. This is called in pre du-1, so users can actually remember the config files
 get_configs()
 {
-	wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$CONFIGS_BODY
+	wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$CONFIGS_BODY
 	
 	if [ -f "$CONFIGS_BODY" -a -n "$( cat $CONFIGS_BODY )" ]
 	then
