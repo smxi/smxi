@@ -19,14 +19,6 @@
 ####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
 ########################################################################
 
-# this installer must be in /usr/sbin because of how system path defaults work
-# it requires two symbolic links: 
-# /usr/sbin/sgfxi -> /usr/sbin/smxi
-# /usr/sbin/svmi -> /usr/sbin/svmi
-# as well to function, basically this is a trick using default path order in root
-#,/usr/sbin is found first, and this either downloads files or starts them if they
-# are present.
-
 # Please do not change the logic here, it makes it too hard to read linearly:
 # [ ! -f somefile ] && do something is far easier to read than [ -f somefile ] || do something
 # tempfile primary cleanup is now handled by called scripts, so no need to complicate this
