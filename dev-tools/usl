@@ -3,8 +3,8 @@
 ####  Script Name: usl
 ####  Development updating tool for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.0.0
-####  Date: July 1 2008
+####  version: 2.0.1
+####  Date: July 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  
@@ -34,6 +34,7 @@ SVN_DIR="$HOME/bin/scripts/sidux/svn/trunk"
 GRAPHICS_DIR="$HOME/bin/scripts/graphics/"
 DEV_TOOLS_DIR="$HOME/bin/scripts/sidux"
 DEV_TOOLS_SVN_DIR="$SVN_DIR/dev-tools"
+STUB_SVN_DIR="$SVN_DIR/smxi-stub"
 KERNEL_DIR="$HOME/large/sidux-kernels"
 KERNEL_SVN_DIR="$SVN_DIR/kernel/"
 MAIN_DIR='/usr/local/bin/'
@@ -83,7 +84,7 @@ start_up_tests()
 	fi
 	
 	# make sure the paths you made are right and exist
-	for startDir in $MAIN_DIR $GRAPHICS_DIR $ALT_DIR $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR $DEV_TOOLS_SVN_DIR $DEV_TOOLS_DIR
+	for startDir in $MAIN_DIR $GRAPHICS_DIR $ALT_DIR $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR $DEV_TOOLS_SVN_DIR $DEV_TOOLS_DIR $STUB_SVN_DIR
 	do
 		if [ ! -d "$startDir" ]
 		then
@@ -135,7 +136,7 @@ main_updater()
 	update_sm_data "$SCRIPT_LIST_GRAPHICS" "$GRAPHICS_DIR"
 	update_sm_data "$SCRIPT_LIST_ALT" "$ALT_DIR"
 	update_kernel_installers
-	update_dev_tools
+	update_other_components
 	finalize_sm_versions
 	clean_dev_flags
 	clean_gfx_test_data
@@ -179,10 +180,12 @@ update_kernel_installers()
 }
 
 # developer scripts for creating smxi
-update_dev_tools()
+update_other_components()
 {
 	cp -f $DEV_TOOLS_DIR/usl $DEV_TOOLS_SVN_DIR/usl
+	cp -f $DEV_TOOLS_DIR/smxi-stub $STUB_SVN_DIR/smxi-stub
 }
+
 
 # if you have write access to svn, this last step will update svn
 update_svn_data()
