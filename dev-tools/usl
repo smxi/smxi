@@ -36,7 +36,7 @@ DEV_TOOLS_DIR="$HOME/bin/scripts/sidux"
 DEV_TOOLS_SVN_DIR="$SVN_DIR/dev-tools"
 STUB_SVN_DIR="$SVN_DIR/smxi-stub"
 KERNEL_DIR="$HOME/large/sidux-kernels"
-KERNEL_SVN_DIR="$SVN_DIR/kernel/"
+KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
 MAIN_DIR='/usr/local/bin/'
 SM_VERSIONS=$ALT_DIR'sm-versions'
 
