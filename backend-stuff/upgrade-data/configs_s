@@ -1,0 +1,16 @@
+Configs Last Modified: 13 June 2008 20:34 (gmt)
+------------------------------------------------------------------
+/etc/X11/Xresources/X11-common
+/etc/init.d/rc.local
+/etc/skel/.kde/share/config/kdesktoprc
+/etc/defaults/distro
+/etc/init.d/xdm
+/etc/locale.alias
+/etc/init.d/gpm
+/etc/init.d/acpid
+/etc/acpi/powerbtn.sh
+/etc/skel/bashrc
+/etc/bash/bashrc 
+/etc/init.d/procps
+
+For ALL powersaved configs, please answer Y

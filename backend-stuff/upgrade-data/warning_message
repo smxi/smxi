@@ -1,0 +1,5 @@
+Warnings Last Modified: 30 June 2008 01:36 (gmt)
+------------------------------------------------------------------
+Perl 5.10.0 issue can break dist-upgrade.  Problems can threaten to remove 
+many packages. Do not proceed until Perl problem go away.
+UPDATE: most packages are synced now, but some remain to be fixed, please wait.

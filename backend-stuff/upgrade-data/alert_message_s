@@ -1,0 +1,7 @@
+Alerts Last Modified: 13 June 2008 22:24 (gmt)
+------------------------------------------------------------------
+1. Let these packages get removed: libts0 firefox; apt-file apt-show-versions, ethereal 
+libapt-pkg-perl; modutils libcurl4 linux-kernel-headers (not part of slh kernels) ibhd13
+## These are being upgraded to newer versions, let them go
+libavcodeccvs51 libavdevicecvs52 libavformatcvs51 libavformatcvs52 libavutilcvs49 
+libpostproccvs51 libswscalecvs0

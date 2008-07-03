@@ -1,0 +1,33 @@
+Alerts Last Modified: 30 June 2008 01:36 (gmt)
+------------------------------------------------------------------
+1. Let these packages get removed: libts0 firefox; apt-file apt-show-versions, ethereal 
+libapt-pkg-perl; modutils libcurl4 linux-kernel-headers (not part of slh kernels) libhd13
+## These are being upgraded to newer versions, let them go
+libavcodeccvs51 libavdevicecvs52 libavformatcvs51 libavformatcvs52 libavutilcvs49 
+libpostproccvs51 libswscalecvs0 
+------------------------------------------------------------------
+2. The libstlport4.6c2 / openoffice fix is now in smxi. Run smxi again if you had
+problems and it should fix it. NOTE: OpenOffice.org will update even if you have it
+on hold, so make sure you have time/bandwidth to upgrade OOo. This fix is not 
+optional. If you have OOo packages on hold I strongly recommend you remove the holds
+prior to the dist-upgrade, then upgrade all components at once, or things might get
+mismatched.
+------------------------------------------------------------------
+3. If package libqtcore4 creates a break in your dist-upgrade, just use the install -f
+option post dist-upgrade, then run the dist-upgrade again option, then continue. 
+------------------------------------------------------------------
+4. 2.6.25 kernels: ATI fglrx now only works with Debian sid kernels, not sidux  kernels.
+You can install Debian sid kernels using smxi. Check sidux.com hardware forums for details.
+------------------------------------------------------------------
+5. Let these Perl based packages go, Perl has upgraded and these you don't need now: 
+fix-fonts fttools libarchive-tar-perl libffi4 libft-perl libldap2 libperl5.8
+------------------------------------------------------------------
+6. Iceweasel 3.0 is now OFF hold. I strongly recommend you update ALL your extensions
+before you install this new version, and make sure you remove any extensions that may
+cause problems. Zulu9 had issues with noscript. I tested this and it works fine, I did
+not need to use a new profile to do this upgrade, but you are well advised to do that,
+although the import procedure for the new Iceweasel profile might work better if it starts
+in your old one. This is a very large change in Firefox/Iceweasel, so if you have doubts
+check the sidux forums for more information before you proceed.
+------------------------------------------------------------------
+7. If you see lilo bootloader message update advice, ignore it, sidux uses grub.

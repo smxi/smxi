@@ -1,0 +1,20 @@
+Configs Last Modified: 8 June 2008 18:06 (gmt)
+------------------------------------------------------------------
+/etc/X11/Xresources/X11-common
+/etc/init.d/rc.local
+/etc/skel/.kde/share/config/kdesktoprc
+/etc/defaults/distro
+/etc/init.d/xdm
+/etc/locale.alias
+/etc/init.d/gpm
+/etc/init.d/acpid
+/etc/acpi/powerbtn.sh
+/etc/skel/bashrc
+/etc/bash/bashrc 
+/etc/init.d/procps
+
+For ALL powersaved configs, please answer Y
+
+Answer 'n' to these questions:
+kde passwrd/login config file question ( if you see it)
+/etc/kde3/kdm/kdmrc

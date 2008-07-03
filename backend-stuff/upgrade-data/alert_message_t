@@ -1,0 +1,19 @@
+Alerts Last Modified: 13 June 2008 19:51 (gmt)
+------------------------------------------------------------------
+1. Let these packages get removed: libts0 firefox; apt-file apt-show-versions, ethereal 
+libapt-pkg-perl; modutils libcurl4 linux-kernel-headers (not part of slh kernels) ibhd13
+## These are being upgraded to newer versions, let them go
+libavcodeccvs51 libavdevicecvs52 libavformatcvs51 libavformatcvs52 libavutilcvs49 
+libpostproccvs51 libswscalecvs0 
+------------------------------------------------------------------
+2. 2.6.25 kernels: ATI fglrx now only works with Debian kernels.
+------------------------------------------------------------------
+3. Let these Perl based packages go, Perl has upgraded and these you don't need now: 
+fix-fonts fttools libarchive-tar-perl libffi4 libft-perl libldap2 libperl5.8
+However, please double check the packages to be removed before you proceed, make
+sure nothing you really need is getting removed.
+------------------------------------------------------------------
+4. Iceweasel 3.0 RC2 hit unstable. There are a lot of add-ons that don't work 
+with it yet. It is therfore put on hold. If you want to update to it anyway 
+(note it is a RC, not the final version!) do 
+apt-get install iceweasel after the upgrade (you can do that back in X).
