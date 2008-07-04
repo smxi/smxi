@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.22
-####  Date: July 2 2008
+####  version: 7.34.23
+####  Date: July 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1009,11 +1009,12 @@ set_distro_data()
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
+	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
 	
 	# these tests will be improved over time, but are ok for now
-	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(stable|etch)' )
-	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(testing|lenny)' )
-	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv '(sidux|sidux.com|opera|ian-multi|skype|virtualbox)' | egrep -icw '(sid|unstable)' )
+	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
+	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
+	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 	
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
