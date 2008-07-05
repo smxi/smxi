@@ -3,8 +3,8 @@
 ####  Script Name: usl
 ####  Development updating tool for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.0.2
-####  Date: July 3 2008
+####  version: 2.0.3
+####  Date: July 5 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  
@@ -107,12 +107,21 @@ make_sm_versions()
 clean_dev_flags()
 {
 	local script='' scripts='smxi sgfxi svmi'
+	local isRestart=''
+	local isDev=''
 	
 	echo "Cleaning dev flags up now..."
 	for script in $scripts
 	do
-		# important! only reset where line begins with variable name
-		sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SVN_DIR/$script || error_handler 3 $script
+		isRestart=$( grep -i "^SKIP_RESTART='true'" $script )
+		isDev=$( grep -i "^DEV_FLAG='true'" $script )
+		
+		# just a small fix to make the files not update unless they need to
+		if [ -n "$isRestart" -o -n "$isDev" ]
+		then
+			# important! only reset where line begins with variable name
+			sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SVN_DIR/$script || error_handler 3 $script
+		fi
 	done
 }
 
