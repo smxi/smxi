@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.13.8
-####  Date: July 2 2008
+####  version: 1.13.9
+####  Date: July 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1427,7 +1427,9 @@ get_current_apt_kernel()
 		# need to make sure it's not a bigmem kernel from debian too, ends in  $platform
 		# note: testing for kernel metapackages here, so only systems with metapackage kernels 
 		# can be tested with this method. The last slice handles a case with metapackages
-		tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
+		
+		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= tempKernels=$( apt-cache show linux-image-2.6$kernelStringExtra-$platform | grep -i '^Depends: ' | cut -d ' ' -f 2 | grep "$platform$" | cut -d '-' -f 3-7 | grep -v "2.6-$platform" )
+# 		tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
 	
 		for kernel1 in $tempKernels
 		do
@@ -1439,8 +1441,9 @@ get_current_apt_kernel()
 				kernel2=$kernel1
 			fi
 		done
+		
 		currentKernel=$kernel2
-	
+
 		case "$defaultKernel" in
 			debian)
 				CURRENT_DEBIAN_KERNEL=$currentKernel
