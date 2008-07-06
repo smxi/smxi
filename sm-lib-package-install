@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.11
-####  Date: June 19 2008
+####  version: 2.8.12
+####  Date: July 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -61,7 +61,7 @@ package_group_installer()
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local streamTuner='streamtuner streamripper kstreamripper'
-	local systemUtils='alsa-base alsa-utils gpm dbus hal pmount udev'
+	local systemUtils='alsa-base alsa-utils gpm dbus hal pmount powersaved udev'
 	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 	
