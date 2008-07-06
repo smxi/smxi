@@ -1423,7 +1423,7 @@ get_current_apt_kernel()
 		apt_update_handler 'kernel'
 		# then we'll slice out the latest apt kernel
 		echo
-		echo "${S}Calculating latest ${C}$distro${S} kernel version now...${N}"
+		echo "${S}Calculating latest ${C}$distro${S} kernel version...${N}"
 		# need to make sure it's not a bigmem kernel from debian too, ends in  $platform
 		# note: testing for kernel metapackages here, so only systems with metapackage kernels 
 		# can be tested with this method. The last slice handles a case with metapackages
