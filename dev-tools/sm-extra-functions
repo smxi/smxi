@@ -84,6 +84,14 @@ infobash_tweak()
 ###---------------------------------------------------------------------
 ### xorg upgrade stuff
 ###---------------------------------------------------------------------
+# in sm-lib-2007-fixes, remove this
+if [ "$DISTRO_LEVEL" -lt 9 ]
+		then
+			# this handles the xorg fixes
+			run_script_import $LIB_MISC_TWEAKS
+			xorg_73_upgrade_1
+		fi
+
 # trigger function
 # can be set, maybe, via misc tweaks
 xorg_73_upgrade_1()
