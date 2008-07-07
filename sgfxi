@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.34
-####  Date: July 5 2008
+####  version: 3.1.35
+####  Date: July 7 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -716,9 +716,6 @@ print_information()
 #print_information
 basic_startup_tests() 
 {
-	# trying here a non zero byte file, of explicit ascii data type.
-	local spiderPage='du-data?sgfxi=sg-connect-test' #  sgfxi_connection_test
-	
 	### basic system requirements for this script to run, first so user doesn't 
 	### have to be root or out of x to get basic failure information
 	# make sure that it's a debian based system
@@ -772,13 +769,6 @@ basic_startup_tests()
 	if [ -n "$DISPLAY" -a "$SKIP_X_TEST" != 'true' ]
 	then
 		error_handler 250
-	fi
-	# there's no need to re-test connections for smxi module since that's redundant
-	# only run this for users on first attempt, script will exit if no connection
-	if [ "$SM_INSTALL" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECT" != 'true' -a "$SKIP_WGET" != 'true' ]
-	then
-		wget -T20 -t 2 --spider -q $TPD$spiderPage || error_handler 238
-		#rm -f $spiderPage
 	fi
 }
 
@@ -942,7 +932,7 @@ update_to_nonfree_sources()
 check_update_script()
 {
 	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
-	local isGood='' 
+	local isGood='' uArgs=''
 	
 	cd $SCRIPT_HOME # make sure we're in the right place
 	
@@ -953,7 +943,11 @@ check_update_script()
 	# if newer version, download / replace lib file
 	case $1 in
 		$SCRIPT_NAME)
-			wget -q -O$fileNameTemp $TPD$1 || error_handler 198 $1
+			if [ "$FORCE_UPDATE" != 'true' -a "$2" != 'repeat' ]
+			then
+				uArgs='?u'
+			fi
+			wget -q -O$fileNameTemp $TPD$1$uArgs || error_handler 198 $1
 
 			# all smxi files have this string as last line, so if it's there, the file should usually
 			# run fine, except for weird fringe cases where the ascii file is corrupted partially

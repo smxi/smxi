@@ -1429,7 +1429,6 @@ get_current_apt_kernel()
 		# can be tested with this method. The last slice handles a case with metapackages
 		
 		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= tempKernels=$( apt-cache show linux-image-2.6$kernelStringExtra-$platform | grep -i '^Depends: ' | cut -d ' ' -f 2 | grep "$platform$" | cut -d '-' -f 3-7 | grep -v "2.6-$platform" )
-# 		tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
 	
 		for kernel1 in $tempKernels
 		do

@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.1.8
-####  Date: July 1 2008
+####  version: 1.1.9
+####  Date: July 7 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -319,9 +319,6 @@ error_handler()
 #print_information
 basic_startup_tests() 
 {
-	# trying here a non zero byte file, of explicit ascii data type.
-	local spiderPage='du-data?svmi=svm-connect-test' #  sgfxi_connection_test
-	
 	### basic system requirements for this script to run, first so user doesn't 
 	### have to be root or out of x to get basic failure information
 	# make sure that it's a debian based system
@@ -351,13 +348,6 @@ basic_startup_tests()
 	if [ "$FORCE_UPDATE" == 'true' ]
 	then
 		check_update_script $SCRIPT_NAME
-	fi
-	# there's no need to re-test connections for svmi module since that's redundant
-	# only run this for users on first attempt, script will exit if no connection
-	if [ "$SM_INSTALL" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECT" != 'true' ]
-	then
-		wget -T20 -t 2 --spider -q $TPD$spiderPage || error_handler 251
-		#rm -f $spiderPage
 	fi
 }
 
@@ -446,22 +436,57 @@ remove_package()
 	fi
 }
 
-# takes one arg: $1 script to get/check
+# args: $1 script to get/check; $2 - repeat, to only retest download failure once
 check_update_script()
 {
+	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
+	local isGood='' uArgs=''
+	
 	cd $SCRIPT_HOME # make sure we're in the right place
+	
+	if [ -f "$fileNameTemp" ]
+	then
+		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
+	fi
+	
 	# if newer version, download / replace lib file
 	if [ "$1" == "$SCRIPT_NAME" ]
 	then
-		wget -q -O$1 $TPD$1 || error_handler 198 $1
-		if [ ! -f $1 ]
+		if [ "$FORCE_UPDATE" != 'true' -a "$2" != 'repeat' ]
 		then
-			error_handler 199 $1 # if failed, exit with file name + error
+			uArgs='?u'
 		fi
-		# restart then exit script, with all start options included
-		chmod +x $1
-		./$1 -R$START_OPTIONS
-		exit 0
+		wget -q -O$fileNameTemp $TPD$1$uArgs || error_handler 198 $1
+		# all smxi files have this string as last line, so if it's there, the file should usually
+		# run fine, except for weird fringe cases where the ascii file is corrupted partially
+		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
+		
+		if [ -n "$isGood" ]
+		then
+			mv -f $fileNameTemp $1
+			chmod +x $1
+			if [ "$FORCE_UPDATE" != 'true' ]
+			then
+				./$1 -R$START_OPTIONS
+			else
+				print_information
+				echo "${C}$SCRIPT_NAME${B} was successfully updated. Please start the script again"
+				echo "to access the latest features and drivers. Exiting now.${N}"
+			fi
+			exit 0
+		else
+			# dump the bad file
+			rm -f $fileNameTemp
+			
+			if [ "$2" != 'repeat' ]
+			then
+				# let's try this once again to make sure it wasn't just a temp problem
+				echo "${E}The file ${C}$1${E} did not download correctly, retrying download now...${N}"
+				check_update_script "$1" 'repeat'
+			else
+				error_handler 231 $1
+			fi
+		fi
 	# I'm only going to load this stuff one time per file so I won't
 	# have to worry about rechecking and multi downloads etc
 	fi
