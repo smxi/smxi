@@ -40,6 +40,7 @@ NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_BASE.slh.$KERNEL_SUB"
 MIRROR_MAIN='http://sidux.com/debian/pool/main/l/linux-sidux-2.6/'
 MIRROR_MODULES='http://sidux.com/debian/pool/main/l/linux-modules-sidux-main-2.6/'
 
+########################################################################
 #### FUNCTIONS
 ########################################################################
 
