@@ -756,12 +756,8 @@ test_version_info()
 # arguments: $1 filename; $2 chm/other, for chmod +x $1
 update_scripts()
 {
-	local wgetTest='' response='' success=""
-	
-	# using a test page for test to avoid messing stats up
-# 	check_for_wget_file $TECH_PATTERNS_DISTRO$WGT
-# 	wgetTest="$?"
-# 	
+	local success=""
+ 	
 	# for devs only, this switches off/on updates, so you can work
 	# on a local test version without overwrites happening
 	if [ "$DEV_FLAG" != 'true' ]
@@ -859,11 +855,6 @@ file_download_error()
 			file_download_error "$1" "$2"
 			;;
 	esac
-}
-# arg $1 is the url to be tested
-check_for_wget_file()
-{
-	wget -T$TIME_OUT -q --spider $1 && return 0 || return 1
 }
 
 # compare 2 dot [5.34.6] or 1/0 dot [3.45,3] version numbers
