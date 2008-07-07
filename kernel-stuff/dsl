@@ -1,0 +1,237 @@
+#!/bin/bash
+########################################################################
+####  Script Name: dsl
+####  Development sidux kernel zip file constructor
+####  version: 2.0.0
+####  Date: July 7 2008
+########################################################################
+####  Copyright (C) Harald Hope 2005-2008
+####  
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+####
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+####
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+########################################################################
+#### DEFINE:
+#### TRUE: -eq 0; == 'true'; function return 0
+#### FALSE: -gt 0; == ''; function return > 0
+########################################################################
+#### VARIABLES
+########################################################################
+
+# layout
+LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+
+# paths, change these to suite your needs
+SVN_DIR="$HOME/bin/scripts/sidux/svn/trunk"
+KERNEL_DIR="$HOME/large/sidux-kernels"
+KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
+
+# data for kernels
+KERNEL_BASE=$1
+KERNEL_SUB=$2
+NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_BASE.slh.$KERNEL_SUB"
+
+MIRROR_MAIN='http://sidux.com/debian/pool/main/l/linux-sidux-2.6/'
+MIRROR_MODULES='http://sidux.com/debian/pool/main/l/linux-modules-sidux-main-2.6/'
+
+#### FUNCTIONS
+########################################################################
+
+# args: $1 error nu; $2 - extra data
+error_handler()
+{
+	local message=''
+	
+	case $1 in
+		1)
+			message='You should not be root to run this script'
+			;;
+		2)
+			message="The directory: $2 does not exist, please fix this."
+			;;
+		3)
+			message="dsl parameter: $2 is null, please fix this."
+			;;
+		4)
+			message="wget download error when downloading: $2"
+			;;
+		5)
+			message="The kernel you are trying to download: $2\ndoes not appear to exist, check your dsl arguments again to make sure they are correct"
+			echo "Error in download data: Cleaning up bad directory name prior to exit..."
+			rm -fR $NEW_KERNEL_DIRECTORY
+			;;
+	esac
+	echo $LINE
+	echo -e $message
+	echo "Error $1 - Exiting script, please correct the error"
+	echo $LINE
+	exit $1
+}
+
+start_up_tests()
+{
+	local startDir=''
+	
+	echo $LINE
+	echo "Running initial startup tests..."
+	
+	# don't want to use root for this script
+	if [ "$(whoami)" == 'root' ]
+	then
+		error_handler 1
+	fi
+	
+	# make sure the args are right
+	if [ -z "$KERNEL_BASE" ]
+	then
+		error_handler 3 'KERNEL_BASE'
+	fi
+	if [ -z "$KERNEL_SUB" ]
+	then
+		error_handler 3 'KERNEL_SUB'
+	fi
+	
+	# make sure the paths you made are right and exist
+	for startDir in $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR
+	do
+		if [ ! -d "$startDir" ]
+		then
+			error_handler 2 $startDir
+		fi
+	done
+	
+	echo "Start up tests passed."
+}
+
+check_kernel_exists()
+{
+	local fileName='tempTesterDsl' kernelExists=''
+	local kernelName="$KERNEL_BASE.slh.$KERNEL_SUB"
+	local kernelId="linux-image-$kernelName-sidux-686"
+	
+	echo $LINE
+	echo "Confirming that kernel $kernelName exists on server..."
+	wget -O $fileName -q -e robots=off $MIRROR_MAIN
+	
+	kernelExists=$( grep -i "$kernelId" $fileName )
+	rm -f $fileName
+	if [ -z "$kernelExists" ]
+	then
+		error_handler 5 $kernelName
+	else
+		echo "Kernel appears to exist on remote server, continuing..."
+	fi
+}
+
+download_kernel_files()
+{
+	echo $LINE
+	echo "Starting kernel zip builder..."
+	if [ ! -d $NEW_KERNEL_DIRECTORY ]
+	then
+		mkdir $NEW_KERNEL_DIRECTORY
+	fi
+	cd $NEW_KERNEL_DIRECTORY
+	check_kernel_exists
+	echo "Using $NEW_KERNEL_DIRECTORY..."
+	## download kernels and all related debs
+	echo "Grabbing debs now..."
+	
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN
+}
+
+create_directories()
+{
+	local directories='32 32-meta 64 kernel-installer-files kernel-full-zips' 
+	local directory=''
+	
+	echo $LINE
+	echo "Generating 32/64 bit and meta directories..."
+	for directory in $directories
+	do
+		if [ ! -d $directory ]
+		then
+			mkdir $directory
+		fi
+	done
+}
+
+move_files_to_directories()
+{
+	echo "Transferring files to directories..."
+	mv -f *2.6-sidux*i386.deb 32-meta
+	mv -f *2.6-sidux*amd64.deb 64-meta
+	mv -f *i386.deb 32
+	mv -f *amd64.deb 64
+	# cp -f $installer32 32
+	# cp -f $installer64 64
+	cp -f linux-patch-sidux* 32
+	cp -f linux-patch-sidux* 64
+	echo "Completed download and handling of $NEW_KERNEL_DIRECTORY."
+}
+
+add_update_installer_files()
+{
+	local fullKernelString="$KERNEL_BASE.slh.$KERNEL_SUB-sidux"
+	
+	echo $LINE
+	echo "Adding installer files and updating files..."
+	cp ../32-installer/install-kernel-sidux-32.sh 32/install-kernel-sidux.sh
+	cp ../64-installer/install-kernel-sidux-64.sh 64/install-kernel-sidux.sh
+	
+	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString'-686\"/' 32/install-kernel-sidux.sh
+	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString'-amd64\"/' 64/install-kernel-sidux.sh
+}
+
+make_zip_files()
+{
+	local zipKernelId=$( echo $KERNEL_BASE | tr '-' '.' )
+	local contents='' filename=''
+	
+	echo 'Making 32 bit zip file now...'
+	cd 32
+	contents=$(ls)
+	fileName="kernel-$zipKernelId-slh-smp-$2.zip"
+	zip $fileName $contents
+	mv $fileName ../kernel-full-zips/
+	
+	echo 'Making 64 bit zip file now...'
+	cd ../64
+	contents=$(ls)
+	fileName="kernel-$zipKernelId-slh64-smp-$KERNEL_SUB.zip"
+	zip $fileName $contents
+	mv $fileName ../kernel-full-zips/
+}
+
+clean_up()
+{
+	cd ../
+	rm -f robots.txt
+}
+
+finish_it_up()
+{
+	echo $LINE
+	echo "OK, all finished. Remember to add new kernels to sm-lib-kernel global and upload the zips."
+}
+
+########################################################################
+#### EXECUTE
+########################################################################
+
+start_up_tests
+download_kernel_files
+create_directories
+move_files_to_directories
+add_update_installer_files
+make_zip_files
+clean_up
+finish_it_up
+exit 0
