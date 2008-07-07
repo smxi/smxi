@@ -1,0 +1,832 @@
+#!/bin/bash
+# some misc crap
+
+# from get_current_apt_kerne lib apt tools, old detection, too slow
+ 		tempKernels=$( grep-dctrl --no-field-names --show-field=Depends --field=Package linux-image-2.6$kernelStringExtra-$platform /var/lib/apt/lists/*_Packages | cut -d ' ' -f 1 | grep "$platform$" | cut -d '-' -f 3-6 | grep -v "2.6-$platform" )
+
+gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6070D3A1 && apt-key add /root/.gnupg/pubring.gpg
+
+
+		# just doing a simple rewrite instead of user option, the logic is simply
+		# too complex to do any other way.
+		local fixedMirror='ftp://ftp.spline.de/pub/sidux/debian/'
+		echo $LINE
+		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S} "
+		echo "is broken and will be replaced by ${C}$fixedMirror${S} now...${N}"
+		sed -i "s%$borkedMirror%$fixedMirror%" $isBorked
+		print_hec
+		echo "${S}That mirror is now updated, continuing with script...${N}"
+		
+		
+###---------------------------------------------------------------------
+### misc tweaks infobash tweak
+###--------------------------------------------------------------------
+## from misc_legacy_tweaks:
+	# 	echo "${C}1${S} - Modifies ${C}infobash${S} slightly so it outputs the complete ${C}xorg${S} version number."
+	# 	echo "    The script will also install the latest version of ${C}locsmif's infobash${S} script before modifying it."
+	# 	echo "    Please note: this can only be used if you have upgraded ${C}xorg${S} at least one time since install"
+	# 	echo "    But if you just did a ${C}$DU_UPGRADE${S} you probably have upgraded ${C}xorg${S}."
+
+			infobash-tweak)
+				check_xorg_version post # just to double check
+				infobash_tweak
+				repeat='true'
+				;;
+
+
+# this adds a small conditional before the xorg version assignment, it will
+# only run if xorg is in apt-cache policy already. Changes output from say 7.0.0 to 7.0.22
+infobash_tweak()
+{
+	local IBPath='/usr/bin/infobash' IBPathT='/usr/bin/infobash-temp' DoIt=''
+	local XOk=$(echo $X_ORG_VERSION_POST | grep -c "[1678].")
+	#echo $XOk
+	
+	echo $MLINE
+	echo "${S}INFOBASH TWEAK"
+	echo $LINE
+	# built in updater function of infobash
+	# echo "${S}Updating ${C}Infobash${S} to latest version...${N}"
+	# $IBPath --update
+	# echo "${C}Infobash${S} should now be updated if all went well.${N}"
+	# must come after new infobash is loaded
+	# I have to update it here to correctly handle xorg
+	sed -i -r "s%apt-cache policy xorg | grep 'Installed: 1:'%apt-cache policy xserver-xorg | grep 'Installed: [1-2]:'%" $IBPath
+	sed -i -r "s%apt-cache policy xorg-server-xorg | grep 'Installed: 1:'%apt-cache policy xserver-xorg-core | grep 'Installed: [1-2]:'%" $IBPath
+	DoIt=$( cat $IBPath | grep -c "apt-cache policy xserver-xorg | grep 'Installed: 1:'" )
+	
+	if [ "$XOk" -eq 0 ]
+	then
+		echo "${W}Sorry, you need to have done an upgrade through ${C}apt-get${S} of ${C}xorg${S} for this to work."
+		echo "${S}You can run it again after you've upgraded ${C}xorg${S} at least one time.${N}"
+	fi
+	
+	if [ "$DoIt" -eq 0 ]
+	then
+		mv $IBPath $IBPathT
+		
+		InfoBashTweak="if [ ! -z \$( grep -oi 'Debian' /etc/issue ) ]\n  then\n    XVERNUM=\$(apt-cache policy xserver-xorg-core | grep 'Installed: [1-2]:' | egrep -m 1 -o \"(1|7)\.[0-9]*\.[0-9]*\")\n  fi\n  XVER=\"\$XVENDOR \$XVERNUM\""
+		
+		echo "${S}Modifying ${C}infobash${S} to show full ${C}xorg${S} version${N}"
+		
+		sed "s@XVER=\"\$XVENDOR \$XVERNUM\"@$InfoBashTweak@g" $IBPathT > $IBPath
+		
+		rm -f $IBPathT
+		chmod +x $IBPath
+		#cat /usr/bin/infobash | grep '' | echo -e $InfoBashTweak
+		echo "${C}infobash${S} has been modified${N}"
+	else
+		echo "${S}Infobash is already modified${N}"
+	fi
+	print_hec
+}
+
+###---------------------------------------------------------------------
+### xorg upgrade stuff
+###---------------------------------------------------------------------
+# trigger function
+# can be set, maybe, via misc tweaks
+xorg_73_upgrade_1()
+{
+	local prefId='xorg-73-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 -o "$1" == 'misc' ]
+	then
+		xorg_73_main
+	fi
+}
+
+xorg_73_main()
+{
+	local repeat='' options='' opt=''
+	
+	run_script_import $LIB_GRAPHICS
+	set_graphics_data
+	
+	local intelText='' nvidiaText='' atiText='' unknownText=''
+	if [ "$NVIDIA" == 'true' ]
+	then
+		nvidiaText='echo "${M}You appear to be using an ${C}nVidia${M} graphics card"'
+	fi
+	if [ "$INTEL" == 'true' ]
+	then
+		intelText='echo "${M}You appear to be using an ${C}Intel${M} graphics card"'
+	fi
+	if [ "$FGLRX" == 'true' ]
+	then
+		atiText='echo "${M}You appear to be using an ${C}ATI${M} graphics card"'
+	fi
+	if [ "$NVIDIA" != 'true' -a "$INTEL" != 'true' -a "$FGLRX" != 'true' ]
+	then
+		unknownText='echo -e "${M}You appear to be using an ${C}unknown${M} graphics card, \nbut should be fine with native xorg driver."'
+	fi
+	
+	echo $MBAR
+	echo "${M}XORG 7.3 UPDATER TOOL"
+	echo $MLINE
+	echo "${S}This tool will do its best to bring your system up to date with"
+	echo "the new ${C}xorg 7.3${S}."
+	echo
+	echo "Currently, nvidia is fully supported in smxi and sgfxi. If you run the intel option,"
+	echo "your ${C}$X_ORG_PATH${S} will be updated to the new syntax for intel drivers."
+	echo
+	echo "${M}ati fglrx users: we finally have a working driver with xorg 7.3 support!"
+	echo "    Use the ${C}1${M} option as well. Only driver ${C}8.42.3${M} is supported and working."
+	echo 
+	echo "${S}If you are using the free ${C}xorg ati / radeon${S} driver, you will be fine, and can just upgrade normally."
+	echo
+	echo "All other chipsets are working fine, more or less."
+	echo $LINE
+	eval $nvidiaText
+	eval $intelText
+	eval $atiText
+	eval $unknownText
+	echo $LINE
+	echo "${C}1${S} - ${C}install-xorg${S} nvidia, fglrx/ati, and all non Intel users run this."
+	echo "    If you are using the ${C}free xorg ati/radeon${S} driver, also run this"
+	echo "${C}2${S} - ${C}install-xorg-intel${S} Intel video card users, please run this one."
+	echo "    It will update and backup your current xorg.conf to use new syntax."
+	echo "${C}3${S} - ${C}stop-bothering-me${S} If you already updated your xorg manually, or other reasons."
+	echo "    Select this and this question never appear again."
+	echo "${C}4${S} - ${C}hold-xorg${S} If you want xorg held to 7.2 version,"
+	echo "    this will place xorg on auto hold/release. You will be asked"
+	echo "    this question every time you run smxi unless you select ${C}3${S}."
+	
+	echo "${C}5${S} - ${C}quit${S} Exits the script."
+	
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	
+	options='install-xorg install-xorg-intel stop-bothering-me hold-xorg quit'
+
+	select opt in $options 
+	do
+		case $opt in
+			install-xorg)
+				xorg_73_install plain
+				;;
+			install-xorg-intel)
+				xorg_73_install intel
+				xorg_73_intel_updater
+				;;
+			stop-bothering-me)	
+				set_sticky_prefs xorg-73-1
+				;;
+			hold-xorg)
+				xorg_73_hold_release
+				;;
+			quit)
+				set_hold_install install
+				print_quit
+				exit 0
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	if [ "$repeat" == 'true' ]
+	then
+		xorg_73_main
+	fi
+}
+
+xorg_73_intel_updater()
+{
+	local timeStampXorg=$X_ORG_PATH-bu-73-$( date +%Y-%m-%d-%H:%M:%S )
+	
+	echo $LINE
+	echo "${S}Backing up ${C}$X_ORG_PATH${S} to ${C}$timeStampXorg${S}..${N}"
+	if [ ! -e $timeStampXorg ]
+	then
+		cp $X_ORG_PATH $timeStampXorg
+	fi
+	
+	# check for right  xorg version in driver
+	# clears up xorg.conf
+	echo "${S}Updating ${C}$X_ORG_PATH${S} to remove Modelines, Modes, VertRefresh, HorizSync..${N}"
+	# dump the i810 just in case, intel works fine
+	sed -i -r 's%^\s*Driver\s*"i810"%\tDriver\t"intel"%' $X_ORG_PATH
+	# strip out all the crap
+	perl -pi -e 's/^\s+(HorizSync|VertRefresh|Modeline|Modes)\s+.+\n?//;s/^\s+#\s+\d+x\d+\s+@\s+[\.\d]+\s*Hz.*\n?//' $X_ORG_PATH
+	 
+	echo "${S}Your ${C}$X_ORG_PATH${S} has been updated to support intel's new syntax..${N}"
+	print_hec
+	 
+	# comments out modelines
+	#perl -pi -e 's/^\s+(HorizSync|VertRefresh|Modes)\s+.+\n?//;s/^\s+Modeline/\t# Modeline/' $X_ORG_PATH
+	 
+	 #sed -i '/^[ \t]\+\(HorizSync\|VertRefresh\|Modes\).*/d' $X_ORG_PATH
+}
+
+xorg_73_hold_release()
+{
+	# reset hold/install data, add the extra xorg stuff
+	local xorgHolds='xorg xserver-xorg-core xserver-xorg'
+	
+	echo $LINE
+	echo "${S}Placing ${C}xorg${S} components on hold so you can $DU_UPGRADE now..${N}"
+	DPKG_HOLD_INSTALL="$DPKG_HOLD_INSTALL $xorgHolds"
+	set_hold_install hold-utility
+	echo "${S}Continuing on with your $DU_UPGRADE without upgrading xorg to 7.3..${N}"
+}
+
+# $1 is plain/intel
+xorg_73_install()
+{
+	local installIntel=''
+	
+	if [ "$1" == 'intel' ]
+	then
+		installIntel='xserver-xorg-video-intel'
+	fi
+	
+	echo $LINE
+	echo "${S}Installing the new ${C}xorg 7.3${S} now...${N}"
+	# on success, don't ask question again, dont' need the custom intel since using -all
+	package_installer 'xorg xserver-xorg-core xserver-xorg xserver-xorg-input-all xserver-xorg-video-all' 'install-always' && set_sticky_prefs xorg-73-1
+	echo "${S}Remember, you can use the ${C}xorg${S} cleanup function in Miscellaneous Tweaks section"
+	echo "to get rid of unneeded xorg components.${N}"
+	
+	print_hec
+}
+
+
+######################################################
+### legacy install-nv/fg crap
+######################################################
+
+
+
+## du-fixes 164/165
+FGLRX_NAME='install-fglrx-debian.sh'
+NVIDIA_NAME='install-nvidia-debian.sh'
+
+## 2318:
+copy_xorg()
+{
+	# create a backup of your xorg.conf file in case you have custom stuff you need for after
+	# for example, dual monitor support and so on
+	echo $LINE
+	echo "${S}Processing ${C}$X_ORG_PATH${S}. A backup copy named ${C}$X_ORG_BU_PATH${S} will be created."
+	# We're only copying the old file one time, don't want to overwrite it in case something went wrong
+	# with the install, you need your xorg.conf original backed up in all cases.
+	#double check that graphics install scripts didn't leave a hanging backup
+	if [ -f $X_ORG_PATH.1st ]
+	then
+		mv -f $X_ORG_PATH.1st $X_ORG_PATH.1st-$(date +%y-%m-%d)
+		echo "${S}The file ${C}$X_ORG_PATH.1st ${S}has been backed up to ${C}$X_ORG_PATH.1st-$(date +%y-%m-%d)${N}"
+	fi
+	if [ ! -f $X_ORG_BU_PATH ]
+	then
+		cp $X_ORG_PATH $X_ORG_BU_PATH
+		echo "${S}The file ${C}$X_ORG_PATH ${S}has been backed up to ${C}$X_ORG_BU_PATH${N}"
+	else
+		echo "${S}The file ${C}$X_ORG_BU_PATH ${S}already exists, you must have already created a copy today.${N}"
+	fi
+}
+
+
+## du-fixes-lib-graphics 33-46
+	if [ "$TESTING" == 'true' ]
+	then
+		GFX_INSTALLER=$MOD_GFX
+	else
+		if [ "$NVIDIA" -gt 0 ]
+		then
+			#GFX_INSTALLER=$NVIDIA_NAME
+			GFX_INSTALLER=$MOD_GFX
+		elif [ "$ATI" -gt 0 ]
+		then
+			#GFX_INSTALLER=$FGLRX_NAME
+			GFX_INSTALLER=$MOD_GFX
+		fi
+	fi
+
+## 309,314
+		# depending on which gfx script is used we either restart x + kill root pid,
+		# or just kill root pid
+		if [ "$?" -eq 0 ]
+		then
+			[ "$GFX_INSTALLER" != "$MOD_GFX" ] && start_default_dm full || start_default_dm nowmstart
+		fi
+## above
+		[ "$GFX_INSTALLER" != "$MOD_GFX" ] && copy_xorg
+		echo $installMess
+		
+######################################################
+### legacy kanotix crap, du-fixes-lib-200-fixes
+######################################################
+fix_kanotix_graphics()
+{
+	local DuPref=$( grep -c 'kanotix-graphics-2' $DU_CONFIG_FILE )
+	local Ksplash='/root/.kde/share/config/ksplashrc /home/*/.kde/share/config/ksplashrc' i=''
+	local OldGrub=$( awk -F= '/^# groot/{print $2}' $GRUB_PATH )
+	local KanoOriginal='/usr/share/apps/ksplash/Themes/Kanotix'
+	local KanoClouds=$KanoOriginal'Clouds'
+	local KanoOriginalNew=$KanoOriginal'Original' BoMe='/boot/message'
+	local KanoGraphics='kanotix-graphics'
+	[ "$BITS" == 64 ] && KanoGraphics='kanotix64-graphics'
+	
+	if [ "$DuPref" -eq 0 ]
+	then
+		if [ "$1" == 'predu' ]
+		then
+			echo $LINE
+			echo "${S}Removing ${C}kanotix-graphics${S} to fix dist-upgrade issue."
+			echo "Please note that your splash screen will be changed.${N}"
+			# this will preserve the old 2005-4 splash screen as an option
+			if [ -d $KanoOriginal ]
+			then
+				if [ ! -d $KanoOriginalNew ]
+				then
+					mv $KanoOriginal $KanoOriginalNew
+					# sed -i "s%KSplash Theme: Kanotix\]%KSplash Theme: KanotixOriginal\]%g" $KanoOriginalNew
+					# sed -i "s%Name = Kanotix$%Name = KanotixOriginal Splash%g" $KanoOriginalNew
+				fi
+			fi
+			# apt-get remove --purge kanotix-graphics
+			[ -f $BoMe -a ! -h $BoMe ] && mv $BoMe $BoMe.old-mess
+			apt-get remove --purge $KanoGraphics
+			set_sticky_prefs y kanotix-graphics-2
+		elif [ "$1" == 'postdu' ]
+		then
+			echo $LINE
+			
+			echo "${S}Reinstalling ${C}kanotix-graphics${S}...${N}"
+			apt-get install $KanoGraphics
+			# update all ksplashrc files at once, for all users
+			if [ -d $KanoClouds  ]
+			then
+				for i in $Ksplash
+				do
+					if [ -f $i ]
+					then
+						sed -i "s%Theme=Kanotix$%Theme=KanotixClouds%g" $i
+						echo "${S}Modified: ${C}$i${N}"
+					fi
+				done
+			fi
+			# reinstall grub
+			if [ -r $GRUB_PATH ]
+			then
+				if [ -n "$OldGrub" -a "$DISTRO_LEVEL" -lt 3 ]
+				then
+					echo "${S}Updating ${C}grub${S}...${N}"
+					grub-install --recheck --no-floppy "$OldGrub"
+					grub-install --recheck --no-floppy "$OldGrub"
+					echo "${C}grub${S} has been updated.${N}"
+				fi
+			fi
+			# use new message file if no old one is present
+			if [ -f $BoMe.hd ]
+			then
+				# only run this if there is no message file
+				[ ! -h $BoMe ] && ln -s message.hd $BoMe
+			fi
+			
+			echo "${C}kanotix-graphics${S} fix completed${N}"
+			set_sticky_prefs y kanotix-graphics-2
+		fi
+	fi
+}
+#fix_kanotix_graphics postdu
+
+kanotix_graphics_updates()
+{
+	local DuPref=$( grep -c 'kano-penguin-theme' $DU_CONFIG_FILE )
+	local frozen='' 
+	
+	if [ "$1" == 'penguin-theme' -a "$DuPref" -eq 0 ]
+	then
+		# kdm background
+		echo $LINE
+		echo "${S}Updating default kdm login background to ${C}kanotix-penguins${S}...${N}"
+		[ -r /usr/share/wallpapers/kanotix.png ] && perl -pi -e 's|^(Wallpaper)=.*|\1=/usr/share/wallpapers/kanotix.png|' /etc/kde3/kdm/backgroundrc
+		# kde themes
+		echo "${S}Updating default kde theme to ${C}kanotix-penguins${S}...${N}"
+		perl -pi -e 's/^(MinShowUID)=.*/\1=500/' /etc/kde3/kdm/kdmrc
+		if [ -d /usr/share/apps/kdm/themes/KanotixPenguins ]
+		then
+			perl -pi -e 's/^#*(UseTheme)=.*/\1=true/' /etc/kde3/kdm/kdmrc
+			perl -pi -e 's|^(Theme)=.*|\1=/usr/share/apps/kdm/themes/KanotixPenguins|' /etc/kde3/kdm/kdmrc
+		fi
+		if [ -d /usr/share/apps/kdm/themes/Kanotix64Penguins ]
+		then
+			perl -pi -e 's/^#*(UseTheme)=.*/\1=true/' /etc/kde3/kdm/kdmrc
+			perl -pi -e 's|^(Theme)=.*|\1=/usr/share/apps/kdm/themes/Kanotix64Penguins|' /etc/kde3/kdm/kdmrc
+		fi
+		echo "${S}KDE themes and default background updated.${N}"
+		set_sticky_prefs y kano-penguin-theme
+	fi
+}
+
+######################################################
+### kernel install, du-fixes-lib-kernel-install.sh
+######################################################
+# line 38
+local KanotixLatest=$( echo $KERNEL_LIST | grep -o "[0-9.]*-kanotix-[0-9]" | grep -m 1 "[0-9.]*-kanotix-[0-9]" )
+
+# line 43
+		# text_2='echo -e "${S}[Intel ${C}duo-core${S} users, please use the latest ${C}$KanotixLatest${S} kernel for full support]${N}"'
+# line 154
+local installKanotix='install-kernel-kanotix.sh' 
+# line 200-203
+			elif [ -f $installKanotix ]
+			then
+				./$installKanotix
+
+######################################################
+### misc crap
+######################################################
+# misc tweaks, cdrom fix dumped:
+			cdrom-mount-fix)
+				run_script_import $LIB_2006_FIXES
+				cdrom_mount_fix m-h
+				repeat='true'
+				;;
+			cdrom-mount-fix 
+			
+						kde-hardware-icons)
+				run_script_import $LIB_MISC_TWEAKS
+				kde_hardware_icons
+				repeat='true'
+				;;
+				
+		
+	echo "${C}3${S} - Runs ${C}cdrom-mount-fix${S} to bring older installs up to date."
+	echo "    2006-01 and later do not require this, and it should have already run automatically."
+	# line 1665
+cdrom_mount_fix d-u # may be required for new hal in some cases
+# lib-misc-tweaks
+# this fixes that annoying kde 3.5.3 bug
+kde_hardware_icons()
+{
+	local deskbug=$( cat $KdeMediaManagerPath | grep -c 'X-KDE-Kded-phase=1' )
+	KdeMediaManagerPath='/usr/share/services/kded/mediamanager.desktop' response=''
+	
+	echo $MLINE
+	echo "${S}KDE HARDWARE ICONS TWEAK"
+	echo $LINE
+	if [ "$deskbug" -eq 0 ]
+	then
+		cp $KdeMediaManagerPath $KdeMediaManagerPath-bu
+		echo "${S}Fixing the kde 3.5.3 hardware icon bug${N}"
+		echo 'X-KDE-Kded-phase=1' >> $KdeMediaManagerPath
+		echo "${S}kde 3.5.3 bug patched${N}"
+	else
+		echo "${C}$KdeMediaManagerPath ${E}has already been patched.${N}"
+	fi
+	echo $LINE
+	# halt the script so people can read the advice
+	echo $HEC
+	echo $LINE
+	read response
+}
+
+# du-fixes-lib-2006-fixes.sh
+
+cdrom_mount_fix()
+{
+	local response='' found='' efo=$EF'.old' efn=$EF'.new' m=''
+	local fstabFixed=$( grep -c '/dev/hd[a-z][ ]*/media/cdrom' $EF )
+	local DuPref=$( grep -c 'kano-cdrom-fix' $DU_CONFIG_FILE )
+	
+	if [ "$DuPref" -eq 0 -a "$fstabFixed" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Running cdrom fix script${N}"
+		
+		# I'm removing the previous script cdrom commenting out fix first:
+		# not using this now due to some weirdness with cdrom output stuff
+		#mv $EF $eft
+		#sed 's@#####@@g' $eft > $EF
+		#rm -f $eft
+		
+		# start fstab fix
+		grep -v /dev/cdrom $EF > $efn
+		# Add cdrom devices to /etc/fstab
+		for c in $( ls -d /dev/cdrom* 2>/dev/null )
+		do
+			m=${c#/dev}
+			[ "$m" == "/cdrom" ] && m="/cdrom0"
+			[ -d /media$m ] || mkdir -p /media$m
+			printf "%-15s %-15s %-7s %-15s %-7s %s\n" "/dev/$(readlink $c)" "/media$m" "udf,iso9660" "user,noauto" "0" "0" >> $efn
+		done
+		mv -f $EF $efo
+		mv $efn $EF
+		# end kano fix
+		set_sticky_prefs y kano-cdrom-fix
+		
+		echo "${S}Finished with cdrom fix"
+		echo $LINE
+		echo "${S}This fix will not be activated until you reboot since ${C}$EF${S} must reload on boot."
+		echo "You may need to edit your ${C}$EF${S} file manually if you had a second dvd or cdrom device."
+		echo "The correct new way is the following <replace paths with your cd/dvd rom paths>:"
+		echo "${C}/dev/hdc /media/cdrom0 udf,iso9660 user,noauto 0 0"
+		echo $LINE
+		if [ "$SKIP_ENTER" != 'true' ]
+		then
+			echo $HEC
+			echo $LINE
+			read response
+		fi
+	elif [ "$1" == 'm-h' ]
+	then
+		echo $LINE
+		echo "${E}the cd rom fix has has already been run.${N}"
+	fi
+}
+#cdrom_mount_fix
+
+########
+## lib-package-install
+########
+# du-fixes, line 1669
+	[ "$DISTRO_LEVEL" -eq 2 ] && install_knxcc post-du
+	echo "${C}1${S} - ${C}knxcc${S} On older kanotixes, installs the new ${C}knxcc${S} control panel. Highly recommended."
+	
+				knxcc)
+				install_knxcc package-install
+				repeat='true'
+				;;
+install_knxcc()
+{
+	local response='' knxccInstall='' DuPref=$( grep -c 'knxcc-install-1' $DU_CONFIG_FILE )
+
+	# this is an unusual one, it handles auto-check for cebit
+	[ "$DISTRO_LEVEL" -le 2 -a "$DuPref" -eq 0 ] && knxccInstall='true'
+
+	if [ "$knxccInstall" != 'true' -a "$1" == 'package-install' ]
+	then	
+		echo $LINE
+		echo "${C}knxcc${S} should already be installed on your system.${N}"
+		echo -e "${Q}Would you like to reinstall it anyway?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)
+				knxccInstall='true'
+				;;
+			n)
+				echo "${S}Ok, continuing with script.${N}"
+				[ "$DuPref" -eq 0 ] && set_sticky_prefs n knxcc-install-1
+				;;
+			*)
+				print_error yn
+				install_knxcc
+				;;
+		esac
+	fi
+	
+	if [ "$knxccInstall" == 'true' ]
+	then
+		echo $LINE
+		echo "${S}Installing ${C}knxcc${S}.${N}"
+
+		if [ "$DISTRO_LEVEL" -eq 2 ]
+		then
+			apt-get remove --purge knxcc
+			apt-get install --reinstall -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew kdebase-data
+		else
+			apt-get install --reinstall kdebase-data
+		fi
+		apt-get install knxcc-kde
+		echo "${C}knxcc${S} is now installed.${N}"
+		
+		[ "$DuPref" -eq 0 ] && set_sticky_prefs y knxcc-install-1
+	fi
+}
+## lib-2006-fixes
+install_knxcc()
+{
+	local response='' knxccInstall='' DuPref=$( grep -c 'knxcc-install-1' $DU_CONFIG_FILE )
+
+	# this is an unusual one, it handles auto-check for cebit
+	[ "$DISTRO_LEVEL" -le 2 -a "$DuPref" -eq 0 ] && knxccInstall='true'
+	
+	if [ "$knxccInstall" == 'true' -a "$1" == 'post-du' ]
+	then
+		echo $LINE
+		echo "${S}Installing ${C}knxcc${S}.${N}"
+
+		if [ "$DISTRO_LEVEL" -eq 2 ]
+		then
+			apt-get remove --purge knxcc
+			apt-get install --reinstall -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew kdebase-data
+		else
+			apt-get install --reinstall kdebase-data
+		fi
+		apt-get install knxcc-kde
+		echo "${C}knxcc${S} is now installed.${N}"
+		
+		[ "$DuPref" -eq 0 ] && set_sticky_prefs y knxcc-install-1
+	fi
+}
+
+
+######################################################
+### specific fix functions, misc crap
+######################################################
+iceweasel_to_firefox_1()
+{
+	local homeDir='/home/' homeUsers=$( ls /home ) homeUser='' mozFirefox='/.mozilla/firefox'
+	local mozIceweasel='/.mozilla/iceweasel' workingDir='' askUpdate=''
+	local DuPref=$( grep -c 'ff-to-iw-1' $DU_CONFIG_FILE )
+	
+	if [ "$DuPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Checking for iceweasel/firefox user profile changeover..."
+		echo
+		
+		for homeUser in $homeUsers
+		do
+			workingDir=$homeDir$homeUser$mozFirefox
+			newIceweasel=$homeDir$homeUser$mozIceweasel
+			[ -d "$workingDir" -a ! -d $newIceweasel ] && askUpdate='true' || askUpdate=''
+			
+			if [ "$askUpdate" == 'true' ]
+			then
+				echo "${S}The user ${C}$homeUser${S} has a firefox profile directory but no iceweasel directory."
+				echo "If you answer ${C}y${S} here, the script will move your firefox user profiles to iceweasel's."
+				echo "I strongly recommend you say ${C}y${S} for each user as the question comes up."
+				echo "If you do not do this, you will have to restore your original user data manually."
+				echo $LINE
+				echo -e "${Q}Do you want to move your firefox profile to iceweasel now?$YNE"
+				read response
+				
+				case $response in
+					y)	mv $workingDir $newIceweasel
+						;;
+					n)	echo "${S}Ok, checking next user name in $homeDir${N}"
+						;;
+					*)	print_error yn
+						;;
+				esac
+			fi
+		done
+		echo "${S}All done, your profiles should all be right now."
+		set_sticky_prefs y ff-to-iw-1
+	fi
+}
+#iceweasel_to_firefox_1
+
+dvd_sound_fix_1()
+{
+	local DuPref=$( grep -c 'liba52-1' $DU_CONFIG_FILE )
+	local liba52Yes=$( dpkg -l | grep -c 'liba52' )
+	if [ "$DuPref" -eq 0 -a "$liba52Yes" -gt 0 ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}liba52${S} now to fix multimedia sound.${N}"
+		apt-get install -y liba52-0.7.4/testing
+		set_sticky_prefs y liba52-1
+	fi
+}
+		
+# these fixes only apply to conversion installs, 5, legacy, dump in a few months
+[ "$DISTRO_LEVEL" -lt 6 ] && update_sources_2_sidux_final
+update_sources_2_sidux_final()
+{
+	local smPref=$( grep -c 'update-sources-sidux-final-1' $SM_CONFIG_FILE )
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $LINE
+		echo "${S}Removing transitional sidux sources ${C}$EAS${S} now...${N}"
+		cp $EAS $EAS-bu-$(date +%y-%m-%d)
+		# sed -i -r 's%\svdr%%' $EAS # dump the vdr from sources
+		perl -pi -e 's/#.*Sidux\sTemporary\n?//g' $EAS
+		perl -pi -e 's|(deb.*sidux.*repo/debian/)\s(.*)|deb http://sidux.com/debian/ \2|g' $EAS
+		perl -pi -e 's|deb.*sidux.*repo.*\n?||g' $EAS
+		set_sticky_prefs y update-sources-sidux-final-1
+	fi
+}
+
+sticky_prefs()
+{
+	local response='' smPref=$( grep -c -i 'RememberResponses' $SM_CONFIG_FILE )
+	local smPref2=$( grep -c -i 'FirstRunCount2' $SM_CONFIG_FILE )
+	
+	# to keep long term stats meaningful, not counting any livecd runs, or vm type stuff
+	if [ "$smPref2" -eq 0 -a "$SKIP_CONNECTIONS" != 'true' ]
+	then
+		local isVm=$( dmesg | egrep -i '(vmware|vbox)' )
+		if [  "$IS_LIVE" != 'true' -a -z "$isVm" ]
+		then
+			local ddurl=$TECH_PATTERNS_DISTRO'distro-counter.php'
+			wget -T$TIME_OUT -t 2 -q --delete-after $ddurl && set_sticky_prefs y FirstRunCount2
+		# I'm turning this off for now because live installs can be put to hard disk.
+		# else
+		# 	set_sticky_prefs y FirstRunCount2 # no point in doing the thing again
+		fi
+	fi
+	
+	if [ "$smPref" -eq 0 ]
+	then
+		echo $MBAR
+		echo "${M}SET STICKY PREFERENCES"
+		echo $MLINE
+		echo "${S}If you answer ${C}y${S} here then you will not be asked this question again"
+		echo "and you will not be asked some of the other script options questions again,"
+		echo "whether or not you answer ${C}y${S} or ${C}n${S} to them."
+		echo 
+		echo "The ${C}n${S} option will make the script only remember your answers when you answered ${C}y${S} to those questions."
+		echo "I recommend selecting the ${C}y${S} option to avoid being asked some"
+		echo "questions over and over again."
+		echo -e "${Q}Do you want the script to remember your choices for one time only items?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	set_sticky_prefs y RememberResponses
+				echo "${S}Your responses will be stored here: "${C}$SM_CONFIG_FILE${N}
+				echo "${S}To change the settings, either simply delete the file"
+				echo "or delete the item you want it to ask about."
+				;;
+			n)	echo "${S}Ok, your responses will only be logged if you selected the 'y' option"
+				echo "on the questions that use this feature"
+				;;
+			*)	print_error yn
+				sticky_prefs
+				;;
+		esac
+	fi
+}
+check_dm_runlevels()
+{
+	local smPref=$( grep -c 'dm-runlevel-1' $SM_CONFIG_FILE ) response='' displayM='kdm'
+	
+	if [ "$( ls -A /etc/rc[234].d/S*kdm* 2>/dev/null )" -a "$smPref" -eq 0 ]
+	then
+		echo $MLINE
+		echo "${M}Your current ${C}kde display manager${M} is not set to start at the sidux default ${C}runlevel 5${M}."
+		echo "${S}We recommend you answer ${C}y${S} to this question unless you have a good reason not to."
+		echo
+		echo -e "${Q}Would you like to update your kdm startup runlevel to 5 now?$YNE"
+		echo $LINE
+		read response
+		
+		case $response in
+			y)	echo "${S}Updating your kdm runlevel now...${N}"
+				update-rc.d -f $displayM remove
+				update-rc.d $displayM start 99 5 . stop 01 0 1 2 3 4 6 .
+				echo "${S}Your kdm will now start at the default sidux runlevel 5.${N}"
+				set_sticky_prefs y dm-runlevel-1
+				;;
+			n)	echo "${S}Ok, continuing without running updating your Display Manager runlevels.${N}"
+				set_sticky_prefs n dm-runlevel-1
+				;;
+			*)	print_error yn
+				check_dm_runlevels
+				;;
+		esac
+	fi
+}
+# this triggers in main script trigger section, if used
+# check_dm_runlevels
+
+update_to_smxi()
+{
+	local DuScripts="du-fixes-lib-clean-up.sh du-fixes-lib-graphics.sh  du-fixes-lib-kernel.sh du-fixes-lib-kernel-install.sh du-fixes-lib-misc-tweaks.sh  du-fixes-lib-package-install.sh du-fixes-lib-package-removal.sh  du-fixes-lib-sidux-conversion.sh du-fixes-lib-warning.sh du-fixes-lib-2006-fixes.sh"
+	local script='' smName=''
+	
+	if [ -f /usr/local/bin/du-fixes-lib-kernel.sh ]
+	then
+		echo $MBAR
+		echo "${M}Please note: ${C}du-fixes-h2.sh${M} is now updating itself"
+		echo "and its components to its new naming scheme, ${C}$SCRIPT_NAME"
+		echo $MLINE
+		echo "${S}Updating ${C}du-fixes-lib-xxx.sh${S} files to new ${C}sm-lib-xxx${S} format.${N}"
+		echo
+		for script in $DuScripts
+		do
+			smName=$( echo $script | sed -r 's/du-fixes-lib-([a-z0-9-]*)\.sh/sm-lib-\1/g' )
+			[ -f "$script" ] && mv -f $script $smName
+		done
+		echo $MLINE
+		echo "${S}Script ${C}du-fixes-lib-${S} files have been updated now to"
+		echo "use new ${C}$SCRIPT_NAME${S} naming scheme: ${C}sm-lib-xxx${N}"
+	fi
+	if [ -f /etc/du-fixes.conf -o -f /etc/sm.conf -o -d /var/log/du-fixes -o -d /var/log/sm ]
+	then
+		echo $MLINE
+		echo "${S}Updating script config file to: ${C}/etc/smxi.conf${S}"
+		echo "and script log locations to: ${C}/var/log/smxi/${N}"
+		[ -f /etc/du-fixes.conf ] && mv -f /etc/du-fixes.conf /etc/smxi.conf
+		[ -f /etc/sm.conf ] && mv -f /etc/sm.conf /etc/smxi.conf
+		
+		[ -d /var/log/du-fixes ] && mv -f /var/log/du-fixes /var/log/smxi
+		[ -d /var/log/sm ] && mv -f /var/log/sm /var/log/smxi
+		echo $MLINE
+		echo "${S}Script system files have been updated now to use new ${C}$SCRIPT_NAME${S} naming scheme:"
+		echo "${C}/var/log/smxi :: /etc/smxi.conf${N}"
+		print_hec
+	fi
+}
