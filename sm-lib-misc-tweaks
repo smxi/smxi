@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.10
-####  Date: June 29 2008
+####  version: 1.15.11
+####  Date: July 7 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1087,182 +1087,6 @@ update_bash_completion()
 	fi
 }
 
-
-
-###---------------------------------------------------------------------
-### xorg upgrade stuff
-###---------------------------------------------------------------------
-# trigger function
-# can be set, maybe, via misc tweaks
-xorg_73_upgrade_1()
-{
-	local prefId='xorg-73-1'
-	local smPref=$( sm_pref_tester $prefId )
-	
-	if [ "$smPref" -eq 0 -o "$1" == 'misc' ]
-	then
-		xorg_73_main
-	fi
-}
-
-xorg_73_main()
-{
-	local repeat='' options='' opt=''
-	
-	run_script_import $LIB_GRAPHICS
-	set_graphics_data
-	
-	local intelText='' nvidiaText='' atiText='' unknownText=''
-	if [ "$NVIDIA" == 'true' ]
-	then
-		nvidiaText='echo "${M}You appear to be using an ${C}nVidia${M} graphics card"'
-	fi
-	if [ "$INTEL" == 'true' ]
-	then
-		intelText='echo "${M}You appear to be using an ${C}Intel${M} graphics card"'
-	fi
-	if [ "$FGLRX" == 'true' ]
-	then
-		atiText='echo "${M}You appear to be using an ${C}ATI${M} graphics card"'
-	fi
-	if [ "$NVIDIA" != 'true' -a "$INTEL" != 'true' -a "$FGLRX" != 'true' ]
-	then
-		unknownText='echo -e "${M}You appear to be using an ${C}unknown${M} graphics card, \nbut should be fine with native xorg driver."'
-	fi
-	
-	echo $MBAR
-	echo "${M}XORG 7.3 UPDATER TOOL"
-	echo $MLINE
-	echo "${S}This tool will do its best to bring your system up to date with"
-	echo "the new ${C}xorg 7.3${S}."
-	echo
-	echo "Currently, nvidia is fully supported in smxi and sgfxi. If you run the intel option,"
-	echo "your ${C}$X_ORG_PATH${S} will be updated to the new syntax for intel drivers."
-	echo
-	echo "${M}ati fglrx users: we finally have a working driver with xorg 7.3 support!"
-	echo "    Use the ${C}1${M} option as well. Only driver ${C}8.42.3${M} is supported and working."
-	echo 
-	echo "${S}If you are using the free ${C}xorg ati / radeon${S} driver, you will be fine, and can just upgrade normally."
-	echo
-	echo "All other chipsets are working fine, more or less."
-	echo $LINE
-	eval $nvidiaText
-	eval $intelText
-	eval $atiText
-	eval $unknownText
-	echo $LINE
-	echo "${C}1${S} - ${C}install-xorg${S} nvidia, fglrx/ati, and all non Intel users run this."
-	echo "    If you are using the ${C}free xorg ati/radeon${S} driver, also run this"
-	echo "${C}2${S} - ${C}install-xorg-intel${S} Intel video card users, please run this one."
-	echo "    It will update and backup your current xorg.conf to use new syntax."
-	echo "${C}3${S} - ${C}stop-bothering-me${S} If you already updated your xorg manually, or other reasons."
-	echo "    Select this and this question never appear again."
-	echo "${C}4${S} - ${C}hold-xorg${S} If you want xorg held to 7.2 version,"
-	echo "    this will place xorg on auto hold/release. You will be asked"
-	echo "    this question every time you run smxi unless you select ${C}3${S}."
-	
-	echo "${C}5${S} - ${C}quit${S} Exits the script."
-	
-	echo $LINE
-	echo -e $SLE
-	echo $LINE
-	
-	options='install-xorg install-xorg-intel stop-bothering-me hold-xorg quit'
-
-	select opt in $options 
-	do
-		case $opt in
-			install-xorg)
-				xorg_73_install plain
-				;;
-			install-xorg-intel)
-				xorg_73_install intel
-				xorg_73_intel_updater
-				;;
-			stop-bothering-me)	
-				set_sticky_prefs xorg-73-1
-				;;
-			hold-xorg)
-				xorg_73_hold_release
-				;;
-			quit)
-				set_hold_install install
-				print_quit
-				exit 0
-				;;
-			*)
-				print_error opt
-				repeat='true'
-				;;
-		esac
-		break
-	done
-	if [ "$repeat" == 'true' ]
-	then
-		xorg_73_main
-	fi
-}
-
-xorg_73_intel_updater()
-{
-	local timeStampXorg=$X_ORG_PATH-bu-73-$( date +%Y-%m-%d-%H:%M:%S )
-	
-	echo $LINE
-	echo "${S}Backing up ${C}$X_ORG_PATH${S} to ${C}$timeStampXorg${S}..${N}"
-	if [ ! -e $timeStampXorg ]
-	then
-		cp $X_ORG_PATH $timeStampXorg
-	fi
-	
-	# check for right  xorg version in driver
-	# clears up xorg.conf
-	echo "${S}Updating ${C}$X_ORG_PATH${S} to remove Modelines, Modes, VertRefresh, HorizSync..${N}"
-	# dump the i810 just in case, intel works fine
-	sed -i -r 's%^\s*Driver\s*"i810"%\tDriver\t"intel"%' $X_ORG_PATH
-	# strip out all the crap
-	perl -pi -e 's/^\s+(HorizSync|VertRefresh|Modeline|Modes)\s+.+\n?//;s/^\s+#\s+\d+x\d+\s+@\s+[\.\d]+\s*Hz.*\n?//' $X_ORG_PATH
-	 
-	echo "${S}Your ${C}$X_ORG_PATH${S} has been updated to support intel's new syntax..${N}"
-	print_hec
-	 
-	# comments out modelines
-	#perl -pi -e 's/^\s+(HorizSync|VertRefresh|Modes)\s+.+\n?//;s/^\s+Modeline/\t# Modeline/' $X_ORG_PATH
-	 
-	 #sed -i '/^[ \t]\+\(HorizSync\|VertRefresh\|Modes\).*/d' $X_ORG_PATH
-}
-
-xorg_73_hold_release()
-{
-	# reset hold/install data, add the extra xorg stuff
-	local xorgHolds='xorg xserver-xorg-core xserver-xorg'
-	
-	echo $LINE
-	echo "${S}Placing ${C}xorg${S} components on hold so you can $DU_UPGRADE now..${N}"
-	DPKG_HOLD_INSTALL="$DPKG_HOLD_INSTALL $xorgHolds"
-	set_hold_install hold-utility
-	echo "${S}Continuing on with your $DU_UPGRADE without upgrading xorg to 7.3..${N}"
-}
-
-# $1 is plain/intel
-xorg_73_install()
-{
-	local installIntel=''
-	
-	if [ "$1" == 'intel' ]
-	then
-		installIntel='xserver-xorg-video-intel'
-	fi
-	
-	echo $LINE
-	echo "${S}Installing the new ${C}xorg 7.3${S} now...${N}"
-	# on success, don't ask question again, dont' need the custom intel since using -all
-	package_installer 'xorg xserver-xorg-core xserver-xorg xserver-xorg-input-all xserver-xorg-video-all' 'install-always' && set_sticky_prefs xorg-73-1
-	echo "${S}Remember, you can use the ${C}xorg${S} cleanup function in Miscellaneous Tweaks section"
-	echo "to get rid of unneeded xorg components.${N}"
-	
-	print_hec
-}
-
 ###---------------------------------------------------------------------
 ### Legacy Tweaks
 ###---------------------------------------------------------------------
@@ -1278,12 +1102,7 @@ misc_legacy_tweaks()
 	echo "${S}Most of these are not needed on current systems, but I'm leaving them here in case"
 	echo "they are useful to some users at some point for some unknown reason."
 	echo $LINE
-	
-	# 	echo "${C}1${S} - Modifies ${C}infobash${S} slightly so it outputs the complete ${C}xorg${S} version number."
-	# 	echo "    The script will also install the latest version of ${C}locsmif's infobash${S} script before modifying it."
-	# 	echo "    Please note: this can only be used if you have upgraded ${C}xorg${S} at least one time since install"
-	# 	echo "    But if you just did a ${C}$DU_UPGRADE${S} you probably have upgraded ${C}xorg${S}."
-	
+
 	echo "${C}1${S} - ${C}alsaconf${S} - for your alsa sound configuration."
 	echo "    ${M}Alert: ${C}alsaconf${M} has been deprecated and should not be required any longer.${S}"
 	echo
@@ -1333,11 +1152,6 @@ misc_legacy_tweaks()
 				echo "${S}Initscript fix is now done.${N}"
 				repeat='true'
 				;;
-			infobash-tweak)
-				check_xorg_version post # just to double check
-				infobash_tweak
-				repeat='true'
-				;;
 			start-splashy)
 				splashy_control start-splashy
 				repeat='true'
@@ -1361,53 +1175,6 @@ misc_legacy_tweaks()
 	then
 		misc_legacy_tweaks
 	fi
-}
-
-# this adds a small conditional before the xorg version assignment, it will
-# only run if xorg is in apt-cache policy already. Changes output from say 7.0.0 to 7.0.22
-infobash_tweak()
-{
-	local IBPath='/usr/bin/infobash' IBPathT='/usr/bin/infobash-temp' DoIt=''
-	local XOk=$(echo $X_ORG_VERSION_POST | grep -c "[1678].")
-	#echo $XOk
-	
-	echo $MLINE
-	echo "${S}INFOBASH TWEAK"
-	echo $LINE
-	# built in updater function of infobash
-	# echo "${S}Updating ${C}Infobash${S} to latest version...${N}"
-	# $IBPath --update
-	# echo "${C}Infobash${S} should now be updated if all went well.${N}"
-	# must come after new infobash is loaded
-	# I have to update it here to correctly handle xorg
-	sed -i -r "s%apt-cache policy xorg | grep 'Installed: 1:'%apt-cache policy xserver-xorg | grep 'Installed: [1-2]:'%" $IBPath
-	sed -i -r "s%apt-cache policy xorg-server-xorg | grep 'Installed: 1:'%apt-cache policy xserver-xorg-core | grep 'Installed: [1-2]:'%" $IBPath
-	DoIt=$( cat $IBPath | grep -c "apt-cache policy xserver-xorg | grep 'Installed: 1:'" )
-	
-	if [ "$XOk" -eq 0 ]
-	then
-		echo "${W}Sorry, you need to have done an upgrade through ${C}apt-get${S} of ${C}xorg${S} for this to work."
-		echo "${S}You can run it again after you've upgraded ${C}xorg${S} at least one time.${N}"
-	fi
-	
-	if [ "$DoIt" -eq 0 ]
-	then
-		mv $IBPath $IBPathT
-		
-		InfoBashTweak="if [ ! -z \$( grep -oi 'Debian' /etc/issue ) ]\n  then\n    XVERNUM=\$(apt-cache policy xserver-xorg-core | grep 'Installed: [1-2]:' | egrep -m 1 -o \"(1|7)\.[0-9]*\.[0-9]*\")\n  fi\n  XVER=\"\$XVENDOR \$XVERNUM\""
-		
-		echo "${S}Modifying ${C}infobash${S} to show full ${C}xorg${S} version${N}"
-		
-		sed "s@XVER=\"\$XVENDOR \$XVERNUM\"@$InfoBashTweak@g" $IBPathT > $IBPath
-		
-		rm -f $IBPathT
-		chmod +x $IBPath
-		#cat /usr/bin/infobash | grep '' | echo -e $InfoBashTweak
-		echo "${C}infobash${S} has been modified${N}"
-	else
-		echo "${S}Infobash is already modified${N}"
-	fi
-	print_hec
 }
 
 splashy_control()
