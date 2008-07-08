@@ -2412,6 +2412,7 @@ print_update_warning_configs()
 				;;
 			w)
 				print_alert_warning_data $startArgs
+				echo $LINE
 				;;
 			cw|wc)
 				print_alert_warning_data $startArgs
@@ -2419,7 +2420,7 @@ print_update_warning_configs()
 				get_configs $startArgs
 				;;
 		esac
-		echo $LINE
+		
 		echo "${S}End of warning/config data. $updateRootMessage"
 		echo $LINE
 	fi
