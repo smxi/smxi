@@ -72,7 +72,7 @@ start_up_tests()
 	
 	echo $LINE
 	echo "Running initial startup tests..."
-	# don't want to use root for this script
+	# user must be root for this script so they can chown to root
 	if [ "$(whoami)" != 'root' ]
 	then
 		error_handler 1
