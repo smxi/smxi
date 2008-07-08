@@ -181,7 +181,7 @@ package_removal()
 					then
 						if [ "$kickit" == 'vdr' ]
 						then
-							$kickit='(vdr |vdr-|xvdr)'
+							$kickit='(vdr[:space:]|vdr-|xvdr)'
 						fi
 						packages=$( dpkg -l | awk '/'$kickit'/{print $2}' )
 						package_remover "$packages"  '--purge'
