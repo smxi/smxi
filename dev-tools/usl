@@ -3,7 +3,7 @@
 ####  Script Name: usl
 ####  Development updating tool for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.0.4
+####  version: 2.0.5
 ####  Date: July 7 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -58,7 +58,7 @@ error_handler()
 			message='You should not be root to run this script'
 			;;
 		2)
-			message="The directory: $2 does not exist, please fix this."
+			message="The directory: $2 does not exist."
 			;;
 		3)
 			message="sed failed for some reason while removing dev flags in file: $2"
@@ -111,6 +111,7 @@ clean_dev_flags()
 	local isDev=''
 	
 	echo "Cleaning dev flags up now..."
+	cd $SVN_DIR
 	for script in $scripts
 	do
 		isRestart=$( grep -i "^SKIP_RESTART='true'" $script )
@@ -194,6 +195,7 @@ update_other_components()
 	cp -f $DEV_TOOLS_DIR/dsl $KERNEL_SVN_DIR/dsl
 	cp -f $DEV_TOOLS_DIR/smxi-stub $STUB_SVN_DIR/smxi-stub
 	cp -f $DEV_TOOLS_DIR/usl $DEV_TOOLS_SVN_DIR/usl
+	cp -f $DEV_TOOLS_DIR/zsl $DEV_TOOLS_SVN_DIR/zsl
 }
 
 

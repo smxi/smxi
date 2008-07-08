@@ -1,0 +1,141 @@
+#! /bin/bash
+
+########################################################################
+####  Script Name: zsl
+####  smxi zip creation installer creation tool
+####  Only supports true Debian based distros.
+####  version: 1.0.0
+####  Date: July 7 2008
+########################################################################
+####  Copyright (C) Harald Hope 2005-2008
+####  
+####  This program is free software; you can redistribute it and/or modify it under 
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 3 of the License, or (at your option) any later version.
+####
+####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+####
+####  Get the full text of the GPL here: http://www.gnu.org/licenses/gpl.txt
+########################################################################
+
+########################################################################
+#### VARIABLES
+########################################################################
+
+# layout
+LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+
+SGFXI_PATH="$HOME/bin/scripts/graphics/sgfxi"
+SMXI_PATH="/usr/local/bin/smxi"
+SVMI_PATH="$HOME/bin/scripts/sidux/svmi"
+ZIP_DIR="$HOME/bin/scripts/sidux/svn/trunk/zips"
+
+########################################################################
+#### FUNCTIONS
+########################################################################
+# args: $1 error nu; $2 - extra data
+error_handler()
+{
+	local message=''
+	
+	case $1 in
+		1)
+			message='You need to be root to run this script'
+			;;
+		2)
+			message="The file: $2 does not exist."
+			;;
+		3)
+			message="The directory: $2 does not exist."
+			;;
+		4)
+			message="The file: $2 did not copy successfully."
+			;;
+		5)
+			message="The file: $2 did not get zipped correctly."
+			echo "Removing failed zip file $2..."
+			rm -f $2
+			;;
+	esac
+	echo $LINE
+	echo $message
+	echo "Error $1 - Exiting script, please correct the error"
+	echo $LINE
+	exit $1
+}
+
+start_up_tests()
+{
+	local startFile=''
+	
+	echo $LINE
+	echo "Running initial startup tests..."
+	# don't want to use root for this script
+	if [ "$(whoami)" != 'root' ]
+	then
+		error_handler 1
+	fi
+	
+	# make sure the paths you made are right and exist
+	for startFile in $SGFXI_PATH $SMXI_PATH $SVMI_PATH
+	do
+		if [ ! -f "$startFile" ]
+		then
+			error_handler 2 $startFile
+		fi
+	done
+	# confirm target zip directory exists
+	if [ ! -d "$ZIP_DIR" ]
+	then
+		error_handler 3 $ZIP_DIR
+	fi
+	echo "Start up tests passed."
+}
+
+copy_files_to_target_directory()
+{
+	echo $LINE
+	echo 'Starting zip file creation now... copying files to target...'
+	cp -f $SGFXI_PATH $ZIP_DIR/sgfxi || error_handler 4 sgfxi
+	cp -f $SMXI_PATH $ZIP_DIR/smxi || error_handler 4 smxi
+	cp -f $SVMI_PATH $ZIP_DIR/svmi || error_handler 4 svmi
+	echo "Files copied."
+}
+
+set_file_permissions()
+{
+	echo "Changing file owner to root and permissions to -x..."
+	chown root $ZIP_DIR/*
+	chmod +x $ZIP_DIR/*
+}
+
+create_zip_file()
+{
+	local contents='' fileName='smxi.zip'
+	
+	echo $LINE
+	echo "Zipping up files into $fileName..."
+	cd $ZIP_DIR
+	contents=$(ls $targetDir)
+	zip $fileName $contents || error_handler 5 $fileName
+	echo 'Files zipped up and ready to go!'
+}
+
+finish_it_up()
+{
+	echo $LINE
+	echo "OK, all finished. Remember to upload via ftp the zip file to make it live."
+}
+
+########################################################################
+#### EXECUTE
+########################################################################
+
+start_up_tests
+copy_files_to_target_directory
+set_file_permissions
+create_zip_file
+finish_it_up
+exit 0
