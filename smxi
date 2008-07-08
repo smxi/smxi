@@ -192,7 +192,6 @@ ALERT_BODY='alert_message'
 CONFIGS_BODY='configs'
 HOLD_INSTALL='holds'
 STATUS='danger' # set to danger level by default
-WGT='wget-test'
 UPGRADE_DATA='upgrade-data/'
 TECH_PATTERNS_DISTRO='http://techpatterns.com/downloads/distro/'
 TECH_PATTERNS_KERNELS='http://techpatterns.com/downloads/distro/kernels/'
@@ -316,6 +315,7 @@ REMOTE_DATE=''
 SET_KERNEL_DATA=''
 SIDUX_SOURCES=''
 SKIP_CONNECTION_RETRY=''
+SYSTEM=''
 SYSTEM_BASE=''
 UPDATED=''
 USE_DEBIAN_KERNEL=''
@@ -1006,6 +1006,7 @@ set_distro_data()
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
+	local distro='debian'
 	
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
@@ -1033,7 +1034,12 @@ set_distro_data()
 	then
 		DEFAULT_KERNEL='no-kernel'
 		USE_DEBIAN_KERNEL='false'
+		distro='antix'
 	else
+		if [ -f $SID ]
+		then
+			distro='sidux'
+		fi
 		DEFAULT_KERNEL='debian'
 		USE_DEBIAN_KERNEL='true'
 	fi
@@ -1048,6 +1054,7 @@ set_distro_data()
 		SIDUX_SOURCES='true'
 		DEFAULT_KERNEL='sidux'
 	fi
+	SYSTEM="$distro-$SYSTEM_BASE-$BITS"
 	
 	## override defaults by user preference
 	# user set default kernel
