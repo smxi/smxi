@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-removal
-####  version: 1.2.8
+####  version: 1.2.9
 ####  Date: July 8 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -37,7 +37,7 @@ package_removal()
 	local options="bluetooth captive dmraid-mdadm-lvm german-components-de gnomemeetings isdn klaptopdaemon koffice openoffice.org skype splashy squid vdr wifi wvdial xawtv remove-chosen back-to-main-menu"
 	local RemoveCount=$( echo $options | awk '{print NF-1}' )
 	local wifiKick="$( dpkg -l | egrep '(ipw[1-9]|madwifi|ndis|wifi|rt25|rt61|wlan|at76|at76|bcm|zd12)' | cut -d ' ' -f 3 )"
-	local deStuff='' dumpDe='' i='' packages=''
+	local deStuff='' dumpDe='' i='' packages='' extraPackage=''
 	
 	print_lib_info $LIB_PACKAGE_REMOVAL
 	echo $MLINE
@@ -182,9 +182,10 @@ package_removal()
 						if [ "$kickit" == 'vdr' ]
 						then
 							$kickit='(vdr[:space:]|vdr-|xvdr)'
+							extraPackage=' vdr'
 						fi
 						packages=$( dpkg -l | awk '/(hi|ii)[ \t]*'$kickit'/{print $2}' )
-						package_remover "$packages vdr"  '--purge'
+						package_remover "$packages $extraPackage"  '--purge'
 						#COLUMNS=200 dpkg -l | awk '/'$kickit'/{print $2}' | xargs -r apt-get remove --purge
 					elif [ "$kickit" == 'captive' ]
 					then
