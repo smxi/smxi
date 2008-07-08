@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-removal
-####  version: 1.2.9
+####  version: 1.2.10
 ####  Date: July 8 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -174,7 +174,6 @@ package_removal()
 			y)
 				for kickit in $KickItems
 				do
-					echo "${S}Removing ${C}$kickit${S} now.${N}"
 					# I don't know why these exceptions are here, leaving them for now
 					# but I don't think they are necessary any longer
 					if [ "$kickit" != 'captive' -a "$kickit" != 'manpages-de' ]
