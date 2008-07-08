@@ -2381,6 +2381,7 @@ print_update_warning_configs()
 	local startArgs='print' 
 	local updateRootMessage=' Remember, to update this live, use ${C}-W${S} option as root.'
 	
+	# need to set the correct config files for user system here
 	set_distro_data
 	cd $SCRIPT_HOME
 	
