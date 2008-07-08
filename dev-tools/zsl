@@ -126,7 +126,7 @@ create_zip_file()
 	zip $fileName $contents || error_handler 5 $fileName
 	echo "Testing smxi installer zip file for corruption..."
 	unzip -t $fileName || error_handler 6 $fileName
-	echo "32 bit smxi instalelr zip corruption test: passed"
+	echo "smxi instalelr zip corruption test: passed"
 	echo 'Files zipped up and ready to go!'
 }
 
