@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-warning
-####  version: 1.2.2
-####  Date: July 2 2008
+####  version: 2.0.0
+####  Date: July 8 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -24,59 +24,68 @@
 ########################################################################
 
 # get remote server status
+# Note: du needs to exit if this file isn't found, otherwise errors can occur in du
+# args: $1 - print (optional)
 get_status()
 {
-	wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$WARNING_STATUS
-	
+	eval $LOGUS
+	if [ "$1" != 'print' ]
+	then
+		wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$WARNING_STATUS $TECH_PATTERNS_DISTRO$UPGRADE_DATA$WARNING_STATUS || error_handler 'warning-status-file-missing' $FUNCNAME $WARNING_STATUS
+	fi
 	if [ -f $WARNING_STATUS ]
 	then
 		STATUS=$( cat $WARNING_STATUS)
-		rm -f $WARNING_STATUS
 	else
-		echo $EBAR
-		echo "${E}Failed to download error status data. Please wait to continue with $DU_UPGRADE."
-		echo $EBAR
-		exit 0
+		error_handler 'warning-status-file-missing' $FUNCNAME $WARNING_STATUS
 	fi
+	eval $LOGUE
 }
 
 # get warning text if required
+# args: $1 - alert/danger; $2 - print (optional)
 get_warning()
 {
+	eval $LOGUS
 	if [ "$STATUS" == 'danger' -o "$STATUS" == 'danger-alert' -a "$1" == 'danger' ]
 	then
-		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$WARNING_BODY
+		if [ "$2" != 'print' ]
+		then
+			wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$WARNING_BODY $TECH_PATTERNS_DISTRO$UPGRADE_DATA$WARNING_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $WARNING_BODY
+		fi
 		if [ -f $WARNING_BODY ]
 		then
 			cat $WARNING_BODY
-			rm -f $WARNING_BODY
 		else
-			echo $EBAR
-			echo "${E}Failed to download warning text data. Please wait to continue with $DU_UPGRADE."
-			echo $EBAR
+			error_handler 'warning-data-file-missing' $FUNCNAME $WARNING_BODY
 		fi
 	fi
 	if [ "$STATUS" == 'alert' -o "$STATUS" == 'danger-alert' -a "$1" == 'alert' ]
 	then
-		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$ALERT_BODY
+		if [ "$2" != 'print' ]
+		then
+			wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$ALERT_BODY $TECH_PATTERNS_DISTRO$UPGRADE_DATA$ALERT_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $ALERT_BODY
+		fi
 		if [ -f $ALERT_BODY ]
 		then
 			cat $ALERT_BODY
-			rm -f $ALERT_BODY
 		else
-			echo $EBAR
-			echo "${E}Failed to download alert text data. Please wait to continue with $DU_UPGRADE."
-			echo $EBAR
+			error_handler 'warning-data-file-missing' $FUNCNAME $ALERT_BODY
 		fi
 	fi
+	eval $LOGUE
 }
 
 # this isn't properly part of the warning system, but it's still reasonably
 # related. This is called in pre du-1, so users can actually remember the config files
+# args: $1 - print (optional)
 get_configs()
 {
-	wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$CONFIGS_BODY
-	
+	eval $LOGUS
+	if [ "$1" != 'print' ]
+	then
+		wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$CONFIGS_BODY $TECH_PATTERNS_DISTRO$UPGRADE_DATA$CONFIGS_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $CONFIGS_BODY
+	fi
 	if [ -f "$CONFIGS_BODY" -a -n "$( cat $CONFIGS_BODY )" ]
 	then
 		echo "${M}Answer ${C}y${M} instead of the standard ${C}n${M} if you are asked to"
@@ -84,29 +93,25 @@ get_configs()
 		cat $CONFIGS_BODY
 		echo
 		echo $MLINE
+	else
+		error_handler 'warning-data-file-missing' $FUNCNAME $CONFIGS_BODY
 	fi
-	if [ -f "$CONFIGS_BODY" ]
-	then
-		rm -f $CONFIGS_BODY
-	fi
+	eval $LOGUE
 }
 
-# issue warning if status = danger etc
-upgrade_warning()
+# args: $1 - print (optional)
+print_alert_warning_data()
 {
-	local ContinueText='' options='' opt=''
-	
-	get_status
+	eval $LOGPS
+	get_status $1
 
 	if [ "$STATUS" == 'alert'  -o "$STATUS" == 'danger-alert' ]
 	then
 		echo $EBAR
 		echo ${E}"*******     CURRENT ALERTS & FIXES"
 		echo $EBAR
-		get_warning alert
+		get_warning 'alert' $1
 		echo
-		
-		ContinueText="${E}Continue with ${C}$DU_UPGRADE${E}. Proceed with caution. Watch for fixes noted above."
 	fi
 	
 	if [ "$STATUS" == 'danger' -o "$STATUS" == 'danger-alert' ]
@@ -115,22 +120,42 @@ upgrade_warning()
 		echo "${W}*******     IT IS NOT CURRENTLY SAFE TO $( tr [a-z] [A-Z] <<< $DU_UPGRADE )"
 		echo ${W}"*******     CURRENT WARNINGS(s)"
 		echo $WBAR
-		get_warning danger
+		get_warning 'danger' $1
 		echo
 		echo $LINE
 		echo "${S}Please wait to do the $DU_UPGRADE until you have received word "
 		echo "that it is safe, or until the script runs without displaying this warning."
 		echo
 		echo "Check the forums and news page of sidux.com for further information."
-		
-		ContinueText="${W}Continue with ${C}$DU_UPGRADE${W}. Proceed at your own risk!!!"
 	fi
 	
 	if [ "$STATUS" == 'proceed' ]
 	then
 		echo $MBAR
 		echo "${M}There are currently no known major issues with ${C}$DU_UPGRADE${S}"
+	fi
+	eval $LOGPE
+}
 
+# issue warning if status = danger etc
+upgrade_warning()
+{
+	eval $LOGMS
+	local ContinueText='' options='' opt=''
+	
+	print_alert_warning_data
+	if [ "$STATUS" == 'alert'  -o "$STATUS" == 'danger-alert' ]
+	then
+		ContinueText="${E}Continue with ${C}$DU_UPGRADE${E}. Proceed with caution. Watch for fixes noted above."
+	fi
+	
+	if [ "$STATUS" == 'danger' -o "$STATUS" == 'danger-alert' ]
+	then
+		ContinueText="${W}Continue with ${C}$DU_UPGRADE${W}. Proceed at your own risk!!!"
+	fi
+	
+	if [ "$STATUS" == 'proceed' ]
+	then
 		ContinueText="${S}Continue with ${C}$DU_UPGRADE${S}."
 	fi
 	
@@ -166,6 +191,7 @@ upgrade_warning()
 		esac
 		break
 	done
+	eval $LOGME
 }
 #upgrade_warning
 

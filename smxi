@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.34.23
-####  Date: July 4 2008
+####  version: 7.35.0
+####  Date: July 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -291,6 +291,7 @@ CONNECTION_RETRY=''
 # setting to 'true' turns off script self-updater. You must have ALL script components
 # in $SCRIPT_HOME (/usr/local/bin) here already to use this without having error occur.
 DEV_FLAG=''
+DISTRO=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
 DU_UPGRADE='dist-upgrade'
 KERNEL_EQUAL_INSTALL=''
@@ -302,12 +303,12 @@ LOG_MASTER=''
 LOG_PRIMARY=''
 LOG_INDENT=''
 LOG_UTILITY=''
-LOGMS='log_function_data ms $FUNCNAME'
-LOGME='log_function_data me $FUNCNAME'
-LOGPS='log_function_data ps $FUNCNAME'
-LOGPE='log_function_data pe $FUNCNAME'
-LOGUS='log_function_data us $FUNCNAME'
-LOGUE='log_function_data ue $FUNCNAME'
+LOGMS='log_function_data ms $FUNCNAME "$0"'
+LOGME='log_function_data me $FUNCNAME "$0"'
+LOGPS='log_function_data ps $FUNCNAME "$0"'
+LOGPE='log_function_data pe $FUNCNAME "$0"'
+LOGUS='log_function_data us $FUNCNAME "$0"'
+LOGUE='log_function_data ue $FUNCNAME "$0"'
 MEPIS_SOURCES=''
 PRINT_VERSION=''
 REMOTE_VERSION=''
@@ -315,7 +316,6 @@ REMOTE_DATE=''
 SET_KERNEL_DATA=''
 SIDUX_SOURCES=''
 SKIP_CONNECTION_RETRY=''
-SYSTEM=''
 SYSTEM_BASE=''
 UPDATED=''
 USE_DEBIAN_KERNEL=''
@@ -426,9 +426,28 @@ error_handler()
 			errorCode=33
 			errorMessage="User initiated $DU_UPGRADE component termination via ctrl+c or kill."
 			;;
-			
+		warning-status-file-missing)
+			errorCode=34
+			errorMessage="Missing Warning Section file: $errorExtra\n$SCRIPT_NAME cannot execute the requested action without this file."
+			;;
+		missing-lib-fatal)
+			errorCode=35
+			errorMessage="The operation you requested requires the library file: $errorExtra but it is missing.\nThe script cannot run the requested action without this library.\n please find out what is wrong."
+			;;
 		# failures in actions/functions not requiring script exit: 100-150: serious
-		# none yet
+		missing-lib)
+			errorCode=100
+			errorMessage="The operation you requested requires the library file: $errorExtra but it is missing.\nSkipping the load attempt and continuing.\n"
+			;;
+		warning-data-wget-error)
+			errorCode=101
+			errorMessage="There was an error downloading the warning file: $errorExtra "
+			;;
+		warning-data-file-missing)
+			errorCode=102
+			errorMessage="Missing Warning Section file: $errorExtra "
+			;;
+		
 		# internal script errors/failures in system: 151-254: normal
 		null-kernel-file-data)
 			errorCode=251
@@ -697,20 +716,23 @@ run_script_import()
 	# test version against current, download/run/include
 	if [ "$loadIt" == 'true' ]
 	then
-		if [ "$2" != 'no-download' -a "$noTestDownloadOnly" != 'true' ]
+		# this is needed for a special case where users might want to run feature in user mode
+		if [ "$( whoami )" == 'root' ]
 		then
-			test_version_info $1
-		fi
-		if [ "$noTestDownloadOnly" == 'true' ]
-		then
-			update_scripts $1
+			if [ "$2" != 'no-download' -a "$noTestDownloadOnly" != 'true' ]
+			then
+				test_version_info $1
+			fi
+			if [ "$noTestDownloadOnly" == 'true' ]
+			then
+				update_scripts $1
+			fi
 		fi
 		if [ -f $1 ] # if the file is already present, do this
 		then
 			. ./$1 # load include file
 		else
-			echo "${E}Error loading script ${C}$1${E}. The file does not exist."
-			echo "${S}The script cannot run this section without this, please find out what is wrong.${N}"
+			error_handler 'missing-lib' $FUNCNAME $1
 		fi
 	elif [ "$runIt" == 'true' ]
 	then
@@ -775,14 +797,18 @@ update_scripts()
 download_test_file()
 {
 	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
-	local isGood='' wgetError=0
+	local isGood='' wgetError=0 update=''
 	
 	if [ -f "$fileNameTemp" ]
 	then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
 	fi
-	# using Nc makes this highly non-robust for this test, so don't do it
-	wget -T$TIME_OUT -t 2 -q -O $fileNameTemp $TECH_PATTERNS_DISTRO$1 &>/dev/null || wgetError="$?"
+	if [ "$1" == "$LIB_WARNING" -a ! -f "$LIB_WARNING" ]
+	then
+		update="?$DISTRO"
+	fi
+	# always using -O here because -Nc is really buggy over time lines and fast file changes
+	wget -T$TIME_OUT -t 2 -q -O $fileNameTemp $TECH_PATTERNS_DISTRO$1$update &>/dev/null || wgetError="$?"
 	if [ "$wgetError" -gt 0 ]
  	then
  		file_download_error "$1" 'server-problem' "$wgetTest"
@@ -1054,7 +1080,7 @@ set_distro_data()
 		SIDUX_SOURCES='true'
 		DEFAULT_KERNEL='sidux'
 	fi
-	SYSTEM="$distro-$SYSTEM_BASE-$BITS"
+	DISTRO="$distro-$SYSTEM_BASE-$BITS"
 	
 	## override defaults by user preference
 	# user set default kernel
@@ -2348,6 +2374,55 @@ print_distro_id()
 	echo $distroId
 }
 
+# trigger function for X loaded updates and viewing, or user viewing
+# args: $1 - which view mode: c = configs; w = warnings; cw = both
+print_update_warning_configs()
+{
+	local startArgs='print' 
+	local updateRootMessage=' Remember, to update this live, use ${C}-W${S} option as root.'
+	
+	set_distro_data
+	cd $SCRIPT_HOME
+	
+	echo $MLINE
+	echo "${M}$SCRIPT_NAME Warning/Config Data"
+	echo $MLINE
+	if [ "$(whoami)" == "root" ]
+	then
+		echo "${S}Since you are logged in as root, the warning/config data will be updated live.${N}"
+		startArgs='print-root'
+		echo $LINE
+		update_scripts $VERSION_INFO # get the version info data file
+	else
+		echo "${S}Since you are not logged in as root, the last available warning data will be used.${N}"
+		echo $LINE
+		updateRootMessage=''
+	fi
+	
+	# this will allow user to use current version of warnings if not root
+	run_script_import $LIB_WARNING
+	if [ ! -f $LIB_WARNING ]
+	then
+		error_handler 'missing-lib-fatal' $FUNCNAME $LIB_WARNING
+	else
+		case $1 in
+			c)
+				get_configs $startArgs
+				;;
+			w)
+				print_alert_warning_data $startArgs
+				;;
+			cw|wc)
+				print_alert_warning_data $startArgs
+				print_hec
+				get_configs $startArgs
+				;;
+		esac
+		echo $LINE
+		echo "${S}End of warning/config data. $updateRootMessage"
+		echo $LINE
+	fi
+}
 # print_hec ;echo helloworld; echo yes indeed; exit
 # last step in smxi
 print_completed()
@@ -2985,7 +3060,11 @@ print_usage()
 	echo "${S}The following can be run in X/kde:"
 	echo "${C}-h${S} Prints this ${C}h${S}elp menu."
 	echo "${C}-v${S} Prints ${C}v${S}ersion and system information, including distro version,"
-	echo "  . current kernel, apt update and $DU_UPGRADE last used, and last use of smxi."
+	echo "   current kernel, apt update and $DU_UPGRADE last used, and last use of smxi."
+	echo "${C}-W${S} Requires argument: ${C}c${S} (print current configs) OR ${C}w${S} (print warnings) OR"
+	echo "   ${C}wc${S} (prints first warnings, then configs). Like this: ${C}smxi -W wc${S}"
+	echo "   Note: if you want to get the live, current warnings, and not the ones left from your last"
+	echo "   $SCRIPT_NAME use, you must be root in terminal/console."
 	echo $LINE
 	echo "${S}Remember: to scroll up or down in terminal window, use: ${C}shift+pageup/pagedown${N}"
 	echo $LINE
@@ -2993,7 +3072,7 @@ print_usage()
 }
 
 ## this is not in a function because these variables need to be set on startup
-while getopts :dDeEhgiI:kKlmMNpP:sStTvwfruUxZ: opt
+while getopts :dDeEhgiI:kKlmMNpP:sStTvwW:fruUxZ: opt
 do
 	case $opt in
 		h)	print_usage;;
@@ -3075,6 +3154,20 @@ do
 			set_distro_data # need some of the distro data here
 			check_dpkg_update # need to set the update data
 			print_install_information
+			exit 0
+			;;
+		W)	if [ -z "$( egrep "^(c|w|cw|wc)$" <<< $OPTARG  )" -o "${#OPTARG}" -gt 1 ]
+			then
+				echo "${E}The -W option supported the following options only:"
+				echo "${S}c - print config y/n data"
+				echo "w - print current alert/warning data"
+				echo "cw - print first alert/warning data, then config data"
+				echo "Like this: -W c${N}"
+				exit 1
+			else
+				print_update_warning_configs $OPTARG
+			fi
+			
 			exit 0
 			;;
 		x)	EXTRA_OPTIONS='true'
