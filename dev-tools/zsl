@@ -27,10 +27,12 @@
 # layout
 LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
-SGFXI_PATH="$HOME/bin/scripts/graphics/sgfxi"
+# make sure this user name is correct for your file system, or just replace with hard coded
+USER_NAME=$( getent passwd 1000 | cut -d ':' -f1 )
+SGFXI_PATH="/home/$USER_NAME/bin/scripts/graphics/sgfxi"
 SMXI_PATH="/usr/local/bin/smxi"
-SVMI_PATH="$HOME/bin/scripts/sidux/svmi"
-ZIP_DIR="$HOME/bin/scripts/sidux/svn/trunk/zips"
+SVMI_PATH="/home/$USER_NAME/bin/scripts/sidux/svmi"
+ZIP_DIR="/home/$USER_NAME/bin/scripts/sidux/svn/trunk/zips"
 
 ########################################################################
 #### FUNCTIONS
