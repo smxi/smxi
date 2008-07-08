@@ -118,7 +118,7 @@ create_zip_file()
 	echo $LINE
 	echo "Zipping up files into $fileName..."
 	cd $ZIP_DIR
-	rm -f $fileName
+	rm -f $fileName # don't want to zip up the zip file again
 	contents=$(ls $targetDir)
 	zip $fileName $contents || error_handler 5 $fileName
 	echo 'Files zipped up and ready to go!'
