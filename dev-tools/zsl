@@ -42,7 +42,7 @@ error_handler()
 	
 	case $1 in
 		1)
-			message='You need to be root to run this script'
+			message='You need to be root to run this script.'
 			;;
 		2)
 			message="The file: $2 does not exist."
