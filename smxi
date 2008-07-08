@@ -3069,8 +3069,8 @@ print_usage()
 	echo "   current kernel, apt update and $DU_UPGRADE last used, and last use of smxi."
 	echo "${C}-W${S} Requires argument: ${C}c${S} (print current configs) OR ${C}w${S} (print warnings) OR"
 	echo "   ${C}wc${S} (prints first warnings, then configs). Like this: ${C}smxi -W wc${S}"
-	echo "   Note: if you want to get the live, current warnings, and not the ones left from your last"
-	echo "   $SCRIPT_NAME use, you must be root in terminal/console."
+	echo "   Note: if you want to get the live, current configs/warnings, and not the ones left from"
+	echo "   your last $SCRIPT_NAME use, you must be root in terminal/console."
 	echo $LINE
 	echo "${S}Remember: to scroll up or down in terminal window, use: ${C}shift+pageup/pagedown${N}"
 	echo $LINE
