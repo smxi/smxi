@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: zsl
 ####  Description: smxi zip installer creation tool
-####  version: 1.0.0
-####  Date: July 7 2008
+####  version: 1.0.1
+####  Date: July 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2008
 ####  
@@ -58,6 +58,9 @@ error_handler()
 			echo "Removing failed zip file $2..."
 			rm -f $2
 			;;
+		6)
+			message="Corrupted smxi installer zip file: $2"
+			;;
 	esac
 	echo $LINE
 	echo $message
@@ -91,7 +94,7 @@ start_up_tests()
 	then
 		error_handler 3 $ZIP_DIR
 	fi
-	echo "Start up tests passed."
+	echo "Start up tests: passed"
 }
 
 copy_files_to_target_directory()
@@ -121,6 +124,9 @@ create_zip_file()
 	rm -f $fileName # don't want to zip up the zip file again
 	contents=$( ls $ZIP_DIR )
 	zip $fileName $contents || error_handler 5 $fileName
+	echo "Testing smxi installer zip file for corruption..."
+	unzip -t $fileName || error_handler 6 $fileName
+	echo "32 bit smxi instalelr zip corruption test: passed"
 	echo 'Files zipped up and ready to go!'
 }
 

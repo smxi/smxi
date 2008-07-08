@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.0.2
-####  Date: July 7 2008
+####  version: 2.0.3
+####  Date: July 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -72,6 +72,9 @@ error_handler()
 		6)
 			message="Missing required packaging file: $2"
 			;;
+		7)
+			message="Corrupted kernel zip file: $2"
+			;;
 	esac
 	echo $LINE
 	echo -e $message
@@ -121,7 +124,7 @@ start_up_tests()
 		error_handler 6 $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh
 	fi
 	
-	echo "Start up tests passed."
+	echo "Start up tests: passed"
 }
 
 create_kernel_directory()
@@ -218,6 +221,9 @@ make_zip_files()
 	contents=$(ls)
 	fileName="kernel-$zipKernelId-slh-smp-$2.zip"
 	zip $fileName $contents
+	echo "Testing 32 bit kernel zip file for corruption..."
+	unzip -t $fileName || error_handler 7 $fileName
+	echo "32 bit kernel zip corruption test: passed"
 	mv $fileName ../kernel-full-zips/
 	
 	echo 'Making 64 bit zip file now...'
@@ -225,6 +231,9 @@ make_zip_files()
 	contents=$(ls)
 	fileName="kernel-$zipKernelId-slh64-smp-$KERNEL_SUB.zip"
 	zip $fileName $contents
+	echo "Testing 64 bit kernel zip file for corruption..."
+	unzip -t $fileName || error_handler 7 $fileName
+	echo "64 bit kernel zip corruption test: passed"
 	mv $fileName ../kernel-full-zips/
 }
 
