@@ -1,9 +1,7 @@
 #! /bin/bash
-
 ########################################################################
 ####  Script Name: zsl
-####  smxi zip creation installer creation tool
-####  Only supports true Debian based distros.
+####  Description: smxi zip installer creation tool
 ####  version: 1.0.0
 ####  Date: July 7 2008
 ########################################################################

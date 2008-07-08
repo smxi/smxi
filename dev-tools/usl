@@ -1,8 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: usl
-####  Development updating tool for smxi scripts
-####  Only supports true Debian based distros.
+####  Description: updating tool for smxi scripts
 ####  version: 2.0.5
 ####  Date: July 7 2008
 ########################################################################
