@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-warning
-####  version: 2.0.0
+####  version: 2.0.1
 ####  Date: July 8 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -125,8 +125,11 @@ print_alert_warning_data()
 		echo $LINE
 		echo "${S}Please wait to do the $DU_UPGRADE until you have received word "
 		echo "that it is safe, or until the script runs without displaying this warning."
-		echo
-		echo "Check the forums and news page of sidux.com for further information."
+		if [ "$SYSTEM_BASE" == 'sid' ]
+		then
+			echo
+			echo "Check the forums and news page of sidux.com for further information."
+		fi
 	fi
 	
 	if [ "$STATUS" == 'proceed' ]
