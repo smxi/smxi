@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.0.3
+####  version: 2.0.4
 ####  Date: July 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -73,7 +73,8 @@ error_handler()
 			message="Missing required packaging file: $2"
 			;;
 		7)
-			message="Corrupted kernel zip file: $2"
+			message="Corrupted kernel zip file: $2\nRemoved bad file."
+			rm -f $2
 			;;
 	esac
 	echo $LINE
