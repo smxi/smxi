@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.2
+####  version: 7.35.3
 ####  Date: July 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2205,30 +2205,40 @@ print_lib_info()
 
 print_version()
 {
-	local distroTeam='slh devil etorix kelmo webera x-un-i crust dutchy latino locsmif piper zulu9' 
-	local extraTeam='...and of course, RazberrieTart, the official sidux fan girl!'
-	local person=''
+	local distroThanks='crust devil dutchy kelmo latino locsmif paleoflatus piper slh trash80 x-un-i webera zulu9' 
+	local extraMessage="...and welcome new Debian users, hope you enjoy $SCRIPT_NAME..."
+	local item=''
 	# only for -v option printout
 	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
 	local systemBase=$( perl -wp -e '$_ = ucfirst' <<< $SYSTEM_BASE )
 	local distroId=$( print_distro_id )
 	
+	if [ -f "$SID" ]
+	then
+		distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
+		extraMessage='...and of course, RazberrieTart, the official sidux fan girl!'
+	elif [ -f "$ATX" ]
+	then
+		distroThanks='anticapitalista crust dutchy eriefisher kelmo latino masinick slh trash80 zulu9'
+		extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
+	fi
+
 	if [ "$PRINT_VERSION" != 'true' ]
 	then
 		echo $LINE
 		echo "${S}Special thanks to the people who have helped with this script, in one way or another:"
 		sleep 0.1
 		echo -n ${C}
-		for person in $distroTeam
+		for item in $distroThanks
 		do
-			echo -n $person' '
+			echo -n $item' '
 			sleep 0.10
 		done
 		echo
-		for person in $extraTeam
+		for item in $extraMessage
 		do
-			echo -n $person' '
+			echo -n $item' '
 			sleep 0.06
 		done
 		echo ${N}
