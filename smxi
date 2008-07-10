@@ -2404,10 +2404,10 @@ print_update_warning_configs()
 		startArgs='print-root'
 		echo $LINE
 		update_scripts $VERSION_INFO # get the version info data file
+		updateRootMessage=''
 	else
 		echo "${S}Since you are not logged in as root, the last available warning data will be used.${N}"
 		echo $LINE
-		updateRootMessage=''
 	fi
 	
 	# this will allow user to use current version of warnings if not root
@@ -2435,7 +2435,7 @@ print_update_warning_configs()
 				;;
 		esac
 		
-		echo "${S}End of warning/config data.$updateRootMessage"
+		echo "${S}End of warning/config data. $updateRootMessage"
 		echo $LINE
 	fi
 }
