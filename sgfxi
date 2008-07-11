@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.38
+####  version: 3.1.39
 ####  Date: July 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -154,9 +154,9 @@ UPDATED=''
 XORG_BACKED_UP=''
 
 # here we're cutting out both card type and version number for cases with > 1 card
-CARD_COUNT=$( lspci -n | grep -c 0300 )
+CARD_COUNT=$( lspci -n | grep -c '0300' )
 #CARD_DATA=$( lspci -n | grep 0300 | cut -d ':' -f 3-4  | cut -d ' ' -f2 )
-CARD_DATA=$( lspci -n | grep 0300 | egrep -io '[a-f0-9]{4}:[a-f0-9]{4}' )
+CARD_DATA=$( lspci -n | grep '0300' | egrep -io '[a-f0-9]{4}:[a-f0-9]{4}' )
 CARD_NUMBER=''
 CARD_BRAND=''
 # this is reset for multiple gfx cards in select_card()
@@ -857,7 +857,7 @@ check_install_tools()
 install_package()
 {
 	local distroVersion='' optionalArgs=''
-	local packageInstalled=$( dpkg -l | grep $1 | cut -d ' ' -f  3 )
+	local packageInstalled=$( dpkg -l | grep "$1" | cut -d ' ' -f  3 )
 	
 	if [ "$UPDATED" != 'true' ]
 	then
@@ -894,7 +894,7 @@ remove_package()
 	echo $LINE
 	for package in $1 
 	do
-		if [ -n "$( dpkg -l | grep $package )" ]
+		if [ -n "$( dpkg -l | grep "$package" )" ]
 		then
 			echo "${B}Removing ${C}$package${S}...${N}"
 			apt-get remove --purge $package || error_handler 190 "$package"
@@ -1176,7 +1176,7 @@ install_native_driver()
 		# this is required to do radeon xorg driver 
 		native_driver_install_keep
 		
-		currentlyInstalled=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep $driver )
+		currentlyInstalled=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep "$driver" )
 		
 		case $CARD in
 			$FGLRX)
@@ -1228,11 +1228,11 @@ native_driver_install_keep()
 	
 	if [ "$NATIVE_OVERRIDE" == 'radeon' ]
 	then
-		if [ -z "$( dpkg -l | grep $lgmd )" ]
+		if [ -z "$( dpkg -l | grep "$lgmd" )" ]
 		then
 			install_package $lgmd
 		fi
-		if [ -z "$( dpkg -l | grep $ldrm )" ]
+		if [ -z "$( dpkg -l | grep "$ldrm" )" ]
 		then
 			install_package $ldrm
 		fi
@@ -1370,7 +1370,7 @@ check_supported_driver()
 	
 	if [ -n "$DRIVER_OVERRIDE" ]
 	then
-		isGood=$( echo $drivers | grep $DRIVER_OVERRIDE )
+		isGood=$( echo $drivers | grep "$DRIVER_OVERRIDE" )
 		if [ -z "$isGood" ]
 		then
 			error_handler 241 $DRIVER_OVERRIDE
@@ -1378,7 +1378,7 @@ check_supported_driver()
 	fi
 	if [ "$1" == 'last-check' ]
 	then
-		isGood=$( echo $drivers | grep $DRIVER_DEFAULT )
+		isGood=$( echo $drivers | grep "$DRIVER_DEFAULT" )
 		if [ -z "$isGood" ]
 		then
 			error_handler 240 $DRIVER_DEFAULT
@@ -1640,7 +1640,7 @@ prep_install()
 			INSTALL_DIRECTORY=$DRIVER_FILE
 			;;
 		$FGLRX)
-			INSTALL_DIRECTORY=$( ls | grep $FG_WORKING_DIR )
+			INSTALL_DIRECTORY=$( ls | grep "$FG_WORKING_DIR" )
 			;;
 	esac
 
@@ -1999,7 +1999,7 @@ install_debian_drivers()
 				echo "${B}Installing ${C}$nvidiaGlx${B} now...${N}"
 				install_package $nvidiaGlx
 				
-				if [ -z "$( grep ^nvidia /etc/modules )" ]
+				if [ -z "$( grep '^nvidia' /etc/modules )" ]
 				then
 					echo 'nvidia' >> /etc/modules
 				fi
@@ -2175,7 +2175,7 @@ final_install_steps()
 			# test for, then remove if present
 			for fgModule in $fgModules
 			do
-				if [ -n "$( lsmod | cut -d ' ' -f 1 | grep $fgModule )" ]
+				if [ -n "$( lsmod | cut -d ' ' -f 1 | grep "$fgModule" )" ]
 				then
 					rmmod $fgModule 1>> $LOG_FILE 2>> $LOG_FILE
 				fi
