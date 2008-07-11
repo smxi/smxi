@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.36
+####  version: 3.1.37
 ####  Date: July 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -160,6 +160,7 @@ CARD_DATA=$( lspci -n | grep 0300 | egrep -io '[a-f0-9]{4}:[a-f0-9]{4}' )
 CARD_NUMBER=''
 CARD_BRAND=''
 # this is reset for multiple gfx cards in select_card()
+# " around CARD_DATA is mandatory for avoiding new grep issue
 BUS_ID=$( lspci -n | grep "$CARD_DATA" | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
 
 COMPOSITE='' # default false
@@ -411,6 +412,8 @@ select_card()
 	local cards='' card='' singleCardId=''
 	local options='' opt='' found=''
 	local timeStampXorg=$EXXC-bu-$( date +%Y-%m-%d-%H:%M:%S )
+	
+	[ "$TESTING" == 'true' ] && echo CARD_DATA pre:select_card: $CARD_DATA
 
 	echo ${M}$LINE
 	echo "${B}The script detected more than one video card in your system:"
@@ -446,6 +449,8 @@ select_card()
 					# override the global values and handle this explicitly
 					CARD_DATA=$singleCardId
 					
+					[ "$TESTING" == 'true' ] && echo CARD_DATA post:select_card: $CARD_DATA
+					
 					if [ "$SKIP_CONFIG" != 'true' ]
 					then
 						if [ ! -e $timeStampXorg ]
@@ -456,13 +461,15 @@ select_card()
 						XORG_BACKED_UP='true'
 						# set correct bus id as last step, note you have to check for . in PCI string:
 						# like this: O1:00.0 and change it to O1:00:0
-						BUS_ID=$( lspci -n | grep $CARD_DATA | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
+						BUS_ID=$( lspci -n | grep "$CARD_DATA" | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
+						
 						# handle explicit assignment of busid to avoid errors
 						echo "${B}Updating ${C}xorg.conf${B} to use the card with this BusID: ${C}$BUS_ID${N}"
 						if [ -n "$BUS_ID" ]
 						then
 							# create a dummy in case it's needed by new xorg system
 							create_section_device
+							pcibusid_hex_to_dec # need to get rid of hex due to xorg error 
 							# this is redundant if set above but easier to do for all cases
 							sed -i -r 's/\s*#*\s*BusID.*/\tBusID\t"PCI:'$BUS_ID'"/' $EXXC
 						fi
@@ -662,11 +669,12 @@ kernel_string_info()
 	# to debug this function, run through with -T as well as -K
 	if [ "$TESTING" == 'true' ]
 	then
-		echo "INSTALL_TO_KERNEL: $INSTALL_TO_KERNEL"
-		echo "KERNEL_VERSION: $KERNEL_VERSION"
-		echo "KERNEL_BASE: $KERNEL_BASE -> 2.6"
-		echo "KERNEL_THREE: $KERNEL_THREE -> 2.6.19"
-		echo "KERNEL_THIRD: $KERNEL_THIRD -> 19"
+# 		echo "INSTALL_TO_KERNEL: $INSTALL_TO_KERNEL"
+# 		echo "KERNEL_VERSION: $KERNEL_VERSION"
+# 		echo "KERNEL_BASE: $KERNEL_BASE -> 2.6"
+# 		echo "KERNEL_THREE: $KERNEL_THREE -> 2.6.19"
+# 		echo "KERNEL_THIRD: $KERNEL_THIRD -> 19"
+		:
 		#exit
 	fi
 }
@@ -693,11 +701,18 @@ print_information()
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
 	#local cardInfo=$( lspci | gawk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\sTechnologies\sInc\s|nVidia\sCorporation\s)(.*)%\2%'  )
 	local cardInfo=$( lspci | awk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\s|nVidia\s|Intel\s)(Technologies\sInc\s|Corporation\s|Unknown\sdevice){1,2}(.*)%\1\3%g' )
-	# we need the real busid, not the xorg one
-	busId=$( lspci -n | grep $CARD_DATA | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' )
-	local cardRam=$( lspci -v -s $busId | egrep '.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]' | sed -r 's/.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]/\1/' )
-	local cardVendor=$( lspci -v -s $busId | egrep '.*Subsystem:[[:space:]]*(.*)' | sed -r 's/.*Subsystem:[[:space:]]*(.*)/\1/' | sed 's/[dD]evice.*$//g' | sed 's/[uU]nknown//g' )
+	local cardRam='' cardVendor='' busId=''
 	
+	[ "$TESTING" == 'true' ] && echo CARD_DATA print_info: $CARD_DATA
+	# we need the real busid, not the xorg one
+	busId=$( lspci -n | grep "$CARD_DATA" | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' )
+	[ "$TESTING" == 'true' ] && echo busId print_info: $busId
+	
+	if [ -n "$busId" ]
+	then
+		cardRam=$( lspci -v -s $busId 2>/dev/null | egrep '.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]' | sed -r 's/.*Memory[[:space:]].*[[:space:]]prefetchable.*\[size=([0-9]+)M\]/\1/' )
+		cardVendor=$( lspci -v -s $busId 2>/dev/null | egrep '.*Subsystem:[[:space:]]*(.*)' | sed -r 's/.*Subsystem:[[:space:]]*(.*)/\1/' | sed 's/[dD]evice.*$//g' | sed 's/[uU]nknown//g' )
+	fi
 	echo ${M}$LINE
 	echo " ${M}$SCRIPT_NAME${B} :: version: ${C}$scriptVersion${B} :: last updated: ${C}$scriptDate"
 	echo ${M}$LINE
@@ -2444,10 +2459,24 @@ create_driver_entry()
 		# unless required by dual card presence, in which case it will get uncommented
 		if [ -z "$isBusId" ]
 		then
+			pcibusid_hex_to_dec
 			sed -i ''${deviceLineNu}',/EndSection/ s/Driver[[:space:]]".*"/&\
 \t#BusID "PCI:'${BUS_ID}'"/' $EXXC
 		fi
 	fi
+}
+
+pcibusid_hex_to_dec()
+{
+	local pt1=$( cut -d ':' -f 1 <<< $BUS_ID )
+	local pt2=$( cut -d ':' -f 2 <<< $BUS_ID )  
+	local pt3=$( cut -d ':' -f 3 <<< $BUS_ID )
+	local tempPt1='' tempPt2='' tempPt3=''
+	let tempPt1=0x$pt1
+	let tempPt2=0x$pt2
+	let tempPt3=0x$pt3
+	
+	BUSID="$tempPt1:$tempPt2:$tempPt3"
 }
 
 # this will handle cases where user is changing from one card to another
@@ -2973,14 +3002,15 @@ set_test_data # this will set other test data for debugging
 
 if [ "$PRINT_VER" != 'true' ]
 then
+	# test for multiple video cards and select only one
+	if [ "$CARD_COUNT" -gt 1 ]
+	then
+		select_card
+	fi
 	print_information
 fi
 
-# test for multiple video cards and select only one
-if [ "$CARD_COUNT" -gt 1 -a "$PRINT_VER" != 'true' ]
-then
-	select_card
-fi
+
 ### this is separate so card can get set first for native installer
 set_card
 if [ "$NATIVE_DRIVER" != 'true' ]
