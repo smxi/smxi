@@ -291,7 +291,8 @@ CONNECTION_RETRY=''
 # setting to 'true' turns off script self-updater. You must have ALL script components
 # in $SCRIPT_HOME (/usr/local/bin) here already to use this without having error occur.
 DEV_FLAG=''
-DISTRO=''
+DISTRO='debian'
+DISTRO_F=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
 DU_UPGRADE='dist-upgrade'
 KERNEL_EQUAL_INSTALL=''
@@ -805,7 +806,7 @@ download_test_file()
 	fi
 	if [ "$1" == "$LIB_WARNING" ]
 	then
-		update="?$DISTRO"
+		update="?$DISTRO_F"
 	fi
 	# always using -O here because -Nc is really buggy over time lines and fast file changes
 	wget -T$TIME_OUT -t 2 -q -O $fileNameTemp $TECH_PATTERNS_DISTRO$1$update &>/dev/null || wgetError="$?"
@@ -1032,7 +1033,6 @@ set_distro_data()
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
-	local distro='debian'
 	
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
@@ -1060,11 +1060,11 @@ set_distro_data()
 	then
 		DEFAULT_KERNEL='no-kernel'
 		USE_DEBIAN_KERNEL='false'
-		distro='antix'
+		DISTRO='antix'
 	else
 		if [ -f $SID ]
 		then
-			distro='sidux'
+			DISTRO='sidux'
 		fi
 		DEFAULT_KERNEL='debian'
 		USE_DEBIAN_KERNEL='true'
@@ -1080,7 +1080,7 @@ set_distro_data()
 		SIDUX_SOURCES='true'
 		DEFAULT_KERNEL='sidux'
 	fi
-	DISTRO="$distro-$SYSTEM_BASE-$BITS"
+	DISTRO_F="$DISTRO-$SYSTEM_BASE-$BITS"
 	
 	## override defaults by user preference
 	# user set default kernel
@@ -2214,15 +2214,16 @@ print_version()
 	local systemBase=$( perl -wp -e '$_ = ucfirst' <<< $SYSTEM_BASE )
 	local distroId=$( print_distro_id )
 	
-	if [ -f "$SID" ]
-	then
-		distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
-		extraMessage='...and of course, RazberrieTart, the official sidux fan girl!'
-	elif [ -f "$ATX" ]
-	then
-		distroThanks='anticapitalista crust dutchy eriefisher kelmo latino masinick slh trash80 zulu9'
-		extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
-	fi
+	case $DISTRO in
+		sidux)
+			distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
+			extraMessage='...and of course, RazberrieTart, the official sidux fan girl!'
+			;;
+		antix)
+			distroThanks='anticapitalista crust dutchy eriefisher kelmo latino masinick slh trash80 zulu9'
+			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
+			;;
+	esac
 
 	if [ "$PRINT_VERSION" != 'true' ]
 	then

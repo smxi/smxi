@@ -36,7 +36,7 @@ check_debian()
 		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."
 		optionSet='stable'
 	fi
-	if [ -f $ATX ]
+	if [ "$DISTRO" == 'antix' ]
 	then
 		conversionOptions='antix-sid antix-sid-sidux antix-sidux-conversion'
 		altText1="${M}Here are your options for your Anti-X system:"

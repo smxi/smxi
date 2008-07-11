@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.35
-####  Date: July 7 2008
+####  version: 3.1.36
+####  Date: July 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -156,11 +156,11 @@ XORG_BACKED_UP=''
 # here we're cutting out both card type and version number for cases with > 1 card
 CARD_COUNT=$( lspci -n | grep -c 0300 )
 #CARD_DATA=$( lspci -n | grep 0300 | cut -d ':' -f 3-4  | cut -d ' ' -f2 )
-CARD_DATA=$( lspci -n | grep 0300 | grep -ioe '[a-f0-9]\{4\}:[a-f0-9]\{4\}' )
+CARD_DATA=$( lspci -n | grep 0300 | egrep -io '[a-f0-9]{4}:[a-f0-9]{4}' )
 CARD_NUMBER=''
 CARD_BRAND=''
 # this is reset for multiple gfx cards in select_card()
-BUS_ID=$( lspci -n | grep $CARD_DATA | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
+BUS_ID=$( lspci -n | grep "$CARD_DATA" | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
 
 COMPOSITE='' # default false
 # RENDER_ACCEL='true' # default use, true
