@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.6
-####  Date: July 11 2008
+####  version: 7.35.7
+####  Date: July 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1439,7 +1439,12 @@ start_stop_default_dm()
 {
 	local displayManager=$( get_default_display_manager )
 	local success=''
-	local dmList='kdm gdm xdm wdm slim' dm=''
+	local dmList='entrance kdm gdm xdm wdm slim' dm=''
+	
+	if [ "$displayManager" == 'entranced' ]
+	then
+		displayManager='entrance'
+	fi
 	
 	case $1 in
 		full)
@@ -1498,7 +1503,7 @@ start_stop_default_dm()
 # get active pid for dm
 do_display_manager_pid_test()
 {
-	local dmIdList='kdm.pid gdm.pid xdm.pid wdm.pid slim.lock' dmId='' found=''
+	local dmIdList='entrance/entranced.pid gdm.pid kdm.pid slim.lock wdm.pid xdm.pid' dmId='' found=''
 	
 	for dmId in $dmIdList
 	do
