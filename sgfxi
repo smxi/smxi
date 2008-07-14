@@ -2455,8 +2455,8 @@ create_driver_entry()
 \tDriver "vesa"/' $EXXC
 		fi
 		# only adding busid if driver is missing, otherwise mistakes will happen
-		# not sure, why some users had issues with this, so it's now commented out
-		# unless required by dual card presence, in which case it will get uncommented
+		# xorg has a bug with bus id with hex, this is now handled in sgfxi
+		# commented unless required by dual card presence, then uncommented
 		if [ -z "$isBusId" ]
 		then
 			pcibusid_hex_to_dec
