@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.7
+####  version: 7.35.8
 ####  Date: July 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1544,6 +1544,11 @@ get_display_manager_runlevels()
 {
 	local displayManager=$( get_default_display_manager )
 	local dmRunlevels=''
+	
+	if [ "$displayManager" == 'entranced' ]
+	then
+		displayManager='entrance'
+	fi
 	
 	if [ -n "$displayManager" ]
 	then
