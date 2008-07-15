@@ -1457,6 +1457,7 @@ start_stop_default_dm()
 			else
 				# question: why is this in some cases not working? No init 5 is happening
 				if [ -x /etc/init.d/$displayManager ]
+				then
 					/etc/init.d/$displayManager $2 && success='true'
 				fi
 			fi
