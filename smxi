@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.12
+####  version: 7.35.13
 ####  Date: July 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1439,13 +1439,8 @@ start_windows_manager()
 start_stop_default_dm()
 {
 	local displayManager=$( get_default_display_manager )
-	local success='' killDm=''
+	local success=''
 	local dmList='entrance kdm gdm xdm wdm slim' dm=''
-	
-	if [ "$displayManager" == 'entranced' ]
-	then
-		displayManager='entrance'
-	fi
 	
 	case $1 in
 		full)
@@ -1455,27 +1450,15 @@ start_stop_default_dm()
 				do
 					if [ -x /etc/init.d/$dm ]
 					then
-						if [ "$2" == 'stop' ]
-						then
-							killDm="killall $dm"
-						fi
-						# these need to be one liners or execution fails for killall
-						/etc/init.d/$dm $2 && success='true' && eval $killDm
+						/etc/init.d/$dm $2 && success='true'
 						break
 					fi
 				done
 			else
 				# question: why is this in some cases not working? No init 5 is happening
 				if [ -x /etc/init.d/$displayManager ]
-				then
-					if [ "$2" == 'stop' ]
-					then
-						killDm="killall $displayManager"
-					fi
-					# these need to be one liners or execution fails for killall
-					/etc/init.d/$displayManager $2 && success='true' && eval $killDm
+					/etc/init.d/$displayManager $2 && success='true'
 				fi
-				# success='true'
 			fi
 			# this handles cases where somehow X is still running
 			# startx x starts can for example bypass kdm tests, etc
@@ -1559,12 +1542,7 @@ get_display_manager_runlevels()
 {
 	local displayManager=$( get_default_display_manager )
 	local dmRunlevels=''
-	
-	if [ "$displayManager" == 'entranced' ]
-	then
-		displayManager='entrance'
-	fi
-	
+
 	if [ -n "$displayManager" ]
 	then
 		# we're only interested in the actual runlevels here
@@ -1579,6 +1557,12 @@ get_default_display_manager()
 	local displayManager=$( cat /etc/X11/default-display-manager 2>/dev/null )
 	
 	displayManager=$( basename $displayManager 2>/dev/null ) 
+	
+	if [ "$displayManager" == 'entranced' ]
+	then
+		displayManager='entrance'
+	fi
+	
 	echo $displayManager
 }
 
