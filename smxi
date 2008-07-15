@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.11
+####  version: 7.35.12
 ####  Date: July 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1439,7 +1439,7 @@ start_windows_manager()
 start_stop_default_dm()
 {
 	local displayManager=$( get_default_display_manager )
-	local success=''
+	local success='' killDm=''
 	local dmList='entrance kdm gdm xdm wdm slim' dm=''
 	
 	if [ "$displayManager" == 'entranced' ]
@@ -1455,7 +1455,12 @@ start_stop_default_dm()
 				do
 					if [ -x /etc/init.d/$dm ]
 					then
-						/etc/init.d/$dm $2 && success='true'
+						if [ "$2" == 'stop' ]
+						then
+							killDm="killall $dm"
+						fi
+						# these need to be one liners or execution fails for killall
+						/etc/init.d/$dm $2 && success='true' && eval $killDm
 						break
 					fi
 				done
@@ -1463,8 +1468,12 @@ start_stop_default_dm()
 				# question: why is this in some cases not working? No init 5 is happening
 				if [ -x /etc/init.d/$displayManager ]
 				then
-					dm=$displayManager
-					/etc/init.d/$displayManager $2 && success='true'
+					if [ "$2" == 'stop' ]
+					then
+						killDm="killall $displayManager"
+					fi
+					# these need to be one liners or execution fails for killall
+					/etc/init.d/$displayManager $2 && success='true' && eval $killDm
 				fi
 				# success='true'
 			fi
@@ -1472,13 +1481,9 @@ start_stop_default_dm()
 			# startx x starts can for example bypass kdm tests, etc
 			if [ "$2" == 'stop' ]
 			then
-				if [ "$success" == 'true' ]
-				then
-					killall $dm # this is needed to kill the pid, need to test this for entrance
-					sleep 3 # going to try to slow this process down a bit
-				fi
 				if [ "$( x_is_running )" -eq 0 ]
 				then
+					echo "${M}Note: display manager shutdown failed... shutting down X directly instead...${N}"
 					killall Xorg
 				fi
 			fi
