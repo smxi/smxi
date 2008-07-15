@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.8
+####  version: 7.35.9
 ####  Date: July 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1649,7 +1649,6 @@ check_display_and_x()
 	# first get count of items, then use that count to extract the last item
 	local rlc=$( echo $( runlevel ) | wc -w ) response='' wmRunning='' facts=''
 	local currentRunlevel=$( echo $(runlevel) | cut -d " " -f $rlc ) sleepTime=6
-	local hasVM=$( ls /proc | grep 'vmnet' ) # will be used to add sleep time for vm shutdown
 	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
 	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
 	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
@@ -1657,28 +1656,6 @@ check_display_and_x()
 	local dmRunlevels=$( get_display_manager_runlevels )
 	local dmRunlevelsCount=$( wc -w <<< "$dmRunlevels" )
 	
-	case $defaultRunlevel in
-		5)
-			# in other words, if there is only one rc level for dm start, and it's 5
-			# just for caution I'm using string equality to avoid error
-			if [ "$dmRunlevelsCount" -eq 1 -a "$dmRunlevels" == '5' ]
-			then
-				runlevelUse=3
-				runlevelText=" in runlevel $runlevelUse and"
-				runlevelText2=" enter runlevel $runlevelUse and"
-				runlevelText3='echo "${S}Entering ${C}runlevel $runlevelUse${S}. Please wait, this takes a few seconds...${N}"'
-			else
-				runlevelUse=$defaultRunlevel
-				INIT_LEVEL=$defaultRunlevel
-			fi
-			;;
-		# No point in trying to guess any other configuration than 5-3, just don't mess
-		# with user runlevels at all then.
-		*)
-			runlevelUse=$defaultRunlevel
-			INIT_LEVEL=$defaultRunlevel
-			;;
-	esac
 	if [ "$TESTING" == 'true' ]
 	then
 		echo runlevelUse: $runlevelUse
@@ -1688,11 +1665,7 @@ check_display_and_x()
 	then
 		facts='true'
 	fi
-	
-	if [ -n "$hasVM" ]
-	then
-		sleepTime=15
-	fi
+
 	# this checks for pid files for known display managers
 	do_display_manager_pid_test && wmRunning='true'
 
@@ -1703,56 +1676,42 @@ check_display_and_x()
 	if [ "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
 	then
 		echo $WBAR
-		echo "${W}You must be out of X to run this script."
-		echo -e "${Q}Would you like to exit X now?$YNE"
+		echo "${W}Your ${C}X/Desktop (kde/gnome/xfce etc..)${W} must be shutdown to run this script."
+		echo -e "${Q}Would you like to shutdown ${C}X/Desktop${Q} now?$YNE"
 		echo $LINE
 		read response
 		
 		case $response in
 			y)	
-				eval $runlevelText3
-#  				if [ "$TESTING" == 'true' ]
-#  				then
-#  				
+				echo "${S}Shutting down ${C}X/Desktop${S} now...${N}"
+# 				if [ "$TESTING" == 'true' ]
+# 				then
 # 					# needs lots of debugging before can be tried with testers...
 # 					launch_from_X
-# 					
-# 					# an interesting idea re dumping from x to init 3, fails currently because
-# 					# it kills the interactive component.
-# 					VT=$( tty | sed 's/.*tty//' )
-# 					init 3
-#  					# sleep helps because otherwise script keeps trying to run while init 3 
-#  					# shutdown process occurs, which gives weird output to user
-# 					sleep $sleepTime
-# 					chvt $VT
-# 					echo "${S}Entering ${C}runlevel 3${S}. Please wait, this takes a few seconds...${N}"
-#  				else
-				# eg: 5 -ne 3, 2 - 3, but for 2 type systems, would be 2 - 2
-
-#  				fi
+# 				fi
 				unset wmRunning # reset to null from first test results
 				do_display_manager_pid_test && wmRunning='true'
 
 				if [ "$wmRunning" == 'true' ]
 				then
-					echo "${S}Shutting down your display manager now...${N}"
+					echo "${S}First shutdown attempt failed. Retrying display manager shutdown now...${N}"
 					start_stop_default_dm full stop
 				fi
 				;;
 			n)	
-				if [ "$currentRunlevel" != "$runlevelUse" ]
+				echo $LINE
+				echo "${S}Exiting the script. Please run the script out of ${C}X/Desktop (kde/gnome/xfce etc..)${S}"
+				echo
+				echo "There are a few ways to start $SCRIPT_NAME out of X/Desktop:"
+				echo "${C}1${S} - Logout of your desktop (or do this before you login), hit ${C}ctrl+alt+F1${S}."
+				echo "    Then, in terminal/tty, login as root, and type: ${C}$SCRIPT_NAME${S}"
+				echo "${C}2${S} - Hit ${C}ctrl+alt+F1${S}, and in tty/terminal login as root, and type: ${C}$SCRIPT_NAME${S}"
+				echo "    ${S}This option makes you lose your current desktop session if you save your sessions."
+				if [ "$dmRunlevelsCount" -eq 1 -a "$dmRunlevels" == '5' ]
 				then
-					echo "${S}Exiting the script. Please run the script out of ${C}X/desktop${S}"
-					
-					echo "There are 3 ways to start $SCRIPT_NAME out of X/desktop:"
-					echo "${C}1${S} - Logout of your desktop, hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}$SCRIPT_NAME${S}"
-					echo "${C}2${S} - Boot your computer and just type ${C}3${S} when grub appears, and hit enter, then login as root."
-					echo "${C}3${S} - Hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}$SCRIPT_NAME${S}"
-					echo "    ${S}This is the worst option because you lose your desktop session."
-					echo
-				else
-					echo "${S}Exiting the script. Please shut down your X desktop before running this script."
+					echo "${C}3${S} - Boot your computer and just type ${C}3${S} when grub appears, and hit enter, then login as root."
 				fi
+				echo
 				echo $WBAR
 				exit 0
 				;;
