@@ -193,7 +193,7 @@ package_installer()
 	# only do error handling if either install only, or force/install cases went bad
 	if [ "$forceError" -gt 0 ] || [ "$forceIt" != 'true' -a "$installError" -gt 1 ]
 	then
-		echo "${SPACER}${E}There was a problem with install of: ${C}$1"
+		echo "${SPACER}${E}There was a problem with install of: ${C}$1${N}"
 		echo
 		return 1
 	else

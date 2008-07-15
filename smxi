@@ -263,7 +263,6 @@ EXTRA_OPTIONS=''
 FORCE_DOWNLOAD=''
 FORCE_UPDATE=''
 HEC_ALT=''
-INIT_LEVEL=5 # default to restart x at init 5
 KERNEL_METAPACKAGE=''
 NO_PDIFFS=''
 NO_PDIFF_ARGS='-o Acquire::Pdiffs=false'
@@ -295,6 +294,8 @@ DISTRO='debian'
 DISTRO_F=''
 DPKG_HOLD_INSTALL='' # holds value for any hold/install required
 DU_UPGRADE='dist-upgrade'
+# we'll always use the system default in all cases
+INIT_LEVEL=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
 KERNEL_EQUAL_INSTALL=''
 KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
@@ -1486,15 +1487,15 @@ start_stop_default_dm()
 			fi
 			;;
 	esac
-	# only kill on dm start 
+	# only kill on dm start. Leaving init stuff for users who are using the init 3 -> 5 
+	# method, so they end up in their default runlevel as expected
 	if [ "$success" == 'true' -a "$2" == 'start' ]
 	then
 		if [ -n "$LOGIN_PID" ]
 		then
 			init $INIT_LEVEL && kill $LOGIN_PID && exit 0
 		else
-			echo "${E}No login Pid found to kill, going to init $INIT_LEVEL and exiting script without"
-			echo "killing root session.${N}"
+			echo "${E}No login Pid found to kill. Exiting script without killing root session.${N}"
 			init $INIT_LEVEL && exit 0
 		fi
 	fi
@@ -1680,10 +1681,12 @@ check_display_and_x()
 	esac
 	if [ "$TESTING" == 'true' ]
 	then
-		echo defaultRunlevel: $defaultRunlevel
 		echo runlevelUse: $runlevelUse
 		echo dmRunlevels: $dmRunlevels
-		echo INIT_LEVEL: $INIT_LEVEL
+	fi
+	if [ "$Z_SET" == "$data1$data2" ]
+	then
+		facts='true'
 	fi
 	
 	if [ -n "$hasVM" ]
@@ -1695,17 +1698,13 @@ check_display_and_x()
 
 	# forces update of script and restarts it
 	check_force_update
-	if [ "$Z_SET" == "$data1$data2" ]
-	then
-		facts='true'
-	fi
 
-	# this should handle most cases, now supports Debian default start of gdm/kdm in init 3
-	if [ "$currentRunlevel" != "$runlevelUse" -o "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
+	# this should handle most cases, now supports Debian default start of gdm/kdm in init 2
+	if [ "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
 	then
 		echo $WBAR
-		echo "${W}You must be$runlevelText out of X to run this script."
-		echo -e "${Q}Would you like to$runlevelText2 exit X now?$YNE"
+		echo "${W}You must be out of X to run this script."
+		echo -e "${Q}Would you like to exit X now?$YNE"
 		echo $LINE
 		read response
 		
@@ -1729,13 +1728,7 @@ check_display_and_x()
 # 					echo "${S}Entering ${C}runlevel 3${S}. Please wait, this takes a few seconds...${N}"
 #  				else
 				# eg: 5 -ne 3, 2 - 3, but for 2 type systems, would be 2 - 2
-				if [ "$currentRunlevel" != "$runlevelUse" ]
-				then
-					init $runlevelUse
-					# sleep helps because otherwise script keeps trying to run while init 3 
-					# shutdown process occurs, which gives weird output to user
-					sleep $sleepTime
-				fi
+
 #  				fi
 				unset wmRunning # reset to null from first test results
 				do_display_manager_pid_test && wmRunning='true'
@@ -1749,15 +1742,14 @@ check_display_and_x()
 			n)	
 				if [ "$currentRunlevel" != "$runlevelUse" ]
 				then
-					echo "${S}Exiting the script. Please run the script in ${C}runlevel $runlevelUse${S}"
+					echo "${S}Exiting the script. Please run the script out of ${C}X/desktop${S}"
 					
-					echo "There are 3 ways to enter ${C}runlevel $runlevelUse${S}:"
-					echo "${C}1${S} - Logout of your desktop, hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}init $runlevelUse${S}"
+					echo "There are 3 ways to start $SCRIPT_NAME out of X/desktop:"
+					echo "${C}1${S} - Logout of your desktop, hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}$SCRIPT_NAME${S}"
 					echo "${C}2${S} - Boot your computer and just type ${C}3${S} when grub appears, and hit enter, then login as root."
-					echo "${C}3${S} - Hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}init $runlevelUse${S}"
+					echo "${C}3${S} - Hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}$SCRIPT_NAME${S}"
 					echo "    ${S}This is the worst option because you lose your desktop session."
 					echo
-					echo "    (Or, once you are in the console, you can just run ${C}$SCRIPT_NAME${S} again and it will drop you to ${C}init $runlevelUse${S})"
 				else
 					echo "${S}Exiting the script. Please shut down your X desktop before running this script."
 				fi
@@ -3067,10 +3059,6 @@ print_usage()
 	echo "   $DU_UPGRADE sections automatically if used without ${C}-d${S}. Be careful!"
 	echo 
 	echo "The following are advanced script options:"
-	echo "${C}-I${S} Sets different ${C}I${S}nit level for X restart. Requires this syntax:"
-	echo "   -I 3  Please note, the number is the init level you want the script to start x in."
-	echo "${C}-K${S} Advanced ${C}K${S}ernel Install. If newer test kernels are available, they will show "
-	echo "   in the kernel install options. ${W}Install advanced kernels at your own risk!"
 	echo "${C}-l${S} Creates time stamped ${C}l${S}ogs of all update and $DU_UPGRADE data."
 	echo "   Logfiles are located in ${C}$SM_LOG_DIR${S}"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
@@ -3144,14 +3132,9 @@ do
 			echo "${M}The ${C}-E${M} option has been deprecated in favor of ${C}-M${M} option to set script kernel mirrors.${N}"
 			print_hec
 			;;
-		# tests: is equal 1-5; more than 1 integer
-		I)	if [ -z "$( echo $OPTARG | egrep "^[1-5]$" )" -o "${#OPTARG}" -gt 1 ]
-			then
-				echo "${E}The -I option requires an integer value between 1 and 5, like this: -I 3${N}"
-				exit 1
-			else
-				INIT_LEVEL="$OPTARG"
-			fi
+		I)	echo $MLINE
+			echo "${M}The ${C}-I${M} option has been deprecated. ${C}$SCRIPT_NAME${M} now starts your init level based on your system defaults.${N}"
+			print_hec
 			;;
 		K)	ADVANCED_KERNEL='true'
 			START_OPTIONS=$START_OPTIONS'K'

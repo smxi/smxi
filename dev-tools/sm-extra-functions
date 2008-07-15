@@ -16,8 +16,159 @@ gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6070D3A1 && apt-key add /root/.gn
 		sed -i "s%$borkedMirror%$fixedMirror%" $isBorked
 		print_hec
 		echo "${S}That mirror is now updated, continuing with script...${N}"
+
+###---------------------------------------------------------------------
+### init 3 kill stuff from smxi
+###-------------------------------------------------------------------
+
+# main init kill, previous:
+# this script must run out of x, and gives option to go into default runlevel on x start
+check_display_and_x() 
+{
+	# this fixes cases where the runlevel might give a 2 or 3 item result
+	# first get count of items, then use that count to extract the last item
+	local rlc=$( echo $( runlevel ) | wc -w ) response='' wmRunning='' facts=''
+	local currentRunlevel=$( echo $(runlevel) | cut -d " " -f $rlc ) sleepTime=6
+	local hasVM=$( ls /proc | grep 'vmnet' ) # will be used to add sleep time for vm shutdown
+	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
+	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
+	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	local runlevelUse='' runlevelText='' runlevelText2='' runlevelText3=''
+	local dmRunlevels=$( get_display_manager_runlevels )
+	local dmRunlevelsCount=$( wc -w <<< "$dmRunlevels" )
+	
+	case $defaultRunlevel in
+		5)
+			# in other words, if there is only one rc level for dm start, and it's 5
+			# just for caution I'm using string equality to avoid error
+			if [ "$dmRunlevelsCount" -eq 1 -a "$dmRunlevels" == '5' ]
+			then
+				runlevelUse=3
+				runlevelText=" in runlevel $runlevelUse and"
+				runlevelText2=" enter runlevel $runlevelUse and"
+				runlevelText3='echo "${S}Entering ${C}runlevel $runlevelUse${S}. Please wait, this takes a few seconds...${N}"'
+			else
+				runlevelUse=$defaultRunlevel
+				INIT_LEVEL=$defaultRunlevel
+			fi
+			;;
+		# No point in trying to guess any other configuration than 5-3, just don't mess
+		# with user runlevels at all then.
+		*)
+			runlevelUse=$defaultRunlevel
+			INIT_LEVEL=$defaultRunlevel
+			;;
+	esac
+	if [ "$TESTING" == 'true' ]
+	then
+		echo defaultRunlevel: $defaultRunlevel
+		echo runlevelUse: $runlevelUse
+		echo dmRunlevels: $dmRunlevels
+		echo INIT_LEVEL: $INIT_LEVEL
+	fi
+	
+	if [ -n "$hasVM" ]
+	then
+		sleepTime=15
+	fi
+	# this checks for pid files for known display managers
+	do_display_manager_pid_test && wmRunning='true'
+
+	# forces update of script and restarts it
+	check_force_update
+	if [ "$Z_SET" == "$data1$data2" ]
+	then
+		facts='true'
+	fi
+
+	# this should handle most cases, now supports Debian default start of gdm/kdm in init 3
+	if [ "$currentRunlevel" != "$runlevelUse" -o "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ]
+	then
+		echo $WBAR
+		echo "${W}You must be$runlevelText out of X to run this script."
+		echo -e "${Q}Would you like to$runlevelText2 exit X now?$YNE"
+		echo $LINE
+		read response
 		
-		
+		case $response in
+			y)	
+				eval $runlevelText3
+#  				if [ "$TESTING" == 'true' ]
+#  				then
+#  				
+# 					# needs lots of debugging before can be tried with testers...
+# 					launch_from_X
+# 					
+# 					# an interesting idea re dumping from x to init 3, fails currently because
+# 					# it kills the interactive component.
+# 					VT=$( tty | sed 's/.*tty//' )
+# 					init 3
+#  					# sleep helps because otherwise script keeps trying to run while init 3 
+#  					# shutdown process occurs, which gives weird output to user
+# 					sleep $sleepTime
+# 					chvt $VT
+# 					echo "${S}Entering ${C}runlevel 3${S}. Please wait, this takes a few seconds...${N}"
+#  				else
+				# eg: 5 -ne 3, 2 - 3, but for 2 type systems, would be 2 - 2
+				if [ "$currentRunlevel" != "$runlevelUse" ]
+				then
+					init $runlevelUse
+					# sleep helps because otherwise script keeps trying to run while init 3 
+					# shutdown process occurs, which gives weird output to user
+					sleep $sleepTime
+				fi
+#  				fi
+				unset wmRunning # reset to null from first test results
+				do_display_manager_pid_test && wmRunning='true'
+
+				if [ "$wmRunning" == 'true' ]
+				then
+					echo "${S}Shutting down your display manager now...${N}"
+					start_stop_default_dm full stop
+				fi
+				;;
+			n)	
+				if [ "$currentRunlevel" != "$runlevelUse" ]
+				then
+					echo "${S}Exiting the script. Please run the script in ${C}runlevel $runlevelUse${S}"
+					
+					echo "There are 3 ways to enter ${C}runlevel $runlevelUse${S}:"
+					echo "${C}1${S} - Logout of your desktop, hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}init $runlevelUse${S}"
+					echo "${C}2${S} - Boot your computer and just type ${C}3${S} when grub appears, and hit enter, then login as root."
+					echo "${C}3${S} - Hit ${C}ctrl+alt+F1${S}, login as root, type: ${C}init $runlevelUse${S}"
+					echo "    ${S}This is the worst option because you lose your desktop session."
+					echo
+					echo "    (Or, once you are in the console, you can just run ${C}$SCRIPT_NAME${S} again and it will drop you to ${C}init $runlevelUse${S})"
+				else
+					echo "${S}Exiting the script. Please shut down your X desktop before running this script."
+				fi
+				echo $WBAR
+				exit 0
+				;;
+			*)
+				print_error yn
+				check_display_and_x
+				;;
+		esac
+	fi
+}
+
+
+## options
+	echo "${C}-I${S} Sets different ${C}I${S}nit level for X restart. Requires this syntax:"
+	echo "   -I 3  Please note, the number is the init level you want the script to start x in."
+	echo "${C}-K${S} Advanced ${C}K${S}ernel Install. If newer test kernels are available, they will show "
+
+
+		# tests: is equal 1-5; more than 1 integer
+		I)	if [ -z "$( echo $OPTARG | egrep "^[1-5]$" )" -o "${#OPTARG}" -gt 1 ]
+			then
+				echo "${E}The -I option requires an integer value between 1 and 5, like this: -I 3${N}"
+				exit 1
+			else
+				INIT_LEVEL="$OPTARG"
+			fi
+			;;
 ###---------------------------------------------------------------------
 ### misc tweaks infobash tweak
 ###--------------------------------------------------------------------
