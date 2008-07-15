@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.9
-####  Date: July 14 2008
+####  version: 7.35.10
+####  Date: July 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1469,9 +1469,16 @@ start_stop_default_dm()
 			fi
 			# this handles cases where somehow X is still running
 			# startx x starts can for example bypass kdm tests, etc
-			if [ "$2" == 'stop' -a "$( x_is_running )" -eq 0 ]
+			if [ "$2" == 'stop' ]
 			then
-				killall Xorg
+				if [ "$success" == 'true' ]
+				then
+					sleep 3 # going to try to slow this process down a bit
+				fi
+				if [ "$( x_is_running )" -eq 0 ]
+				then
+					killall Xorg
+				fi
 			fi
 			;;
 		nowmstart)
@@ -1684,6 +1691,7 @@ check_display_and_x()
 		case $response in
 			y)	
 				echo "${S}Shutting down ${C}X/Desktop${S} now...${N}"
+				start_stop_default_dm full stop
 # 				if [ "$TESTING" == 'true' ]
 # 				then
 # 					# needs lots of debugging before can be tried with testers...
@@ -3092,7 +3100,8 @@ do
 			print_hec
 			;;
 		I)	echo $MLINE
-			echo "${M}The ${C}-I${M} option has been deprecated. ${C}$SCRIPT_NAME${M} now starts your init level based on your system defaults.${N}"
+			echo "${M}The ${C}-I${M} option has been deprecated."
+			echo "${C}$SCRIPT_NAME${M} now starts your init level based on your system defaults.${N}"
 			print_hec
 			;;
 		K)	ADVANCED_KERNEL='true'
@@ -3148,10 +3157,6 @@ do
 	esac
 done
 # reset optarg values if required for restart; init defaults to 5 
-if [ "$INIT_LEVEL" -ne 5 -a -n "$INIT_LEVEL" ]
-then
-	START_OPTIONS="$START_OPTIONS -I $INIT_LEVEL"
-fi
 if [ -n "$http_proxy" ]
 then
 	START_OPTIONS="$START_OPTIONS -P $http_proxy"

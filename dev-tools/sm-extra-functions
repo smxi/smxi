@@ -169,6 +169,11 @@ check_display_and_x()
 				INIT_LEVEL="$OPTARG"
 			fi
 			;;
+			
+if [ "$INIT_LEVEL" -ne 5 -a -n "$INIT_LEVEL" ]
+then
+	START_OPTIONS="$START_OPTIONS -I $INIT_LEVEL"
+fi
 ###---------------------------------------------------------------------
 ### misc tweaks infobash tweak
 ###--------------------------------------------------------------------
