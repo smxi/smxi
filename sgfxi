@@ -2358,11 +2358,7 @@ start_stop_x()
 	local displayManagers='entrance gdm kdm slim wdm xdm' dman='' success=''
 	# setting the default will handle cases like default 2 while still handling 3/5
 	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
-	
-	if [ "$1" == 'stop' ]
-	then
-		killall -9 Xgl >/dev/null 2>&1
-	fi
+
 	### restart x if this is not being run by smxi
 	if [ -z "$DISPLAY_MANAGER" ]
 	then
@@ -2371,8 +2367,7 @@ start_stop_x()
 			if [ -x /etc/init.d/$dman ]
 			then
 				# nohup is required to make sure dm is fully stopped, and pids removed
-				nohup /etc/init.d/$dman $1 2>/dev/null
-				success='true'
+				nohup /etc/init.d/$dman $1 2>/dev/null && success='true'
 			fi
 		done
 	else
@@ -2381,8 +2376,7 @@ start_stop_x()
 			# I tried stringing these in a && sequence but something failed and 
 			# init 5 start broke. This order takes care of runlevel restart bug
 			# nohup is required to make sure dm is fully stopped, and pids removed
-			nohup /etc/init.d/$DISPLAY_MANAGER $1 
-			success='true'
+			nohup /etc/init.d/$DISPLAY_MANAGER $1 && success='true'
 		fi
 	fi
 	# this handles cases where somehow X is still running
