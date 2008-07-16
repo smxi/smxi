@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.39
-####  Date: July 11 2008
+####  version: 3.1.40
+####  Date: July 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -2355,7 +2355,7 @@ start_x_question()
 # takes one argument, stop or start
 start_stop_x()
 {
-	local displayManagers='kdm gdm xdm' dman='' success=''
+	local displayManagers='entrance gdm kdm slim wdm xdm' dman='' success=''
 	# setting the default will handle cases like default 2 while still handling 3/5
 	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
 	
@@ -2370,7 +2370,8 @@ start_stop_x()
 		do
 			if [ -x /etc/init.d/$dman ]
 			then
-				/etc/init.d/$dman $1 2>/dev/null
+				# nohup is required to make sure dm is fully stopped, and pids removed
+				nohup /etc/init.d/$dman $1 2>/dev/null
 				success='true'
 			fi
 		done
@@ -2379,8 +2380,19 @@ start_stop_x()
 		then 
 			# I tried stringing these in a && sequence but something failed and 
 			# init 5 start broke. This order takes care of runlevel restart bug
-			/etc/init.d/$DISPLAY_MANAGER $1 
+			# nohup is required to make sure dm is fully stopped, and pids removed
+			nohup /etc/init.d/$DISPLAY_MANAGER $1 
 			success='true'
+		fi
+	fi
+	# this handles cases where somehow X is still running
+	# startx x starts can for example bypass kdm tests, etc
+	if [ "$1" == 'stop' ]
+	then
+		if [ "$( x_is_running )" -eq 0 ]
+		then
+			echo "${M}Note: display manager shutdown failed... shutting down X directly instead...${N}"
+			nohup killall Xorg
 		fi
 	fi
 	# this will exit the root shell on successful run of start x
@@ -2400,6 +2412,20 @@ start_stop_x()
 			exit 0 # smxi will handle the pid root kill
 		fi
 	fi 
+}
+
+x_is_running()
+{
+	# we'll do one final X is running test here, note, handling a bunch of
+	# different possible X detections in etch, lenny, and sid, then filtering out the grep
+	local xIsRunning=$( ps aux | grep '/usr.*/X' | grep -vc 'grep' )
+	
+	if [ "$xIsRunning" -gt 0 ]
+	then
+		echo 0
+	else
+		echo 1
+	fi
 }
 
 ########################################################################
