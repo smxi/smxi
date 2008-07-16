@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.13
-####  Date: July 8 2008
+####  version: 2.8.14
+####  Date: July 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -41,7 +41,7 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
-	local pdfLight='epdfview libpoppler1'
+	local pdfLight='epdfview'
 	
 	# note: epdfview is not in stable currently
 	if [ "$SYSTEM_BASE" == 'stable' ]
