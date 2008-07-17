@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.1.41
+####  version: 3.1.42
 ####  Date: July 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -115,14 +115,14 @@ DISPLAY_MANAGER=$( basename $DISPLAY_MANAGER 2>/dev/null )
 VERSIONS=''
 OTHER_VERSIONS=''
 # other stuff: nothing now
-NV_VERSIONS='173.14.09:169.12:96.43.05:71.86.04'
+NV_VERSIONS='173.14.09:169.12:96.43.07:71.86.06'
 NV_DEFAULT='173.14.09'
 NV_LEGACY=$( echo $NV_VERSIONS | cut -d ':' -f 4 )
 NV_OLDER=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
 NV_QUAD=$NV_DEFAULT # no more individual quad drivers
-NV_TESTING='177.13:96.43.07:71.86.06' 
-NV_OTHERS='173.14.05:173.08:171.06:100.14.23:100.14.19'
+NV_TESTING='177.13' 
+NV_OTHERS='173.14.05:173.08:171.06:100.14.23:100.14.19:96.43.05:71.86.04'
 
 # debian sid legacies:
 NV_DEBIAN_LEGACY_1='71xx'
