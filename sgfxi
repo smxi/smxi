@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.0
+####  version: 3.2.1
 ####  Date: July 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2874,6 +2874,7 @@ show_options()
 # 	echo "-e Use experimental drivers (currently: xorg ati only)."
 # 	echo "-E Adds extra experimental driver features. Currently libdrm2 things for ati."
 	echo "-h View this help menu."
+	echo "-j Turns off all text/output script colors, sets to console/tty default."
 	echo "-K Installs nVidia/fglrx driver for another kernel. Syntax: sgfxi -K 2.6.24-2.6.24.5.slh.2"
 	echo "-n Automatically installs correct native xorg nv, intel, or ati driver for your system."
 	echo "   Cleans up old binary driver stuff, updates xorg.conf with new driver information,"

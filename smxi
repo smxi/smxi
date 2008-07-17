@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.36.1
+####  version: 7.36.2
 ####  Date: July 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -3044,6 +3044,7 @@ print_usage()
 	echo "   $DU_UPGRADE sections automatically if used without ${C}-d${S}. Be careful!"
 	echo 
 	echo "The following are advanced script options:"
+	echo "${C}-j${S} Turns off all text/output script colors, sets to console/tty default."
 	echo "${C}-l${S} Creates time stamped ${C}l${S}ogs of all update and $DU_UPGRADE data."
 	echo "   Logfiles are located in ${C}$SM_LOG_DIR${S}"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"

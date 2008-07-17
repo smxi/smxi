@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.2.0
+####  version: 1.2.1
 ####  Date: July 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1284,10 +1284,12 @@ show_options()
 	echo "-A Run the any any install non-interactively."
 # 	echo "-g Lets you use a specific gcc version to compile module. Example: -g 4.1"
 	echo "-h View this help menu."
+	echo "-j Turns off all text/output script colors, sets to console/tty default."
 	echo "-M Run the vbox module install non-interactively."
 	echo "-R Skips self updating feature. No restart."
 	echo "-u Enter the username that will be used for vbox group membership and other functions."
 	echo "   Best used with non-interactive mode, but is fine for normal mode too. Example: svmi -u jeff"
+	echo "-U Forces $SCRIPT_NAME to update itself, must be root, but can be in x. Exits after."
 	echo "-v Prints $SCRIPT_NAME current version information. Exits after."
 	echo "-V Allows you try a specific Version of vbox. Only applies to non-ose version."
 	echo "   Supported versions: $VBOX_VERSIONS"
