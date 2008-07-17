@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.16
-####  Date: July 16 2008
+####  version: 7.35.17
+####  Date: July 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -440,6 +440,10 @@ error_handler()
 		missing-lib)
 			errorCode=100
 			errorMessage="The operation you requested requires the library file: $errorExtra but it is missing.\nSkipping the load attempt and continuing.\n"
+			;;
+		package-unavailable)
+			errorCode=103
+			errorMessage="The package: $errorExtra is not available.\nYou may need to add different sources for apt to install it, or it may be obsolete.\n"
 			;;
 		warning-data-wget-error)
 			errorCode=101

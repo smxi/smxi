@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.15
-####  Date: July 16 2008
+####  version: 2.8.16
+####  Date: July 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -54,7 +54,7 @@ package_group_installer()
 	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
-	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xsltprochabak xscreensaver"
+	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras='kdeaddons kdemultimedia-kio-plugins konq-plugins'
 	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse"
@@ -344,7 +344,7 @@ non_free_installer()
 	echo "${C}1${S} - ${C}Opera${S} One of the better Non Free packages here. Web browser."
 	echo "    Will add opera.com sources to your ${C}$EAS${S}."
 	echo
-	echo "${C}2${S} - ${C}flash-plugin${S} Installs the flashnonfree-plugin, for use by all browsers."
+	echo "${C}2${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
 	echo "    Check out the new FSF gnash player for the Free Software version flash player."
 	echo
 	echo "${C}3${S} - ${C}java-plugin${S} Installs the Sun Java plugin and jre, for use by all browsers."
@@ -371,7 +371,18 @@ non_free_installer()
 				repeat='true'
 				;;
 			flash-plugin)
-				package_group_installer plain flashplugin-nonfree 'update_to_nonfree_sources'
+				# first we  need to make sure that user system has non-free
+				update_to_nonfree_sources
+				# then test for sid version of flash
+				if [ -n "$( check_package_status 'flashplugin-nonfree' )" ]
+				then
+					package_group_installer 'plain' 'flashplugin-nonfree' 
+				elif [ -n "$( check_package_status 'flashplayer-mozilla' )" ]
+				then
+					package_group_installer 'plain' 'flashplayer-mozilla'
+				else
+					error_handler 'package-unavailable' $FUNCNAME 'flashplugin-nonfree/flashplayer-mozilla'
+				fi
 				repeat='true'
 				;;
 			java-plugin)
@@ -394,15 +405,8 @@ non_free_installer()
 				repeat='true'
 				;;
 			google-earth)
-# 				if [ "$BITS" != "64" ]
-# 				then
-					package_group_installer plain google-earth 'update_to_nonfree_sources'
-					install_google_earth
-# 				else
-# 					echo $ELINE
-# 					echo "${E}googleearth install is not supported for 64 bit, sorry."${N}
-# 					echo $ELINE
-# 				fi
+				package_group_installer plain google-earth 'update_to_nonfree_sources'
+				install_google_earth
 				repeat='true'
 				;;
 			back-to-install-menu)
