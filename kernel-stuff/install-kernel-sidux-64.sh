@@ -94,9 +94,9 @@ LIMAGE=$( ls linux-image-${VER}*.deb 2> /dev/null )
 LHEADERS_COMMON=$( ls linux-headers-*-common*.deb 2> /dev/null )
 LHEADERS_SIDUX=$( ls linux-headers-*-sidux*.deb 2> /dev/null )
 LHEADERS_ALL_ARCH=$( ls linux-headers-*-all-*.deb 2> /dev/null )
-LHEADERS_ALL=$( ls linux-headers-*-all_*.deb 2> /dev/null )
+LKBUILD=$( ls linux-kbuild-2.6*.deb 2> /dev/null )
 
-INSTALL_KERNEL="$LIMAGE $LHEADERS_COMMON $LHEADERS_SIDUX $LHEADERS_ALL_ARCH $LHEADERS_ALL"
+INSTALL_KERNEL="$LIMAGE $LHEADERS_COMMON $LHEADERS_SIDUX $LHEADERS_ALL_ARCH $LHEADERS_ALL $LKBUILD"
 echo 'Installing dpkg based local kernel components now...'
 echo 'Install directory: ' $(pwd)
 for PACKAGE in $INSTALL_KERNEL

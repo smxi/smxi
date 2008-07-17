@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.0.4
-####  Date: July 8 2008
+####  version: 2.1.0
+####  Date: July 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -35,12 +35,20 @@ KERNEL_32_INSTALLER_DIR="$KERNEL_DIR/32-installer"
 KERNEL_64_INSTALLER_DIR="$KERNEL_DIR/64-installer"
 
 # data for kernels
+ALT_PATH=''
 KERNEL_BASE=$1
 KERNEL_SUB=$2
-NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_BASE.slh.$KERNEL_SUB"
+KERNEL_TYPE=$3
 
-MIRROR_MAIN='http://sidux.com/debian/pool/main/l/linux-sidux-2.6/'
-MIRROR_MODULES='http://sidux.com/debian/pool/main/l/linux-modules-sidux-main-2.6/'
+if [ "$KERNEL_TYPE" == 'a' ]
+then
+	ALT_PATH='exp.'
+fi
+
+NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_BASE.slh.$KERNEL_SUB"
+MIRROR_MAIN="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-sidux-2.6/"
+MIRROR_MODULES="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-modules-sidux-main-2.6/"
+MIRROR_EXTRA="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-kbuild-2.6/"
 
 ########################################################################
 #### FUNCTIONS
@@ -76,6 +84,9 @@ error_handler()
 			message="Corrupted kernel zip file: $2\nRemoved bad file."
 			rm -f $2
 			;;
+		8)
+			message="Unsupported Value for: \$3"
+			;;
 	esac
 	echo $LINE
 	echo -e $message
@@ -105,6 +116,10 @@ start_up_tests()
 	if [ -z "$KERNEL_SUB" ]
 	then
 		error_handler 3 'KERNEL_SUB'
+	fi
+	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s)$' <<< "$KERNEL_TYPE" )" ]
+	then
+		error_handler 8 
 	fi
 	
 	# make sure the paths you made are right and exist
@@ -168,6 +183,11 @@ download_kernel_files()
 	## download kernels and all related debs
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN
+	
+	if [ "$KERNEL_TYPE" == 'a' ]
+	then
+		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
+	fi
 }
 
 create_sub_directories()
@@ -220,7 +240,7 @@ make_zip_files()
 	echo 'Making 32 bit zip file now...'
 	cd 32
 	contents=$(ls)
-	fileName="kernel-$zipKernelId-slh-smp-$2.zip"
+	fileName="kernel-$zipKernelId-slh-smp-$KERNEL_SUB.zip"
 	zip $fileName $contents
 	echo "Testing 32 bit kernel zip file for corruption..."
 	unzip -t $fileName || error_handler 7 $fileName
