@@ -1,4 +1,4 @@
-smxi=7.35.17:July 17 2008
+smxi=7.36.0:July 17 2008
 sm-lib-apt-tools=1.14.0:July 17 2008
 sm-lib-clean-up=2.4.15:July 6 2008
 sm-lib-distro-conversion=3.0.17:July 4 2008
@@ -12,8 +12,8 @@ sm-lib-warning=2.0.1:July 8 2008
 sm-lib-2006-fixes=1.2.2:June 8 2008
 sm-lib-2007-fixes=1.3.18:July 7 2008
 sm-lib-2008-fixes=1.3.9:June 27 2008
-sgfxi=3.1.44:July 17 2008
+sgfxi=3.2.0:July 17 2008
 kremover=1.0.0:June 12 2008
-svmi=1.1.9:July 7 2008
+svmi=1.2.0:July 17 2008
 
 ###**EOF**###

@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.1.9
-####  Date: July 7 2008
+####  version: 1.2.0
+####  Date: July 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -28,37 +28,6 @@
 #### VARIABLES
 ########################################################################
 
-# colors
-W="[1;31m" # red: Warning message
-E="[1;33m" # yellow: script Error
-S="[1;32m" # green: Standard message
-# L="[1;32m" # green: for resetting default colors
-Q="[1;36m" # CYAN: Questions
-M="[1;36m" # CYAN: Message
-B="[1;34m" # BLUE: Message
-C="[1;35m" # MAGENTA: Command or Path
-N="[0;39m" # default system console color: Normal :: make last in colors
-
-CALLER_DEF=${S} # will switch default output color to the calling script's
-S=${B} # this is slightly tricky, making standard blue AFTER the caller def is set.
-
-# script layout stuff
-BA='=================================================================='
-LI='------------------------------------------------------------------'
-BAR=${S}$BA${N}
-EBAR=${E}$BA${N}
-WBAR=${W}$BA${N}
-MBAR=${M}$BA${N}
-LINE=${S}$LI${N}
-ELINE=${E}$LI${N}
-MLINE=${M}$LI${N}
-WLINE=${W}$LI${N}
-
-# repeated text
-YNE="\n${S}[ type lower case ${C}y${S} or ${C}n${S} and hit ${C}enter${S} ]${N}"
-SLE="${Q}Please type the appropriate number and hit ${C}enter${N}"
-HEC="${Q}Please hit ${C}enter${Q} to continue${N}"
-
 # options and global data
 AUTO_RUN=''
 AUTORUN_ANYANY=''
@@ -68,6 +37,7 @@ AUTORUN_VBOX_MODULE=''
 AUTORUN_VMPLAYER=''
 AUTORUN_VMSERVER=''
 FORCE_UPDATE=''
+MONOCHROME=''
 SKIP_CONNECT=''
 SKIP_FUNCTION=''
 SKIP_RESTART=''
@@ -184,6 +154,54 @@ DOWNLOAD_COUNTER=0
 ########################################################################
 ####  FUNCTIONS 
 ########################################################################
+
+# set global color variables
+# args: $1 - optional: monochrome, turn off all colors
+set_script_colors()
+{
+	# colors
+	if [ "$1" != 'monochrome' ]
+	then
+		W="[1;31m" # red: Warning message
+		E="[1;33m" # yellow: script Error
+		S="[1;32m" # green: Standard message
+		Q="[1;36m" # CYAN: Questions
+		M="[1;36m" # CYAN: Message
+		B="[1;34m" # BLUE: Message
+		C="[1;35m" # MAGENTA: Command or Path
+		N="[0;39m" # default system console color: Normal :: make last in colors
+	else
+		W='' # red: Warning message
+		E='' # yellow: script Error
+		S='' # green: Standard message
+		Q='' # CYAN: Questions
+		M='' # CYAN: Message
+		B='' # BLUE: Message
+		C='' # MAGENTA: Command or Path
+		N='' # default system console color: Normal :: make last in colors
+	fi
+
+	CALLER_DEF=${S} # will switch default output color to the calling script's
+	S=${B} # this is slightly tricky, making standard blue AFTER the caller def is set.
+
+	# script layout stuff
+	BA='=================================================================='
+	LI='------------------------------------------------------------------'
+	BAR=${S}$BA${N}
+	EBAR=${E}$BA${N}
+	WBAR=${W}$BA${N}
+	MBAR=${M}$BA${N}
+	LINE=${S}$LI${N}
+	ELINE=${E}$LI${N}
+	MLINE=${M}$LI${N}
+	WLINE=${W}$LI${N}
+	
+	# repeated text
+	YNE="\n${S}[ type lower case ${C}y${S} or ${C}n${S} and hit ${C}enter${S} ]${N}"
+	SLE="${Q}Please type the appropriate number and hit ${C}enter${N}"
+	HEC="${Q}Please hit ${C}enter${Q} to continue${N}"
+}
+
 # only for debugging purposes
 set_test_data()
 {
@@ -1286,7 +1304,9 @@ show_options()
 	fi
 }
 
-while getopts ABDFhMPRSTuUvV:Z opt
+# this must be set before anything else runs in script, -j will reset to no colors
+set_script_colors 
+while getopts ABDFhjMPRSTuUvV:Z opt
 do
 	case $opt in
 		A) AUTORUN_ANYANY='true'
@@ -1304,6 +1324,10 @@ do
 		F) # for debugging purposes only
 			SKIP_FUNCTION='true'
 			START_OPTIONS=$START_OPTIONS'F'
+			;;
+		j)	MONOCHROME='true'
+			set_script_colors 'monochrome'
+			START_OPTIONS=$START_OPTIONS'j'
 			;;
 		M) AUTORUN_VBOX_MODULE='true'
 			START_OPTIONS=$START_OPTIONS'M'

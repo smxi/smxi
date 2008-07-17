@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.35.17
+####  version: 7.36.0
 ####  Date: July 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -68,35 +68,6 @@
 ########################################################################
 ####  VARIABLES
 ########################################################################
-
-# [ -z "$DISPLAY" ] && trap 'exec chvt 1' 2
-# colors
-W="[1;31m" # red: Warning message
-# W="\e[1;31;43m" # red: Warning message
-E="[1;33m" # yellow: script Error
-S="[1;32m" # green: Standard message
-Q="[1;36m" # CYAN: Questions
-M="[1;36m" # CYAN: Message
-# M="[1;34m" # BLUE: Message
-C="[1;35m" # MAGENTA: Command or Path
-N="[0;39m" # default system console color: Normal :: make last in colors
-
-# script layout stuff
-BA='=================================================================='
-LI='------------------------------------------------------------------'
-BAR=${S}$BA${N}
-EBAR=${E}$BA${N}
-WBAR=${W}$BA${N}
-MBAR=${M}$BA${N}
-LINE=${S}$LI${N}
-ELINE=${E}$LI${N}
-MLINE=${M}$LI${N}
-WLINE=${W}$LI${N}
-SPACER=' '
-
-# repeated text
-YNE="\n${S}[ type lower case ${C}y${S} or ${C}n${S} and hit ${C}enter${S} ]${N}"
-SLE="${Q}Please type the appropriate number and hit ${C}enter${N}"
 
 # system paths etc
 X_ORG_PATH='/etc/X11/xorg.conf'
@@ -264,6 +235,7 @@ FORCE_DOWNLOAD=''
 FORCE_UPDATE=''
 HEC_ALT=''
 KERNEL_METAPACKAGE=''
+MONOCHROME=''
 NO_PDIFFS=''
 NO_PDIFF_ARGS='-o Acquire::Pdiffs=false'
 START_OPTIONS=''
@@ -338,6 +310,50 @@ TIME_OUT=25
 ###---------------------------------------------------------------------
 ### core utilities: debugger, error handler, logging when it comes
 ###---------------------------------------------------------------------
+
+# set global color variables
+# args: $1 - optional: monochrome, turn off all colors
+set_script_colors()
+{
+	# colors
+	if [ "$1" != 'monochrome' ]
+	then
+		W="[1;31m" # red: Warning message
+		# W="\e[1;31;43m" # red: Warning message
+		E="[1;33m" # yellow: script Error
+		S="[1;32m" # green: Standard message
+		Q="[1;36m" # CYAN: Questions
+		M="[1;36m" # CYAN: Message
+		# M="[1;34m" # BLUE: Message
+		C="[1;35m" # MAGENTA: Command or Path
+		N="[0;39m" # default system console color: Normal :: make last in colors
+	else
+		W='' # red: Warning message
+		E='' # yellow: script Error
+		S='' # green: Standard message
+		Q='' # CYAN: Questions
+		M='' # CYAN: Message
+		C='' # MAGENTA: Command or Path
+		N='' # default system console color: Normal :: make last in colors
+	fi
+	
+	# script layout stuff
+	BA='=================================================================='
+	LI='------------------------------------------------------------------'
+	BAR=${S}$BA${N}
+	EBAR=${E}$BA${N}
+	WBAR=${W}$BA${N}
+	MBAR=${M}$BA${N}
+	LINE=${S}$LI${N}
+	ELINE=${E}$LI${N}
+	MLINE=${M}$LI${N}
+	WLINE=${W}$LI${N}
+	SPACER=' '
+	
+	# repeated text
+	YNE="\n${S}[ type lower case ${C}y${S} or ${C}n${S} and hit ${C}enter${S} ]${N}"
+	SLE="${Q}Please type the appropriate number and hit ${C}enter${N}"
+}
 
 ## Generic script debugging, $1 testing function; $2 test output; $3 test input, if needed
 # output is usually an echo of the value produced by function
@@ -3051,8 +3067,10 @@ print_usage()
 	exit 0
 }
 
+# this must be set before anything else runs in script, -j will reset to no colors
+set_script_colors 
 ## this is not in a function because these variables need to be set on startup
-while getopts :dDeEhgiI:kKlmMNpP:sStTvwW:fruUxZ: opt
+while getopts :dDeEhgiI:jkKlmMNpP:sStTvwW:fruUxZ: opt
 do
 	case $opt in
 		h)	print_usage;;
@@ -3071,6 +3089,10 @@ do
 			;;
 		i)	SKIP_INFO='true'
 			START_OPTIONS=$START_OPTIONS'i'
+			;;
+		j)	MONOCHROME='true'
+			set_script_colors 'monochrome'
+			START_OPTIONS=$START_OPTIONS'j'
 			;;
 		k)	SKIP_KERNEL='true'
 			START_OPTIONS=$START_OPTIONS'k'
