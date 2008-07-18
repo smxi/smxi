@@ -1820,6 +1820,7 @@ run_patches()
 							# patch source url:
 							# http://www.nvnews.net/vbulletin/showthread.php?t=112452&highlight=2.6.26
 							# patch author: NiLuJe, MamiyaOtaru, zander (from nvidia)
+							# patchFile='NVIDIA-100.14.19-kernel-2.6.25+26-compat.diff'
 							patchFile='NVIDIA-100.14.19-for-2.6.26.patch'
 							apply_patch_file $patchFile
 							;;
