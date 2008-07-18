@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.2.1
-####  Date: July 17 2008
+####  version: 1.2.2
+####  Date: July 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -84,8 +84,8 @@ FILE_URL=''
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.i386.tar.gz
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.x86_64.tar.gz
 VMPLAYER_PREFIX='http://download3.vmware.com/software/vmplayer/'
-VMPLAYER_NUMBER='2.0.2'
-VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-59824"
+VMPLAYER_NUMBER='2.0.4'
+VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-93057"
 VMWARE_Z='.tar.gz'
 if [ "$BITS" -eq 32 ]
 then
