@@ -1149,7 +1149,7 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
-			echo -e "Func Args: $3" | sed 's%\${.*}%%g' >> $LOG_FILE
+			echo -e "Func Args: $3" | sed 's%[.*m%%g' >> $LOG_FILE
 		fi
 	fi
 }
@@ -1486,13 +1486,12 @@ set_version()
 	
 	if [ "$SM_INSTALL" != 'true' -a -n "$START_OPTIONS_PRINT" ]
 	then
-		print_information_continue 'info' "You are using the following options:\n$START_OPTIONS_PRINT" $FUNCNAME
+		print_information_continue 'info' "You are using the following options:\n$START_OPTIONS_PRINT"
 	elif [ "$SM_INSTALL" == 'true' -a -n "$INSTALL_TO_KERNEL" ]
 	then
 		newKernelText="\n${B}onto the kernel: ${C}$INSTALL_TO_KERNEL${N}"
 	fi
-	echo -e "Driver installed using options:\n$START_OPTIONS_PRINT" >> $LOG_FILE
-	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}$newKernelText" $FUNCNAME
+	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}$newKernelText"
 
 	echo "Installing this driver: $DRIVER_DEFAULT" >> $LOG_FILE
 	
