@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.3
+####  version: 3.2.4
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -167,10 +167,10 @@ DEBIAN_NVIDIA='debian-nvidia'
 
 LOG_FILE_DIR="/var/log/sgfxi/"
 LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
-LOGPS='log_function_data ps $FUNCNAME "$0"'
-LOGPE='log_function_data pe $FUNCNAME'
-LOGUS='log_function_data us $FUNCNAME "$0"'
-LOGUE='log_function_data ue $FUNCNAME'
+LOGPS='log_function_data $FUNCNAME ps  "$0"'
+LOGPE='log_function_data $FUNCNAME pe'
+LOGUS='log_function_data $FUNCNAME us "$0"'
+LOGUE='log_function_data $FUNCNAME ue'
 
 SCRIPT_NAME='sgfxi'
 
