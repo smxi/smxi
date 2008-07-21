@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.0
+####  version: 3.3.1
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1104,20 +1104,20 @@ create_log()
 	# check and create logfile:
 	LOG_FILE=$LOG_FILE_DIR$LOG_FILE
 	touch $LOG_FILE
-	log_function_data "======================================="
-	log_function_data "Script started: $( date +%Y-%m-%d-%H:%M:%S )"
-	log_function_data "Video Card Information:$cardString"
-	log_function_data "Video Card Type: $CARD_BRAND"
-	log_function_data "Video Card Number: $CARD_NUMBER"
-	log_function_data "Installing driver to kernel: $KERNEL_VERSION"
+	echo "=======================================" >> $LOG_FILE
+	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
+	echo "Video Card Information:$cardString" >> $LOG_FILE
+	echo "Video Card Type: $CARD_BRAND" >> $LOG_FILE
+	echo "Video Card Number: $CARD_NUMBER" >> $LOG_FILE
+	echo "Installing driver to kernel: $KERNEL_VERSION" >> $LOG_FILE
 	if [ -n "$INSTALL_TO_KERNEL" ]
 	then
-		log_function_data "Running install from Kernel: $(uname -r)"
+		echo "Running install from Kernel: $(uname -r)" >> $LOG_FILE
 	fi
-	log_function_data "$SCRIPT_NAME script version: $sgfxiVersion"
-	log_function_data "======================================="
-	log_function_data "Start Install log:"
-	log_function_data "======================================="
+	echo "$SCRIPT_NAME script version: $sgfxiVersion" >> $LOG_FILE
+	echo "=======================================" >> $LOG_FILE
+	echo "Start Install log:" >> $LOG_FILE
+	echo "=======================================" >> $LOG_FILE
 }
 
 # $1 type or data; $2 is function; $3 - function args, optional
