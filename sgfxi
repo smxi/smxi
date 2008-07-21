@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.12
+####  version: 3.3.0
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -167,10 +167,10 @@ DEBIAN_NVIDIA='debian-nvidia'
 
 LOG_FILE_DIR="/var/log/sgfxi/"
 LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
-LOGPS='log_function_data $FUNCNAME ps "$( echo $@ )"'
-LOGPE='log_function_data $FUNCNAME pe'
-LOGUS='log_function_data $FUNCNAME us "$( echo $@ )"'
-LOGUE='log_function_data $FUNCNAME ue'
+LOGPS='log_function_data ps $FUNCNAME "$( echo $@ )"'
+LOGPE='log_function_data pe $FUNCNAME'
+LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
+LOGUE='log_function_data ue $FUNCNAME'
 
 SCRIPT_NAME='sgfxi'
 
@@ -415,7 +415,7 @@ error_handler()
 	echo -e ${E}$ErrorMessage${N}
 	if [ -f $LOG_FILE ]
 	then
-		echo -e $ErrorMessage >> $LOG_FILE
+		log_function_data "$ErrorMessage"
 		echo
 		echo "${B}Time stamped error logs are located here: $LOG_FILE"
 	fi
@@ -477,7 +477,7 @@ select_card()
 						then
 							cp $EXXC $timeStampXorg
 						fi
-						echo "xorg.conf was backed up to: $timeStampXorg" >> $LOG_FILE
+						log_function_data "xorg.conf was backed up to: $timeStampXorg"
 						XORG_BACKED_UP='true'
 						# set correct bus id as last step, note you have to check for . in PCI string:
 						# like this: O1:00.0 and change it to O1:00:0
@@ -1043,14 +1043,14 @@ apply_patch_file()
 	
 	cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY # first change to the correct directory
 	
-	echo "Patch URL: $patchUrl" >> $LOG_FILE
+	log_function_data "Patch URL: $patchUrl"
 
 	echo "${B}Retrieving patch ${C}$patchFile${B}...${N}"
 	wget -q -O $patchDirectory$patchFile $patchUrl || error_handler 180 $patchFile
 	
 	if [ -f $patchFile ]
 	then
-		echo "Patch File: $patchDirectory$patchFile" >> $LOG_FILE
+		log_function_data "Patch File: $patchDirectory$patchFile"
 		echo "${B}Running patch ${C}$patchFile${B}...${N}"
 
 		patch -p0 < $patchDirectory$patchFile || error_handler 179 $patchFile
@@ -1083,7 +1083,7 @@ print_information_continue()
 			read response
 			case $response in
 				x|X)
-					error_handler 100 $3
+					error_handler 100 $FUNCNAME
 					;;
 			esac
 		fi
@@ -1104,47 +1104,49 @@ create_log()
 	# check and create logfile:
 	LOG_FILE=$LOG_FILE_DIR$LOG_FILE
 	touch $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
-	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
-	echo "Video Card Information:$cardString" >> $LOG_FILE
-	echo "Video Card Type: $CARD_BRAND" >> $LOG_FILE
-	echo "Video Card Number: $CARD_NUMBER" >> $LOG_FILE
-	echo "Installing driver to kernel: $KERNEL_VERSION" >> $LOG_FILE
+	log_function_data "======================================="
+	log_function_data "Script started: $( date +%Y-%m-%d-%H:%M:%S )"
+	log_function_data "Video Card Information:$cardString"
+	log_function_data "Video Card Type: $CARD_BRAND"
+	log_function_data "Video Card Number: $CARD_NUMBER"
+	log_function_data "Installing driver to kernel: $KERNEL_VERSION"
 	if [ -n "$INSTALL_TO_KERNEL" ]
 	then
-		echo "Running install from Kernel: $(uname -r)" >> $LOG_FILE
+		log_function_data "Running install from Kernel: $(uname -r)"
 	fi
-	echo "$SCRIPT_NAME script version: $sgfxiVersion" >> $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
-	echo "Start Install log:" >> $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
+	log_function_data "$SCRIPT_NAME script version: $sgfxiVersion"
+	log_function_data "======================================="
+	log_function_data "Start Install log:"
+	log_function_data "======================================="
 }
 
-# $1 is function; $2 is further information; $3 - function args, optional
+# $1 type or data; $2 is function; $3 - function args, optional
 log_function_data()
 {
 	local funcInfo='' logSpacer='  ' arg='' argArray=( $3 )
 	
 	if [ "$PRINT_VER" != 'true' ]
 	then
-		case $2 in
+		case $1 in
 			ps)
-				funcInfo="Function: $1 - Primary: Start"
+				funcInfo="Function: $2 - Primary: Start"
 				;;
 			pe)
-				funcInfo="Function: $1 - Primary: End"
+				funcInfo="Function: $2 - Primary: End"
 				;;
 			us)
-				funcInfo="Function: $1 - Utility: Start"
+				funcInfo="Function: $2 - Utility: Start"
 				;;
 			ue)
-				funcInfo="Function: $1 - Utility: End"
+				funcInfo="Function: $2 - Utility: End"
 				;;
 		esac
 		
 		if [ -n "$funcInfo" ]
 		then
 			echo "$funcInfo" >> $LOG_FILE
+		else
+			echo -e "${logSpacer}$1" >> $LOG_FILE
 		fi
 		
 		if [ -n "$3" ]
@@ -1207,7 +1209,7 @@ install_native_driver()
 		
 		if [ "$PRINT_VER" != 'true' ]
 		then
-			print_information_continue 'standard' "The graphics installer will be installing the${C}$experimentalText Free xorg${B} driver: ${C}$driverInstall${N}" $FUNCNAME
+			print_information_continue 'standard' "The graphics installer will be installing the${C}$experimentalText Free xorg${B} driver: ${C}$driverInstall${N}"
 		else
 			exit 0 # this is required for smxi native driver tests
 		fi
@@ -1408,7 +1410,7 @@ set_cpu_data()
 
 	if [ "$PRINT_VER" != 'true' ]
 	then
-		echo "cpu: $CPU - arch: $ARCH - x86: $X86" >> $LOG_FILE
+		log_function_data "cpu: $CPU - arch: $ARCH - x86: $X86"
 	fi
 	eval $LOGUE
 }
@@ -1493,7 +1495,7 @@ set_version()
 	fi
 	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}$newKernelText"
 
-	echo "Installing this driver: $DRIVER_DEFAULT" >> $LOG_FILE
+	log_function_data "Installing this driver: $DRIVER_DEFAULT"
 	
 	eval $LOGPE
 	# test for support
@@ -1577,13 +1579,13 @@ misc_fixes()
 				
 			if [ ! -e $headersDir/asm-i386 -a "$BITS" == '32' ]
 			then
-				echo "Creating soft link asm-x86 asm-i386 in $headersDir" >> $LOG_FILE
+				log_function_data "Creating soft link asm-x86 asm-i386 in $headersDir"
 				echo "${B}Creating symbolic link ${C}asm-x86 asm-i386${B}...${N}"
 			
 				ln -s $headersDir/asm-x86 $headersDir/asm-i386 || error_handler 233 "link -s asm-x86 asm-i386"
-				echo "Link successfully created." >> $LOG_FILE
+				log_function_data "Link successfully created."
 			else
-				echo "link asm-x86 asm-i386 in $headersDir already exists" >> $LOG_FILE
+				log_function_data "link asm-x86 asm-i386 in $headersDir already exists"
 			fi
 			;;
 	esac
@@ -1612,7 +1614,7 @@ set_download_info()
 			;;
 	esac
 
-	echo "download url: $downloadUrl - driver file: $DRIVER_FILE" >> $LOG_FILE
+	log_function_data "download url: $downloadUrl - driver file: $DRIVER_FILE"
 	
 	eval $LOGPE
 	download_extract_driver $downloadUrl $DRIVER_FILE 
@@ -1753,11 +1755,11 @@ preinstall_cleanup()
 	# both files should be present in case of previous nvidia install
 	if [ -x /usr/bin/$installer ]
 	then
-		echo 'Using nvidia uninstaller: /usr/bin/'$installer >> $LOG_FILE
+		log_function_data 'Using nvidia uninstaller: /usr/bin/'$installer
 		/usr/bin/$installer --uninstall -s -N 1>> $LOG_FILE 2>> $LOG_FILE || installError="$?"
 	elif [ -f /usr/lib/libnvidia-tls.so.1 ]
 	then
-		echo 'Using local nvidia uninstaller' >> $LOG_FILE
+		log_function_data 'Using local nvidia uninstaller'
 		# some cases this will not be present, like to native ati/nv conversion
 		if [ -f ./$installer ]
 		then
@@ -1942,7 +1944,7 @@ run_driver_installer()
 	cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
 	echo "${B}Running driver installer for ${C}$DRIVER_DEFAULT${B} (this might take a while)...${N}"
 
-	echo "driver: $DRIVER_DEFAULT" >> $LOG_FILE
+	log_function_data "driver: $DRIVER_DEFAULT"
 	
 	# run the card installers
 	case $CARD in
@@ -1964,7 +1966,7 @@ run_driver_installer()
 			distroCodeName='sid'
 			installer='ati-installer.sh'
 			installerArgs="$DRIVER_DEFAULT --buildpkg $distroId/$distroCodeName"
-			echo "dist-id/dist-codename: $distroId/$distroCodeName" >> $LOG_FILE
+			log_function_data "dist-id/dist-codename: $distroId/$distroCodeName"
 			
 			# tell fglrx installer correct x version
 	# 		if [ -n "$( echo $X_VERSION | egrep '[1-2]\.[4-9]' )" ]
@@ -2109,7 +2111,7 @@ clean_up_fglrx_junk()
 	then
 		rm -rf /usr/lib/opengl
 		ldconfig
-		echo 'Note: cleanup usr/lib/opengl' >> $LOG_FILE
+		log_function_data 'Note: cleanup usr/lib/opengl'
 	fi
 	eval $LOGUE
 }
@@ -2172,7 +2174,7 @@ install_fglrx_debs()
 			forceIt='--force-all'
 		fi
 
-		echo "These installation debs have been created: $availableDebs" >> $LOG_FILE
+		log_function_data "These installation debs have been created: $availableDebs"
 		
 		echo "${B}Installing fglrx debs for kernel ${C}$KERNEL_VERSION${B}...${N}"
 		# unfreeze/freeze stuff may be required for some legacy type systems
@@ -2354,7 +2356,7 @@ start_x_question()
 				then
 					echo "${B}Installing the package ${C}$ia32libs${B} now...${N}"
 					install_package $ia32libs '' '--reinstall'
-					echo "Final Step: Installed: $ia32libs" >> $LOG_FILE
+					log_function_data "Final Step: Installed: $ia32libs"
 				else
 					echo "${E}The package ${C}$ia32libs${E} is only available for ${C}64 bit${E} systems.${N}"
 				fi
@@ -2371,7 +2373,7 @@ start_x_question()
 						install_package $package '' '--reinstall'
 					done
 					
-					echo "Final Step: Installed: $fgGlx" >> $LOG_FILE
+					log_function_data "Final Step: Installed: $fgGlx"
 				else
 					echo "${E}The packages ${C}$fgGlx${E} are only installable in ${C}64 bit + ATI fglrx${E} systems.${N}"
 				fi
@@ -2380,20 +2382,20 @@ start_x_question()
 				;;
 			start-x) 
 				echo "${B}Ok, starting X now, thanks for using this script.${N}"
-				echo "Final Step: start-x" >> $LOG_FILE
+				log_function_data "Final Step: start-x"
 				start_stop_x start
 				;;
 			reboot-now)
 				echo "${B}Ok, rebooting into kernel ${C}$INSTALL_TO_KERNEL${B} and your"
 				echo "${C}$DRIVER_DEFAULT${B} video driver. Thanks for using this script.${N}"
-				echo "Final Step: reboot to kernel: $INSTALL_TO_KERNEL" >> $LOG_FILE
+				log_function_data "Final Step: reboot to kernel: $INSTALL_TO_KERNEL"
 				reboot
 				exit 100 # need to exit with 100 to not trigger root pid kill in smxi
 				;;
 			quit)
 				echo "${B}Ok, exiting now, thanks for using this script.${N}"
 				# this is to send calling script message that it should not do its success action
-				echo "Final Step: quit" >> $LOG_FILE
+				log_function_data "Final Step: quit"
 				exit 100 # need to exit with 100 to not trigger pid root kill in smxi
 				;;
 			*)
@@ -2754,7 +2756,7 @@ update_xorg()
 		then
 			cp $EXXC $timeStampXorg
 		fi
-		echo "xorg.conf was backed up to: $timeStampXorg" >> $LOG_FILE
+		log_function_data "xorg.conf was backed up to: $timeStampXorg"
 		echo "${B}Backup copy of your previous version: ${C}$timeStampXorg${N}"
 	fi
 	echo "${B}Updating your ${C}$EXXC${B} file now...${N}"
