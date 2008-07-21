@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.1
+####  version: 3.3.2
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -167,6 +167,7 @@ DEBIAN_NVIDIA='debian-nvidia'
 
 LOG_FILE_DIR="/var/log/sgfxi/"
 LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
+LOGGING_STARTED=''
 LOGPS='log_function_data ps $FUNCNAME "$( echo $@ )"'
 LOGPE='log_function_data pe $FUNCNAME'
 LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
@@ -413,7 +414,7 @@ error_handler()
 	esac
 	ErrorMessage="ERROR: ($errorCode) $errorData"
 	echo -e ${E}$ErrorMessage${N}
-	if [ -f $LOG_FILE ]
+	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
 	then
 		log_function_data "$ErrorMessage"
 		echo
@@ -1118,6 +1119,8 @@ create_log()
 	echo "=======================================" >> $LOG_FILE
 	echo "Start Install log:" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
+	
+	LOGGING_STARTED='true'
 }
 
 # $1 type or data; $2 is function; $3 - function args, optional

@@ -274,6 +274,7 @@ KERNEL_POST_DU_INSTALL=''
 LOG_MASTER=''
 LOG_PRIMARY=''
 LOG_INDENT=''
+LOGGING_STARTED=''
 LOG_UTILITY=''
 LOGMS='log_function_data ms $FUNCNAME "$0"'
 LOGME='log_function_data me $FUNCNAME'
@@ -512,7 +513,7 @@ error_handler()
 	
 	echo -e "$errorPrintMessage"
 	# not ready for logging yet
-# 	if [ -f $LOG_FILE ]
+# 	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
 # 	then
 # 		log_writer "$errorLine$errorMessage$errorLine" >> $LOG_FILE
 # 		echo

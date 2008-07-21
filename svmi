@@ -145,6 +145,10 @@ SCRIPT_NAME=$( basename $0 )
 
 CONFIG_FILE='/etc/svmi.conf'
 LOG_FILE='/var/log/svmi.log'
+LOGPS='log_function_data ps $FUNCNAME "$( echo $@ )"'
+LOGPE='log_function_data pe $FUNCNAME'
+LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
+LOGUE='log_function_data ue $FUNCNAME'
 LOGGING_STARTED='' # this will flag to avoid logging for pre log errors like no root
 
 # miscellaneous settings
@@ -622,6 +626,8 @@ create_log()
 	echo "=======================================" >> $LOG_FILE
 	echo "Start Install log:" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
+	
+	LOGGING_STARTED='true'
 }
 
 # $1 is function; $2 is further information
@@ -1402,7 +1408,6 @@ set_test_data # this will set other test data for debugging
 if [ "$SKIP_FUNCTION" != 'true' ]
 then
 	create_log
-	LOGGING_STARTED='true'
 fi
 # will run non interactive and set the AUTO_UPDATE flag
 run_non_interactive
