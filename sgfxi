@@ -1149,7 +1149,7 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
-			echo -e "Func Args: $3" >> $LOG_FILE
+			echo -e "${logSpacer}Func Args: $3" >> $LOG_FILE
 		fi
 	fi
 }
