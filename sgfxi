@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.9
+####  version: 3.2.10
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -167,9 +167,9 @@ DEBIAN_NVIDIA='debian-nvidia'
 
 LOG_FILE_DIR="/var/log/sgfxi/"
 LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
-LOGPS='log_function_data $FUNCNAME ps  "$@"'
+LOGPS='log_function_data $FUNCNAME ps  "$( local args=;for args in $@;do echo arg: $args;done )"'
 LOGPE='log_function_data $FUNCNAME pe'
-LOGUS='log_function_data $FUNCNAME us "$@"'
+LOGUS='log_function_data $FUNCNAME us "$( local args=;for args in $@;do echo arg: $args;done )"'
 LOGUE='log_function_data $FUNCNAME ue'
 
 SCRIPT_NAME='sgfxi'
@@ -232,17 +232,17 @@ set_test_data()
 ## NOTE: it's important to start all comments in here at first character for cleanup updater
 #		# this is required for testing to make sure we always are starting with true
 #		# latest script versions
-#		rm -f sgfxi* 
-#		# note: devs: double check this output to make sure it's your user name
-#		username=$( getent passwd 1000|cut -d \: -f1 )
-#		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
-#		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
-#		cd $SCRIPT_HOME
-#		CARD_DATA=1002:7280 # fake ati
-#		CARD_DATA=10de:0020 # fake nvidia legacy 
-#		CARD_DATA=10de:0322 # fake nvidia 
-#		CARD_DATA=10de:0020
-#		FG_DEFAULT='8-5' 
+# 		rm -f sgfxi* 
+# 		# note: devs: double check this output to make sure it's your user name
+# 		username=$( getent passwd 1000|cut -d \: -f1 )
+# 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
+# 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
+# 		cd $SCRIPT_HOME
+# 		CARD_DATA=1002:7280 # fake ati
+# 		CARD_DATA=10de:0020 # fake nvidia legacy 
+# 		CARD_DATA=10de:0322 # fake nvidia 
+# 		CARD_DATA=10de:0020
+# 		FG_DEFAULT='8-5' 
 # leave this at first character or errors in updater tools will occur
 :
 	fi
@@ -1123,7 +1123,7 @@ create_log()
 # $1 is function; $2 is further information; $3 - function args, optional
 log_function_data()
 {
-	local funcInfo='' logSpacer='  ' arg=''
+	local funcInfo='' logSpacer='  ' arg='' argArray=( $3 )
 	
 	if [ "$PRINT_VER" != 'true' ]
 	then
@@ -1149,11 +1149,7 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
-# 			for arg in ${3[@]}
-# 			do
-# 				echo "${logSpacer}Arguments: $arg" >> $LOG_FILE
-# 			done
-:
+			echo "$3"
 		fi
 	fi
 }
