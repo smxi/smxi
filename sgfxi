@@ -1144,12 +1144,12 @@ log_function_data()
 		
 		if [ -n "$funcInfo" ]
 		then
-			echo "$funcInfo" >> $LOG_FILE
+			echo -e "$funcInfo" >> $LOG_FILE
 		fi
 		
 		if [ -n "$3" ]
 		then
-			echo "Func Args: $3" >> $LOG_FILE
+			echo -e "Func Args: $3" >> $LOG_FILE
 		fi
 	fi
 }
