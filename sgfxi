@@ -28,7 +28,6 @@
 
 CARD='' # card type: fglrx or nvidia
 AUTORUN=''
-COLOR_DEFAULT=''
 DISPLAY_DEVICES=''
 SM_INSTALL='' # utilities for smxi
 EXPERIMENTAL=''
@@ -1150,9 +1149,7 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
-			set_script_colors 'monochrome'
 			echo -e "Func Args: $3" >> $LOG_FILE
-			set_script_colors $COLOR_DEFAULT
 		fi
 	fi
 }
@@ -2989,7 +2986,6 @@ do
 			;;
 		j)	MONOCHROME='true'
 			set_script_colors 'monochrome'
-			COLOR_DEFAULT='monochrome'
 			START_OPTIONS=$START_OPTIONS'j'
 			;;
 		K)	INSTALL_TO_KERNEL="$OPTARG"
