@@ -1149,7 +1149,7 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
-			echo "Func Args: $3" | sed 's%\${.*}%%g' >> $LOG_FILE
+			echo -e "Func Args: $3" | sed 's%\${.*}%%g' >> $LOG_FILE
 		fi
 	fi
 }
