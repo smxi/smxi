@@ -1123,7 +1123,7 @@ create_log()
 # $1 type or data; $2 is function; $3 - function args, optional
 log_function_data()
 {
-	local funcInfo='' logSpacer='  ' arg='' argArray=( $3 )
+	local funcInfo='' logSpacer='  '
 	
 	if [ "$PRINT_VER" != 'true' ]
 	then
