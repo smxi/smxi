@@ -1123,33 +1123,33 @@ create_log()
 # $1 is function; $2 is further information; $3 - function args, optional
 log_function_data()
 {
-	local moreInfo='' logSpacer='  ' arg=''
+	local funcInfo='' logSpacer='  ' arg=''
 	
 	if [ "$PRINT_VER" != 'true' ]
 	then
 		case $2 in
 			ps)
-				moreInfo="Function: $1 - Primary: Start"
+				funcInfo="Function: $1 - Primary: Start"
 				;;
 			pe)
-				moreInfo="Function: $1 - Primary: End"
+				funcInfo="Function: $1 - Primary: End"
 				;;
 			us)
-				moreInfo="Function: $1 - Utility: Start"
+				funcInfo="Function: $1 - Utility: Start"
 				;;
 			ue)
-				moreInfo="Function: $1 - Utility: End"
+				funcInfo="Function: $1 - Utility: End"
 				;;
 		esac
 		
-		if [ -n "$moreInfo" ]
+		if [ -n "$funcInfo" ]
 		then
-			echo "$moreInfo" >> $LOG_FILE
+			echo "$funcInfo" >> $LOG_FILE
 		fi
 		
 		if [ -n "$3" ]
 		then
-			for arg in $3
+			for arg in ${3[@]}
 			do
 				echo "${logSpacer}Arguments: $arg" >> $LOG_FILE
 			done
