@@ -271,11 +271,9 @@ KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
 KERNEL_POST_DU_FLAG=''
 KERNEL_POST_DU_INSTALL=''
-LOG_MASTER=''
-LOG_PRIMARY=''
+LOG_FILE=''
 LOG_INDENT=''
 LOGGING_STARTED=''
-LOG_UTILITY=''
 LOGMS='log_function_data ms $FUNCNAME "$0"'
 LOGME='log_function_data me $FUNCNAME'
 LOGPS='log_function_data ps $FUNCNAME "$0"'
@@ -536,45 +534,48 @@ log_function_data()
 {
 	# master are not set by another function. primary are set by a master
 	# utilities are used by all functions. This should result in nested logs
-	local type='' message=''
+	local funcInfo='' 
 	case $1 in
 		ms)
-			type='master: start'
+			funcInfo="Function: $2 - MASTER: Start"
 			LOG_INDENT=''
-			LOG_MASTER='true'
 			;;
 		me)
-			type='master: end'
+			funcInfo="Function: $2 - MASTER: End"
 			LOG_INDENT=''
-			LOG_MASTER='false'
 			;;
 		ps)
-			type='primary: start'
+			funcInfo="Function: $2 - Primary: Start"
 			# set tabbing for nested
 			adjust_log_indent 'add'
-			LOG_PRIMARY='true'
 			;;
 		pe)
-			type='primary: end'
+			funcInfo="Function: $2 - Primary: End"
 			# slice out zero or one spacer element to reset tabbing for nesting
 			adjust_log_indent 'remove'
-			LOG_PRIMARY='false'
 			;;
 		us)
-			type='utility: start'
+			funcInfo="Function: $2 - Utility: Start"
 			# set tabbing for nested
 			adjust_log_indent 'add'
-			LOG_UTILITY='true'
 			;;
 		ue)
-			type='utility: end'
+			funcInfo="Function: $2 - Utility: End"
 			# slice out zero or one spacer element to reset tabbing for nesting
-			adjust_log_indent 'remove'
-			LOG_UTILITY='false'
 			;;
 	esac
-	message="Function: $2 - type: $type"
-	log_writer "$message"
+	
+	if [ -n "$funcInfo" ]
+	then
+		log_writer "$funcInfo"
+	else
+		log_writer "$1"
+	fi
+	
+	if [ -n "$3" ]
+	then
+		log_writer "Func Args: $3"
+	fi
 }
 # sets the global LOG_INDENT for logging output
 # args: $1 - add/remove
@@ -585,11 +586,8 @@ adjust_log_indent()
 			LOG_INDENT="$LOG_INDENT$SPACER"
 			;;
 		remove)
-			if [ -n "$LOG_INDENT" ]
-			then
-				# trim off one spacer block only to drop one indent level
-				LOG_INDENT=$( echo "$LOG_INDENT" | sed "s/$SPACER//" )
-			fi
+			# trim off one spacer block only to drop one indent level
+			LOG_INDENT=$( echo "$LOG_INDENT" | sed "s/$SPACER//" )
 			;;
 	esac
 }
@@ -599,7 +597,7 @@ log_writer()
 {
 	# this handles first line indents, all other indents must be set in message data
 	# like so: message="some problem... \n${LOG_INDENT}more problem stuff..."
-	# echo -e "${LOG_INDENT}$1" >> $SM_LOG_FILE
+	# echo -e "${LOG_INDENT}$1" >> $LOG_FILE
 	:
 }
 
