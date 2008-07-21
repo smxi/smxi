@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.2.2
-####  Date: July 18 2008
+####  version: 1.3.0
+####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -325,7 +325,7 @@ error_handler()
 	echo -e ${E}$ErrorMessage${N}
 	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
 	then
-		echo -e $ErrorMessage >> $LOG_FILE
+		log_function_data "$ErrorMessage"
 		echo
 		echo "${S}Time stamped error logs are located here: $LOG_FILE"
 	fi
@@ -376,6 +376,7 @@ basic_startup_tests()
 # handles bug in stub installer that leaves tempfiles uncleaned
 cleanup_temp_files()
 {
+	eval $LOGUS
 	local all_files=""
 
 	# Note: if  * is in "" the wildcard does not work
@@ -386,12 +387,12 @@ cleanup_temp_files()
 	then
 		rm -f $all_files
 	fi
+	eval $LOGUE
 }
 
 check_install_tools()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local gccVersion=$( egrep -io 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | egrep -o '[4-6]\.[0-9]{1,2}' )
 	local ubgv="/usr/bin/gcc-$gccVersion"
 	
@@ -415,13 +416,13 @@ check_install_tools()
 	else
 		error_handler 250 "$ubgv"
 	fi
-
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 # arg: $1 - package names
 install_package()
 {
+	eval $LOGUS
 	if [ "$UPDATED" != 'true' ]
 	then
 		echo "${S}Updating apt now...${N}"
@@ -432,10 +433,12 @@ install_package()
 		echo "${S}Installing required package ${C}$1${S} now...${N}"
 		apt-get install --allow-unauthenticated --yes $1 || error_handler 200 $1
 	fi
+	eval $LOGUE
 }
 
 remove_package()
 {
+	eval $LOGUS
 	local response='' package=''
 	
 	if [ -n "$1" ]
@@ -456,6 +459,7 @@ remove_package()
 		done
 		echo "${S}Package(s) removed successfully, continuing with driver install.${N}"
 	fi
+	eval $LOGUE
 }
 
 # args: $1 script to get/check; $2 - repeat, to only retest download failure once
@@ -517,6 +521,7 @@ check_update_script()
 # 2.6.24.2.slh.2-sidux-686 / 2.6.24.2.slh.2-sidux-amd64
 normalize_kernel_string()
 {
+	eval $LOGUS
 	local kernelString=$1 processSlh='' oldSlh='' processedString='' kernelArch=''
 	# first test for the new default .slh. syntax:
 	if [ -n "$( echo $kernelString | egrep '(-slh(64)?-)' )" ]
@@ -557,10 +562,12 @@ normalize_kernel_string()
 	fi
 
 	echo $processedString
+	eval $LOGUE
 }
 
 print_information()
 {
+	eval $LOGPS
 	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
 	#echo 'sv:' $scriptVersion
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
@@ -576,6 +583,7 @@ print_information()
 	echo $MLINE
 	echo " ${M}$SCRIPT_NAME${S} :: version: ${C}$scriptVersion${S} :: last updated: ${C}$scriptDate${N}"
 	#eval $vmPlayer
+	eval $LOGPE
 }
 
 # this is the hit enter to continue blurb...
@@ -618,9 +626,6 @@ create_log()
 	echo "=========================================================" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
-# 	echo "Video Card Information:$cardString" >> $LOG_FILE
-# 	echo "Video Card Type: $CARD_BRAND" >> $LOG_FILE
-# 	echo "Video Card Number: $CARD_NUMBER" >> $LOG_FILE
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
@@ -630,22 +635,41 @@ create_log()
 	LOGGING_STARTED='true'
 }
 
-# $1 is function; $2 is further information
-log_info()
+# $1 type or data; $2 is function; $3 - function args, optional
+log_function_data()
 {
-	local moreInfo=$2
+	local funcInfo='' logSpacer='  '
 	
-	if [ "$moreInfo" == 's' ]
+	if [ "$PRINT_VER" != 'true' ]
 	then
-		moreInfo='started'
-	elif [ "$moreInfo" == 'c' ]
-	then
-		moreInfo='completed successfully'
+		case $1 in
+			ps)
+				funcInfo="Function: $2 - Primary: Start"
+				;;
+			pe)
+				funcInfo="Function: $2 - Primary: End"
+				;;
+			us)
+				funcInfo="Function: $2 - Utility: Start"
+				;;
+			ue)
+				funcInfo="Function: $2 - Utility: End"
+				;;
+		esac
+		
+		if [ -n "$funcInfo" ]
+		then
+			echo "$funcInfo" >> $LOG_FILE
+		else
+			echo -e "${logSpacer}$1" >> $LOG_FILE
+		fi
+		
+		if [ -n "$3" ]
+		then
+			echo -e "${logSpacer}Func Args: $3" >> $LOG_FILE
+		fi
 	fi
-	
-	echo "function: $1 - message: $moreInfo" >> $LOG_FILE
 }
-
 
 ########################################################################
 #### Core virtual machine installer functions
@@ -654,6 +678,7 @@ log_info()
 # startup questions, users choose vm and action
 vm_main_selector()
 {
+	eval $LOGPS
 	local repeat='' options='' opt='' quitContinue='quit'
 	# testing for both ose and non ose versions, then installing the requested version
 	set_installed_vbox_version
@@ -766,6 +791,7 @@ vm_main_selector()
 	then
 		vm_main_selector
 	fi
+	eval $LOGPE
 }
 
 ### -------------------------------------------------------------------
@@ -774,7 +800,7 @@ vm_main_selector()
 
 construct_file_name()
 {
-	log_info $FUNCNAME s
+	eval $LOGUS
 	
 	if [ "$INSTALL_TYPE" == "$AA" ]
 	then
@@ -794,19 +820,17 @@ construct_file_name()
 		FILE_URL=$VMPLAYER_PREFIX$FILE_NAME
 	fi
 	
-	echo 'DIR_NAME: '$DIR_NAME >> $LOG_FILE
-	echo 'FILE_NAME: '$FILE_NAME >> $LOG_FILE
-	echo 'FILE_URL: '$FILE_URL >> $LOG_FILE
-	
-	log_info $FUNCNAME c
+	log_function_data "DIR_NAME: $DIR_NAME"
+	log_function_data "FILE_NAME: $FILE_NAME"
+	log_function_data "FILE_URL: $FILE_URL"
+	eval $LOGUE
 }
 # construct_file_name anyany failed; exit
 
 # test, download, run app
 download_file()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	local noGood='' fileURL='' testExtract=''
 	
 	if [ ! -d "$VMWARE_INSTALL_PATH" ]
@@ -833,7 +857,7 @@ download_file()
 					error_handler 195 $FILE_URL
 				fi
 			else
-				echo 'Send FILE_URL to test_extract_file: '$FILE_URL >> $LOG_FILE
+				log_function_data "Send FILE_URL to test_extract_file: $FILE_URL"
 				testExtract='true'
 			fi
 		else
@@ -844,18 +868,16 @@ download_file()
 		testExtract='true'
 	fi
 	
-	log_info $FUNCNAME c
-	
 	if [ "$testExtract" == 'true' ]
 	then
 		test_extract_file
 	fi
+	eval $LOGUE
 }
 
 test_extract_file()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	local extractFailed=''
 	
 	if [ ! -d "$DIR_NAME" ]
@@ -868,14 +890,13 @@ test_extract_file()
 		mv $VMPLAYER_DIR $DIR_NAME
 	fi
 	
-	log_info $FUNCNAME c
+	eval $LOGUE
 	run_file
 }
 
 run_file()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	local runFile=''
 	
 	cd $DIR_NAME
@@ -890,15 +911,13 @@ run_file()
 	esac
 	
 	./$runFile
-	
-	log_info $FUNCNAME c
+	eval $LOGUE
 }
 
 # $1 which install type to use
 install_vmware()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	INSTALL_TYPE=$1
 	
 	echo $LINE
@@ -921,14 +940,13 @@ install_vmware()
 		install_anyany
 	fi
 	
-	log_info $FUNCNAME c
+	eval $LOGPE
 	print_hec
 }
 
 install_anyany()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	if [ -x "$VMWARE_CONFIG" ]
 	then
 		echo "${S}Starting $AA install and setup. When any any asks if you want to run"
@@ -939,14 +957,12 @@ install_anyany()
 	else
 		error_handler 192
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGUE
 }
 
 create_qemu_image()
 {
-	log_info $FUNCNAME s	
-	
+	eval $LOGUS	
 	local qemuExists=$( dpkg -l | grep 'qemu'  )
 	
 	echo $LINE
@@ -957,7 +973,7 @@ create_qemu_image()
 		echo "${C}qemu${M} is already installed on your system.${N}"
 	fi
 	
-	log_info $FUNCNAME c
+	eval $LOGUE
 	print_hec
 }
 
@@ -968,14 +984,15 @@ create_qemu_image()
 # this will set the global installed vbox version to handle mismatches
 set_installed_vbox_version()
 {
+	eval $LOGUS
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox-ose virtualbox| grep 'Installed:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
+	eval $LOGUE
 }
 # create and install vbox module:
 # $1 is ose/non-ose
 install_vbox()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local vboxOSE='virtualbox-ose virtualbox-ose-source'
 	local vboxGeneral=$( dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox' )
 	local vboxBad='virtualbox virtualbox-source'
@@ -998,12 +1015,13 @@ install_vbox()
 	
 	add_vbox_user
 	
-	log_info $FUNCNAME c
+	eval $LOGPE
 	print_hec
 }
 
 install_vbox_non_ose()
 {
+	eval $LOGPS
 	local arch='i386' 
 	if [ "$BITS" == '64' ]
 	then
@@ -1041,6 +1059,7 @@ install_vbox_non_ose()
 			rm -f $debName
 		fi
 	fi
+	eval $LOGPE
 	print_hec
 }
 #install_vbox_non_ose;exit
@@ -1049,8 +1068,7 @@ install_vbox_non_ose()
 # $1 is ose or non-ose
 install_vbox_module()
 {
-	log_info $FUNCNAME s 
-	
+	eval $LOGPS 
 	local vbs='virtualbox-ose-source' vbdv='vboxdrv' vbo='virtualbox-ose' vboxSlhMod=''
 	local vboxSource=$( dpkg -l | grep -i $vbs )
 	local isEMod=$( cat $EMOD | grep -i $vbdv )
@@ -1095,18 +1113,18 @@ install_vbox_module()
 			if [ -z "$modDeb" -o -z "$vboxSlhMod" ]
 			then
 				echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
-				echo "Building $vbdv module now and running modprobe..." >> $LOG_FILE
+				log_function_data "Building $vbdv module now and running modprobe..."
 				m-a a-i $vbs || error_handler 197 $vbdv
 			else
 				echo "${S}Installing prebuilt slh vbox kernel module...${N}"
-				echo "Installing prebuilt slh vbox kernel modules: $modDeb" >> $LOG_FILE
+				log_function_data "Installing prebuilt slh vbox kernel modules: $modDeb"
 				dpkg -i $modDeb 2>> $LOG_FILE || error_handler 191 $modDeb
 			fi
 # 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
 			modprobe $vbdv
 # 		else
 # 			echo "${M}Kernel Module ${C}$vbdv${M} is already installed...${N}"
-# 			echo "Kernel Module $vbdv is already installed..." >> $LOG_FILE
+# 			log_function_data "Kernel Module $vbdv is already installed..."
 # 		fi
 		success='true'
 	elif [ "$1" == 'non-ose' ]
@@ -1135,16 +1153,16 @@ install_vbox_module()
 		modprobe $vbdv
 		echo "${C}$vbdv${S} module should now be up and running.${N}"
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 	print_hec
 }
 #install_vbox_module
 
 preinstall_cleanup()
 {
+	eval $LOGUS
 	local previousVbox='' oldVbSource='virtualbox-source'
-	local previousVbm=''  vbdv='vboxdrv'
+	local previousVbm='' vbdv='vboxdrv'
 	local vbModLoaded=$( lsmod | grep $vbdv )
 		
 	echo $LINE
@@ -1171,13 +1189,13 @@ preinstall_cleanup()
 	then
 		dpkg --purge $previousVbox  1>> $LOG_FILE 2>> $LOG_FILE
 	fi
+	eval $LOGUE
 }
 # getent passwd 1000|cut -d\: -f1 
 # your first user is ${1st_user}. Press ENTER to use that, or type the username'
 add_vbox_user()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local userExists=''
 	
 	echo $LINE
@@ -1201,27 +1219,25 @@ add_vbox_user()
 	
 	if [ "$USER_NAME" != '' ]
 	then
-		echo 'Using USER_NAME: '$USER_NAME >> $LOG_FILE
+		log_function_data "Using USER_NAME: $USER_NAME"
 		if [ -n "$userExists" ]
 		then
 			echo "${M}NOTE: the new group will not be available to ${C}$USER_NAME${M} until they logout and log back in.${N}"
 			adduser $USER_NAME vboxusers
 		else
 			echo "${E}The user name ${C}$USER_NAME${E} does not appear to exist, please try again...${N}"
-			echo 'Error: USER_NAME: '$USER_NAME 'does not exist in /etc/passwd' >> $LOG_FILE
+			log_function_data "Error: USER_NAME: $USER_NAME does not exist in /etc/passwd"
 			USER_NAME='' # must be reset here to null or loops endlessly
 			add_vbox_user
 		fi
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 # $1 is OSE or non OSE
 install_vbox_addons()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local isOSE='' 
 	
 	
@@ -1269,7 +1285,7 @@ install_vbox_addons()
 	fi
 	echo
 	print_hec
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 # install_vbox_addons
 ########################################################################
