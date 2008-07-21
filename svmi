@@ -984,6 +984,7 @@ set_installed_vbox_version()
 {
 	eval $LOGUS
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox-ose virtualbox| grep 'Installed:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
+	log_function_data "VBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION"
 	eval $LOGUE
 }
 # create and install vbox module:
