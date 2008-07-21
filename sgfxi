@@ -436,8 +436,6 @@ select_card()
 	local cards='' card='' singleCardId=''
 	local options='' opt='' found=''
 	local timeStampXorg=$EXXC-bu-$( date +%Y-%m-%d-%H:%M:%S )
-	
-	[ "$TESTING" == 'true' ] && echo CARD_DATA pre:select_card: $CARD_DATA
 
 	echo ${M}$LINE
 	echo "${B}The script detected more than one video card in your system:"
@@ -472,8 +470,6 @@ select_card()
 					echo "${C}$card${N}"
 					# override the global values and handle this explicitly
 					CARD_DATA=$singleCardId
-					
-					[ "$TESTING" == 'true' ] && echo CARD_DATA post:select_card: $CARD_DATA
 					
 					if [ "$SKIP_CONFIG" != 'true' ]
 					then
@@ -726,11 +722,9 @@ print_information()
 	#local cardInfo=$( lspci | gawk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\sTechnologies\sInc\s|nVidia\sCorporation\s)(.*)%\2%'  )
 	local cardInfo=$( lspci | awk -F': ' '/VGA compatible controller.*: / { print $NF }' | sed -r 's%(ATI\s|nVidia\s|Intel\s)(Technologies\sInc\s|Corporation\s|Unknown\sdevice){1,2}(.*)%\1\3%g' )
 	local cardRam='' cardVendor='' busId=''
-	
-	[ "$TESTING" == 'true' ] && echo CARD_DATA print_info: $CARD_DATA
+
 	# we need the real busid, not the xorg one
 	busId=$( lspci -n | grep "$CARD_DATA" | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' )
-	[ "$TESTING" == 'true' ] && echo busId print_info: $busId
 	
 	if [ -n "$busId" ]
 	then
