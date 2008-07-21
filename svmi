@@ -365,7 +365,7 @@ basic_startup_tests()
 	then
 		error_handler 252
 	fi
-	cleanup_temp_files 
+	
 	# this allows users to update in x, for example, to see latest drivers
 	if [ "$FORCE_UPDATE" == 'true' ]
 	then
@@ -1411,6 +1411,7 @@ if [ "$SKIP_FUNCTION" != 'true' ]
 then
 	basic_startup_tests
 fi
+cleanup_temp_files 
 ### update everything, restart if not run from smxi
 if [ "$SKIP_RESTART" != 'true' -a "$SM_INSTALL" != 'true' -a "$SKIP_FUNCTION" != 'true' ]
 then
