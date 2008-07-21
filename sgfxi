@@ -1148,9 +1148,9 @@ log_function_data()
 		then
 			echo "${logSpacer}Arguments: $3" >> $LOG_FILE
 		fi
-		if [ -n "$2" ]
+		if [ -n "$moreInfo" ]
 		then
-			echo "${logSpacer}$2" >> $LOG_FILE
+			echo "${logSpacer}$moreInfo" >> $LOG_FILE
 		fi
 	fi
 }
