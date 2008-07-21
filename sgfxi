@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.1
-####  Date: July 17 2008
+####  version: 3.2.2
+####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -167,6 +167,10 @@ DEBIAN_NVIDIA='debian-nvidia'
 
 LOG_FILE_DIR="/var/log/sgfxi/"
 LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
+LOGPS='log_function_data ps $FUNCNAME "$0"'
+LOGPE='log_function_data pe $FUNCNAME'
+LOGUS='log_function_data us $FUNCNAME "$0"'
+LOGUE='log_function_data ue $FUNCNAME'
 
 SCRIPT_NAME='sgfxi'
 
@@ -810,6 +814,7 @@ basic_startup_tests()
 # handles bug in stub installer that leaves tempfiles uncleaned
 cleanup_temp_files()
 {
+	eval $LOGUS
 	local all_files="" slxorg='sgfxi-lib-xorg'
 
 	# Note: if  * is in "" the wildcard does not work
@@ -824,11 +829,12 @@ cleanup_temp_files()
 	then
 		rm -f $slxorg # clean up old xorg lib file
 	fi
+	eval $LOGUE
 }
 
 check_install_tools()
 {
-	log_info $FUNCNAME s
+	eval $LOGPS
 	# nvidia and fglrx tools
 	if [ ! -x /usr/bin/module-assistant ]
 	then
@@ -869,13 +875,14 @@ check_install_tools()
 		rm -f /etc/modutils/1alsa
 		depmod $KERNEL_VERSION -a
 	fi
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 # arg: $1 - package name; $2 - /experimental/unstable/testing/stable; $3 - --reinstall
 # optional args. Note that if you use 3, you have to set 2 by '' if blank.
 install_package()
 {
+	eval $LOGUS
 	local distroVersion='' optionalArgs=''
 	local packageInstalled=$( dpkg -l | grep "$1" | cut -d ' ' -f  3 )
 	
@@ -902,10 +909,12 @@ install_package()
 	esac
 	# then install the package with all options
 	apt-get install --allow-unauthenticated --yes $optionalArgs $1$distroVersion || error_handler 200 $1
+	eval $LOGUE
 }
 # install_package nano '' --reinstall
 remove_package()
 {
+	eval $LOGUS
 	local response='' package=''
 	
 	echo ${M}$LINE
@@ -923,12 +932,12 @@ remove_package()
 		fi
 	done
  	echo "${B}Package(s) removed successfully, continuing with driver install.${N}"
+ 	eval $LOGUE
 }
 
 update_to_nonfree_sources()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local isFree=0 i='' counter=0
 	local eas='/etc/apt/sources.list'
 	local easdl='/etc/apt/sources.list.d/debian.list'
@@ -959,8 +968,7 @@ update_to_nonfree_sources()
 		done
 		apt-get update && UPDATED='true' # need to refresh
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 # args: $1 script to get/check; $2 - repeat, to only retest download failure once
@@ -1034,6 +1042,7 @@ check_update_script()
 # args: $1 patch file to apply
 apply_patch_file()
 {
+	eval $LOGUS
 	local patchFile=$1
 	local patchDirectory="$INSTALL_WORKING_DIR$INSTALL_DIRECTORY/"
 	local patchUrl="${TPD}patches/$patchFile"
@@ -1057,11 +1066,13 @@ apply_patch_file()
 	else
 		error_handler 181 $patchFile
 	fi
+	eval $LOGUE
 }
 
 # args: $1 testing or standard; $2 function/feature name; $3 function name
 print_information_continue()
 {
+	eval $LOGUS
 	local response=''
 	
 	case $1 in
@@ -1083,6 +1094,7 @@ print_information_continue()
 			esac
 		fi
 	fi
+	eval $LOGUE
 }
 
 create_log() 
@@ -1114,7 +1126,7 @@ create_log()
 	echo "=======================================" >> $LOG_FILE
 }
 
-# $1 is function; $2 is further information
+# $1 is function; $2 is further information; $3 - function args, optional
 log_info()
 {
 	local moreInfo=$2
@@ -1122,13 +1134,25 @@ log_info()
 	if [ "$PRINT_VER" != 'true' ]
 	then
 		case $moreInfo in
-			s)	moreInfo='started'
+			ps)
+				moreInfo='Primary: started'
 				;;
-			c)	moreInfo='completed successfully'
+			pe)
+				moreInfo='Primary: ended'
+				;;
+			us)
+				moreInfo='Utility: started'
+				;;
+			ue)
+				moreInfo='Utility: ended'
 				;;
 		esac
 	
 		echo "function: $1 - message: $moreInfo" >> $LOG_FILE
+		if [ -n "$3" ]
+		then
+			echo "Arguments: $3" >> $LOG_FILE
+		fi
 	fi
 }
 
@@ -1142,6 +1166,7 @@ log_info()
 # this bypasses core binary installers and just runs the required pieces
 install_native_driver()
 {
+	eval $LOGPS
 	local xorgBase='xserver-xorg-video-' xorgNv='nv' xorgAti='ati' xorgIntel='intel'
 	local xorgDriver='' driver='' currentlyInstalled='' 
 	local driverInstall='' experimentalText=''
@@ -1153,7 +1178,7 @@ install_native_driver()
 	# 
 	if [ "$CARD" == $NVIDIA -o "$CARD" == $FGLRX -o "$CARD" == $INTEL -o -n "$NATIVE_OVERRIDE" ]
 	then
-		log_info $FUNCNAME s
+		eval $LOGPS
 		
 		case $CARD in
 			$NVIDIA)
@@ -1233,17 +1258,19 @@ install_native_driver()
 		update_xorg
 		process_xvmc # this will restore xvmc defaults if nvidia stuff was being used
 		
-		log_info $FUNCNAME c
+		eval $LOGPE
 		## and finish it up
 		x_start_stop_master start
 		exit 0 # just exit here in case something weird goes wrong with xorg start
 	else
 		error_handler 254 # this is redundant, but I'm leaving it as a fail safe
 	fi
+	eval $LOGPE
 }
 
 native_driver_install_keep()
 {
+	eval $LOGUS
 	local lgmd='libgl1-mesa-dri'  ldrm='libdrm2'
 	
 	if [ "$NATIVE_OVERRIDE" == 'radeon' ]
@@ -1264,11 +1291,13 @@ native_driver_install_keep()
 			deborphan --add-keep $ldrm > /dev/null
 		fi
 	fi
+	eval $LOGUE
 }
 
 # args: $1 $driver; $2 $currentlyInstalled
 native_driver_experimental()
 {
+	eval $LOGPS
 	if [ "$CARD" == $FGLRX ]
 	then
 		# step one, check and install basic drivers
@@ -1291,11 +1320,13 @@ native_driver_experimental()
 			error_handler 187 exp-drm2
 		fi
 	fi
+	eval $LOGPE
 }
 
 # this is for non-standard debs, and other stuff, for experimental use primarily
 download_install_package()
 {
+	eval $LOGUS
 	local packageToInstall='' url='' systemType='_i386.deb' shortPackage=''
 	if [ "$CPU" == 'x86_64' ]
 	then
@@ -1333,10 +1364,12 @@ download_install_package()
 		#rm -f $packageToInstall
 		error_handler 188 $packageToInstall
 	fi
+	eval $LOGUE
 }
 
 prep_native_driver()
 {
+	eval $LOGUS
 	local xxva='xserver-xorg-video-ati' ldrmd='libdrm-dev'
 	local packageList=''
 	
@@ -1345,7 +1378,7 @@ prep_native_driver()
 			packageList="$xxva $ldrmd"
 			;;
 	esac
-
+	eval $LOGUE
 	remove_package "$packageList" $xxva 
 }
 ### -------------------------------------------------------------------
@@ -1353,8 +1386,7 @@ prep_native_driver()
 ### -------------------------------------------------------------------
 set_cpu_data()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	case $CARD in
 		$NVIDIA)
 			if [ "$CPU" == 'x86_64' ]
@@ -1380,11 +1412,12 @@ set_cpu_data()
 	then
 		echo "cpu: $CPU - arch: $ARCH - x86: $X86" >> $LOG_FILE
 	fi
-	log_info $FUNCNAME c
+	eval $LOGUE
 }
 
 check_supported_driver()
 {
+	eval $LOGUS
 	local isGood='' pattern='[0-9]{4}'
 	local drivers="$DRIVER_DEFAULT:$VERSIONS:$DRIVER_TESTING:$OTHER_VERSIONS:$DRIVER_QUAD"
 	
@@ -1404,13 +1437,14 @@ check_supported_driver()
 			error_handler 240 $DRIVER_DEFAULT
 		fi
 	fi
+	eval $LOGUE
 }
 
 set_version()
 {
+	eval $LOGPS
 	local response='' printDriver='' newKernelText=''
-	
-	log_info $FUNCNAME s
+
 	# I'm forcing special cases to override the defaults so the data
 	# printed out will show what drivers are supported
 	if [ -n "$DRIVER_INSTALL" ]
@@ -1464,7 +1498,7 @@ set_version()
 
 	echo "Installing this driver: $DRIVER_DEFAULT" >> $LOG_FILE
 	
-	log_info $FUNCNAME c
+	eval $LOGPE
 	# test for support
 	driver_support_tests supported-driver
 }
@@ -1472,6 +1506,7 @@ set_version()
 # args: $1- test type
 driver_support_tests()
 {
+	eval $LOGUS
 	# test for binary only tests here
 	case $1 in
 		supported-driver)
@@ -1523,11 +1558,13 @@ driver_support_tests()
 			:
 			;;
 	esac
+	eval $LOGUE
 }
 
 # args: $1 - which fix. Holds miscellaneous highly specific fixes, created as needed
 misc_fixes()
 {
+	eval $LOGUS
 	case $1 in
 		nvidia-24-link)
 			local headersDir="/usr/src/linux-headers-$KERNEL_VERSION/include"
@@ -1553,14 +1590,14 @@ misc_fixes()
 			fi
 			;;
 	esac
+	eval $LOGUE
 }
 
 set_download_info()
 {
+	eval $LOGPS
 	local packageName='' downloadUrl='' response='' country='us'
-	
-	log_info $FUNCNAME s
-	
+
 	case $CARD in
 		$NVIDIA)
 			PKG=0
@@ -1580,16 +1617,14 @@ set_download_info()
 
 	echo "download url: $downloadUrl - driver file: $DRIVER_FILE" >> $LOG_FILE
 	
-	log_info $FUNCNAME c
-	
+	eval $LOGPE
 	download_extract_driver $downloadUrl $DRIVER_FILE 
 }
 
 # arg: $1 install package to remove
 pre_extract_cleanup()
 {
-	log_info $FUNCNAME s
-
+	eval $LOGUS
 	if [ "$NATIVE_DRIVER" != 'true' ]
 	then
 		rm -rf $1 # this removes nvidia install dir if present
@@ -1600,16 +1635,15 @@ pre_extract_cleanup()
 	# using the format fgrlx-install.FRGDXE
 	rm -rf $FG_WORKING_DIR* /tmp/fglrx*
 	rm -f /etc/fglrxrc /etc/fglrxprofiles.csv fglrx*
-
-	log_info $FUNCNAME c
+	eval $LOGUE
 }
 
 # args: $1 download url; $2 package name
 download_extract_driver()
 {
+	eval $LOGPS
 	local runPackage=$2'.run' errorTemp='' atiRef=''
-	
-	log_info $FUNCNAME s
+
 	# this was needed to avoid some test from ati... not needed anymore last I tried
 	case $CARD in
 		$FGLRX)
@@ -1652,13 +1686,12 @@ download_extract_driver()
 	then
 		exit # this is just to test up to download/extract point
 	fi
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 prep_install()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local gccVersion=$( egrep -io 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | egrep -o '[4-6]\.[0-9]{1,2}' )
 	local ubgv="/usr/bin/gcc-$gccVersion"
 	
@@ -1689,15 +1722,14 @@ prep_install()
 	else
 		error_handler 230 "$ubgv"
 	fi
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 preinstall_cleanup()
 {
+	eval $LOGPS
 	local oldNvidia='' divertedPackages='' installer='nvidia-installer' oldFglrx=''
-	
-	log_info $FUNCNAME s
-	
+
 	echo "${B}Running preinstall cleanup...${N}"
 	# this is not set as a path if native driver install
 	if [ "$NATIVE_DRIVER" != 'true' ]
@@ -1765,15 +1797,13 @@ preinstall_cleanup()
 	do 
 		dpkg-divert --package $package --remove $GL  1>> $LOG_FILE 2>> $LOG_FILE
 	done
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 # these patch calls used to be in lib files but this is cleaner/simpler long term
 run_patches()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local patchFile=''
 	
 	case $CARD in
@@ -1867,14 +1897,14 @@ run_patches()
 	then
 		: # doing nothing for now
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 # arg: $1 - pre/post Undoing the patches in case the xen stuff is needed later
 # as of 2.6.25-2, debian kernels are compiled with xen, which breaks nvidia currently
 apply_module_patch()
 {
+	eval $LOGPS
 	local lmkv="/lib/modules/$KERNEL_VERSION"
 	local bccx=$( grep -i 'CONFIG_XEN=y' /boot/config-$KERNEL_VERSION )
 	
@@ -1896,11 +1926,13 @@ apply_module_patch()
 		esac
 		cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
 	fi
+	eval $LOGPE
 }
 
 ### run patch module, then install
 run_driver_installer()
 {
+	eval $LOGPS
 	local installError='' installerArgs=''
 	local xModPath='/usr/lib/xorg/modules'
 	local xLibPath='/usr/lib'
@@ -1908,8 +1940,7 @@ run_driver_installer()
 	
 	local distroId=''
 	local distroCodeName=''
-	
-	log_info $FUNCNAME s
+
 	# this was set in prep_install()
 	cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
 	echo "${B}Running driver installer for ${C}$DRIVER_DEFAULT${B} (this might take a while)...${N}"
@@ -1958,16 +1989,14 @@ run_driver_installer()
 			:
 			;;
 	esac
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 post_installer_steps()
 {
+	eval $LOGPS
 	local ema='/etc/modutils/aliases' oldFglrx=''
-	
-	log_info $FUNCNAME s
-	
+
 	echo "${B}Running post installer steps...${N}"
 
 	cd $INSTALL_WORKING_DIR
@@ -1988,8 +2017,7 @@ post_installer_steps()
 			rm -f fglrx-installer_*.changes
 			;;
 	esac
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 ### -------------------------------------------------------------------
@@ -1997,8 +2025,7 @@ post_installer_steps()
 ### -------------------------------------------------------------------
 install_debian_drivers()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local nvidiaGlx='' nvidiaSource=''
 	
 	clean_up_fglrx_junk
@@ -2064,8 +2091,7 @@ install_debian_drivers()
 			m-a install -f -l $KERNEL_VERSION fglrx 1>> $LOG_FILE 2>> $LOG_FILE || error_handler 193 $DEBIAN_FGLRX
 			;;
 	esac
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 
@@ -2075,8 +2101,7 @@ install_debian_drivers()
 
 clean_up_fglrx_junk()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	rm -f /lib/modules/$KERNEL_VERSION/kernel/drivers/char/drm/fglrx.*o
 	rm -f /lib/modules/$KERNEL_VERSION/volatile/fglrx.*o
 	rm -rf /usr/src/modules/fglrx
@@ -2089,8 +2114,7 @@ clean_up_fglrx_junk()
 		ldconfig
 		echo 'Note: cleanup usr/lib/opengl' >> $LOG_FILE
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGUE
 }
 
 # this is only for fgrlx
@@ -2104,6 +2128,7 @@ install_fglrx_debs()
 	# fglrx-kernel-src_8.443.1-1_i386.deb
 	if [ "$CARD" == $FGLRX ]
 	then
+		eval $LOGPS
 		local fgAmd='fglrx-amdcccle_' fgDri='fglrx-driver_' fgKsc='fglrx-kernel-src_'
 		local fgDriver="$fgDri$DRIVER_DEFAULT-1_*.deb"
 		local fgAmdcccle="$fgAmd$DRIVER_DEFAULT-1_*.deb"
@@ -2112,9 +2137,7 @@ install_fglrx_debs()
 		local fgKsrc='fglrx-kernel-src'
 		
 		local usunf='/usr/sbin/unfreeze-rc.d' frozen=0 forceIt=''
-		
-		log_info $FUNCNAME s
-		
+
 		# this is slightly excessive, but may handle a case where extra debs exist
 		# due to weird user action. Also protects against new ati randomness.
 		if [ -f $fgDriver ]
@@ -2183,8 +2206,7 @@ install_fglrx_debs()
 		echo "${B}Placing ATI packages on hold to avoid dist-upgrade issues with Debian fglrx drivers...${N}"
 		echo fglrx-amdcccle hold | dpkg --set-selections
 		echo fglrx-driver hold | dpkg --set-selections
-	
-		log_info $FUNCNAME c
+		eval $LOGPE
 	fi
 }
 ### -------------------------------------------------------------------
@@ -2192,8 +2214,7 @@ install_fglrx_debs()
 ### -------------------------------------------------------------------
 final_install_steps()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGPS
 	local emod='/etc/modules' fgModules='radeon drm fglrx' fgModule=''
 	
 	echo "${B}Finalizing install...${N}"
@@ -2230,14 +2251,12 @@ final_install_steps()
 	sync # Force changed blocks to disk, update the super block
 	echo ${M}$LINE
 	echo "${B}Congratulations! It looks like your new ${C}$DRIVER_DEFAULT $CARD${B} driver installed successfully!${N}"
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 process_xvmc()
 {
-	log_info $FUNCNAME s
-	
+	eval $LOGUS
 	local lxvmcN='libXvMCNVIDIA_dynamic.so.1' lxvmc='libXvMC.so.1' exxv='/etc/X11/XvMCConfig'
 	
 	# xvmc information here: http://www.mythtv.org/wiki/index.php/XvMC
@@ -2247,14 +2266,14 @@ process_xvmc()
 	else
 		echo $lxvmc > $exxv
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGUE
 }
 ### -------------------------------------------------------------------
 ### Stop / Start Xorg handling section
 ### -------------------------------------------------------------------
 x_start_stop_master()
 {
+	eval $LOGPS
 	case $1 in
 		stop)
 			if [ "$SKIP_FUNCTION" != 'true' -a "$SM_INSTALL" != 'true' -a "$SKIP_X_TEST" != 'true' -a "$AUTORUN" != 'true' ]
@@ -2282,10 +2301,12 @@ x_start_stop_master()
 			fi
 			;;
 	esac
+	eval $LOGPE
 }
 
 start_x_question()
 {
+	eval $LOGPS
 	local opt='' options='' repeat='' package=''
 	local ia32libs='ia32-libs' iaOpt='install-ia32libs' 
 	local ia32Alert='echo -e "\n${M}You should probably (re)install ${C}$ia32libs${M} (even if already installed)\nif you use applications that depend on them in your ${C}64 bit${M} system,\nfor example ${C}Wine${M}.${N}"'
@@ -2390,12 +2411,14 @@ start_x_question()
 	then
 		start_x_question
 	fi
+	eval $LOGPE
 }
 # start_x_question
 
 # takes one argument, stop or start
 start_stop_x()
 {
+	eval $LOGUS
 	local displayManagers='entrance gdm kdm slim wdm xdm' dman='' success=''
 	# setting the default will handle cases like default 2 while still handling 3/5
 	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
@@ -2447,10 +2470,12 @@ start_stop_x()
 			exit 0 # smxi will handle the pid root kill
 		fi
 	fi 
+	eval $LOGUE
 }
 
 x_is_running()
 {
+	eval $LOGUS
 	# we'll do one final X is running test here, note, handling a bunch of
 	# different possible X detections in etch, lenny, and sid, then filtering out the grep
 	local xIsRunning=$( ps aux | grep '/usr.*/X' | grep -vc 'grep' )
@@ -2461,6 +2486,7 @@ x_is_running()
 	else
 		echo 1
 	fi
+	eval $LOGUE
 }
 
 ########################################################################
@@ -2470,6 +2496,7 @@ x_is_running()
 # create required section device:
 create_section_device()
 {
+	eval $LOGUS
 	# if this section is not present, create it
 	if [ "$( egrep -ic 'Section[ \t]*"Device"' $EXXC )" -eq 0 ]
 	then
@@ -2483,6 +2510,7 @@ create_section_device()
 		echo  >> $EXXC
 	fi
 	# now fill it if needed
+	eval $LOGUE
 	create_driver_entry
 }
 
@@ -2491,6 +2519,7 @@ create_section_device()
 # if all goes well, will only create a driver / busid entry if missing
 create_driver_entry()
 {
+	eval $LOGUS
 	# since this is set in the above function, it must exist, but I'll check to make sure
 	local deviceLineNu=$( egrep -in 'Section[[:space:]]*"Device"' $EXXC | cut -d ':' -f 1 )
 	
@@ -2525,12 +2554,13 @@ create_driver_entry()
 \t#BusID "PCI:'${BUS_ID}'"/' $EXXC
 		fi
 	fi
+	eval $LOGUE
 }
 
 # this will reset any hex in bus id string to avoid that new xorg failure to handle hex
 pcibusid_hex_to_dec()
 {
-	[ "$TESTING" == 'true' ] && echo BUS_ID pre:pcibusid_hex_to_dec: $BUS_ID
+	eval $LOGUS
 	local pt1=$( cut -d ':' -f 1 <<< $BUS_ID )
 	local pt2=$( cut -d ':' -f 2 <<< $BUS_ID )  
 	local pt3=$( cut -d ':' -f 3 <<< $BUS_ID )
@@ -2541,12 +2571,13 @@ pcibusid_hex_to_dec()
 	let tempPt3=0x$pt3
 	
 	BUS_ID="$tempPt1:$tempPt2:$tempPt3"
-	[ "$TESTING" == 'true' ] && echo BUS_ID post:pcibusid_hex_to_dec: $BUS_ID
+	eval $LOGUE
 }
 
 # this will handle cases where user is changing from one card to another
 update_xorgconf_driver_version()
 {
+	eval $LOGUS
 	local driverName=$CARD
 
 	if [ "$NATIVE_DRIVER" == 'true' ]
@@ -2579,6 +2610,7 @@ update_xorgconf_driver_version()
 	# previous: (i810|nvidia|nv|fglrx|ati|radeon|apm|iftv|fbdev|vesa)
 	# these are all current xserver-xorg-video-xxxx drivers, plus nvidia and fglrx
 	sed -i -r 's%^\s*Driver\s*"(apm|ark|ati|chips|cirrus|cyrix|fbdev|fglrx|glint|iftv|ivtv|i810|imstt|intel|mesa|mga|neomagic|newport|nsc|nv|nvidia|openchrome|radeon|radeonhd|rendition|s3|s3virge|savage|siliconmotion|sis|tdfx|tga|trident|tseng|v4l|vesa|vga|via|vmware|voodoo)"%\tDriver\t"'$driverName'"%' $EXXC
+	eval $LOGUE
 }
 
 
@@ -2586,6 +2618,7 @@ update_xorgconf_driver_version()
 # each specific argument/driver combination
 check_extensions()
 {
+	eval $LOGUS
 	local stateOn=1 stateOff=0  # default for nvidia
 	local turnOff='' rendState=0 compState=0 aiglxString=''
 	local compComment='#' rendComment='#' 
@@ -2634,11 +2667,13 @@ check_extensions()
 	fi
 	# rebuild the extensions now
 	perl -pi -e 's/^([\s]*Section\s*"Extensions")/\1\n'$compComment'\tOption      "Composite"\t"'$compState'"\n'$rendComment'\tOption      "RENDER"\t"'$rendState'"'$aiglxString'/' $EXXC
+	eval $LOGUE
 }
 
 # resets xorg to basics, strips out all fglrx/nvidia specific stuff
 clear_prep_xorg()
 {
+	eval $LOGUS
 	perl -pi -e 's/^[\s]*Load\s*"GLcore"/#\tLoad\t"GLcore"/;
 	s/^[\s]*Load\s*"dri"/#\tLoad\t"dri"/;
 	s/^[\s]*#*[\s]*Load\s*"glx"/\tLoad\t"glx"/;
@@ -2675,10 +2710,12 @@ clear_prep_xorg()
 			perl -pi -e 's/^[\s]*#*[\s]*Load\s*"dri"/\tLoad\t"dri"/' $EXXC
 			;;
 	esac
+	eval $LOGUE
 }
 
 remove_modelines()
 {
+	eval $LOGUS
 	local removeThem=''
 	
 	### this handles standard cases, always for fglrx, never for native ati/nv
@@ -2697,12 +2734,12 @@ remove_modelines()
 	then
 		perl -pi -e 's/^.*Mode.ine.*\n?//g' $EXXC
 	fi
+	eval $LOGUE
 }
 
 update_xorg()
 {
-	log_info $FUNCNAME s
-
+	eval $LOGPS
 	# this to second time stamp should help fix that old repeated .1st bug
 	local timeStampXorg=$EXXC-bu-$( date +%Y-%m-%d-%H:%M:%S )
 	local stateOn='1' stateOff='0' 
@@ -2783,8 +2820,7 @@ update_xorg()
 			perl -pi -e 's/^([\s]*Driver\s*"radeon")/\1\n\tOption  "AGPFastWrite"    "off"\n\tOption  "AGPMode" "4"\n\tOption   "ColorTiling" "on"\n\tOption  "DynamicClocks"   "on"\n\tOption   "EnablePageFlip" "on"\n\tOption   "AccelMethod" "XAA"/' $EXXC
 		fi
 	fi
-	
-	log_info $FUNCNAME c
+	eval $LOGPE
 }
 
 ########################################################################
