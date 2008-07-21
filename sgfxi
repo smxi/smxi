@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.5
+####  version: 3.2.6
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1123,7 +1123,7 @@ create_log()
 # $1 is function; $2 is further information; $3 - function args, optional
 log_function_data()
 {
-	local moreInfo=$2
+	local moreInfo=$2 logSpacer='  '
 	
 	if [ "$PRINT_VER" != 'true' ]
 	then
@@ -1142,10 +1142,15 @@ log_function_data()
 				;;
 		esac
 	
-		echo "function: $1 - message: $moreInfo" >> $LOG_FILE
+		echo "function: $1" >> $LOG_FILE
+		
 		if [ -n "$3" ]
 		then
-			echo "Arguments: $3" >> $LOG_FILE
+			echo "${logSpacer}Arguments: $3" >> $LOG_FILE
+		fi
+		if [ -n "$2" ]
+		then
+			echo "${logSpacer}$2" >> $LOG_FILE
 		fi
 	fi
 }
