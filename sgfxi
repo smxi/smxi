@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.2.11
+####  version: 3.2.12
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -28,6 +28,7 @@
 
 CARD='' # card type: fglrx or nvidia
 AUTORUN=''
+COLOR_DEFAULT=''
 DISPLAY_DEVICES=''
 SM_INSTALL='' # utilities for smxi
 EXPERIMENTAL=''
@@ -1149,7 +1150,9 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
+			set_script_colors 'monochrome'
 			echo -e "Func Args: $3" >> $LOG_FILE
+			set_script_colors $COLOR_DEFAULT
 		fi
 	fi
 }
@@ -2945,7 +2948,7 @@ show_options()
 }
 
 # this must be set before anything else runs in script, -j will reset to no colors
-set_script_colors 
+set_script_colors $COLOR_DEFAULT
 while getopts AbcCdDeEFhjK:nN:o:pQrRsStTUvWXxZ opt
 do
 	case $opt in
@@ -2986,6 +2989,7 @@ do
 			;;
 		j)	MONOCHROME='true'
 			set_script_colors 'monochrome'
+			COLOR_DEFAULT='monochrome'
 			START_OPTIONS=$START_OPTIONS'j'
 			;;
 		K)	INSTALL_TO_KERNEL="$OPTARG"
