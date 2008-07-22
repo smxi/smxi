@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.2
+####  version: 1.15.3
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1034,7 +1034,7 @@ create_apt_source_item()
 # screws up, or whatever else might happen, and has.
 force_kernel_mirror_change()
 {
-	eval $LOGPS
+	eval $LOGUS
 	# core-eu-4:http://ftp.spline.de/pub/sidux/debian/ 
 	local prefId='smxi-kernel-borked-1'
 	local smPref=$( sm_pref_tester $prefId )
