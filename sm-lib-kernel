@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.4.0
+####  version: 2.4.1
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -259,12 +259,11 @@ kernel_question()
 		esac
 		break
 	done
-	
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		kernel_question $1
 	fi
-	eval $LOGPE
 }
 # set_kernel_data
 # check_kernel
@@ -521,11 +520,11 @@ install_wireless_modules()
 		esac
 		
 	fi
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		install_wireless_modules
 	fi
-	eval $LOGPE
 }
 
 install_the_module()
