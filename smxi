@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.0.6
+####  version: 8.0.7
 ####  Date: July 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1263,6 +1263,7 @@ create_script_files()
 		echo "$LOG_FILE {
 	rotate 2
 	size 200k
+	create
 }
 " > $SCRIPT_ROTATE
 	fi

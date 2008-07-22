@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.3.1
+####  version: 1.3.3
 ####  Date: July 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -626,6 +626,7 @@ create_log()
 		echo "$LOG_FILE {
 	rotate 1
 	size 100k
+	create
 }	
 " > $SCRIPT_ROTATE
 	fi
