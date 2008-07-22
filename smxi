@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.11
+####  version: 7.90.12
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2081,12 +2081,11 @@ check_connection()
 	else
 		echo "${S}Internet connection is present and working.${N}"
 	fi
-	
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		check_connection
 	fi
-	eval $LOGPE
 }
 
 restart_networking()
@@ -3131,12 +3130,11 @@ post_du_options()
 		esac
 		break
 	done
-	
+	eval $LOGME
 	if [ "$repeat" == 'true' ]
 	then
 		post_du_options
 	fi
-	eval $LOGME
 }
 ## DEBUGGER
 #script_debugger post_du_options '' 'EXTRA_OPTIONS="true"' 
