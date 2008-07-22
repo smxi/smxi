@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.36.3
-####  Date: July 19 2008
+####  version: 7.90.0
+####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -167,15 +167,11 @@ UPGRADE_DATA='upgrade-data/'
 TECH_PATTERNS_DISTRO='http://techpatterns.com/downloads/distro/'
 TECH_PATTERNS_KERNELS='http://techpatterns.com/downloads/distro/kernels/'
 SM_CONFIG_FILE='/etc/smxi.conf'
-SM_LOG_DIR='/var/log/smxi/'
-UPDATE_LOG='-update-'
-DU_LOG='-dist-upgrade-'
-INSTALL_F_LOG='-install-f'
 
 # xorg stuff
 X_VERSIONS_PRE=''
 X_VERSIONS_POST=''
-CLEAN_X_ORG_LOG=$SM_LOG_DIR'clean_xorg_modules.log'
+CLEAN_X_ORG_LOG='/var/log/sm_clean_xorg_modules.log'
 X_ORG_SAVE_LIST=''
 X_ORG_LIST=''
 
@@ -271,7 +267,7 @@ KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
 KERNEL_POST_DU_FLAG=''
 KERNEL_POST_DU_INSTALL=''
-LOG_FILE=''
+LOG_FILE='/var/log/smxi0.log'
 LOG_INDENT=''
 LOGGING_STARTED=''
 LOGMS='log_function_data ms $FUNCNAME "$0"'
@@ -378,8 +374,7 @@ error_handler()
 	local errorExtra=$3 # this is secondary info, like failed package name
 	local errorCode=0 # exit/internal error number 
 	local errorLevel='' # fatal/serious/internal
-	local errorMessage=''
-	local errorPrintMessage=''
+	local errorMessage='' errorLogMessage='' errorPrintMessage=''
 	local errorColor=${E}
 	local errorLine=''
 	
@@ -410,7 +405,7 @@ error_handler()
 			;;
 		smxi-version-too-old)
 			errorCode=5
-			errorMessage="The Script has not been updated in more than ${C}$MAX_AGE${W} Days\n${LOG_INDENT}It is not safe to proceed.\n${LOG_INDENT}Check that the script is still being maintained please before you use it."
+			errorMessage="The Script has not been updated in more than $MAX_AGE Days\n${LOG_INDENT}It is not safe to proceed.\n${LOG_INDENT}Check that the script is still being maintained please before you use it."
 			;;
 		unidentified-distro)
 			errorCode=6
@@ -500,23 +495,27 @@ error_handler()
 		errorColor=${W}
 		errorLine="\n${LOG_INDENT}$WLINE\n${LOG_INDENT}"
 	fi
-	
+	errorLogMessage="$errorMessage\n${LOG_INDENT}Error No: $errorCode- Function: $errorFunction"
 	errorMessage="$errorMessage\n${LOG_INDENT}${M}Error No: ${C}$errorCode ${M}- Function: ${C}$errorFunction"
 	errorPrintMessage="$errorLine${errorColor}$errorMessage$errorLine${N}"
 	# strip out the spacer stuff for output if required, not testing null gives sed error
-	if [ -n "$LOG_INDENT" ]
+	if [ "$LOG_INDENT" != '' -a "$LOG_INDENT" != ' '  ]
 	then
 		errorPrintMessage=$( echo "$errorPrintMessage" | sed "s/$LOG_INDENT//g" )
 	fi
 	
 	echo -e "$errorPrintMessage"
-	# not ready for logging yet
-# 	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
-# 	then
-# 		log_writer "$errorLine$errorMessage$errorLine" >> $LOG_FILE
-# 		echo
-# 		echo "${B}Time stamped error logs are located here: $LOG_FILE"
-# 	fi
+
+	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
+	then
+		log_function_data "$LI\n${LOG_INDENT}$errorLogMessage\n${LOG_INDENT}$LI"
+	fi
+	
+	if [ "$errorLevel" == 'fatal' -a "$LOGGING_STARTED" == 'true' ]
+	then
+		echo
+		echo "${M}Error logs are located here: ${C}$LOG_FILE${N}"
+	fi
 
 	case $errorLevel in
 		fatal)
@@ -583,11 +582,11 @@ adjust_log_indent()
 {
 	case $1 in
 		add)
-			LOG_INDENT="$LOG_INDENT$SPACER"
+			LOG_INDENT="${LOG_INDENT}${SPACER}"
 			;;
 		remove)
 			# trim off one spacer block only to drop one indent level
-			LOG_INDENT=$( echo "$LOG_INDENT" | sed "s/$SPACER//" )
+			LOG_INDENT="$( echo ''${LOG_INDENT}'' | sed 's/'${SPACER}'//' )"
 			;;
 	esac
 }
@@ -597,9 +596,29 @@ log_writer()
 {
 	# this handles first line indents, all other indents must be set in message data
 	# like so: message="some problem... \n${LOG_INDENT}more problem stuff..."
-	# echo -e "${LOG_INDENT}$1" >> $LOG_FILE
-	:
+	if [ "$LOGGING_STARTED" == 'true' ]
+	then
+		echo -e "${LOG_INDENT}$1" >> $LOG_FILE
+	fi
 }
+
+create_log() 
+{
+	local scriptVersion=$( grep 'version:' $SCRIPT_NAME | grep -o "[0-9]*\.[0-9]*\.[0-9]*" )
+	
+	# check and create logfile:
+	touch $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
+	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
+	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
+	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
+	echo "=======================================" >> $LOG_FILE
+	echo "Start Install log:" >> $LOG_FILE
+	echo "=======================================" >> $LOG_FILE
+	
+	LOGGING_STARTED='true'
+}
+
 
 ###---------------------------------------------------------------------
 ### core utilities: script libs update: 'mini-apt', trigger function
@@ -610,6 +629,7 @@ log_writer()
 # arguments: $1 which lib/module file; $2 and $3 are options for run module
 run_script_import()
 {
+	eval $LOGPS
 	local loadIt='' runIt='' options='' noTestDownloadOnly=''
 	
 	case $1 in
@@ -762,12 +782,14 @@ run_script_import()
 		test_version_info $1 'chm'
 		DISPLAY= ./$1 $options # run module
 	fi
+	eval $LOGPE
 }
 
 # arg: $1 is which file to test; $2 is if chmod or not
 # 0 means get latest, 1 means don't
 test_version_info()
 {
+	eval $LOGUS
 	local LocalVersion='' remoteVersion='' remoteDate='' updateLocal=''
 
 	# first to test that it exists, download if not
@@ -788,6 +810,7 @@ test_version_info()
 	# keep in mind, return values for compare: 0 -> >; 1 -> ==; 2 -> <
 	updateLocal=$( compare_numbers $remoteVersion $LocalVersion )
 	
+	eval $LOGUE
 	# updates as needed, if updated, return 0, if not, return 1
 	if [ "$updateLocal" -ne 1 ]
 	then
@@ -796,11 +819,13 @@ test_version_info()
 	else
 		return 1
 	fi
+	eval $LOGUE
 }
 
 # arguments: $1 filename; $2 chm/other, for chmod +x $1
 update_scripts()
 {
+	eval $LOGUS
 	local success=""
  	
 	# for devs only, this switches off/on updates, so you can work
@@ -812,13 +837,15 @@ update_scripts()
 	else
 		success=0 # hard code success, do not actually update
 	fi
-	
+	log_function_data "Return: $success"
+	eval $LOGUE
 	return $success
 }
 
 # args: $1 - file to download; $2 -chm; $3 - repeat try, auto
 download_test_file()
 {
+	eval $LOGUS
 	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
 	local isGood='' wgetError=0 update=''
 	
@@ -862,10 +889,12 @@ download_test_file()
 			fi
 		fi
 	fi
+	eval $LOGUE
 }
 # args: $1 - file name; $2 - error type
 file_download_error()
 {
+	eval $LOGPS
 	local response='' repeat='' downloadError1='' downloadError2=''
 	
 	if [ "$2" == 'file-corrupt' ]
@@ -895,7 +924,6 @@ file_download_error()
 	
 	case $response in
 		y)	print_quit
-			exit 0
 			;;
 		n)	echo "${S}Ok, continuing with the script without downloading the new ${C}$1${N}"
 			return 1
@@ -904,6 +932,7 @@ file_download_error()
 			file_download_error "$1" "$2"
 			;;
 	esac
+	eval $LOGPE
 }
 
 # compare 2 dot [5.34.6] or 1/0 dot [3.45,3] version numbers
@@ -913,6 +942,7 @@ file_download_error()
 # localization re decimal indicators internally, otherwise it's too much of a pain.
 compare_numbers()
 {
+	eval $LOGUS
 	## DEBUGGER
 	# echo $1 $2
 	# first we need to determine what the base system is using for decimal indicator
@@ -956,6 +986,8 @@ compare_numbers()
 	fi
 	
 	echo $returnValue
+	log_function_data "returnValue: $returnValue"
+	eval $LOGUE
 }
 ## DEBUGGER
 # compare_numbers   100.12.2 100.4.3  ;echo result: $?;exit
@@ -964,6 +996,7 @@ compare_numbers()
 # args: $1 - which function 
 launch_function_trigger()
 {
+	eval $LOGPS
 	local prefId='' scriptOption='' scriptFunction='' setPrefs='true' funcArg='prefs'
 
 	case $1 in
@@ -1018,11 +1051,13 @@ launch_function_trigger()
 	then
 		set_sticky_prefs $prefId
 	fi
+	eval $LOGPE
 }
 
 # args: $1 - prefs/standard -- will pass on to it's launched function
 metapackage_launcher()
 {
+	eval $LOGPS
 	local metaExists=$( package_tester '2.6-sidux-' 'wild-full' )
 	
 	# special case here, only run if metapackages are present, or if user initiates
@@ -1036,6 +1071,7 @@ metapackage_launcher()
 		print_lib_info $LIB_KERNEL_INSTALL
 		kernel_meta_package_handler $1 # pass along prefs/standard
 	fi
+	eval $LOGPE
 }
 
 ###---------------------------------------------------------------------
@@ -1044,6 +1080,7 @@ metapackage_launcher()
 
 set_distro_data()
 {
+	eval $LOGPS
 	local siduxSources=$( grep -sil '^[[:space:]]*deb.*sidux' $EAS $EAS.d/*.list )
 	local mepisSources=$( grep -sil '^[[:space:]]*deb.*mepis' $EAS $EAS.d/*.list )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
@@ -1117,11 +1154,20 @@ set_distro_data()
 			DU_UPGRADE=$duUpgrade
 			;;
 	esac
+	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
+	log_function_data "DU_UPGRADE: $DU_UPGRADE"
+	log_function_data "DEFAULT_KERNEL: $DEFAULT_KERNEL"
+	log_function_data "USE_DEBIAN_KERNEL: $USE_DEBIAN_KERNEL"
+	log_function_data "DISTRO: $DISTRO"
+	log_function_data "DISTRO_F: $DISTRO_F"
+	log_function_data "SIDUX_SOURCES: $SIDUX_SOURCES"
+	eval $LOGPE
 }
 
 # cleans up legacy and stub files if present
 cleanup_extra_files()
 {
+	eval $LOGUS
 	local script_names="sgfxi sm smxi du-fixes-h2.sh svmi" i="" all_files=""
 	
 	for i in $script_names
@@ -1141,6 +1187,10 @@ cleanup_extra_files()
 	if [ -n "$all_files" ]
 	then
 		rm -f $all_files
+	fi
+	if [ -d /var/log/smxi ]
+	then
+		rm -fR /var/log/smxi
 	fi
 	if [ -f sm ]
 	then
@@ -1164,19 +1214,17 @@ cleanup_extra_files()
 	then
 		sed -i 's/no-set//' $SM_CONFIG_FILE
 	fi
+	eval $LOGUE
 }
 
 # creates / tests for required script data files and logs etc
 create_script_files()
 {
+	eval $LOGUS
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
 	
 	# make config file / log dir if required
 	check_sm_pref_file
-	if [ ! -d $SM_LOG_DIR ]
-	then
-		mkdir $SM_LOG_DIR
-	fi
 	# move old xorg clean up log if present
 	if [ -f $oldCleanXorgLog ]
 	then
@@ -1191,12 +1239,14 @@ create_script_files()
 	then
 		mv $EASMS $EASSL
 	fi
+	eval $LOGUE
 	# rename directories to new syntax
 	update_kernel_directories
 }
 
 update_kernel_directories()
 {
+	eval $LOGUS
 	local prefId='kernel-directory-update-1'
 	local smPref=$( sm_pref_tester $prefId )
 
@@ -1209,6 +1259,7 @@ update_kernel_directories()
 		echo "${S}Checking and updating kernel download directory names in ${C}$KERNEL_DIRECTORY${S}...${N}"
 		if [ -n "$kernelDirs" ]
 		then
+			log_function_data "Updating: $kernelDirs"
 			for kernelDir in $kernelDirs
 			do
 				echo "${SPACER}${S}Checking: ${C}$kernelDir${N}"
@@ -1224,6 +1275,7 @@ update_kernel_directories()
 		fi
 		set_sticky_prefs $prefId 
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -1236,6 +1288,7 @@ update_kernel_directories()
 # string will be dumped for a shorter more readable one ;-)
 normalize_kernel_string()
 {
+	eval $LOGUS
 	local kernelString=$1 processSlh='' oldSlh='' processedString='' kernelArch=''
 	local slhSlicePoint=''
 	local slhNew1=$( echo $kernelString | egrep '(2\.6\.[0-9]{2}-2\.6\.[0-9]{2}.*\.slh\.)' )
@@ -1284,11 +1337,14 @@ normalize_kernel_string()
 	fi
 
 	echo $processedString
+	log_function_data "processedString: $processedString"
+	eval $LOGUE
 }
 
 # args: $1 - what to compare to kernel name; $2 - set-ke
 test_kernel_strings()
 {
+	eval $LOGUS
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 	local normalizedPackageId=$( normalize_kernel_string $1 )
 	local value=''
@@ -1307,6 +1363,8 @@ test_kernel_strings()
 	else
 		echo $value
 	fi
+	log_function_data "value: $value"
+	eval $LOGUE
 }
 #normalize_kernel_string $(uname -r);exit
 
@@ -1315,6 +1373,7 @@ test_kernel_strings()
 ###---------------------------------------------------------------------
 sticky_prefs()
 {
+	eval $LOGPS
 	local prefId='RememberResponses'
 	local prefId2='FirstRunCount2'
 	local smPref=$( sm_pref_tester $prefId )
@@ -1333,11 +1392,13 @@ sticky_prefs()
 		set_sticky_prefs $prefId
 		print_hec
 	fi
+	eval $LOGPS
 }
 
 # args: $1, s/d, set the du data, or standard, set the sticky string in /etc/smxi.conf 
 set_sticky_prefs()
 {
+	eval $LOGUS
 	check_sm_pref_file
 	local currentDate=$( date +%Y-%m-%d-%H:%M )
 	
@@ -1350,6 +1411,7 @@ set_sticky_prefs()
 			sort_sticky_prefs
 			;;
 	esac
+	eval $LOGUE
 }
 
 sort_sticky_prefs()
@@ -1365,6 +1427,7 @@ sort_sticky_prefs()
 # args: $1 - pref name; $2 - pref value, eg: <name>=<value>
 set_sm_pref_values()
 {
+	eval $LOGUS
 	check_sm_pref_file
 	local prefId="$1"
 	local smPref=$( sm_pref_tester $prefId )
@@ -1376,6 +1439,7 @@ set_sm_pref_values()
 		sed -i "s%$1=.*%$1=$2%" $SM_CONFIG_FILE
 	fi
 	sort_sticky_prefs
+	eval $LOGUE
 }
 
 check_sm_pref_file()
@@ -1390,6 +1454,7 @@ check_sm_pref_file()
 # $2 - optional: custom test; default standard; equal slice out after =
 sm_pref_tester()
 {
+	eval $LOGUS
 	check_sm_pref_file
 	local smPref='' testType='standard'
 	
@@ -1413,9 +1478,11 @@ sm_pref_tester()
 		esac
 		
 		echo $smPref
+		log_function_data "smPref: $smPref"
 	else
 		error_handler 'value-null' $FUNCNAME '$1'
 	fi
+	eval $LOGUE
 }
 #sm_pref_tester smxi-kernel-mirror equal;exit
 
@@ -1426,6 +1493,7 @@ sm_pref_tester()
 # select windows manager, currently only supports kdm, xdm, and gdm
 start_windows_manager()
 {
+	eval $LOGPS
 	local options='' opt=''
 	
 	echo $LINE
@@ -1445,7 +1513,7 @@ start_windows_manager()
 				start_stop_default_dm full start
 				;;
 			quit)
-				print_completed && exit 0
+				print_completed
 				;;
 			*)
 				print_error opt
@@ -1454,11 +1522,13 @@ start_windows_manager()
 		esac
 		break
 	done
+	eval $LOGPE
 }
 
 # arg: $1 - start/stop; $2 - stop/start
 start_stop_default_dm()
 {
+	eval $LOGUS
 	local displayManager=$( get_default_display_manager )
 	local success=''
 	local dmList='entrance gdm kdm slim wdm xdm' dm=''
@@ -1520,11 +1590,13 @@ start_stop_default_dm()
 			init $INIT_LEVEL && exit 0
 		fi
 	fi
+	eval $LOGUE
 }
 
 # get active pid for dm
 do_display_manager_pid_test()
 {
+	eval $LOGUS
 	local dmIdList='entrance/entranced.pid gdm.pid kdm.pid slim.lock wdm.pid xdm.pid' dmId='' found=''
 	
 	for dmId in $dmIdList
@@ -1539,7 +1611,9 @@ do_display_manager_pid_test()
 	then
 		found='true'
 	fi
-
+	
+	eval $LOGUE
+	log_function_data "found: $found"
 	if [ "$found" == 'true' ]
 	then
 		return 0
@@ -1550,20 +1624,26 @@ do_display_manager_pid_test()
 
 x_is_running()
 {
+	eval $LOGUS
+	local returnVal=''
 	# we'll do one final X is running test here, note, handling a bunch of
 	# different possible X detections in etch, lenny, and sid, then filtering out the grep
 	local xIsRunning=$( ps aux | grep '/usr.*/X' | grep -vc 'grep' )
 	
 	if [ "$xIsRunning" -gt 0 ]
 	then
-		echo 0
+		returnVal=''
 	else
-		echo 1
+		returnVal=''
 	fi
+	echo $returnVal
+	log_function_data "returnVal: $returnVal"
+	eval $LOGUE
 }
 # keep the lists here synced, do dm pid, and below: 
 get_display_manager_runlevels()
 {
+	eval $LOGUS
 	local displayManager=$( get_default_display_manager )
 	local dmRunlevels=''
 
@@ -1573,11 +1653,14 @@ get_display_manager_runlevels()
 		dmRunlevels=$( ls /etc/rc*.d/S*$displayManager | sed -r 's%/etc/rc([1-5])\.d.*%\1%g' )
 	fi
 	echo $dmRunlevels
+	log_function_data "dmRunlevels: $dmRunlevels"
+	eval $LOGUE
 }
 
 # just return the dm or null if missing
 get_default_display_manager()
 {
+	eval $LOGUS
 	local displayManager=$( cat /etc/X11/default-display-manager 2>/dev/null )
 	
 	displayManager=$( basename $displayManager 2>/dev/null ) 
@@ -1588,12 +1671,15 @@ get_default_display_manager()
 	fi
 	
 	echo $displayManager
+	log_function_data "displayManager: $displayManager"
+	eval $LOGUE
 }
 
 # must run after, not before first apt-get update/ dist-upgrade
 # otherwise there is no policy set for xorg
 test_xorg_version()
 {
+	eval $LOGUS
 	local XorgIs='' xVersions='' xVersion1='' xVersion2=''
 	
 	if [ -f /var/lib/dpkg/status ]
@@ -1616,6 +1702,8 @@ test_xorg_version()
 				;;
 		esac
 	fi
+	log_function_data "xVersions: $xVersions"
+	eval $LOGUE
 }
 ## DEBUGGER
 #script_debugger "test_xorg_version pre" 'echo "${S}Xorg Version: "${C}$X_ORG_VERSION_PRE${N}'
@@ -1666,6 +1754,7 @@ start_up_tests()
 # this script must run out of x, and gives option to go into default runlevel on x start
 check_display_and_x() 
 {
+	eval $LOGPS
 	# this fixes cases where the runlevel might give a 2 or 3 item result
 	# first get count of items, then use that count to extract the last item
 	local rlc=$( echo $( runlevel ) | wc -w ) response='' wmRunning='' facts=''
@@ -1743,6 +1832,7 @@ check_display_and_x()
 				;;
 		esac
 	fi
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger check_display_and_x
@@ -1750,6 +1840,7 @@ check_display_and_x()
 # I was forced to do this more aggressively to fight off user error
 check_script_path()
 {
+	eval $LOGUS
 	local dufDir=$( dirname $0 )
 	c2=( 'a' 'b' 'e' 'f' 'i' 'k' 'l' 'm' 'r' 't' 'u' 'y' )
 	
@@ -1785,12 +1876,14 @@ check_script_path()
 	then
 		cd $SCRIPT_HOME
 	fi
+	eval $LOGUE
 }
 
 # test for sidux or conversion type system
 # start_up_tests now checks for non-supported distros and levels
 check_distro_version()
 {
+	eval $LOGUS
 	local distroName=' current distro' i='' dis='' temp1=''
 	# note: pre 2008-06 conversions are now version 8 by default
 	# post 2008-06 conversions will carry id set dynamically by time check
@@ -1843,6 +1936,9 @@ check_distro_version()
 		run_script_import $LIB_DISTRO_CONVERSION
 		check_debian
 	fi
+	log_function_data "DISTRO_LEVEL: $DISTRO_LEVEL"
+	log_function_data "DISTRO_VERSION: $DISTRO_VERSION"
+	eval $LOGUE
 }
 ## DEBUGGER
 #script_debugger check_distro_version 'echo dl: $DISTRO_LEVEL' 'DISTRO_VERSION="sidux 2007-04"'
@@ -1851,6 +1947,7 @@ check_distro_version()
 # if the age is greater than $MAX_AGE it will stop execution
 check_age()
 {
+	eval $LOGUS
 	local ScriptDate=$( grep -o -G -m 1 "Date: [A-Za-z\ 0-9]*" $SCRIPT_HOME/$SCRIPT_NAME | grep -m 1 -o -G "\ [A-Za-z\ 0-9]*" )
 	local ScriptYear=$( date -d "$ScriptDate" +%Y )
 	local ScriptDay=$( date -d "$ScriptDate" +%-j )
@@ -1881,11 +1978,13 @@ check_age()
 	then
 		error_handler smxi-version-too-old $FUNCNAME
 	fi
+	eval $LOGUE
 }
 
 # makes sure that there is a connection, especially for kernel install wifi restarts
 check_connection()
 {
+	eval $LOGPS
 	local repeat='' connection='' options='' opt='' 
 	local UserAgent='Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1'
 
@@ -1960,9 +2059,7 @@ check_connection()
 						install_wireless_modules
 						;;
 					quit)
-						echo $LINE
-						echo "${S}Exiting the script now.${N}"
-						exit 0
+						print_quit
 						;;
 					*)
 						print_error opt
@@ -1980,10 +2077,12 @@ check_connection()
 	then
 		check_connection
 	fi
+	eval $LOGPE
 }
 
 restart_networking()
 {
+	eval $LOGPS
 	local RestartNetworking='/etc/init.d/networking restart' response=''
 	
 	echo $WLINE
@@ -2013,6 +2112,7 @@ restart_networking()
 			print_error yn
 			;;
 	esac
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger check_connection
@@ -2040,6 +2140,7 @@ check_force_update()
 # downloads, installs, and restarts if required
 check_version()
 {
+	eval $LOGPS
 	local response='' existsNewer=''
 	local LocalVersion=$( grep -m 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $SCRIPT_HOME/$SCRIPT_NAME | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	
@@ -2078,12 +2179,14 @@ ${S}You are using the latest version of this script.${N}"
 		./$SCRIPT_NAME -r$START_OPTIONS
 		exit 0
 	fi
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger check_version
 
 check_dpkg_update()
 {
+	eval $LOGUS
 	local dpkguf='/var/cache/apt/pkgcache.bin'
 	
 	if [ -f $dpkguf ]
@@ -2092,6 +2195,8 @@ check_dpkg_update()
 	else
 		DPKG_UPDATE="${W}No update file found - Unmodified Install"
 	fi
+	log_function_data "DPKG_UPDATE: $DPKG_UPDATE"
+	eval $LOGUE
 }
 
 ########################################################################
@@ -2102,6 +2207,7 @@ check_dpkg_update()
 # $2 - extra argument, optional
 print_error()
 {
+	eval $LOGUS
 	echo $EBAR
 	case $1 in
 		yn)
@@ -2124,11 +2230,13 @@ print_error()
 			;;
 	esac
 	echo $EBAR
+	eval $LOGUE
 }
 
 # args: $1 lib file
 print_lib_info()
 {
+	eval $LOGUS
 	local scriptText='' printIt=''
 	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$1 | cut -d ' ' -f 2 )
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$1 | cut -d ' ' -f 2-4 )
@@ -2184,10 +2292,13 @@ print_lib_info()
 		echo $MBAR
 		echo "${M}$scriptText ${S}:: Module Version: ${C}$scriptVersion${S} :: Last Updated: ${C}$scriptDate${N}"
 	fi
+	log_function_data "$scriptText :: Module Version: $scriptVersion :: Last Updated: $scriptDate"
+	eval $LOGUE
 }
 
 print_version()
 {
+	eval $LOGPS
 	local distroThanks='crust devil dutchy kelmo latino locsmif paleoflatus piper slh trash80 x-un-i webera zulu9' 
 	local extraMessage="...and welcome Debian users, hope you enjoy $SCRIPT_NAME..."
 	local item=''
@@ -2231,7 +2342,9 @@ print_version()
 		echo " ${M}$SCRIPT_NAME${S} :: version: ${C}$scriptVersion${S} :: last updated: ${C}$scriptDate"
 	fi
 	echo $LINE
-	echo "${S}Your installed version of ${C}Debian $systemBase${S} is: "${C}$distroId${N}
+	echo "${S}Your installed version of ${C}Debian $systemBase${S} is: ${C}$distroId${N}"
+	log_function_data "Installed version of Debian $systemBase is: $distroId"
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger print_version '' ''
@@ -2239,6 +2352,7 @@ print_version()
 # note, this runs after the set 64 bit stuff, and uses some variables set it that function
 print_install_information()
 {
+	eval $LOGPS
 	local AdvancedOptions=''
 	local dpkgUpdate='' dpkgInstall='' 
 	local latestKernel='NO KERNEL DATA'
@@ -2292,6 +2406,15 @@ print_install_information()
 	then
 		print_hec
 	fi
+	log_function_data "Operating system: $BITS bit"
+	log_function_data "CPU: $CPU_NAME"
+	log_function_data "Current kernel version: $currentKernel"
+	log_function_data "Latest kernel: $latestKernel"
+	log_function_data "Last package database update: $DPKG_UPDATE"
+	log_function_data "Last package install or upgrade: $dpkgInstall"
+	log_function_data "Last use of $SCRIPT_NAME: $ScriptLastRun"
+	log_function_data "Last $DU_UPGRADE using $SCRIPT_NAME: $ScriptLastDu"
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger print_install_information
@@ -2346,6 +2469,7 @@ print_hec()
 
 print_distro_id()
 {
+	eval $LOGUS
 	# Note: $DEB is the default if all else fails
 	local knownDistroIds="$SID $ATX $EDI $SMDV $DEB" 
 	local distroFile='' distroId=''
@@ -2366,6 +2490,8 @@ print_distro_id()
 	fi
 	
 	echo $distroId
+	log_function_data "distroId: $distroId"
+	eval $LOGUE
 }
 
 # trigger function for X loaded updates and viewing, or user viewing
@@ -2427,17 +2553,23 @@ print_update_warning_configs()
 # last step in smxi
 print_completed()
 {
+	eval $LOGUS
 	echo 
 	echo $MBAR
 	echo "${M}==== Ok, you are done with the system upgrade. Hope it works. ===="
 	echo $MBAR
 	echo
+	eval $LOGUE
+	exit 0
 }
 print_quit()
 {
+	eval $LOGUS
 	echo $LINE
 	echo "${S}OK, have a good day, thanks for using this script.${N}"
 	echo $LINE
+	eval $LOGUE
+	exit 0
 }
 
 ########################################################################
@@ -2466,6 +2598,7 @@ print_quit()
 
 pre_du_tasks()
 {
+	eval $LOGPS
 	# begin update tasks
 	apt_update_handler 'pre-du'
 	if [ "$SYSTEM_BASE" != 'stable' ]
@@ -2499,15 +2632,17 @@ pre_du_tasks()
 		echo $LINE
 		echo "${S}Finished with the pre-upgrade tasks.${N}"
 	fi
+	eval $LOGPE
 }
 
 # main dist-upgrade/ update etc function
 install_dist_upgrade()
 {
+	eval $LOGMS
 	local prefId='du-connection-drop-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local continue='' repeat='' options='' opt='' ConnectionDropped=''
-	local logfile='' exitStatus=$2 # only for script re-runs, $2 not set first time
+	local exitStatus=$2 # only for script re-runs, $2 not set first time
 	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
@@ -2581,8 +2716,7 @@ install_dist_upgrade()
 		then
 			apt-get $DU_UPGRADE
 		else
-			logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$DU_LOG'du1'
-			apt-get $DU_UPGRADE 2>$logfile 2>&1 | tee $logfile
+			apt-get $DU_UPGRADE 2>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
@@ -2638,8 +2772,7 @@ install_dist_upgrade()
 				then
 					apt-get install -f
 				else
-					logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$INSTALL_F_LOG
-					apt-get install -f 2>$logfile 2>&1 | tee $logfile
+					apt-get install -f 2>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 				fi
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-f $exitStatus
@@ -2651,8 +2784,7 @@ install_dist_upgrade()
 				then
 					apt-get $DU_UPGRADE
 				else
-					logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$DU_LOG'du2'
-					apt-get $DU_UPGRADE 2>$logfile 2>&1 | tee $logfile
+					apt-get $DU_UPGRADE 2>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 				fi
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-2 $exitStatus
@@ -2680,7 +2812,6 @@ install_dist_upgrade()
 			exit)
 				set_hold_install install # in case of exit, make sure to lift hold
 				print_quit
-				exit 0
 				;;
 			*)
 				print_error opt
@@ -2692,6 +2823,7 @@ install_dist_upgrade()
 	trap - INT TERM
 	# run du cleanup etc tasks once user decides to continue, note that
 	# script uses the error numbers to determine which message to display on repeat
+	eval $LOGME
 	if [ "$repeat" == 'true' ]
 	then
 		install_dist_upgrade repeat $exitStatus
@@ -2719,6 +2851,7 @@ du_trap_handler()
 # this will only run if user enters the 'continue' option to avoid looping errors
 post_du_tasks()
 {
+	eval $LOGPS
 	# set the trap here
 	if [ "$SYSTEM_BASE" != 'stable' ]
 	then
@@ -2747,6 +2880,7 @@ post_du_tasks()
 		## take the package(s) off hold if they were set
 		set_hold_install install
 	fi
+	eval $LOGPE
 }
 
 ###---------------------------------------------------------------------
@@ -2757,6 +2891,7 @@ post_du_tasks()
 # args: $1 - pre-du or kernel
 libc6_fix_1()
 {
+	eval $LOGUS
 	#local libc6Version=$( apt-cache policy libc6 | grep -m 2 ':' | egrep '2\.[0-4]' )
 	# for general users I'll update this if needed now and then, but mostly this is
 	# for kernel installs, to avoid the du failure after new kernel
@@ -2783,12 +2918,14 @@ libc6_fix_1()
  			set_sticky_prefs $prefId
  		fi
  	fi
+ 	eval $LOGUE
  	# I'm putting this in here to make sure it has fired at least once pre kernel install
  	busybox_fix_1
 }
 
 busybox_fix_1()
 {
+	eval $LOGUS
 	local prefId='busybox-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	
@@ -2799,10 +2936,12 @@ busybox_fix_1()
 		package_installer 'busybox' 'install-always'
 		set_sticky_prefs $prefId 
 	fi
+	eval $LOGUE
 }
 
 nvidia_sse_alert()
 {
+	eval $LOGUS
 	local isSse=$( grep -io 'sse' /proc/cpuinfo )
 	# for some reason using \s* fails randomly for space test
 	# local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2  )
@@ -2829,9 +2968,10 @@ nvidia_sse_alert()
 		echo "${C}4 - ${S}Get an old used ${C}ATI 7/8/9xxx${S} card that has fine working ${C}xorg drivers."
 		echo
 		echo "${S}Please check the ${C}sidux.com${S} forums, hardware section, for more information on this.${N}"
-		
+		log_function_data "Is sse cpu and nvidia system."
 		print_hec
 	fi
+	eval $LOGUE
 }
 # nvidia_sse_alert
 ###---------------------------------------------------------------------
@@ -2848,6 +2988,7 @@ nvidia_sse_alert()
 # options for post du stuff, selection list
 post_du_options()
 {
+	eval $LOGMS
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
 	local  advanced1Option='' advanced2Option='' initX=''
 	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
@@ -2973,7 +3114,6 @@ post_du_options()
 				;;
 			quit)
 				print_completed
-				exit 0
 				;;
 			*)
 				print_error opt
@@ -2987,6 +3127,7 @@ post_du_options()
 	then
 		post_du_options
 	fi
+	eval $LOGME
 }
 ## DEBUGGER
 #script_debugger post_du_options '' 'EXTRA_OPTIONS="true"' 
@@ -3041,8 +3182,8 @@ print_usage()
 	echo 
 	echo "The following are advanced script options:"
 	echo "${C}-j${S} Turns off all text/output script colors, sets to console/tty default."
-	echo "${C}-l${S} Creates time stamped ${C}l${S}ogs of all update and $DU_UPGRADE data."
-	echo "   Logfiles are located in ${C}$SM_LOG_DIR${S}"
+	echo "${C}-l${S} Turn on ${C}l${S}ogging for update and $DU_UPGRADE data."
+	echo "   Logfile is located here: ${C}$LOG_FILE${S}"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
 	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
@@ -3196,6 +3337,7 @@ fi
 run_script_components()
 {
 	start_up_tests
+	create_log
 	check_display_and_x
 	create_script_files
 	# clean up old and temp files if required

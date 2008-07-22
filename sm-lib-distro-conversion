@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.0.17
-####  Date: July 4 2008
+####  version: 3.0.18
+####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -128,7 +128,6 @@ check_debian()
 				;;
 			quit)
 				print_quit
-				exit 1
 				;;
 			*)
 				print_error opt

@@ -559,8 +559,7 @@ du_gtk_fix_1()
 		then
 			apt-get dist-upgrade
 		else
-			logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$DU_LOG'du-temp'
-			apt-get dist-upgrade 2>$logfile 2>&1 | tee $logfile
+			apt-get dist-upgrade 2>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-temp $exitStatus

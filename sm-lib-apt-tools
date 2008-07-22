@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.14.1
+####  version: 1.15.0
 ####  Date: July 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -36,7 +36,8 @@ CHECK_HOLD_PACKAGES='amule:amule-common elinks:elinks-data gimp-help-common:gimp
 # this replaces all the locally run if present type tests
 package_tester()
 {
-	local item=$1 doWild='+' installType='(hi|ii)' wildFull=''
+	eval $LOGUS
+	local item=$1 doWild='+' installType='(hi|ii)' wildFull='' packageStatus=''
 	
 	case "$2" in
 		wild)
@@ -77,7 +78,10 @@ package_tester()
 	esac
 
 	# note that we need [ \t]+ so that only cases of whitespace after are counted
-	dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}'
+	packageStatus=$( dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}' )
+	echo $packageStatus
+	log_function_data "packageStatus: $packageStatus"
+	eval $LOGUE
 }
 
  
@@ -85,6 +89,7 @@ package_tester()
 # args: $1 - package to test; $2 [optional] - candidate/installed
 check_package_status()
 {
+	eval $LOGUS
 	local packageStatus='' statusType='Candidate:'
 	
 	if [ "$2" == 'installed' ]
@@ -95,6 +100,8 @@ check_package_status()
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageStatus=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
 	
 	echo $packageStatus
+	log_function_data "packageStatus: $packageStatus"
+	eval $LOGUE
 }
 
 # args: $1 package to install; $2 install/install-optional/force-always/force-present
@@ -108,6 +115,7 @@ check_package_status()
 # install-user-ok does not force install, but lets user accept or reject.
 package_installer()
 {
+	eval $LOGUS
 	#local prefId=$3
 	# we can't ever send a null value to sm_pref_tester or it hangs the script
 	#[ -z "$prefId" ] && prefId='no-set'
@@ -216,12 +224,14 @@ package_installer()
 	else
 		return 0
 	fi
+	eval $LOGUE
 }
 
 # simple thing to just install/start package if needed
 # args: $1: package name; $2 - run/optional
 check_install_run_package()
 {
+	eval $LOGUS
 	local packageCheck=$( package_tester $1 )
 	
 	if [ -z "$packageCheck" ]
@@ -234,12 +244,13 @@ check_install_run_package()
 		echo "${S}Starting ${C}$1${S} now...${N}"
 		$1
 	fi
-	
+	eval $LOGUE
 }
 
 # args: $1 - package; $2 - extra args: --purge etc
 package_remover()
 {
+	eval $LOGUS
 	local packageExists='' item='' removeError=0
 	local removeErrorPackage='' packageIsWild=''
 	
@@ -273,15 +284,16 @@ package_remover()
 	else
 		return 0
 	fi
+	eval $LOGUE
 }
 
 # returns error message if required for apt functions
 # arg: $1 du type; $2 return code
 apt_error_handling()
 {
-	local ddurl=$TECH_PATTERNS_DISTRO'du-data?'$1'='$2 options='' opt='' repeat=''
+	eval $LOGUS
+	local options='' opt='' repeat=''
 	local fixText='' pText='' response='' aptUpdate='' distUpgrade=''
-	local upLog=$SM_LOG_DIR'update-error-' logfile=''
 	
 	case $1 in
 		du-1|du-2|du-temp)
@@ -302,9 +314,6 @@ apt_error_handling()
 			error_handler 'value-bad' $FUNCNAME "$installType"
 			;;
 	esac
-
-	# set apt stats
-	wget -T$TIME_OUT -t 2 -q --delete-after $ddurl
 	
 	# mirror update happens pre keys so just ignore errors
 	# don't do for step 1 of keyrings too
@@ -320,8 +329,8 @@ apt_error_handling()
 			print_hec
 		elif [ "$aptUpdate" == 'true' ]
 		then
-			echo "${S}You have 4 options to resolve this issues. If you select 1 or 2, a log file like this:"
-			echo "${C}$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$UPDATE_LOG-up-err1${S} will be created, with current time."
+			echo "${S}You have 4 options to resolve this issues. If you select 1 or 2, the information will"
+			echo "be logged to ${C}$LOG_FILE${S}"
 			echo "${C}1 - apt-get update-no-pdiffs${S} ${M}Recommended${S} Runs update again without pdiffs."
 			echo "    This will fix most update errors except for apt repository offline stuff."
 			echo "${C}2 - apt-get update${S} Runs update again using your current choices."
@@ -360,9 +369,7 @@ apt_error_handling()
 						echo "${S}Continuing without resolving the ${C}update${S} error.${N}"
 						;;
 					quit)
-						echo $LINE
-						echo "${S}Exiting the script now.${N}"
-						exit 0
+						print_quit
 						;;
 					*)
 						print_error opt
@@ -377,6 +384,7 @@ apt_error_handling()
 			fi
 		fi
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -386,6 +394,7 @@ apt_error_handling()
 # args: $1 hold/install/hold-utility - utility is for other uses of this function
 set_hold_install()
 {
+	eval $LOGPS
 	local packageName='' userPackages='' statusD='' packageInstalled='' hoIn='ii'
 	local dhiTemp=''
 	
@@ -396,6 +405,7 @@ set_hold_install()
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
 		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$HOLD_INSTALL
 		DPKG_HOLD_INSTALL="$( cat $HOLD_INSTALL ) $userPackages"
+		log_function_data "DPKG_HOLD_INSTALL: $DPKG_HOLD_INSTALL"
 		if [ -f "$HOLD_INSTALL" ]
 		then
 			rm -f $HOLD_INSTALL
@@ -458,6 +468,7 @@ set_hold_install()
 			DPKG_HOLD_INSTALL="$dhiTemp"
 		fi
 	fi
+	eval $LOGPE
 }
 
 ## DEBUGGER
@@ -467,6 +478,7 @@ set_hold_install()
 # this will get added to the hold stuff.
 broken_dependency_handler()
 {
+	eval $LOGUS
 	local versionNumbers='' packageGroup='' subPackage='' 
 	local package1='' package2='' tempHolder1='' tempHolder2=''
 	local packageInstalled1='' packageInstalled2='' useFull=''
@@ -519,6 +531,7 @@ broken_dependency_handler()
 	done
 	echo 
 	echo "${S}${SPACER}Check of package group version mismatch completed.${N}"
+	eval $LOGUE
 }
 #broken_dependency_handler; exit
 
@@ -526,6 +539,7 @@ broken_dependency_handler()
 # args: $1 - which package group to test
 advanced_broken_dependency_handler()
 {
+	eval $LOGUS
 	local tempOne='' tempTwo='' package='' packages='' packageInstalled1=''
 	local holdList='' packageVersionMismatch=''
 	
@@ -636,6 +650,7 @@ wesnoth-all
 	then
 		echo "${SPACER}${M}You do not appear to have ${C}$packageGroup${M} installed, or it is on hold. Continuing...${N}"
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -647,7 +662,8 @@ wesnoth-all
 # args: $1 - where from;
 apt_update_handler()
 {
-	local logfile='' exitStatus='' aehv='up-du-1' forceUpdate=''
+	eval $LOGUS
+	local exitStatus='' aehv='up-du-1' forceUpdate=''
 	
 	# the forceUpdate flag is for cases where the update must always be
 	# performed to fix or resync system
@@ -697,8 +713,7 @@ apt_update_handler()
 		then
 			apt-get update $NO_PDIFFS
 		else
-			logfile=$SM_LOG_DIR$(date +%Y-%m-%d-%H:%M:%S)$UPDATE_LOG
-			apt-get update $NO_PDIFFS 2>$logfile 2>&1 | tee $logfile
+			apt-get update $NO_PDIFFS 2>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		# get the success/fail exit code of update
 		exitStatus=${PIPESTATUS[0]}
@@ -711,10 +726,12 @@ apt_update_handler()
 		# set this to determine if update should be run again
 		UPDATED='true' 
 	fi
+	eval $LOGUE
 }
 
 install_keyrings()
 {
+	eval $LOGUS
 	local prefId='keyrings-sidux-1'
 	local smPref=$( sm_pref_tester $prefId )
 	
@@ -729,11 +746,12 @@ install_keyrings()
 		# and no need to run this more than once, so we won't
 		set_sticky_prefs $prefId
 	fi
-	
+	eval $LOGUE
 }
 
 update_gpg()
 {
+	eval $LOGUS
 	local prefId='keyrings-update-4'
 	local smPref=$( sm_pref_tester $prefId )
 	
@@ -756,12 +774,14 @@ update_gpg()
 		
 		set_sticky_prefs $prefId
 	fi
+	eval $LOGUE
 }
 #update_gpg
 
 ## Debian mirror switching routines, -m option
 change_debian_mirrors()
 {
+	eval $LOGPS
 	local countryId='' CountryName='' mirror='' opt='' options='' found='' skip='' prefMess=''
 	local debianMirrors='
 	at:Austria
@@ -890,12 +910,14 @@ change_debian_mirrors()
 		echo "in ${C}$EAS${E} that this script can recognize. You will"
 		echo "have to update your ${C}$EAS${E} sources manually.${N}"
 	fi
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger  'change_debian_mirrors prefs'
 
 update_to_nonfree_sources()
 {
+	eval $LOGPS
 	local prefId='update-nonfree-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local response='' i='' counter=''
@@ -958,6 +980,7 @@ update_to_nonfree_sources()
 		echo $LINE
 		echo 
 	fi
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger  update_to_nonfree_sources
@@ -967,6 +990,7 @@ update_to_nonfree_sources()
 # args: $1 - grepSearch; $2 - sourceFile; $3 - sourcesData; $4 - searchIdentifier
 create_apt_source_item()
 {
+	eval $LOGUS
 	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
 	local searchIdentifier=$4
 	
@@ -997,6 +1021,7 @@ create_apt_source_item()
 	else
 		return 1
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -1007,6 +1032,7 @@ create_apt_source_item()
 # screws up, or whatever else might happen, and has.
 force_kernel_mirror_change()
 {
+	eval $LOGPS
 	# core-eu-4:http://ftp.spline.de/pub/sidux/debian/ 
 	local prefId='smxi-kernel-borked-1'
 	local smPref=$( sm_pref_tester $prefId )
@@ -1047,11 +1073,13 @@ force_kernel_mirror_change()
 				;;
 		esac
 	fi
+	eval $LOGUE
 }
 
 # update kernel mirrors, -M option
 change_kernel_mirrors()
 {
+	eval $LOGPS
 	if [ -n "$SIDUX_SOURCES" ]
 	then
 		local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
@@ -1163,6 +1191,7 @@ change_kernel_mirrors()
 		echo "${M}This feature is only available for systems using ${C}sidux${M} sources.${N}"
 		print_hec
 	fi
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger 'change_kernel_mirrors prefs'
@@ -1170,6 +1199,7 @@ change_kernel_mirrors()
 # args: $1 - all/get-them/non-core
 get_sidux_mirrors()
 {
+	eval $LOGUS
 	local siduxMirrors="$( list_sidux_mirrors )"
 	local badSiduxMirrors="$( list_bad_sidux_mirrors )"
 	local noMirrorString='No mirrors were detected that fit the search pattern.'
@@ -1222,11 +1252,13 @@ get_sidux_mirrors()
 	else
 		echo $noMirrorString
 	fi
+	eval $LOGUE
 }
 
 # args: $1 - which mirror to update
 set_sidux_mirror()
 {
+	eval $LOGUS
 	local siduxSources='' siduxSource='' mirrorTemp='' nonCoreSiduxRepo='' isCoreSiduxRepo=''
 	local entryExists='' siduxSpecs='' isSiduxMulti='' siduxTempHolder='' siduxTempRepo=''
 	local updateIt=''
@@ -1340,11 +1372,13 @@ set_sidux_mirror()
 		print_hec
 		return 0
 	fi
+	eval $LOGUE
 }
 
 # bad mirrors for updates:
 list_bad_sidux_mirrors()
 {
+	eval $LOGUS
 	# these are currently either dead or defective: 
 	local badMirrors='
 core-eu-4:http://ftp.spline.de/pub/sidux/debian/
@@ -1353,12 +1387,13 @@ usa-1:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/
 new-zealand-1:ftp://debian.co.nz/Sidux/debian/
 '
 	echo $badMirrors
+	eval $LOGUE
 }
 
 # I want to keep this out of globals, so we'll just echo it to functions
 list_sidux_mirrors()
 {
-	
+	eval $LOGUS
 	local siduxMirrors="
 core-eu-1:http://debian.tu-bs.de/project/sidux/debian/
 core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/
@@ -1380,6 +1415,7 @@ alt-usa-3:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/
 "
 	
 	echo "$siduxMirrors"
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -1390,6 +1426,7 @@ alt-usa-3:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/
 # args: $1 - debian/sidux - optional, to get current sid kernel version if needed
 get_current_apt_kernel()
 {
+	eval $LOGUS
 	local tempKernels='' kernelThird=0
 	local kernel1='' kernel2='' kernel1Greater='' kernelStringExtra='' 
 	local defaultKernel=$1 distro='' currentKernel=''
@@ -1462,9 +1499,11 @@ get_current_apt_kernel()
 		case "$defaultKernel" in
 			debian)
 				CURRENT_DEBIAN_KERNEL=$currentKernel
+				log_function_data "CURRENT_DEBIAN_KERNEL: $CURRENT_DEBIAN_KERNEL"
 				;;
 			sidux)
 				CURRENT_SIDUX_KERNEL=$currentKernel
+				log_function_data "CURRENT_SIDUX_KERNEL: $CURRENT_SIDUX_KERNEL"
 				;;
 		esac
 		
@@ -1472,16 +1511,20 @@ get_current_apt_kernel()
 		if [ "$defaultKernel" == "$DEFAULT_KERNEL" ]
 		then
 			CURRENT_APT_KERNEL=$currentKernel
+			log_function_data ""
 			kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
 			# now just slice out the major version, and add 1 so it's always 1 > than current
 			KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
+			log_function_data "KERNEL_FORCE_DU: $KERNEL_FORCE_DU"
 			# global will handle alert to metapackage users to reboot post du
 			# global will handle alert to metapackage users to reboot post du
 			CURRENT_APT_KERNEL_GRUB=$( grep -is -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
+			log_function_data "CURRENT_APT_KERNEL_GRUB: $CURRENT_APT_KERNEL_GRUB"
 		fi
 	else
 		CURRENT_APT_KERNEL='no-apt-kernel-available'
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -1491,6 +1534,7 @@ get_current_apt_kernel()
 # args: $1 can trigger 'post' test, for running this after initial tests
 test_app_exists()
 {
+	eval $LOGPS
 	local p='' r='' missing='' installApps='' response='' updateError='' appPath='' appExists=''
 	local requiredApps="awk basename bzip2 cat chmod chown cut date egrep gawk gcc grep ln make mkdir perl pidof ps readlink sed sleep sort tar touch unzip wc wget whoami"
 	# dctr is for grep-aptavail
@@ -1540,13 +1584,13 @@ test_app_exists()
 				package_installer "$installApps" 'install-missing'
 				echo "${S}Finished installing missing programs, continuing with script.${N}"
 				;;
-			n)	echo "${S}Ok, exiting script now.${N}"
-				exit 0
+			n)	print_quit
 				;;
 			*)	print_error yn
 				;;
 		esac
-	fi 
+	fi
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger test_app_exists

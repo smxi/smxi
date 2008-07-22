@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.6.6
-####  Date: July 15 2008
+####  version: 2.6.7
+####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
@@ -971,9 +971,10 @@ reboot_now_question()
 		do
 			case $opt in
 				reboot-now)
+					echo $LINE
 					echo "${S}Rebooting now into your new ${C}$1${S} kernel...${N}"
-					print_quit
 					reboot
+					exit 0
 					;;
 				$continueOpt)
 					echo "${S}Continuing on to finish your system maintenance."
@@ -988,7 +989,6 @@ reboot_now_question()
 				quit)
 					echo "${M}Ok, but remember your kernel is not active yet until you reboot.${N}"
 					print_quit
-					exit 0
 					;;
 				*)
 					print_error opt
@@ -1124,7 +1124,6 @@ handle_preexisting_install_directory()
 				;;
 			quit)
 				print_quit
-				exit 0
 				;;
 			*)
 				print_error yn

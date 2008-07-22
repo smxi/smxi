@@ -185,7 +185,6 @@ upgrade_warning()
 				;;
 			quit|q)
 				print_quit
-				exit 0
 				;;
 			*)
 				print_error opt
