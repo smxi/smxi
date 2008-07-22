@@ -917,7 +917,7 @@ change_debian_mirrors()
 
 update_to_nonfree_sources()
 {
-	eval $LOGPS
+	eval $LOGUS
 	local prefId='update-nonfree-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local response='' i='' counter=''
@@ -980,7 +980,7 @@ update_to_nonfree_sources()
 		echo $LINE
 		echo 
 	fi
-	eval $LOGPE
+	eval $LOGUE
 }
 ## DEBUGGER
 #script_debugger  update_to_nonfree_sources

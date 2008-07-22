@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.4
+####  version: 7.90.5
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -270,11 +270,11 @@ KERNEL_POST_DU_INSTALL=''
 LOG_FILE='/var/log/smxi0.log'
 LOG_INDENT=''
 LOGGING_STARTED=''
-LOGMS='log_function_data ms $FUNCNAME "$0"'
+LOGMS='log_function_data ms $FUNCNAME "$( echo $@ )"'
 LOGME='log_function_data me $FUNCNAME'
-LOGPS='log_function_data ps $FUNCNAME "$0"'
+LOGPS='log_function_data ps $FUNCNAME "$( echo $@ )"'
 LOGPE='log_function_data pe $FUNCNAME'
-LOGUS='log_function_data us $FUNCNAME "$0"'
+LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
 LOGUE='log_function_data ue $FUNCNAME'
 MEPIS_SOURCES=''
 PRINT_VERSION=''
@@ -560,7 +560,6 @@ log_function_data()
 		ue)
 			funcInfo="Function: $2 - Utility: End"
 			# slice out zero or one spacer element to reset tabbing for nesting
-			adjust_log_indent 'remove'
 			;;
 	esac
 	
@@ -571,7 +570,7 @@ log_function_data()
 		log_writer "$1"
 	fi
 	
-	if [ -n "$3" ]
+	if [ -n "$3" -a "$3" != "$SCRIPT_HOME/$SCRIPT_NAME" ]
 	then
 		log_writer "Func Args: $3"
 	fi
@@ -586,7 +585,7 @@ adjust_log_indent()
 			;;
 		remove)
 			# trim off one spacer block only to drop one indent level
-			LOG_INDENT="$( echo ''${LOG_INDENT}'' | sed 's/[:spacer:][:spacer:]//' )"
+			LOG_INDENT="$( echo "${LOG_INDENT}" | sed s/[\ ][\ ]// )"
 			;;
 	esac
 }
