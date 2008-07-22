@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.0.1
+####  version: 8.0.2
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -637,7 +637,7 @@ create_log()
 # arguments: $1 which lib/module file; $2 and $3 are options for run module
 run_script_import()
 {
-	eval $LOGPS
+	eval $LOGUS
 	local loadIt='' runIt='' options='' noTestDownloadOnly=''
 	
 	case $1 in
@@ -790,7 +790,7 @@ run_script_import()
 		test_version_info $1 'chm'
 		DISPLAY= ./$1 $options # run module
 	fi
-	eval $LOGPE
+	eval $LOGUE
 }
 
 # arg: $1 is which file to test; $2 is if chmod or not

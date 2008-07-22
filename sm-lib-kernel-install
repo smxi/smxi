@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.7.3
+####  version: 2.7.4
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1205,7 +1205,7 @@ print_module_list()
 	"
 	
 	echo "$availableModules"
-	eval $LOGUS
+	eval $LOGUE
 }
 # args: $1 kernel install version; $2 - which module madwifi/ndiswrapper
 extra_module_installer()
