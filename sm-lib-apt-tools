@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.0
-####  Date: July 19 2008
+####  version: 1.15.1
+####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1511,7 +1511,7 @@ get_current_apt_kernel()
 		if [ "$defaultKernel" == "$DEFAULT_KERNEL" ]
 		then
 			CURRENT_APT_KERNEL=$currentKernel
-			log_function_data ""
+			log_function_data "CURRENT_APT_KERNEL: $CURRENT_APT_KERNEL"
 			kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
 			# now just slice out the major version, and add 1 so it's always 1 > than current
 			KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
