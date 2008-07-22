@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.0.18
+####  version: 3.1.0
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -26,6 +26,7 @@
 # args: $1 - repeat
 check_debian()
 {
+	eval $LOGMS
 	local opt='' options='' repeat='' optionSet='debian'
 	local conversionOptions='sidux-sources sidux-conversion'
 	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
@@ -141,19 +142,23 @@ check_debian()
 	then
 		check_debian 'repeat'
 	fi
+	eval $LOGME
 }
 
 print_conversion_information()
 {
+	eval $LOGUS
 	echo $MLINE
 	echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will bring your system into sync."
 	echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux conversion is completed!"
 	echo ""
 	print_hec
+	eval $LOGUE
 }
 
 install_window_manager()
 {
+	eval $LOGUS
 	echo $MBAR
 	echo "${M}Window manager install process"
 	echo $LINE
@@ -163,10 +168,12 @@ install_window_manager()
 	echo "display manager. For older installs I recommend ${C}xfce${S} or ${C}fvwm crystal${S}.${N}"
 	print_hec
 	set_sticky_prefs debian-to-sidux-wm-1
+	eval $LOGUE
 }
 
 install_sidux_components()
 {
+	eval $LOGPS
 	local prefId='install-sidux-packages-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local siduxPackages='configure-cups configure-dsl configure-gprs configure-isdn configure-ndiswrapper ceni deborphan distro-defaults etcskel-sidux gfxboot-theme-sidux gpm infobash sidux-irc sidux-kernelhacking sidux-keyrings sidux-scripts udev-config-sidux wodim'
@@ -194,6 +201,7 @@ install_sidux_components()
 		echo "${S}Finished installing ${C}sidux${S} packages.${N}"
 		set_sticky_prefs $prefId
 	fi
+	eval $LOGPE
 }
 
 # this one needs work, not currently functioning
@@ -246,12 +254,15 @@ sidux_graphics_legacy()
 
 update_smxi_data()
 {
+	eval $LOGPS
 	distro_number_calculator
 	set_distro_version # just in case user exits, we'll still have the level set
+	eval $LOGPE
 }
 
 set_distro_version()
 {
+	eval $LOGPS
 	local repeat='' opt=''
 	
 	local distros='
@@ -300,16 +311,19 @@ set_distro_version()
 	then
 		write_smdv_file 'anti-x'
 	fi
+	eval $LOGPE
 }
 
 # args: $1 which smdv type
 write_smdv_file()
 {
+	eval $LOGUS
 	local timeStamp=$( date +%Y%m%d ) fullIdString=''
 	
 	fullIdString="$1:sc:$timeStamp"
 	echo $fullIdString > $SMDV
 	DISTRO_VERSION=$fullIdString
+	eval $LOGUE
 }
 
 # this is going to just make a rough working guess to avoid running ALL fixes
@@ -317,6 +331,7 @@ write_smdv_file()
 # arrangement: <year>:<last quarter month number>:<distro equivalent>
 distro_number_calculator()
 {
+	eval $LOGUS
 	local year=$( date +%Y )
 	local month=$( date +%m )
 	local distroYear='' distroMonth='' distroLevel='' item='' assembled=''
@@ -360,12 +375,15 @@ distro_number_calculator()
 		# set the distro level id number now
 		echo $distroLevel > $SMDL
 		DISTRO_LEVEL=$distroLevel
+		log_function_data "DISTRO_LEVEL: $DISTRO_LEVEL"
 	fi
+	eval $LOGUE
 }
 
 # args: $1 - which source update
 update_to_new_sources()
 {
+	eval $LOGUS
 	local grepSearch=''
 	local searchIdentifier=''
 	local sourceFile=''
@@ -404,10 +422,12 @@ update_to_new_sources()
 
 	# we need to set the SIDUX_SOURCES global now to make sure it's correct
 	set_distro_data
+	eval $LOGUE
 }
 
 tweak_antix_vb_source()
 {
+	eval $LOGUS
 	local fixVB=$( egrep '^deb[[:space:]].*virtualbox.*' $EAS )
 	
 	if [ -n "$fixVB" ]
@@ -415,10 +435,12 @@ tweak_antix_vb_source()
 		echo "${S}Commenting out broken virtualbox repo ...${N}"
 		sed -i -r 's%^(deb[[:space:]].*virtualbox.*)%##\1%g' $EAS
 	fi
+	eval $LOGUE
 }
 
 tweak_antix_sources()
 {
+	eval $LOGUS
 	local fixDM=$( egrep '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
 	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
 	local doUpdate=''
@@ -438,11 +460,13 @@ tweak_antix_sources()
 	tweak_antix_vb_source
 	
 	update_completion_handler "$doUpdate" 'anti-X unstable'
+	eval $LOGUE
 }
 
 # args: $1 - doUpdate; $2 - which update
 update_completion_handler()
 {
+	eval $LOGUS
 	local doUpdate=$1 whichUpdate=$2
 	
 	if [ "$doUpdate" == 'true' ]
@@ -452,13 +476,17 @@ update_completion_handler()
 		apt_update_handler 'distro-conversion'
 	else
 		echo "$SPACER${M}You already appear to have ${C}$whichUpdate${M} sources installed, continuing...${N}"
+		log_function_data "Sources already installed: $whichUpdate"
 	fi
+	eval $LOGUE
 }
 
 antix_fix_1()
 {
+	eval $LOGPS
 	run_script_import $LIB_2008_FIXES
 	libavutil_fix_1
+	eval $LOGPE
 }
 
 ###**EOF**###
