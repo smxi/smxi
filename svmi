@@ -623,6 +623,7 @@ create_log()
 	# check and create logfile:
 	touch $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
