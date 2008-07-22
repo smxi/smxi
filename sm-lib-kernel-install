@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.6.7
+####  version: 2.7.0
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -37,6 +37,7 @@
 # 32 or 64 bit is selected automatically, otherwise the user can do what they want
 advanced_kernel_install()
 {
+	eval $LOGPS
 	local kernel='' options='' opt='' userSelection=''
 	local text_1='' text_2=''  rcMessage='' altKernelOption='' altKernelText1=''
 	local optionList='' listCount='' 
@@ -162,11 +163,13 @@ advanced_kernel_install()
 			double_check_kernel advanced
 			;;
 	esac
+	eval $LOGPE
 }
 
 # args: $1 - advanced/apt/apt-debian
 double_check_kernel()
 {
+	eval $LOGPS
 	local repeat='' options='' opt='' kernelFile='' extraText=''
 	
 	case $1 in
@@ -260,6 +263,7 @@ double_check_kernel()
 	else
 		error_handler 'null-kernel-file-data' "$FUNCNAME" "$1" 
 	fi
+	eval $LOGPE
 }
 # kernel_question
 #check_kernel
@@ -271,6 +275,7 @@ double_check_kernel()
 # args: $1 prefs/standard
 kernel_meta_package_handler()
 {
+	eval $LOGPS
 	if [ -n "$SIDUX_SOURCES" ]
 	then
 		local metaExists=$( package_tester 'linux-image-2.6-sidux-' 'wild-full' )
@@ -364,7 +369,6 @@ kernel_meta_package_handler()
 					update_grub
 					install_apt_kernel_modules 'meta-sidux'
 					extra_module_installer $CURRENT_APT_KERNEL 'madwifi'
-					kernel_data $linuxImage
 					post_install_messages
 					reboot_now_question $CURRENT_APT_KERNEL
 					;;
@@ -405,25 +409,28 @@ kernel_meta_package_handler()
 		echo "${M}This feature is currently only available for systems using ${C}sidux${M} sources and kernels.${N}"
 		print_hec
 	fi
+	eval $LOGPE
 }
 
 remove_kernel_metapackages()
 {
+	eval $LOGUS
 	local metaPackageList=$( package_tester '2.6-sidux-' 'wild-full' )
 	
 	if [ -n "$metaPackageList" ]
 	then
-		kernel_data 'remove-metapackages'
 		package_remover "$metaPackageList" '--purge --yes'
 	else
 		echo $ELINE
 		echo "${E}There are no kernel meta packages installed, so none were removed.${N}"
 		print_hec
 	fi
+	eval $LOGUE
 }
 
 set_metapackage_prefs()
 {
+	eval $LOGUS
 	local prefId='kernel-metapackage-1' 
 	local smPref=$( sm_pref_tester $prefId )
 
@@ -431,12 +438,15 @@ set_metapackage_prefs()
 	then
 		set_sticky_prefs $prefId
 	fi
+	eval $LOGUE
 }
 
 # args: $1 manual/automatic
 set_metapackage_selections()
 {
+	eval $LOGUS
 	set_sm_pref_values 'meta-package-selection' "$1"
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -447,6 +457,7 @@ set_metapackage_selections()
 # args: $1 debian/sidux
 install_apt_kernel()
 {
+	eval $LOGPS
 	local currentAptKernel=''
 	
 	case "$1" in
@@ -465,7 +476,6 @@ install_apt_kernel()
 	libc6_fix_1 'kernel'
 	backup_grub
 	install_the_apt_kernel $currentAptKernel
-	kernel_data $currentAptKernel
 	update_kernel_links $currentAptKernel # must run prior to update_grub
 	update_grub
 	install_apt_kernel_modules 'standard' $currentAptKernel
@@ -480,18 +490,21 @@ install_apt_kernel()
 	copy_debs_to_install_directory $currentAptKernel
 	post_install_messages
 	reboot_now_question $currentAptKernel
+	eval $LOGPE
 }
 
 # the actual first step install
 # args: $1 - kernel version to install
 install_the_apt_kernel()
 {
+	eval $LOGUS
 	local kernelImage="linux-image-$1"
 	local kernelHeaders="linux-headers-$1"
 	
 	echo $LINE
 	echo "${S}Installing your new ${C}$1${S} kernel now...${N}"
 	package_installer "$kernelHeaders $kernelImage" 'install-user'
+	eval $LOGUE
 }
 
 # now loop through and install all running modules for new kernel
@@ -499,6 +512,7 @@ install_the_apt_kernel()
 # add: tp-smapi- r5u870- eeepc-acpi- qc-usb- sfc- rfswitch-
 install_apt_kernel_modules()
 {
+	eval $LOGUS
 	local supportedModules='acer_acpi acerhk acx atl2 aufs av5100 btrfs eeepc_acpi et131x fsam7400 gspca kqemu ndiswrapper omnibook qc_usb quickcam r5u870 rfswitch sfc sqlzma squashfs tp_smapi vboxadd vboxdrv'
 	local module='' modulePath='' modulePackage='' moduleType='' kernelArch='686'
 	local extraModuleText=''
@@ -544,11 +558,13 @@ install_apt_kernel_modules()
 			fi
 		fi
 	done
+	eval $LOGUE
 }
 
 # args: $1 - module package name; $2 - triggered from auto/manual mode
 install_the_apt_kernel_module()
 {
+	eval $LOGUS
 	local modulePackage=$1 noModuleText=''
 	local moduleExists=$( grep-aptavail -PX "$modulePackage" )
 	local moduleOutputName=$( egrep -o '.*-modules' <<< $modulePackage )
@@ -580,6 +596,7 @@ install_the_apt_kernel_module()
 		echo
 		echo "$SPACER${M}$noModuleText: ${C}$moduleOutputName${M} is  not in apt currently.${N}"
 	fi
+	eval $LOGUE
 }
 
 # this will sync the kernel download directory module debs with the sidux ones.
@@ -587,6 +604,7 @@ install_the_apt_kernel_module()
 # args: $1 - kernel name
 download_remaining_module_debs()
 {
+	eval $LOGUS
 	# not current: acx100- redhat-cluster-modules- loop-aes-modules-
 	local module='' missingModules='' missingModule=''
 	local availableModules="$( print_module_list )"
@@ -624,12 +642,14 @@ download_remaining_module_debs()
 # 		done
 		echo "${S}This is not that important, not all modules are available always.${N}"
 	fi
+	eval $LOGUE
 }
 
 # copy over all installed kernel debs to kernel download directory
 # args: $1 - kernel version
 copy_debs_to_install_directory()
 {
+	eval $LOGUS
 	# this handles both 2.6.24-2.6.24-3 and 2.6.25-3 syntax
 	local kernelBase=$( echo $1 | cut -d '-' -f 1-2 )
 	local installDirectory="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY"
@@ -638,6 +658,7 @@ copy_debs_to_install_directory()
 	echo "${S}Transfering kernel/module debs to kernel install directory: ${C}$installDirectory${N}"
 	cp /var/cache/apt/archives/*${kernelBase}*.deb $installDirectory
 	echo "${S}Kernel/module debs transferred.${N}"
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -646,6 +667,7 @@ copy_debs_to_install_directory()
 
 update_kernel()
 {
+	eval $LOGPS
 	local FullFileName='' skipWget='' proceedNormally=0 # default: true
 	local installSidux='install-kernel-sidux.sh' kernelFailed='' download3Failed='' 
 	
@@ -679,10 +701,6 @@ update_kernel()
 	else 
 		# careful with the logic here, it's only in the case where the final download failed
 		# flag is not set that we will count the download as a success
-		if [ "$download3Failed" != 'true' ]
-		then
-			kernel_data $KERNEL_FILE
-		fi
 		# run a cyclic redundancy check on the zip file first
 		echo "${S}Testing integrity of downloaded kernel zip installer file ${C}$FullFileName${S}...${N}"
 		unzip -t $FullFileName &> /dev/null || error_handler 'kernel-zip-corrupted' $FUNCNAME $FullFileName
@@ -724,11 +742,13 @@ update_kernel()
 			error_handler 'kernel-zip-installer-missing' $FUNCNAME
 		fi
 	fi
+	eval $LOGPE
 }
 
 # args: $1 - full Kernel file Name
 download_kernel()
 {
+	eval $LOGUS
 	local FullFileName=$1 kernelDownloadPath=''
 	local downloadFailed='' download2Failed='' download3Failed='' 
 	local isAlt='' altString='heanet.ie' isTech='' isTechString='techpatterns.com'
@@ -749,16 +769,18 @@ download_kernel()
 		echo "${E}could not be accessed, or it doesn't have the kernel you requested."
 		echo
 		echo "${S}If kernel has not been previously downloaded here, the script will exit.${N}"
-		
+		eval $LOGUE
 		# create return values
 		return 1 # 1 on error, that is
 	else
+		eval $LOGUE
 		return 0 # and 0 for success, as normal for bash
 	fi
 }
 
 post_kernel_install_steps()
 {
+	eval $LOGPS
 	local realKernelVersion=$( get_real_kernel_version )
 	
 	echo $LINE
@@ -774,10 +796,12 @@ post_kernel_install_steps()
 	post_install_messages
 	# then we're ready to reboot
 	reboot_now_question $realKernelVersion
+	eval $LOGPE
 }
 
 get_real_kernel_version()
 {
+	eval $LOGUS
 	# we need to first extract the new naming schema:
 	local installSidux='install-kernel-sidux.sh'
 	local installFile="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installSidux"
@@ -798,6 +822,8 @@ get_real_kernel_version()
 	fi
 	# return the string value
 	echo $kernelString
+	log_function_data "kernelString: $kernelString"
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -807,6 +833,7 @@ get_real_kernel_version()
 # this is a temp fix to handle the break in sidux kernel install as of 2.6.25.11
 sidux_devicemap_fix_1()
 {
+	eval $LOGUS
 	local dMap='/boot/grub/device.map'
 	local isHdx=$( grep '/dev/hd' $dMap )
 	
@@ -816,12 +843,14 @@ sidux_devicemap_fix_1()
 		echo "${S}Updating ${C}$dMap${S} to change all /dev/hdx to /dev/sdx...${N}"
 		sed -i 's|/dev/hd|/dev/sd|' $dMap
 	fi
+	eval $LOGUE
 }
 
 # just in case we'll confirm this here
 # args: $1 installing kernel
 update_kernel_links()
 {
+	eval $LOGUS
 	local uir='' installKernel=$1
 	
 	if [ -n "$1" ] # protect here to avoid major errors
@@ -882,10 +911,12 @@ update_kernel_links()
 	else
 		error_handler 'value-null' $FUNCNAME '$1'
 	fi
+	eval $LOGUE
 }
 
 update_grub()
 {
+	eval $LOGUS
 	if [ -f $GRUB_PATH ] # handles cases where user might have lilo
 	then
 		echo $LINE
@@ -893,10 +924,12 @@ update_grub()
 		update-grub
 		echo "${C}update-grub${S} completed.${N}"
 	fi
+	eval $LOGUE
 }
 
 backup_grub()
 {
+	eval $LOGUS
 	echo $LINE
 	echo "${S}Backing up ${C}$GRUB_PATH"
 	if [ ! -f $GRUB_BU_PATH ]
@@ -907,12 +940,14 @@ backup_grub()
 		echo "${E}You have already created a backup copy of ${C}$GRUB_PATH${E} today."
 		echo "${S}The backup copy is found here: ${C}$GRUB_BU_PATH${S}.${N}"
 	fi
+	eval $LOGUE
 }
 
 post_install_messages()
 {
+	eval $LOGUS
 	local driverReinstall=$( nonfree_driver_reinstall )
-	
+	log_function_data "driverReinstall: $driverReinstall"
 	# note: latino idea: m-a --text-mode --non-inter -l "${VER}" a-i fglrx 
 	if [ -n "$driverReinstall" ]
 	then
@@ -924,11 +959,13 @@ post_install_messages()
 		echo "or you can do it manually, with ${C}sgfxi -K <your new kernel name> <other  options>${S}${N}"
 		print_hec
 	fi
+	eval $LOGUE
 }
 
 # args: $1 - which kernel was installed; $2 - non free info
 reboot_now_question()
 {
+	eval $LOGPS
 	local driverReinstall=$( nonfree_driver_reinstall )
 	local continueOpt='continue' nonfreeText='' altText2='' altText1=''
  
@@ -951,6 +988,7 @@ reboot_now_question()
 	echo $MLINE
 	echo "${M}KERNEL INSTALL COMPLETE"
 	echo $MLINE
+	log_function_data "KERNEL_EQUAL_INSTALL: $KERNEL_EQUAL_INSTALL"
 	
 	if [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
 	then
@@ -973,6 +1011,7 @@ reboot_now_question()
 				reboot-now)
 					echo $LINE
 					echo "${S}Rebooting now into your new ${C}$1${S} kernel...${N}"
+					eval $LOGPE
 					reboot
 					exit 0
 					;;
@@ -980,11 +1019,7 @@ reboot_now_question()
 					echo "${S}Continuing on to finish your system maintenance."
 					echo "${M}Remember your new kernel will not be active until you reboot.${N}"
 					KERNEL_INSTALL_TO=$1
-					if [ "$TESTING" == 'true' ]
-					then
-						echo kernelToInstall: $KERNEL_INSTALL_TO
-						print_hec
-					fi
+					log_function_data "KERNEL_INSTALL_TO: $KERNEL_INSTALL_TO"
 					;;
 				quit)
 					echo "${M}Ok, but remember your kernel is not active yet until you reboot.${N}"
@@ -1009,11 +1044,13 @@ reboot_now_question()
 		echo "${S}Feel free to continue on doing things in ${C}$SCRIPT_NAME${S} if you want.${N}"
 		print_hec
 	fi
+	eval $LOGPS
 }
 
 # returns driver or null if no nonfree used
 nonfree_driver_reinstall()
 {
+	eval $LOGUS
 	local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
 	local isFglrx=$( egrep -io 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
 	local driverReinstall=''
@@ -1028,22 +1065,18 @@ nonfree_driver_reinstall()
 	fi
 	
 	echo $driverReinstall
-}
-
-# args: $1 - kernel string
-kernel_data()
-{
-	local kernelCounter=$TECH_PATTERNS_DISTRO'du-data?kernel='$1
-	wget  -T$TIME_OUT -t 2 -q --delete-after $kernelCounter			
+	log_function_data "driverReinstall: $driverReinstall"
+	eval $LOGUE
 }
 
 # args: $1 - $KERNEL_FILE/installed kernel
 create_kernel_install_directory()
 {
+	eval $LOGUS
 	local directoryAction=0
 	
 	KERNEL_INSTALL_DIRECTORY=$( normalize_kernel_string $1 )
-	
+	log_function_data "KERNEL_INSTALL_DIRECTORY: $KERNEL_INSTALL_DIRECTORY"
 	echo $LINE
 	echo "${S}Please note!! The kernel install directory will be located here:" 
 	echo "${C}$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY${N}"
@@ -1063,13 +1096,14 @@ create_kernel_install_directory()
 		directoryAction="$?" # 0 for mv/rm, 1 for use, 2 for use no unzip
 	fi
 	cd $KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY
-	
+	eval $LOGUE
 	return $directoryAction
 }
 
 # args: $1 which directory
 handle_preexisting_install_directory()
 {
+	eval $LOGUS
 	local opt=''
 	local olddirectory=$KERNEL_DIRECTORY/$1
 	local newdirectory="$olddirectory-$(date +%y-%m-%d)"
@@ -1101,6 +1135,7 @@ handle_preexisting_install_directory()
 				echo "${C}$olddirectory${S} has been removed. Continuing with kernel install.${N}"
 				mkdir $olddirectory
 				echo "${S}Created new empty directory: ${C}$olddirectory${N}"
+				eval $LOGUE
 				return 0
 				;;
 			rename-directory)
@@ -1110,16 +1145,19 @@ handle_preexisting_install_directory()
 				echo "${S}Directory renamed"${N}
 				mkdir $olddirectory
 				echo "${S}Created new empty directory: ${C}$olddirectory${N}"
+				eval $LOGUE
 				return 0
 				;;
 			use-directory)
 				echo "${M}Ok, using the current install directory: ${C}$olddirectory"
 				echo "${S}Hopefully it contains the kernel download zip file.${N}"
+				eval $LOGUE
 				return 1
 				;;
 			use-directory-no-unzip)
 				echo "${M}Ok, using the current install directory:  ${C}$olddirectory"
 				echo "without unzipping kernel file.${N}"
+				eval $LOGUE
 				return 2
 				;;
 			quit)
@@ -1138,6 +1176,7 @@ handle_preexisting_install_directory()
 # stuff re module installer options.
 print_module_list()
 {
+	eval $LOGUS
 	local availableModules="
 	acer-acpi-modules-
 	acerhk-modules-
@@ -1164,10 +1203,12 @@ print_module_list()
 	"
 	
 	echo "$availableModules"
+	eval $LOGUS
 }
 # args: $1 kernel install version; $2 - which module madwifi/ndiswrapper
 extra_module_installer()
 {
+	eval $LOGUS
 	local kernelVersion=$1 moduleName=$2 argMissing=''
 	local filename='' tarball='' module='' message='' extra='' buildFailed=0
 	
@@ -1238,6 +1279,7 @@ extra_module_installer()
 		fi
 		error_handler 'value-null' $FUNCNAME "$argMissing"
 	fi
+	eval $LOGUE
 }
 
 
