@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.0
+####  version: 7.90.1
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -499,10 +499,10 @@ error_handler()
 	errorMessage="$errorMessage\n${LOG_INDENT}${M}Error No: ${C}$errorCode ${M}- Function: ${C}$errorFunction"
 	errorPrintMessage="$errorLine${errorColor}$errorMessage$errorLine${N}"
 	# strip out the spacer stuff for output if required, not testing null gives sed error
-	if [ "$LOG_INDENT" != '' -a "$LOG_INDENT" != ' '  ]
-	then
-		errorPrintMessage=$( echo "$errorPrintMessage" | sed "s/$LOG_INDENT//g" )
-	fi
+# 	if [ "$LOG_INDENT" != '' -a "$LOG_INDENT" != ' '  ]
+# 	then
+# 		errorPrintMessage=$( echo "$errorPrintMessage" | sed "s/$LOG_INDENT//g" )
+# 	fi
 	
 	echo -e "$errorPrintMessage"
 
@@ -586,7 +586,7 @@ adjust_log_indent()
 			;;
 		remove)
 			# trim off one spacer block only to drop one indent level
-			LOG_INDENT="$( echo ''${LOG_INDENT}'' | sed 's/'${SPACER}'//' )"
+			LOG_INDENT="$( echo ''${LOG_INDENT}'' | sed 's/[:spacer:][:spacer:]//' )"
 			;;
 	esac
 }
