@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.9
+####  version: 7.90.10
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -619,6 +619,7 @@ create_log()
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
+	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
 	echo "Start Install log:" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
