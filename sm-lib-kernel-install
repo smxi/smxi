@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.7.4
+####  version: 2.7.5
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -194,6 +194,8 @@ double_check_kernel()
 			extraText='sidux archived'
 			;;
 	esac
+	
+	log_function_data "Kernel Install Selection: $extraText $kernelFile"
 	
 	if [ -n "$kernelFile" ]
 	then
