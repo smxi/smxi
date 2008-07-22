@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.0.5
+####  version: 8.0.6
 ####  Date: July 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -156,6 +156,7 @@ LOGIN_PID=$( echo $LOGIN_PID | grep -o "[0-9]*" )
 # script paths
 SCRIPT_HOME='/usr/local/bin'
 SCRIPT_NAME=$( basename $0 )
+SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
 VERSION_INFO='sm-versions'
 WARNING_STATUS='status'
 WARNING_BODY='warning_message'
@@ -611,9 +612,12 @@ log_writer()
 create_log() 
 {
 	local scriptVersion=$( grep 'version:' $SCRIPT_NAME | grep -o "[0-9]*\.[0-9]*\.[0-9]*" )
-	
-	# check and create logfile:
-	touch $LOG_FILE
+	touch $LOG_FILE # make one for logrotate if null
+	if [ -n "$( which logrotate )" ]
+	then
+		logrotate $SCRIPT_ROTATE
+	fi
+	touch $LOG_FILE # and if rotated, make a new one
 	echo "=========================================================" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
@@ -621,7 +625,7 @@ create_log()
 	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
-	echo "Start Install log:" >> $LOG_FILE
+	echo "Start $SCRIPT_NAME log:" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
 	
 	LOGGING_STARTED='true'
@@ -1253,6 +1257,14 @@ create_script_files()
 	if [ -f $EASMS ]
 	then
 		mv $EASMS $EASSL
+	fi
+	if [ ! -f $SCRIPT_ROTATE ]
+	then
+		echo "$LOG_FILE {
+	rotate 2
+	size 200k
+}
+" > $SCRIPT_ROTATE
 	fi
 	eval $LOGPE
 	# rename directories to new syntax

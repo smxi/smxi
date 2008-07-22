@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.2
-####  Date: July 21 2008
+####  version: 3.3.3
+####  Date: July 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -166,7 +166,7 @@ DEBIAN_FGLRX='debian-fglrx'
 DEBIAN_NVIDIA='debian-nvidia'
 
 LOG_FILE_DIR="/var/log/sgfxi/"
-LOG_FILE=$( date +%Y-%m-%d-%H:%M:%S )'-sgfxi.log'
+LOG_FILE='sgfxi.log'
 LOGGING_STARTED=''
 LOGPS='log_function_data ps $FUNCNAME "$( echo $@ )"'
 LOGPE='log_function_data pe $FUNCNAME'
@@ -174,6 +174,7 @@ LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
 LOGUE='log_function_data ue $FUNCNAME'
 
 SCRIPT_NAME='sgfxi'
+SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
 
 EXPERIMENTAL_XORG_ATI='xserver-xorg-video-ati_6.6.193-1'
 EXPERIMENTAL_LIBDRM2='libdrm2_2.4.0~git20070625-1'
@@ -418,7 +419,7 @@ error_handler()
 	then
 		log_function_data "$ErrorMessage"
 		echo
-		echo "${B}Time stamped error logs are located here: $LOG_FILE"
+		echo "${B}Log file is located here: $LOG_FILE"
 	fi
 	echo "${M}Exiting script now.${N}"
 	
@@ -1104,7 +1105,20 @@ create_log()
 	fi
 	# check and create logfile:
 	LOG_FILE=$LOG_FILE_DIR$LOG_FILE
-	touch $LOG_FILE
+	
+	if [ ! -f $SCRIPT_ROTATE ]
+	then
+		echo "$LOG_FILE {
+	rotate 12
+}	
+" > $SCRIPT_ROTATE
+	fi
+	touch $LOG_FILE # make sure there's one there for rotate to look at
+	if [ -n "$( which logrotate )" ]
+	then
+		logrotate $SCRIPT_ROTATE
+	fi
+	touch $LOG_FILE # and if rotated, need a new one
 	echo "=======================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
 	echo "Video Card Information:$cardString" >> $LOG_FILE

@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.3.0
-####  Date: July 21 2008
+####  version: 1.3.1
+####  Date: July 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -150,6 +150,7 @@ LOGPE='log_function_data pe $FUNCNAME'
 LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
 LOGUE='log_function_data ue $FUNCNAME'
 LOGGING_STARTED='' # this will flag to avoid logging for pre log errors like no root
+SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
 
 # miscellaneous settings
 TIME_OUT=25
@@ -327,7 +328,7 @@ error_handler()
 	then
 		log_function_data "$ErrorMessage"
 		echo
-		echo "${S}Time stamped error logs are located here: $LOG_FILE"
+		echo "${S}Log file is located here: $LOG_FILE"
 	fi
 	echo "${M}Exiting script now.${N}"
 	
@@ -620,15 +621,27 @@ create_log()
 {
 	local svmiVersion=$( grep 'version:' $SCRIPT_NAME | grep -o "[0-9]*\.[0-9]*\.[0-9]*" )
 	
-	# check and create logfile:
-	touch $LOG_FILE
+	if [ ! -f $SCRIPT_ROTATE ]
+	then
+		echo "$LOG_FILE {
+	rotate 1
+	size 100k
+}	
+" > $SCRIPT_ROTATE
+	fi
+	touch $LOG_FILE # make sure there's one there for rotate to look at
+	if [ -n "$( which logrotate )" ]
+	then
+		logrotate $SCRIPT_ROTATE
+	fi
+	touch $LOG_FILE # and if rotated, need a new one
 	echo "=========================================================" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
-	echo "Start Install log:" >> $LOG_FILE
+	echo "Start $SCRIPT_NAME log:" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
 	
 	LOGGING_STARTED='true'
