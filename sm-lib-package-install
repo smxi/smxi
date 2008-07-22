@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.9.0
+####  version: 2.9.1
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -260,12 +260,11 @@ select_install_type()
 		esac
 		break
 	done
-	
+	eval $LOGME
 	if [ "$repeat" == 'true' ]
 	then
 		select_install_type
 	fi
-	eval $LOGME
 }
 
 # install office suites, languages packs, etc
@@ -327,12 +326,11 @@ office_installer()
 		esac
 		break
 	done
-	
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		office_installer
 	fi
-	eval $LOGPE
 }
 
 # main selector, pick which package group type to install
@@ -428,12 +426,11 @@ non_free_installer()
 		esac
 		break
 	done
-	
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		non_free_installer
 	fi
-	eval $LOGPE
 }
 #katapult (personally) and kshutdown yakuake
 # various utilities
@@ -541,12 +538,11 @@ utilities_installer()
 		esac
 		break
 	done
-	
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		utilities_installer
 	fi
-	eval $LOGPE
 }
 
 display_manager_installer()
@@ -672,12 +668,11 @@ display_manager_installer()
 		esac
 		break
 	done
-	
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		display_manager_installer
 	fi
-	eval $LOGPE
 }
 
 select_display_manager()
@@ -734,7 +729,7 @@ select_display_manager()
 			esac
 			break
 		done
-		
+		eval $LOGPE
 		if [ "$repeat" == 'true' ]
 		then
 			select_display_manager
@@ -742,8 +737,8 @@ select_display_manager()
 	else
 		echo "${S}Your system already has a default display manager: ${C}$displayManager${N}"
 		print_hec
+		eval $LOGPE
 	fi
-	eval $LOGPE
 }
 
 # returns proper dm to use in installer function
@@ -912,11 +907,12 @@ install_openoffice()
 		else
 			echo "${S}Continuing on to main script without installing OpenOffice.org.${N}"
 		fi
+		eval $LOGPE
 	else
+		eval $LOGPE
 		print_error opt
 		install_openoffice
 	fi
-	eval $LOGPE
 }
 #install_openoffice
 
@@ -1216,7 +1212,6 @@ swiftfox_installer()
 	
 	if [ "$found" == 'true' ]
 	then
-
 		if [ "$skip" != 'true' ]
 		then
 			update_sources swiftfox
@@ -1226,11 +1221,12 @@ swiftfox_installer()
 			echo $LINE
 			echo "${S}Returning to main script now...${N}"
 		fi
+		eval $LOGPE
 	else
+		eval $LOGPE
 		print_error opt
 		swiftfox_installer
 	fi
-	eval $LOGPE
 }
 
 ###---------------------------------------------------------------------
