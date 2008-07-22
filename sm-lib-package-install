@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.8.16
-####  Date: July 17 2008
+####  version: 2.9.0
+####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -37,6 +37,7 @@ DEFAULT_DM=''
 # installer also handles metapackage assignments
 package_group_installer()
 {
+	eval $LOGUS
 	local itemName=$2 packageName='' 
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
 	# unless other default override is set
@@ -135,12 +136,14 @@ package_group_installer()
 	fi
 	update_sources $1
 	package_installer "$packageName" 'install-user'
+	eval $LOGUE
 }
 
 # the main updater function is going to handle most of the checking here, but
 # if the sources are updated, this will force the update
 update_sources()
 {
+	eval $LOGUS
 	local op='' multi='' doUpdate='' plain='' skyp='' swift=''
 	local operaSources='deb http://deb.opera.com/opera sid non-free'
 	local operaApt="$EAS.d/opera.list"
@@ -194,6 +197,7 @@ update_sources()
 	then
 		apt_update_handler 'package-install'
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -203,6 +207,7 @@ update_sources()
 # main selector, pick which package group type to install
 select_install_type()
 {
+	eval $LOGMS
 	local repeat='' options='' opt=''
 
 	print_lib_info $LIB_PACKAGE_INSTALL
@@ -260,11 +265,13 @@ select_install_type()
 	then
 		select_install_type
 	fi
+	eval $LOGME
 }
 
 # install office suites, languages packs, etc
 office_installer()
 {
+	eval $LOGPS
 	local repeat='' options='' opt=''
 
 	echo $MLINE
@@ -325,11 +332,13 @@ office_installer()
 	then
 		office_installer
 	fi
+	eval $LOGPE
 }
 
 # main selector, pick which package group type to install
 non_free_installer()
 {
+	eval $LOGPS
 	local repeat='' options='' opt='' gge64=''
 	if [ "$BITS" == "64" ]
 	then
@@ -424,6 +433,7 @@ non_free_installer()
 	then
 		non_free_installer
 	fi
+	eval $LOGPE
 }
 #katapult (personally) and kshutdown yakuake
 # various utilities
@@ -431,6 +441,7 @@ non_free_installer()
 # apt-get install yakuake  hardinfo lshw
 utilities_installer()
 {
+	eval $LOGPS
 	local repeat='' options='' opt=''
 
 	echo $MLINE
@@ -535,10 +546,12 @@ utilities_installer()
 	then
 		utilities_installer
 	fi
+	eval $LOGPE
 }
 
 display_manager_installer()
 {
+	eval $LOGPS
 	local displayManager=$( get_default_display_manager )
 	local repeat='' options='' opt=''
 	local xorgPackages=''
@@ -664,10 +677,12 @@ display_manager_installer()
 	then
 		display_manager_installer
 	fi
+	eval $LOGPE
 }
 
 select_display_manager()
 {
+	eval $LOGPS
 	local displayManager=$( get_default_display_manager )
 	local repeat='' options='kdm gdm xdm wdm slim back-to-desktop-install' opt=''
 	
@@ -706,6 +721,7 @@ select_display_manager()
 						echo "${S}Your default display manager for your desktop install is now: ${C}$opt${N}"
 						DEFAULT_DM=$opt
 					fi
+					log_function_data "DEFAULT_DM: $DEFAULT_DM"
 					print_hec
 					;;
 				back-to-desktop-install)
@@ -727,12 +743,14 @@ select_display_manager()
 		echo "${S}Your system already has a default display manager: ${C}$displayManager${N}"
 		print_hec
 	fi
+	eval $LOGPE
 }
 
 # returns proper dm to use in installer function
 # args: $1 - item from package group installer
 assign_display_manager()
 {
+	eval $LOGUS
 	local displayManager=$( get_default_display_manager )
 	local itemName=$1
 	
@@ -757,6 +775,8 @@ assign_display_manager()
 		fi
 	fi
 	echo $displayManager
+	log_function_data "displayManager: $displayManager"
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -764,6 +784,7 @@ assign_display_manager()
 ###---------------------------------------------------------------------
 install_openoffice()
 {
+	eval $LOGPS
 	# data is this order: 
 	# note: no entry for en-us language pack since that's part of common
 	# oooLanguagePack:oooHyphenation:oooHelp:oooThesaurus:myspell:<Language Name>
@@ -895,6 +916,7 @@ install_openoffice()
 		print_error opt
 		install_openoffice
 	fi
+	eval $LOGPE
 }
 #install_openoffice
 
@@ -905,6 +927,7 @@ install_openoffice()
 # grabs the latest skype deb from the skype site and installs it
 reinstall_skype()
 {
+	eval $LOGPS
 	local SkypeFileName=''
 	# note: the skype url is a 302 to the current latest version of skype
 	# local skypeDebUrl='http://www.skype.com/go/getskype-linux-beta-deb'
@@ -932,10 +955,12 @@ reinstall_skype()
 	else
 		echo "${E}The skype deb file failed to download, maybe the skype server is down.${N}"
 	fi
+	eval $LOGPE
 }
 
 install_google_earth()
 {
+	eval $LOGPS
 	local goog='Google Earth'
 	echo $LINE
 	echo "${S}Starting ${C}$goog${S} installer."
@@ -953,12 +978,14 @@ install_google_earth()
 	echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
 	
 	print_hec
+	eval $LOGPE
 }
 ###---------------------------------------------------------------------
 ### package installers for complex stuff, utilities
 ###---------------------------------------------------------------------
 install_ceni()
 {
+	eval $LOGPS
 	local appName='Ceni'
 	
 	echo $LINE
@@ -978,10 +1005,12 @@ install_ceni()
 	package_group_installer plain ceni-stuff
 	echo  "${S}Congratulations. ${C}$appName${S} is now installed. To redo your networking, simply type, as root: ${C}$appName${S} (uppercase C)${N}"
 	print_hec
+	eval $LOGPE
 }
 
 h2_faves()
 {
+	eval $LOGPS
 	local response='' ceni='ceni'
 	local removeItems='ifrename splashy'
 	if [ "$SIDUX_SOURCES" != 'true' ]
@@ -999,11 +1028,13 @@ h2_faves()
 	h2_package_group_installer "$mozItems"
 
 	echo "${S}Ok, all done with h2 favorite installs.${N}"
+	eval $LOGPE
 }
 
 # args: $1 - packages to remove
 h2_package_group_remover()
 {
+	eval $LOGUS
 	local response='' removeItems=$1 package=''
 	
 	for package in $removeItems
@@ -1024,11 +1055,13 @@ h2_package_group_remover()
 		fi
 		unset response
 	done
+	eval $LOGUE
 }
 
 # args: $1 packages to be installed
 h2_package_group_installer()
 {
+	eval $LOGUS
 	local response=''
 	
 	echo "${S}Installing ${C}$1${S}..."
@@ -1043,11 +1076,13 @@ h2_package_group_installer()
 			;;
 	esac
 	unset response
+	eval $LOGUE
 }
 
 # swap captive for ntfs-3g ntfs driver
 install_ntfs_3g()
 {
+	eval $LOGPS
 	echo $LINE
 	echo "${S}For more information on how to setup ntfs-3g, please read ${C}/usr/share/doc/ntfs-3g/README.gz${S}"
 	echo "or use the ${C}sidux-irc${S} factoid ${C}!ntfs-3g${S}."
@@ -1059,10 +1094,12 @@ install_ntfs_3g()
 	package_remover 'captive captive-lufs gnome-vfs-httpcaptive captive  captive-install ntfsprogs-gnomevfs' '--purge'
 	package_installer 'ntfs-3g' 'install-user'
 	echo "${S}Your system will now use ${C}ntfs-3g${S} to read your ntfs files.${N}"
+	eval $LOGPE
 }
 
 install_kpowersave()
 {
+	eval $LOGPS
 	local response=''
 	
 	echo $LINE
@@ -1099,10 +1136,12 @@ install_kpowersave()
 			install_kpowersave
 			;;
 	esac
+	eval $LOGPE
 }
 
 swiftfox_installer()
 {
+	eval $LOGPS
 	local opt='' options='' swiftOpt='' swiftPackage='' found='' skip=''
 	local LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= cpuType=$( grep -i -m 1 'model name' /proc/cpuinfo | cut -d ':' -f 2  )
 	# current swiftfox packages
@@ -1191,6 +1230,7 @@ swiftfox_installer()
 		print_error opt
 		swiftfox_installer
 	fi
+	eval $LOGPE
 }
 
 ###---------------------------------------------------------------------
