@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.5.0
+####  version: 2.5.1
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -164,12 +164,11 @@ clean_up()
 		esac
 		break 
 	done
-	
+	eval $LOGME
 	if [ "$repeat" == 'true' ]
 	then
 		clean_up
 	fi
-	eval $LOGME
 }
 #clean_up
 
@@ -215,11 +214,11 @@ clean_cruft()
 			dpkg --purge $action $package
 		done
 	fi
+	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
 		clean_cruft
 	fi
-	eval $LOGPE
 }
 
 apt_clean()
