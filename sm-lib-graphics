@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.1.1
+####  version: 2.1.2
 ####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -563,8 +563,8 @@ final_graphics_install()
 	eval $LOGPE
 	if [ "$completed" == "true" ]
 	then
-		print_completed
-	fi
+		print_completed 'noquit'
+	fi 
 }
 # install_graphics
 

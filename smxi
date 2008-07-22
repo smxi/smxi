@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.0.0
+####  version: 8.0.1
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1522,7 +1522,7 @@ start_windows_manager()
 	do
 		case $opt in
 			start-desktop)
-				print_completed
+				print_completed 'noquit'
 				start_stop_default_dm full start
 				;;
 			quit)
@@ -2563,6 +2563,7 @@ print_update_warning_configs()
 }
 # print_hec ;echo helloworld; echo yes indeed; exit
 # last step in smxi
+# args: $1: optional, noquit
 print_completed()
 {
 	eval $LOGUS
@@ -2572,7 +2573,10 @@ print_completed()
 	echo $MBAR
 	echo
 	eval $LOGUE
-	exit 0
+	if [ "$1" != 'noquit' ]
+	then
+		exit 0
+	fi
 }
 print_quit()
 {
@@ -3121,7 +3125,7 @@ post_du_options()
 				echo "${S}Continuing to graphics driver install...${N}"
 				;;
 			start-desktop)
-				print_completed
+				print_completed 'noquit'
 				start_stop_default_dm full start
 				;;
 			quit)
