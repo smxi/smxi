@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.5
+####  version: 7.90.6
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1167,7 +1167,7 @@ set_distro_data()
 # cleans up legacy and stub files if present
 cleanup_extra_files()
 {
-	eval $LOGUS
+	eval $LOGPS
 	local script_names="sgfxi sm smxi du-fixes-h2.sh svmi" i="" all_files=""
 	
 	for i in $script_names
@@ -1214,13 +1214,13 @@ cleanup_extra_files()
 	then
 		sed -i 's/no-set//' $SM_CONFIG_FILE
 	fi
-	eval $LOGUE
+	eval $LOGPE
 }
 
 # creates / tests for required script data files and logs etc
 create_script_files()
 {
-	eval $LOGUS
+	eval $LOGPS
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
 	
 	# make config file / log dir if required
@@ -1239,7 +1239,7 @@ create_script_files()
 	then
 		mv $EASMS $EASSL
 	fi
-	eval $LOGUE
+	eval $LOGPE
 	# rename directories to new syntax
 	update_kernel_directories
 }
@@ -1883,7 +1883,7 @@ check_script_path()
 # start_up_tests now checks for non-supported distros and levels
 check_distro_version()
 {
-	eval $LOGUS
+	eval $LOGPS
 	local distroName=' current distro' i='' dis='' temp1=''
 	# note: pre 2008-06 conversions are now version 8 by default
 	# post 2008-06 conversions will carry id set dynamically by time check
@@ -1938,7 +1938,7 @@ check_distro_version()
 	fi
 	log_function_data "DISTRO_LEVEL: $DISTRO_LEVEL"
 	log_function_data "DISTRO_VERSION: $DISTRO_VERSION"
-	eval $LOGUE
+	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger check_distro_version 'echo dl: $DISTRO_LEVEL' 'DISTRO_VERSION="sidux 2007-04"'
@@ -1947,7 +1947,7 @@ check_distro_version()
 # if the age is greater than $MAX_AGE it will stop execution
 check_age()
 {
-	eval $LOGUS
+	eval $LOGPS
 	local ScriptDate=$( grep -o -G -m 1 "Date: [A-Za-z\ 0-9]*" $SCRIPT_HOME/$SCRIPT_NAME | grep -m 1 -o -G "\ [A-Za-z\ 0-9]*" )
 	local ScriptYear=$( date -d "$ScriptDate" +%Y )
 	local ScriptDay=$( date -d "$ScriptDate" +%-j )
@@ -1978,7 +1978,7 @@ check_age()
 	then
 		error_handler smxi-version-too-old $FUNCNAME
 	fi
-	eval $LOGUE
+	eval $LOGPE
 }
 
 # makes sure that there is a connection, especially for kernel install wifi restarts
@@ -2082,7 +2082,7 @@ check_connection()
 
 restart_networking()
 {
-	eval $LOGPS
+	eval $LOGUS
 	local RestartNetworking='/etc/init.d/networking restart' response=''
 	
 	echo $WLINE
@@ -2112,7 +2112,7 @@ restart_networking()
 			print_error yn
 			;;
 	esac
-	eval $LOGPE
+	eval $LOGUE
 }
 ## DEBUGGER
 #script_debugger check_connection
