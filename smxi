@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.7
+####  version: 7.90.8
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -880,6 +880,7 @@ download_test_file()
 			then
 				chmod +x $1
 			fi
+			eval $LOGUE
 			return 0
 		else
 			# dump the bad file
@@ -892,10 +893,12 @@ download_test_file()
 				download_test_file "$1" "$2" 'repeat'
 			else
 				file_download_error "$1" 'file-corrupt'
+				eval $LOGUE
 				return 1
 			fi
 		fi
 	fi
+	
 	eval $LOGUE
 }
 # args: $1 - file name; $2 - error type
