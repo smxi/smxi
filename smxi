@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 7.90.6
+####  version: 7.90.7
 ####  Date: July 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -531,6 +531,7 @@ error_handler()
 # args: $1 - type of function/feature; $2 $FUNCNAME
 log_function_data()
 {
+	local utilClose=''
 	# master are not set by another function. primary are set by a master
 	# utilities are used by all functions. This should result in nested logs
 	local funcInfo='' 
@@ -560,6 +561,7 @@ log_function_data()
 		ue)
 			funcInfo="Function: $2 - Utility: End"
 			# slice out zero or one spacer element to reset tabbing for nesting
+			utilClose='true'
 			;;
 	esac
 	
@@ -573,6 +575,11 @@ log_function_data()
 	if [ -n "$3" -a "$3" != "$SCRIPT_HOME/$SCRIPT_NAME" ]
 	then
 		log_writer "Func Args: $3"
+	fi
+	
+	if [ "$utilClose" == 'true' ]
+	then
+		adjust_log_indent 'remove'
 	fi
 }
 # sets the global LOG_INDENT for logging output
@@ -1611,9 +1618,9 @@ do_display_manager_pid_test()
 	then
 		found='true'
 	fi
-	
-	eval $LOGUE
+
 	log_function_data "found: $found"
+	eval $LOGUE
 	if [ "$found" == 'true' ]
 	then
 		return 0
