@@ -1653,7 +1653,7 @@ get_display_manager_runlevels()
 		dmRunlevels=$( ls /etc/rc*.d/S*$displayManager | sed -r 's%/etc/rc([1-5])\.d.*%\1%g' )
 	fi
 	echo $dmRunlevels
-	log_function_data "dmRunlevels: $dmRunlevels"
+	log_function_data "dmRunlevels: $( echo $dmRunlevels)"
 	eval $LOGUE
 }
 
