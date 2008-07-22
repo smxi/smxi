@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.15.11
-####  Date: July 7 2008
+####  version: 1.16.0
+####  Date: July 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -34,6 +34,7 @@
 # this one just does various odd little things
 misc_hacks()
 {
+	eval $LOGMS
 	local repeat='' options='' opt=''
 
 	print_lib_info $LIB_MISC_TWEAKS
@@ -108,6 +109,7 @@ misc_hacks()
 	then
 		misc_hacks
 	fi
+	eval $LOGME
 }
 #misc_hacks
 
@@ -117,6 +119,7 @@ misc_hacks()
 
 advanced_tweaks()
 {
+	eval $LOGPS
 	local opt='' repeat='' options='' tempCount=0 advancedOption1='' advanced1=''
 	local cont=''
 	
@@ -207,7 +210,7 @@ advanced_tweaks()
 	then
 		advanced_tweaks
 	fi
-	
+	eval $LOGPE
 }
 ###---------------------------------------------------------------------
 ### openoffice hold/install tweaks
@@ -215,6 +218,7 @@ advanced_tweaks()
 
 openoffice_hold_install()
 {
+	eval $LOGPS
 	local opt='' repeat='' options='' 
 	# possible extra holds ttf-freefont
 	local oooPackages="$( package_tester 'openoffice' 'wild-full' ) python-uno"
@@ -280,6 +284,7 @@ openoffice_hold_install()
 		echo "openoffice.org, use the convenient ${C}smxi package install${M}, office suites, ooo option.${N}"
 		print_hec
 	fi
+	eval $LOGPE
 }
 
 
@@ -288,6 +293,7 @@ openoffice_hold_install()
 ###---------------------------------------------------------------------
 mozilla_tweaks()
 {
+	eval $LOGPS
 	local opt='' repeat='' options=''
 	
 	echo $MLINE
@@ -344,11 +350,13 @@ mozilla_tweaks()
 	then
 		mozilla_tweaks
 	fi
+	eval $LOGPE
 }
 
 # links iceweasel plugin directory to swiftfox's, run on every reinstall/upgrade of swiftfox
 swiftfox_link_tweak()
 {
+	eval $LOGUS
 	local ulsp='/usr/lib/swiftfox/plugins' ulip='/usr/lib/iceweasel/plugins'
 	local uls='/usr/lib/swiftfox'
 
@@ -364,18 +372,22 @@ swiftfox_link_tweak()
 		if [ -d $uls ]
 		then
 			# remove any bad link swiftfox might try to make before creating the real one
+			log_function_data "ln -fs $ulip $ulsp"
 			ln -fs $ulip $ulsp
 			echo  "${S}Symbolic link from ${C}$ulip${S} to ${C}$ulsp${S} created.${N}"
 		else
 			echo "${E}No ${C}$uls${E} directory found.${N}"
+			log_function_data "No $uls directory found."
 		fi
 	else
 		echo "${E}No ${C}$ulip${E} found to link to.${N}"
 	fi
+	eval $LOGUE
 }
 
 dump_gtk_file_handler()
 {
+	eval $LOGUS
 	local libsPre='/usr/lib/' libsPost='/components/nsFilePicker.js'
 	local homePre='/home/*/.' homePost='/*/' homeRemove1='compreg.dat' homeRemove2='xpti.dat'
 	local nsFileNu1='' nsFileNu2='' f='' mozfile='' homefile1='' homefile2='' nums=''
@@ -431,10 +443,12 @@ dump_gtk_file_handler()
 	then
 		print_hec
 	fi
+	eval $LOGUE
 }
 
 tweak_gecko_prefs()
 {
+	eval $LOGUS
 	local homeprefs='' prefs='prefs.js' homedir='/home/' h='' m='' v='' profileIs='' 
 	local p='' profdirs='' fullprofileprefs='' prefn='' prefv=''
 	local homes=$( ls $homedir )
@@ -496,6 +510,7 @@ tweak_gecko_prefs()
 	then
 		print_hec
 	fi
+	eval $LOGUE
 }
 # tweak_gecko_prefs
 #dump_gtk_file_handler
@@ -505,6 +520,7 @@ tweak_gecko_prefs()
 ###---------------------------------------------------------------------
 latino_cathbard_sidux_kde()
 {
+	eval $LOGPS
 	local opt='' option='' repeat=''
 	
 	echo $MLINE
@@ -573,10 +589,12 @@ latino_cathbard_sidux_kde()
 	then
 		latino_cathbard_sidux_kde
 	fi
+	eval $LOGPE
 }
 
 install_kmenu_sidebar()
 {
+	eval $LOGPS
 	# well, "plain sidux text" "sidux logo" and "coffee theme match"
 	 # drb 1 - elegant style
 	local siduxUrl=$TECH_PATTERNS_DISTRO'artwork/'
@@ -634,9 +652,11 @@ install_kmenu_sidebar()
 	echo "${S}Done installing kmenu side image.${N}"
 	
 	cd $SCRIPT_HOME
+	eval $LOGPE
 }
 install_kmenu_icon()
 {
+	eval $LOGUS
 	local siduxMenuFile='kmenu.tar.gz'
 	local siduxKmenuUrl=$TECH_PATTERNS_DISTRO'artwork/'$siduxMenuFile
 	
@@ -671,11 +691,13 @@ install_kmenu_icon()
 	echo "${S}Icons should now be installed, with backups named ${C}kmenu-original${S} in"
 	echo "${C}$ButtonDir${S} subdirectories for $iconSizes1.${N}"
 	cd $SCRIPT_HOME
+	eval $LOGUE
 }
 
 # args: $1 which grub graphic package
 cathbard_grub_gfx_installer()
 {
+	eval $LOGUS
 	local cbrd='message.'$1
 	local grubCbrd='/boot/'$cbrd
 	local bgmc=$TECH_PATTERNS_DISTRO'artwork/'$cbrd
@@ -704,10 +726,12 @@ cathbard_grub_gfx_installer()
 		echo "Please update it to use this feature.${N}"
 	fi
 	print_hec
+	eval $LOGUE
 }
 
 restore_grub_gfx()
 {
+	eval $LOGUS
 	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
 	
 	echo $LINE
@@ -726,6 +750,7 @@ restore_grub_gfx()
 		echo "Please update it to use this feature.${N}"
 	fi
 	print_hec
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -734,6 +759,7 @@ restore_grub_gfx()
 
 fxfonts()
 {
+	eval $LOGPS
 	local repeat='' options='' opt=''
 	
 	echo $MLINE
@@ -803,6 +829,7 @@ fxfonts()
 	then
 		fxfonts
 	fi
+	eval $LOGPE
 }
 #fxfonts
 
@@ -810,6 +837,7 @@ fxfonts()
 # this will undo the operation one time to maintain xorg stuff
 make_fonts_links()
 {
+	eval $LOGUS
 	local prefId='fontlinks-1' ulxf='' usfx=''
 	local prefId2='fontlinks-2'
 	local smPref=$( sm_pref_tester $prefId )
@@ -837,6 +865,7 @@ make_fonts_links()
 		
 		set_sticky_prefs $prefId2
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -845,6 +874,7 @@ make_fonts_links()
 # args: $1 - optional - conversion
 set_default_system_kernel()
 {
+	eval $LOGPS
 	local smPref='distro-kernel'
 	local altKernelSet=$( sm_pref_tester $smPref 'equal' )
 	local typeData='' altKernelSetting='' opt='' options=''
@@ -927,10 +957,12 @@ set_default_system_kernel()
 	then
 		set_default_system_kernel
 	fi
+	eval $LOGPE
 }
 
 alt_print_hec()
 {
+	eval $LOGPS
 	local altHecSet=$( sm_pref_tester 'alt-print-hec' 'equal' )
 	local response='' typeData='' tempTest='' altHecSetting=''
 	local repeat=''
@@ -979,24 +1011,26 @@ alt_print_hec()
 				typeData=$response
 			fi
 			;;
-		esac
+	esac
 		
-		if [ "$repeat" == 'true' ]
-		then
-			alt_print_hec
-		fi
-		if [ -n "$typeData" ]
-		then
-			echo $LINE
-			echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default of hit ${C}$typeData${S} key to continue...${N}"
-			set_sm_pref_values "alt-print-hec" "$typeData"
-			HEC_ALT=$1
-			print_hec
-		fi
+	if [ "$repeat" == 'true' ]
+	then
+		alt_print_hec
+	fi
+	if [ -n "$typeData" ]
+	then
+		echo $LINE
+		echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default of hit ${C}$typeData${S} key to continue...${N}"
+		set_sm_pref_values "alt-print-hec" "$typeData"
+		HEC_ALT=$1
+		print_hec
+	fi
+	eval $LOGPE
 }
 
 restore_standard_sources()
 {
+	eval $LOGUS
 	local easld='/etc/apt/sources.list.d/'
 	# we need to avoid putting backups or any other crap into this output
 	local subSources=$( ls $easld | grep '\.list$' ) sourceFile=''
@@ -1026,10 +1060,12 @@ restore_standard_sources()
 		echo "so there is nothing to change or update.${N}"
 	fi
 	print_hec
+	eval $LOGUE
 }
 
 update_locales()
 {
+	eval $LOGUS
 	local upl='dpkg-reconfigure locales'
 	
 	echo $LINE
@@ -1047,10 +1083,12 @@ update_locales()
 	echo "that will let you see all the characters."
 	print_hec
 	eval $upl
+	eval $LOGUE
 }
 # this should search and modify .bashrc if required.
 update_bash_completion()
 {
+	eval $LOGUS
 	local rbe='' rbrc='/root/.bashrc'
 	
 	# test for bashrc, test for data if exists, and create file if doesn't
@@ -1085,6 +1123,7 @@ update_bash_completion()
 	else
 		echo "${C}$rbrc${M} has already been updated.${N}"
 	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -1094,6 +1133,7 @@ update_bash_completion()
 # this one just does various odd little things
 misc_legacy_tweaks()
 {
+	eval $LOGPS
 	local repeat='' options='' opt=''
 	
 	echo $MLINE
@@ -1175,10 +1215,12 @@ misc_legacy_tweaks()
 	then
 		misc_legacy_tweaks
 	fi
+	eval $LOGPE
 }
 
 splashy_control()
 {
+	eval $LOGUS
 	local frozen=''
 	if [ "$1" == 'stop-splashy' ]
 	then
@@ -1216,26 +1258,30 @@ splashy_control()
 		echo "${S}Auto start/shutdown display for ${C}splashy${S} activated now."
 		echo "${M}Remember, you can use this script to turn it off if you decide you don't like it.${N}"
 	fi
+	eval $LOGUE
 }
 
 clean_kanotix_transitional()
 {
+	eval $LOGUS
 	local oldKanotix=$(COLUMNS=300 dpkg -l | grep "allow an easy transition between kanotix and sidux" | awk '{ print $2 }')
 	
 	echo $LINE
 	if [ -n "$oldKanotix" ]
 	then
 		echo -e "${S}Removing the following transitional kanotix packages:\n${C}$oldKanotix${N}"
-		apt-get remove $oldKanotix
+		package_remover "$oldKanotix"
 		echo "${S}All Kanotix to sidux transitional packages removed.${N}"
 	else
 		echo "${E}There are no transitional packages to remove.${N}"
 	fi
 	print_hec
+	eval $LOGUE
 }
 
 clean_kanotix_packages()
 {
+	eval $LOGUS
 	local packages=$( dpkg -l | grep -i 'kanotix' | cut -d ' ' -f 3)
 	local package='' isOk=''
 	
@@ -1244,19 +1290,15 @@ clean_kanotix_packages()
 	then
 		for package in $packages
 		do 
-			# isOk=$( echo $package | grep -c 'ndiswrapper-utils' )
-			isOk=0
-			if [ "$isOk" -eq 0 ]
-			then
-				echo "${S}Removing ${C}$package${S} now...${N}"
-				apt-get remove --purge $package
-			fi
+			echo "${S}Removing ${C}$package${S} now...${N}"
+			package_remover "$package" '--purge'
 		done
 		echo "${S}Finished removing Kanotix legacy packages.${N}"
 	else
 		echo "${S}No Kanotix legacy packages found to remove.${N}"
 	fi
 	print_hec
+	eval $LOGUE
 }
 
 ###**EOF**###
