@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.3
-####  Date: July 21 2008
+####  version: 1.15.4
+####  Date: July 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -80,7 +80,7 @@ package_tester()
 	# note that we need [ \t]+ so that only cases of whitespace after are counted
 	packageStatus=$( dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}' )
 	echo $packageStatus
-	log_function_data "packageStatus: $packageStatus"
+	log_function_data "Package $installType status: $packageStatus"
 	eval $LOGUE
 }
 
@@ -90,17 +90,17 @@ package_tester()
 check_package_status()
 {
 	eval $LOGUS
-	local packageStatus='' statusType='Candidate:'
+	local packageVersion='' statusType='Candidate:'
 	
 	if [ "$2" == 'installed' ]
 	then
 		statusType='Installed:'
 	fi
 	
-	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageStatus=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
 	
-	echo $packageStatus
-	log_function_data "packageStatus: $packageStatus"
+	echo $packageVersion
+	log_function_data "Package Version: $packageVersion"
 	eval $LOGUE
 }
 
@@ -220,11 +220,13 @@ package_installer()
 	then
 		echo "${SPACER}${E}There was a problem with install of: ${C}$1${N}"
 		echo
+		log_function_data "Error: $installError with install of $1"
+		eval $LOGUE
 		return 1
 	else
+		eval $LOGUE
 		return 0
 	fi
-	eval $LOGUE
 }
 
 # simple thing to just install/start package if needed
@@ -277,14 +279,13 @@ package_remover()
 			echo
 		fi
 	done
-	
+	eval $LOGUE
 	if [ -n "$removeErrorPackage" ]
 	then
 		return 1
 	else
 		return 0
 	fi
-	eval $LOGUE
 }
 
 # returns error message if required for apt functions
@@ -348,6 +349,7 @@ apt_error_handling()
 			options='update-no-pdiffs update change-debian-mirror change-sidux-mirror continue quit'
 			select opt in $options
 			do
+				eval $LOGUE
 				case $opt in
 					update-no-pdiffs)
 						echo $LINE
@@ -378,7 +380,7 @@ apt_error_handling()
 				esac 
 				break
 			done
-			eval $LOGUE
+			
 			if [ "$repeat" == 'true' ]
 			then
 				apt_error_handling $1 $2
@@ -405,9 +407,10 @@ set_hold_install()
 	then
 		# get user set hold/install packages first, slice change separator to space
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
+		log_function_data "User held packages: $userPackages"
 		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$HOLD_INSTALL
 		DPKG_HOLD_INSTALL="$( cat $HOLD_INSTALL ) $userPackages"
-		log_function_data "DPKG_HOLD_INSTALL: $DPKG_HOLD_INSTALL"
+		log_function_data "Backend hold packages: $( cat $HOLD_INSTALL )"
 		if [ -f "$HOLD_INSTALL" ]
 		then
 			rm -f $HOLD_INSTALL
@@ -423,10 +426,7 @@ set_hold_install()
 		advanced_broken_dependency_handler 'ooo'
 		advanced_broken_dependency_handler 'wesnoth'
 	fi
-	if [ "$TESTING" == 'true' ]
-	then
-		echo dpkg-hold-install: $DPKG_HOLD_INSTALL
-	fi
+	log_function_data "Post test hold packages: $DPKG_HOLD_INSTALL"
 	if [ -n "$DPKG_HOLD_INSTALL" ]
 	then
 		echo $LINE
@@ -460,6 +460,7 @@ set_hold_install()
 				fi
 				echo "${S}${SPACER}Changing ${C}$packageName${S} dpkg status to: ${C}$statusD${N}"
 				echo $packageName $statusD | dpkg --set-selections
+				log_function_data "Package $packageName set to: $statusD"
 			fi 
 		done
 		# this step is key, it will avoid trying to put on install packages that are
@@ -902,8 +903,10 @@ change_debian_mirrors()
 			else
 				echo "${S}Continuing on to main script without making any changes to ${C}$EAS${E}.${N}"
 			fi
+			eval $LOGPE
 		else
 			print_error opt
+			eval $LOGPE
 			change_debian_mirrors
 		fi
 	else
@@ -911,8 +914,9 @@ change_debian_mirrors()
 		echo "${E}I'm sorry, but you are not using a format for your Debian mirrors"
 		echo "in ${C}$EAS${E} that this script can recognize. You will"
 		echo "have to update your ${C}$EAS${E} sources manually.${N}"
+		log_function_data "Unrecognized format/syntax for Debian apt mirror sources"
+		eval $LOGPE
 	fi
-	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger  'change_debian_mirrors prefs'
@@ -969,20 +973,22 @@ update_to_nonfree_sources()
 				echo "${C}apt sources${S} have been updated, please check them to make sure they are right.${N}"
 				set_sticky_prefs $prefId
 				print_hec
+				eval $LOGUE
 				;;
 			n)	echo "${S}Ok, continuing without updating them, you'll have to do that manually"
 				echo "if you change your mind later and decide you want to use non-free or contrib.${N}"
 				echo
 				set_sticky_prefs $prefId
+				eval $LOGUE
 				;;
 			*)	print_error yn
+				eval $LOGUE
 				update_to_nonfree_sources
 				;;
 		esac
 		echo $LINE
 		echo 
 	fi
-	eval $LOGUE
 }
 ## DEBUGGER
 #script_debugger  update_to_nonfree_sources
@@ -1019,11 +1025,12 @@ create_apt_source_item()
 			echo >> $sourceFile
 		fi
 		echo "${S}Source file: ${C}$sourceFile${S} updated.${N}"
+		eval $LOGUE
 		return 0
 	else
+		eval $LOGUE
 		return 1
 	fi
-	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
@@ -1184,16 +1191,18 @@ change_kernel_mirrors()
 					echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
 					apt_update_handler 'post-mirror'
 			fi
+			eval $LOGPE
 		else
 			print_error opt
+			eval $LOGPE
 			change_kernel_mirrors
 		fi
 	else
 		echo $MLINE
 		echo "${M}This feature is only available for systems using ${C}sidux${M} sources.${N}"
 		print_hec
+		eval $LOGPE
 	fi
-	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger 'change_kernel_mirrors prefs'
@@ -1287,21 +1296,13 @@ set_sidux_mirror()
 	else
 		entryExists=$( egrep -os -m1 "^[[:space:]]*(deb|deb-src)[[:space:]]*$nonCoreSiduxRepo" $EAS $EAS.d/*.list | grep -o "$nonCoreSiduxRepo" )
 	fi
-	
-	if [ "$TESTING" == 'true' ]
-	then
-		echo
-		echo ${M}BEGIN DEBUGGING OUTPUT:
-		echo mirror to install: ${C}$1${M}
-		echo nonCoreSiduxRepo: ${C}$nonCoreSiduxRepo${M}
-		echo entryExists: ${C}$entryExists${M}
-		echo writing to: ${C}$sourceFile${M}
-		echo countMirrors: ${C}$countMirrors${M}
-		echo isSiduxMulti: ${C}$isSiduxMulti${M}
-		echo isCoreSiduxRepo: ${C}$isCoreSiduxRepo${M}
-		echo END DEBUGGING OUTPUT${N}
-		echo
-	fi
+	log_function_data "mirror to install: $1"
+	log_function_data "nonCoreSiduxRepo: $nonCoreSiduxRepo"
+	log_function_data "entryExists: $entryExists"
+	log_function_data "writing to: $sourceFile"
+	log_function_data "countMirrors: $countMirrors"
+	log_function_data "isSiduxMulti: $isSiduxMulti"
+	log_function_data "isCoreSiduxRepo: $isCoreSiduxRepo"
 	
 	# note: we don't need any special regex because we already know
 	# we're in the right place, with a matching syntax, so things should be good
@@ -1332,16 +1333,9 @@ set_sidux_mirror()
 				# we want the same stuff after the mirror as the primary has
 				siduxSpecs=$( echo $siduxTempHolder | sed -r 's%.*((sid|unstable).*)%\1%' )
 				
-				if [ "$TESTING" == 'true' ]
-				then
-					echo
-					echo ${M}BEGIN DEBUGGING OUTPUT:
-					echo siduxTempHolder: ${C}$siduxTempHolder${M}
-					echo siduxTempMainHolder: ${C}$siduxTempMainHolder${M}
-					echo siduxSpecs: ${C}$siduxSpecs${M}
-					echo END DEBUGGING OUTPUT${N}
-					echo
-				fi
+				log_function_data "siduxTempHolder: $siduxTempHolder"
+				log_function_data "siduxTempMainHolder: $siduxTempMainHolder"
+				log_function_data "siduxSpecs: $siduxSpecs"
 
 				echo "${S}Prepending the mirror:${C} $1"
 				echo "${S}to current sidux repo: ${C}$siduxTempRepo${N}"
@@ -1366,15 +1360,17 @@ set_sidux_mirror()
 	then
 		echo "${E}Unable to properly match your ${C}sidux.com${E} repo, sorry.${N}"
 		print_hec
+		log_function_data "Unable to match sidux repo"
+		eval $LOGUE
 		return 1
 	fi
 	
 	if [ "$updateIt" == 'true' ]
 	then
 		print_hec
+		eval $LOGUE
 		return 0
 	fi
-	eval $LOGUE
 }
 
 # bad mirrors for updates:
@@ -1465,6 +1461,7 @@ get_current_apt_kernel()
 				platform='smp'
 				;;
 		esac
+		log_function_data "Platform: $platform"
 		
 		# little trick here to present just debian kernels if not distro
 		if [ "$SIDUX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' ]
@@ -1581,6 +1578,7 @@ test_app_exists()
 		echo -e "${Q}Would you like to install those now? ${S}[${C}y${S} installs the missing programs, ${C}n${S} exits]$YNE"
 		echo $LINE
 		read response
+		eval $LOGPE
 		case $response in
 			y)	apt_update_handler 'update-apps'
 				package_installer "$installApps" 'install-missing'
@@ -1589,10 +1587,10 @@ test_app_exists()
 			n)	print_quit
 				;;
 			*)	print_error yn
+				test_app_exists "$1"
 				;;
 		esac
 	fi
-	eval $LOGPE
 }
 ## DEBUGGER
 #script_debugger test_app_exists
