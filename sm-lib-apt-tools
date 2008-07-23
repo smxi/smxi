@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.5
-####  Date: July 22 2008
+####  version: 1.15.6
+####  Date: July 23 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -716,7 +716,7 @@ apt_update_handler()
 		then
 			apt-get update $NO_PDIFFS
 		else
-			apt-get update $NO_PDIFFS 2>$LOG_FILE 2>&1 | tee >> $LOG_FILE
+			apt-get update $NO_PDIFFS 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		# get the success/fail exit code of update
 		exitStatus=${PIPESTATUS[0]}
