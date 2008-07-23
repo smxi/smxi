@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.0.8
-####  Date: July 22 2008
+####  version: 8.0.9
+####  Date: July 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -605,7 +605,8 @@ log_writer()
 	# like so: message="some problem... \n${LOG_INDENT}more problem stuff..."
 	if [ "$LOGGING_STARTED" == 'true' ]
 	then
-		echo -e "${LOG_INDENT}$1" >> $LOG_FILE
+		# strip out escape color code, if any. Method by dzz of sidux, thanks ;-)
+		echo -e "${LOG_INDENT}$1" | sed 's/\x1b\[[0-9]\{1,2\}\(;[0-9]\{1,2\}\)\{0,2\}m//g' >> $LOG_FILE
 	fi
 }
 
