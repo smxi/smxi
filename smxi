@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.0.12
+####  version: 8.1.1
 ####  Date: July 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2230,6 +2230,52 @@ check_dpkg_update()
 	eval $LOGUE
 }
 
+# returns driver or null if no nonfree used
+# args: $1 - kernel-install/xorg/kernel
+nonfree_driver_reinstall()
+{
+	eval $LOGUS
+	local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
+	local isFglrx=$( egrep -io 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
+	local driverIs=''
+	
+	if [ -n "$isNvidia" ]
+	then
+		driverIs='nVidia'
+	fi
+	if [ -n "$isFglrx" ]
+	then
+		driverIs='ATI/fglrx'
+	fi
+	
+	log_function_data "Non-Free driver data: $driverIs"
+	
+	if [ -n "$driverIs" ]
+	then
+		case $1 in
+			kernel-install)
+				echo $driverIs
+				;;
+			xorg)
+				if [ "$X_VERSIONS_PRE" != "$X_VERSIONS_POST" ]
+				then
+					echo -e "${C}Xorg${M} was upgraded in this $DU_UPGRADE.\nYou will need to reinstall your ${C}$driverIs${M} driver.\n$MLINE"
+					log_function_data "Xorg upgrade message: $X_VERSIONS_POST $driverIs"
+				fi
+				;;
+			kernel)
+				if [ -n "$KERNEL_INSTALL_TO" ]
+				then
+					echo -e "${M}Your kernel was upgraded to ${C}$KERNEL_INSTALL_TO${M}\nYou will need to reinstall your ${C}$driverIs${M} driver in Graphics Install.\n$MLINE"
+					log_function_data "Kernel upgrade message: $KERNEL_INSTALL_TO $driverIs"
+				fi
+				;;
+		esac
+	fi
+	
+	eval $LOGUE
+}
+
 ########################################################################
 ### information / output type stuff, utilities
 ###---------------------------------------------------------------------
@@ -2682,6 +2728,7 @@ install_dist_upgrade()
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f $DU_UPGRADE-again check-services continue $reboot"
+	local nonFreeGfx=$( nonfree_driver_reinstall )
 	
 	if [ "$SYSTEM_BASE" != 'stable' ]
 	then
@@ -2690,24 +2737,7 @@ install_dist_upgrade()
 	
 	# set the trap here
 	trap 'du_trap_handler $FUNCNAME' INT TERM
-	
-	# if current kernel was not in grub prior to du, and is in grub post du
-	if [ "$currentAptKernelGrub" != "$CURRENT_APT_KERNEL_GRUB" -a -n "$metaExists" -a -n "$currentAptKernelGrub" ]
-	then
-		reboot='reboot'
-		options="$options $reboot"
-		rebootNo=$( echo $options | wc -w )
-		rebootTopText='echo -e "$MLINE\n${M}You are using ${C}kernel metapackages${M} and your ${C}$DU_UPGRADE${M} installed a new kernel.\nYou can reboot to make your new ${C}$CURRENT_APT_KERNEL${M} kernel active,\nor continue on to install graphics driver if needed."'
-		rebootText='echo -e "${C}$rebootNo - reboot${M} Reboot into your new ${C}$CURRENT_APT_KERNEL${M} kernel."'
-		KERNEL_INSTALL_TO=$CURRENT_APT_KERNEL
-		if	[ "$TESTING" == 'true' ]
-		then
-			echo 'cakgrub: '$currentAptKernelGrub
-			echo 'CAKGrub: '$CURRENT_APT_KERNEL_GRUB
-			echo 'metaExists: '$metaExists
-			
-		fi
-	fi
+
 	options="$options exit"
 	exitNo=$( echo $options | wc -w )
 	# this prints one time, until the first full du is done, will be updated to be more useful.
@@ -2756,7 +2786,7 @@ install_dist_upgrade()
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
 	fi
-	
+
 	if [ "$exitStatus" -eq 0 ]
 	then
 		echo $MLINE
@@ -2781,8 +2811,26 @@ install_dist_upgrade()
 		echo
 		echo "Once you are sure the upgrade is done, you can continue, check services, or exit."
 	fi
+	
+	# if current kernel was not in grub prior to du, and is in grub post du
+	if [ "$currentAptKernelGrub" != "$CURRENT_APT_KERNEL_GRUB" -a -n "$metaExists" -a -n "$currentAptKernelGrub" ]
+	then
+		reboot='reboot'
+		options="$options $reboot"
+		rebootNo=$( echo $options | wc -w )
+		rebootTopText='echo -e "${M}You are using ${C}kernel metapackages${M} and your ${C}$DU_UPGRADE${M} installed a new kernel.\nYour new ${C}$CURRENT_APT_KERNEL${M} kernel will not become active until you reboot.\n$MLINE"'
+		rebootText='echo -e "${C}$rebootNo - reboot${M} Reboot into your new ${C}$CURRENT_APT_KERNEL${M} kernel."'
+		KERNEL_INSTALL_TO=$CURRENT_APT_KERNEL
+	fi
+	log_function_data "currentAptKernelGrub: $currentAptKernelGrub"
+	log_function_data "CURRENT_APT_KERNEL_GRUB: $CURRENT_APT_KERNEL_GRUB"
+	log_function_data "metaExists: $metaExists"
+	log_function_data "KERNEL_INSTALL_TO: $KERNEL_INSTALL_TO"
+	
+	echo $MLINE
+	nonfree_driver_reinstall 'kernel'
+	nonfree_driver_reinstall 'xorg'
 	eval "$rebootTopText"
-	echo $LINE
 	echo "${C}1 - use-install-f${S} Use this to try to resolve error in $DU_UPGRADE."
 	echo "${C}2 - $DU_UPGRADE-again${S} Run this after correcting an error with ${C}1${S}."
 	echo
@@ -3060,7 +3108,9 @@ post_du_options()
 	echo $MLINE
 	echo "${S}This is a list of various things you can do at this point to"
 	echo "handle some loose ends after doing a ${C}$DU_UPGRADE${S}."
-	echo $LINE
+	echo $MLINE
+	nonfree_driver_reinstall 'kernel'
+	nonfree_driver_reinstall 'xorg'
 # 	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}$DU_UPGRADE${S} if the upgrade "
 # 	echo "    was really big, or if you haven't run it recently. This can fix some kde display issues."
 # 	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
@@ -3090,9 +3140,8 @@ post_du_options()
 	
 	eval $advanced1
 	eval $advanced2
-	echo
-	echo "${C}$cont${S} - Continue to graphics driver installation. ${M}If you use ${C}nvidia${M} or ${C}ati${M} graphics drivers,"
-	echo "    and either ${C}Xorg${M} updated or you installed a new kernel, you must reinstall your drivers."
+	echo 
+	echo "${C}$cont${S} - Continue to graphics driver installation."
 	echo "${C}$initX${S} - Restart desktop/X (skip graphics (re)install)."
 	echo "${C}$qui${S} - Exits the script."
 	echo $LINE

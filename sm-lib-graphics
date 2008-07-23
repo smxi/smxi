@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.1.2
-####  Date: July 21 2008
+####  version: 2.2.0
+####  Date: July 23 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -72,7 +72,6 @@ install_graphics()
 	local repeat='' options='' opt='' OptionText='' CurrentDriverText=''
 	local unsupportedNvFgCard='' sgfxiData='' otherError='' otherErrorMessage=''
 	local cardBrand='' error='' xorgNative='' installXorgDriver='install-xorg-driver'
-	local updateDriver='' newX='' kernelInstallToText=''
 	# nvidia stuff
 	local NvOptionText='' OptNv='' OptNvLatest='' NvAdvancedText=''
 	local NvDefault='' NvLatest='' NvPrevious='' NvOlder='' NvOldest=''
@@ -132,11 +131,6 @@ install_graphics()
 		
 		otherError=$( echo $sgfxiData | egrep -o '\([0-9]{3}\)' )
 		
-		if [ -n "$KERNEL_INSTALL_TO" ] && [ "$NVIDIA"  == 'true' -o "$ATI"  == 'true' ]
-		then
-			kernelInstallToText='echo -e "$MLINE\n${M}You will be installing your graphics driver to this new kernel: ${C}$KERNEL_INSTALL_TO${N}\n"'
-		fi
-		
 		if [ -n "$otherError" -a -z "$fgXorgError" -a -z "$unsupportedNvFgCard" ] # handle weird cases
 		then
 			OptionText='echo -e "${E}Error ${C}'$otherError'${E} occurred. The script is not able to continue.\n${S}Please let the script maintainer know.\n\n"'
@@ -159,17 +153,6 @@ install_graphics()
 						error='true'
 					fi
 					OptFg="$OptFg install-xorg-radeon install-xorg-radeonhd"
-				fi
-				# set the update driver message only in case no problems and card supported
-				if [ "$error" != 'true' ] 
-				then 
-					if [ "$X_VERSIONS_PRE" != "$X_VERSIONS_POST" ]
-					then
-						newX="It looks like ${C}Xorg${S} was upgraded in this $DU_UPGRADE -"
-					else
-						newX="Although it looks like ${C}Xorg${S} was not updated, if you installed a new kernel,"
-					fi
-					updateDriver='echo -e "${S}'$newX'\nyou will need to reinstall your '$cardBrand' driver if you use the non-Free ones.\n$LINE"'
 				fi
 			fi
 			
@@ -308,8 +291,12 @@ install_graphics()
 	fi
 	print_lib_info $LIB_GRAPHICS
 	echo $MLINE
-	eval $updateDriver
-	eval $kernelInstallToText
+	# set the update driver message only in case no problems and card supported
+	if [ "$error" != 'true' ] 
+	then 
+		nonfree_driver_reinstall 'kernel'
+		nonfree_driver_reinstall 'xorg'
+	fi
 	eval $CurrentDriverText
 	eval $OptionText
 	eval $NvOptionText
