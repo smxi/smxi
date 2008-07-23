@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.7
+####  version: 3.3.8
 ####  Date: July 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1130,7 +1130,9 @@ create_log()
 		logrotate $SCRIPT_ROTATE
 	fi
 	touch $LOG_FILE # and if rotated, need a new one
-	echo "=======================================" >> $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
+	echo "Start $SCRIPT_NAME log:" >> $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
 	echo "Video Card Information:$cardString" >> $LOG_FILE
 	echo "Video Card Type: $CARD_BRAND" >> $LOG_FILE
@@ -1142,9 +1144,7 @@ create_log()
 	fi
 	echo "$SCRIPT_NAME script version: $sgfxiVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
-	echo "Start Install log:" >> $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
+	echo "-------------------------------------" >> $LOG_FILE
 	
 	LOGGING_STARTED='true'
 }

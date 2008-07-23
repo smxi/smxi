@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.3.4
+####  version: 1.3.5
 ####  Date: July 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -637,14 +637,13 @@ create_log()
 	fi
 	touch $LOG_FILE # and if rotated, need a new one
 	echo "=========================================================" >> $LOG_FILE
+	echo "Start $SCRIPT_NAME log:" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
-	echo "Start $SCRIPT_NAME log:" >> $LOG_FILE
-	echo "=======================================" >> $LOG_FILE
+	echo "-------------------------------------" >> $LOG_FILE
 	
 	LOGGING_STARTED='true'
 }
