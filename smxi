@@ -3140,7 +3140,7 @@ post_du_options()
 	
 	eval $advanced1
 	eval $advanced2
-	echo 
+	echo
 	echo "${C}$cont${S} - Continue to graphics driver installation."
 	echo "${C}$initX${S} - Restart desktop/X (skip graphics (re)install)."
 	echo "${C}$qui${S} - Exits the script."
