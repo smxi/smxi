@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.5
-####  Date: July 22 2008
+####  version: 3.3.6
+####  Date: July 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -118,8 +118,8 @@ NV_DEBIAN_LEGACY_2='96xx'
 
 # other options: nothing now
 # IMPORTANT: on function set_download_info the actual path file name is set:
-FG_VERSIONS='8-6:8-5'
-FG_DEFAULT='8-6'
+FG_VERSIONS='8-7:8-6:8-5'
+FG_DEFAULT='8-7'
 
 FG_LEGACY='' # no legacy for ati + xorg >= 7.1
 FG_TESTING=''
@@ -1532,21 +1532,28 @@ driver_support_tests()
 		supported-driver)
 			case $CARD in
 				$FGLRX)
-# 					case $KERNEL_THIRD in
-# 						25|26)
-							case $DRIVER_DEFAULT in
-								8-4|8-5)
-									# fglrx is working on sid kernels, so users who want up to date
-									# system will need to use debian sid kernels + fglrx
-									if [ -n "$IS_SIDUX_KERNEL" ]
-									then
-										error_handler 229
-										# print_information_continue 'standard' "You must be using sidux kernel of at least version ${C}2.6.25-4.slh.8${B} to install fglrx ${C}$DRIVER_DEFAULT\n${B}Your kernel version is: ${C}$KERNEL_VERSION${N}"
-									fi
-									;;
-							esac
-# 							;;
-# 					esac
+					case $KERNEL_THIRD in
+						# handle no sidux kernel support first
+						25|26)
+							if [ -n "$IS_SIDUX_KERNEL" ]
+							then
+								error_handler 229
+								#print_information_continue 'standard' "You must be using sidux kernel of at least version ${C}2.6.25-4.slh.8${B} to install fglrx ${C}$DRIVER_DEFAULT\n${B}Your kernel version is: ${C}$KERNEL_VERSION${N}"
+							else
+								case $KERNEL_THIRD in
+									26)
+										case $DRIVER_DEFAULT in
+											8-5|8-7)
+												#fglrx is working on sid kernels, so users who want up to date
+												#system will need to use debian sid kernels + fglrx
+												error_handler 234 26
+												;;
+										esac
+										;;
+								esac
+							fi
+							;;
+					esac
 					;;
 				$NVIDIA)
 					case $KERNEL_THIRD in
