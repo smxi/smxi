@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.6
+####  version: 3.3.7
 ####  Date: July 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1111,11 +1111,18 @@ create_log()
 	if [ ! -f $SCRIPT_ROTATE ]
 	then
 		echo "$LOG_FILE {
-	rotate 4
+	rotate 8
 	create
-	size 120k
+	size 10k
 }	
 " > $SCRIPT_ROTATE
+	else
+		# update if needed
+		if [ -n "$( grep ' 120k' $SCRIPT_ROTATE )" ]
+		then
+			sed -i 's/rotate[[:space:]]4/rotate 8/' $SCRIPT_ROTATE
+			sed -i 's/size[[:space:]]120k/size 10k/' $SCRIPT_ROTATE
+		fi
 	fi
 	touch $LOG_FILE # make sure there's one there for rotate to look at
 	if [ -n "$( which logrotate )" ]
@@ -1134,6 +1141,7 @@ create_log()
 		echo "Running install from Kernel: $(uname -r)" >> $LOG_FILE
 	fi
 	echo "$SCRIPT_NAME script version: $sgfxiVersion" >> $LOG_FILE
+	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
 	echo "Start Install log:" >> $LOG_FILE
 	echo "=======================================" >> $LOG_FILE
@@ -1165,15 +1173,28 @@ log_function_data()
 		
 		if [ -n "$funcInfo" ]
 		then
-			echo "$funcInfo" >> $LOG_FILE
+			log_writer "$funcInfo"
 		else
-			echo -e "${logSpacer}$1" >> $LOG_FILE
+			log_writer "${logSpacer}$1"
 		fi
 		
 		if [ -n "$3" ]
 		then
-			echo -e "${logSpacer}Func Args: $3" >> $LOG_FILE
+			log_writer "${logSpacer}Func Args: $3"
 		fi
+	fi
+}
+
+# args: $1 - data to write to logfile. Note that the function is always logged
+# via function_logging first, and other relevant globals are set there as well
+log_writer()
+{
+	# this handles first line indents, all other indents must be set in message data
+	# like so: message="some problem... \n${LOG_INDENT}more problem stuff..."
+	if [ "$LOGGING_STARTED" == 'true' ]
+	then
+		# strip out escape color code, if any. Method by dzz of sidux, thanks ;-)
+		echo -e "$1" | sed 's/\x1b\[[0-9]\{1,2\}\(;[0-9]\{1,2\}\)\{0,2\}m//g' >> $LOG_FILE
 	fi
 }
 
