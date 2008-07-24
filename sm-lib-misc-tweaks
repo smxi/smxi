@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.16.2
+####  version: 1.17.0
 ####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1021,6 +1021,80 @@ alt_print_hec()
 	if [ "$repeat" == 'true' ]
 	then
 		alt_print_hec
+	fi
+}
+
+# args: $1 - optional, conversion
+set_apt_type()
+{
+	eval $LOGPS
+	local smPref='apt-type'
+	local aptType=$( sm_pref_tester $smPref 'equal' )
+	local aptTypeSetting=''
+	local typeData='' tempTest='' altHecSetting=''
+	local repeat='' opt='' options='apt-get aptitude continue exit'
+	
+	if [ -n "$aptType"  ]
+	then
+		aptTypeSetting=$aptType
+	else
+		aptTypeSetting='unset'
+	fi
+	echo $LINE
+	echo "${S}Set ${C}$SCRIPT_NAME${S} to use package manager ${C}apt-get${S} or ${C}aptitude${S}."
+	echo $WLINE
+	echo "${W}Only use ${C}aptitude${W} if you have not already used ${C}apt-get${W}, or if this is"
+	echo " a fresh install. If you have used ${C}apt-get${W}, ${C}aptitude${W} will try to remove  "
+	echo "all apt-get installed packages unless you manually take care of that before running this."
+	echo $WLINE
+	echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S}"
+	echo "will use that for all its operations. If you are in doubt, maybe exit here to learn more"
+	echo "about the pros and cons of each method."
+	echo
+	echo "Your current setting is: ${C}$aptTypeSetting"
+	echo $LINE
+	echo "${C}1 - apt-get${S} Solid, reliable, good for Debian Sid."
+	echo "${C}2 - aptitude${S} New package manager wrapper for Debian apt."
+	echo
+	echo "${C}3 - continue${S} Don't change or set."
+	echo "${C}4 - exit${S} Don't want to decide now, I'll study up on this and try later."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		case $opt in
+			apt-get|aptitude)
+				echo $LINE
+				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default apt type: ${C}$opt${N}"
+				set_sm_pref_values "$smPref" "$opt"
+				set_distro_data # have to reset globals now
+				echo "${C}$SCRIPT_NAME${S} will now use apt type: ${C}$APT_TYPE${N}"
+				if [ "$1" == 'conversion' ]
+				then
+					echo "${S}To change your preference, edit $SM_CONFIG_FILE to apt-get or aptitude${N}"
+				fi
+				print_hec
+				;;
+			continue)
+				echo "${S}Ok, not changing anything, $continueText2.${N}"
+				;;
+			exit)
+				print_quit
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+
+	eval $LOGPE
+	if [ "$repeat" == 'true' ]
+	then
+		set_apt_type
 	fi
 }
 

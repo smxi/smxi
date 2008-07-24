@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.1.2
+####  version: 3.2.0
 ####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -23,10 +23,23 @@
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 
+# will remove flag files if user exits early
+# args: $1 - FUNCNAME
+conversion_trap_handler()
+{
+	# first echo is to clear the top line
+	echo ""
+	echo $WLINE
+	echo "${W}You exited before completing the conversion process."
+	echo "Removing all conversion identifier files and exiting now...${N}"
+	rm -f $SMDV  $SMDL
+}
+
 # args: $1 - repeat
 check_debian()
 {
 	eval $LOGMS
+	trap 'conversion_trap_handler $FUNCNAME' INT TERM EXIT
 	local opt='' options='' repeat='' optionSet='debian'
 	local conversionOptions='sidux-sources sidux-conversion'
 	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
@@ -86,12 +99,14 @@ check_debian()
 				tweak_antix_vb_source # only runs if detected so fine for general use
 				update_smxi_data
 				echo "${S}Ok, you can use ${C}$SCRIPT_NAME${S} with no changes to your system, proceed.${N}"
+				trap - INT TERM EXIT
 				;;
 			antix-sid)
 				update_smxi_data
 				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
 				antix_fix_1
+				trap - INT TERM EXIT
 				;;
 			antix-sid-sidux)
 				update_smxi_data
@@ -101,6 +116,7 @@ check_debian()
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				antix_fix_1
+				trap - INT TERM EXIT
 				;;
 			antix-sidux-conversion)
 				update_smxi_data
@@ -112,12 +128,14 @@ check_debian()
 				antix_fix_1
 				print_conversion_information
 				CON_DEB='true'
+				trap - INT TERM EXIT
 				;;
 			sidux-sources)
 				update_smxi_data
 				update_to_new_sources 'sidux'
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
+				trap - INT TERM EXIT
 				;;
 			sidux-conversion)
 				update_smxi_data
@@ -126,6 +144,7 @@ check_debian()
 				set_default_system_kernel 'conversion'
 				print_conversion_information
 				CON_DEB='true'
+				trap - INT TERM EXIT
 				;;
 			quit)
 				print_quit
@@ -254,6 +273,11 @@ sidux_graphics_legacy()
 update_smxi_data()
 {
 	eval $LOGPS
+	if [ ! -f $ATX ]
+	then
+		run_script_import $LIB_MISC_TWEAKS
+		set_apt_type 'conversion' # too risky, users would destroy systems
+	fi
 	distro_number_calculator
 	set_distro_version # just in case user exits, we'll still have the level set
 	eval $LOGPE
