@@ -2930,7 +2930,7 @@ show_options()
 		echo "${W}While you can run this script in X, we recommend you run it in terminal.${N}"
 		echo $LINE
 	fi
-	echo "Script Requirements: Debian Sid or Sidux. No other distro supported!"
+	echo "Script Requirements: Only true Debian based systems. No *buntus."
 	echo "Xorg version required: 7.1/1.1 or greater - Your X version: $xVersion"
 	echo "Linux Kernel required: 2.6.18 or greater - Your kernel: $(uname -r)"
 	echo $LINE
