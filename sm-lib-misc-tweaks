@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.16.1
-####  Date: July 21 2008
+####  version: 1.16.2
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -809,7 +809,7 @@ fxfonts()
 				echo "${S}Removing old ${C}/etc/fonts${S} file.${N}"
 				rm -rf /etc/fonts
 				echo "${S}Running ${C}fontconfig${S} fix.${N}"
-				apt-get install --reinstall --yes -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew fontconfig fontconfig-config
+				apt-get install --reinstall -y -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew fontconfig fontconfig-config
 				echo "${C}fontconfig${S} fix is now completed. Your fonts should work fine again.${N}"
 				;;
 			continue)
@@ -1184,7 +1184,7 @@ misc_legacy_tweaks()
 			fix-init-scripts)
 				echo $LINE
 				echo "${S}Reconfiguring initscripts.${N}"
-				apt-get install --yes --reinstall -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew initscripts
+				apt-get install -y --reinstall -o DPkg::Options::=--force-confmiss -o DPkg::Options::=--force-confnew initscripts
 				echo "${S}Initscript fix is now done.${N}"
 				repeat='true'
 				;;
@@ -1286,7 +1286,7 @@ clean_kanotix_packages()
 		for package in $packages
 		do 
 			echo "${S}Removing ${C}$package${S} now...${N}"
-			package_remover "$package" '--purge'
+			package_remover "$package" 'purge'
 		done
 		echo "${S}Finished removing Kanotix legacy packages.${N}"
 	else

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2007-fixes
-####  version: 1.3.18
-####  Date: July 23 2008
+####  version: 1.3.19
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -101,7 +101,7 @@ kde_sdk_fix_1()
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
-		package_remover 'kdesdk-scripts' '--purge'
+		package_remover 'kdesdk-scripts' 'purge'
 		set_sticky_prefs $prefId 
 	fi
 }
@@ -115,7 +115,7 @@ sysv_freeze_fix_1()
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
-		package_remover 'sysv-freeze' '--purge'
+		package_remover 'sysv-freeze' 'purge'
 		set_sticky_prefs $prefId 
 	fi
 }
@@ -129,7 +129,7 @@ libntfs_3g4_fix_1()
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
-		package_remover 'libntfs-3g4' '--purge'
+		package_remover 'libntfs-3g4' 'purge'
 		set_sticky_prefs $prefId 
 	fi
 }
@@ -210,7 +210,7 @@ remove_sidux_legacy_1()
 			echo "  ${C}fix-res${S} functionality is now found by running: ${C}siduxcc${S}, then"
 			echo "  going to ${C}display -> resolution${S} which has defaults or custom resolutions.  ${N}"
 			print_hec
-			package_remover "$packagesInstalled" '--purge --yes'
+			package_remover "$packagesInstalled" 'purge -y'
 		fi
 		set_sticky_prefs $prefId
 	fi
@@ -229,7 +229,7 @@ k3b_fix_4()
 	then
 		echo $LINE
 		echo "${S}Starting ${C}k3b${S} fix now...${N}"
-		package_remover 'k3b' '--yes'
+		package_remover 'k3b' '-y'
 		package_installer 'k3b' 'install-always'
 		if [ -n "$packageExists" ]
 		then
@@ -336,7 +336,7 @@ ralink_fix_1()
 		then
 			echo $LINE
 			echo "${S}Running ${C}ralink${S} fix now...${N}"
-			package_remover 'firmware-rt61 firmware-rt73 rt61-fwcutter rt73-fwcutter' '--purge --yes'
+			package_remover 'firmware-rt61 firmware-rt73 rt61-fwcutter rt73-fwcutter' 'purge -y'
 			package_installer 'firmware-ralink' 'install-always'
 		fi
 # 		set_sticky_prefs $prefId
@@ -433,7 +433,7 @@ icedove_fix_1()
 			echo "come up with a reasonably safe solution, and this fix seems to do the job."
 			echo
 			echo "The fix is quite simple, and should work for most users:"
-			echo "${C}apt-get remove --purge icedove"
+			echo "${C}apt-get purge icedove"
 			echo "apt-get install icedove"
 			echo "${S}After the upgrade your icedove icons will be gone. This is a known issue."
 			if [ -n "$icedoveLocale" ]
@@ -455,7 +455,7 @@ icedove_fix_1()
 					echo $LINE
 					echo "${S}Running fix now.${N}"
 					
-					package_remover 'icedove' '--purge -y --force-yes' 
+					package_remover 'icedove' 'purge -y --force-yes' 
 					package_installer 'icedove' 'install-always'
 					echo "${S}Fix is completed. I hope it works for you.${N}"
 					set_sticky_prefs $prefId
@@ -557,9 +557,9 @@ du_gtk_fix_1()
 		echo "say n to the continue question and report to forums or irc.${N}"
 		if [ "$USE_LOG" != 'true' ]
 		then
-			apt-get dist-upgrade
+			$APT_TYPE dist-upgrade
 		else
-			apt-get dist-upgrade 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
+			$APT_TYPE dist-upgrade 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-temp $exitStatus
@@ -582,7 +582,7 @@ k3b_fix_1()
 		fi
 		echo $LINE
 		echo "${S}Purging ${C}$dumpPackage${S} then reinstalling ${C}k3b${S} to resolve a conflict...${N}"
-		package_remover "$dumpPackage" '--purge --yes'
+		package_remover "$dumpPackage" 'purge -y'
 		package_installer "k3b $k3bLang" 'install-always'
 		set_sticky_prefs $prefId
 	fi
@@ -598,7 +598,7 @@ remove_zd1211rw()
 	if [ "$smPref" -eq 0 -a -n "$zd1211" ]
 	then
 		echo $LINE
-		package_remover "$zd12" '--purge --yes'
+		package_remover "$zd12" 'purge -y'
 		set_sticky_prefs $prefId
 	fi
 }

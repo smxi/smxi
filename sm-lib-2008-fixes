@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.9
-####  Date: June 27 2008
+####  version: 1.3.10
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -103,7 +103,7 @@ b43_fwcutter_fix_1()
 	then
 		echo $LINE
 		echo "${S}Running ${C}b43-fwcutter${S} fix now...${N}"
-		package_remover 'b43-fwcutter' '--purge --yes'
+		package_remover 'b43-fwcutter' 'purge -y'
 		rm -rf /lib/firmware/b43 /lib/firmware/b43legacy
 		package_installer 'b43-fwcutter' 'install-always'
 		set_sticky_prefs $prefId 
@@ -119,7 +119,7 @@ console_tools_kbd_fix_1()
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
-		# odd trick here, this will remove console-tools
+		# odd trick here, this will remove console-tools, only works with apt-get
 		package_installer 'kbd' 'install-always' '--purge'
 		set_sticky_prefs $prefId 
 	fi
@@ -166,11 +166,11 @@ libstlport4_fix_1()
 		echo $LINE
 		echo "${S}Runnning ${C}libstlport4.6c2${S} fix now. This may also upgrade your ${C}openoffice.org${S}"
 		echo "if it's installed due to dependency issues. ${M}You MUST upgrade both now or your dist-upgrade will fail!${N}"
-		package_remover 'libstlport4.6c2' '--purge'
+		package_remover 'libstlport4.6c2' 'purge'
 		echo "${M}Don't worry if you get an error, just accept ${C}y${M} the next step...${N}"
 		dpkg --purge  'libstlport4.6c2'
-		apt-get install -f
-		apt-get install -f
+		$APT_TYPE install -f
+		$APT_TYPE install -f
 		set_sticky_prefs $prefId 
 	fi
 }

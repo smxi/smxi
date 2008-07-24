@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.6
-####  Date: July 23 2008
+####  version: 1.15.7
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -121,19 +121,19 @@ package_installer()
 	#[ -z "$prefId" ] && prefId='no-set'
 	#local smPref=$( sm_pref_tester $prefId )
 	local packageExists='' package='' packageTemp='' dumpSpace=''
-	local installType=$2 doYes=' --yes' forceIt='' extraInstallArgs=$3
+	local installType=$2 doYes=' -y' forceIt='' extraInstallArgs=$3
 	local installAlways='' installAbsent='' installPresent=''
-	local installError=0 forceError=0 installIt=''
+	local installError=0 forceError=0 installIt='' install='install'
 	local altText1='Installing' altText2=' to update your system'
 	local testOption='ii' packagePlural1='' packagePlural2='is'
 	
 	# set the plural text
-	if [ "$( echo $1 | wc -w )" -gt 1 ]
+	if [ "$( wc -w <<< $1 )" -gt 1 ]
 	then
 		packagePlural1='s'
 		packagePlural2='are'
 	fi
-	
+
 	case $installType in
 		force-always)
 			forceIt='true'
@@ -168,6 +168,17 @@ package_installer()
 			error_handler 'value-bad' $FUNCNAME "$installType"
 			;;
 	esac
+	
+	if [ "$APT_TYPE" == 'aptitude' ]
+	then
+		extraInstallArgs=$( sed -e 's/--allow-unauthenticated/--allow-untrusted/' <<< $extraInstallArgs )
+		if [ -n "$( grep '\--reinstall' <<< $extraInstallArgs )" ]
+		then
+			extraInstallArgs=$( sed 's/--reinstall//' <<< $extraInstallArgs )
+			install='reinstall'
+			doYes='' # because of how aptitude handles this stuff, no auto yes yet
+		fi
+	fi
 	#  no point running these tests if they are not needed
 	if [ "$installAlways" != 'true' ]
 	then
@@ -201,12 +212,12 @@ package_installer()
 		
 		if [ "$forceIt" == 'true' ]
 		then
-			apt-get install -f $doYes
+			$APT_TYPE install -f $doYes
 		fi
-		apt-get install $doYes $extraInstallArgs $1 || installError=$?
+		$APT_TYPE $install $doYes $extraInstallArgs $1 || installError=$?
 		if [ "$forceIt" == 'true' ]
 		then
-			apt-get install -f $doYes || forceError=$?
+			$APT_TYPE install -f $doYes || forceError=$?
 		fi
 	# if user install and already installed...
 	elif [ "$installAbsent" == 'true' -a -n "$packageExists"  ]
@@ -249,12 +260,23 @@ check_install_run_package()
 	eval $LOGUE
 }
 
-# args: $1 - package; $2 - extra args: --purge etc
+# args: $1 - package; $2 - extra args: purge etc
 package_remover()
 {
 	eval $LOGUS
-	local packageExists='' item='' removeError=0
-	local removeErrorPackage='' packageIsWild=''
+	local packageExists='' item='' removeError=0 extraArgs=$2
+	local removeErrorPackage='' packageIsWild='' removePurge='remove'
+	local isPurge=$( grep 'purge' <<< $extraArgs )
+	
+	if [ -n "$isPurge" ]
+	then
+		extraArgs=$( sed 's/purge//g' <<< $extraArgs  )
+		removePurge='purge'
+	fi
+	if [ "$APT_TYPE" == 'aptitude' ]
+	then
+		extraArgs=$( sed 's/-y//' <<< $extraArgs ) # turn off auto yes until tested more
+	fi
 	
 	for item in $1
 	do
@@ -267,12 +289,13 @@ package_remover()
 			removeError=0 # reset to no error
 			echo 
 			echo "${SPACER}${S}Removing package ${C}$item${S}...${N}"
-			apt-get remove $2 $item || removeError=$?
+			$APT_TYPE $removePurge $extraArgs $item || removeError=$?
 			if [ "$removeError" -gt 0 ]
 			then
 				echo "${SPACER}${E}Error ${C}$removeError${E} removing package: ${C}$item${N}"
 				removeErrorPackage="$removeErrorPackage $item"
 				echo
+				log_function_data
 			fi
 		else
 			echo "${SPACER}${M}Cannot remove package ${C}$item${M} because it is not installed.${N}"
@@ -308,7 +331,7 @@ apt_error_handling()
 			distUpgrade='true'
 			;;
 		up-du-1|up-du-key1|up-du-key2|up-err-1|up-mirror-1|up-kernel-1|up-package-1|up-app|up-kern-tools|distro-conversion)
-			pText='apt-get update'
+			pText="$APT_TYPE update"
 			aptUpdate='true'
 			;;
 		*)
@@ -332,9 +355,9 @@ apt_error_handling()
 		then
 			echo "${S}You have 4 options to resolve this issues. If you select 1 or 2, the information will"
 			echo "be logged to ${C}$LOG_FILE${S}"
-			echo "${C}1 - apt-get update-no-pdiffs${S} ${M}Recommended${S} Runs update again without pdiffs."
+			echo "${C}1 - $APT_TYPE update-no-pdiffs${S} ${M}Recommended${S} Runs update again without pdiffs."
 			echo "    This will fix most update errors except for apt repository offline stuff."
-			echo "${C}2 - apt-get update${S} Runs update again using your current choices."
+			echo "${C}2 - $APT_TYPE update${S} Runs update again using your current choices."
 			echo "${C}3 - change-debian-mirror${S} If the mirror that is failing is a debian mirror (will not say"
 			echo "    ${C}sidux${S} in mirror), change to another debian mirror."
 			echo "${C}4 - change-sidux-mirror${S} If the mirror that is failing is a ${C}sidux${S} mirror,"
@@ -353,7 +376,7 @@ apt_error_handling()
 				case $opt in
 					update-no-pdiffs)
 						echo $LINE
-						echo "${S}Running ${C}apt-get update no pdiffs${S} to solve broken bzip pdiff errors.${N}"
+						echo "${S}Running ${C}$APT_TYPE update no pdiffs${S} to solve broken bzip pdiff errors.${N}"
 						NO_PDIFFS=$NO_PDIFF_ARGS
 						apt_update_handler 'up-error-1'
 						;;
@@ -657,7 +680,7 @@ wesnoth-all
 }
 
 ###---------------------------------------------------------------------
-### apt-get update tools - update / keyrings / gpg / debian mirrors / non-free
+### apt update tools - update / keyrings / gpg / debian mirrors / non-free
 ###---------------------------------------------------------------------
 
 # this can be run by either post kernel install or pre dist-upgrade
@@ -710,13 +733,13 @@ apt_update_handler()
 		
 		# then start the update for real
 		echo $LINE
-		echo "${S}Starting ${C}apt-get update${S} now to bring your system into sync with apt...${N}"
+		echo "${S}Starting ${C}$APT_TYPE update${S} now to bring your system into sync with apt...${N}"
 		
 		if [ "$USE_LOG" != 'true' -a "$1" != 'up-error-1' ]
 		then
-			apt-get update $NO_PDIFFS
+			$APT_TYPE update $NO_PDIFFS
 		else
-			apt-get update $NO_PDIFFS 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
+			$APT_TYPE update $NO_PDIFFS 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		# get the success/fail exit code of update
 		exitStatus=${PIPESTATUS[0]}
@@ -1572,7 +1595,7 @@ test_app_exists()
 		echo "${C}$installApps"
 		echo $EBAR
 		echo "${S}Run the following manually to install the missing programs:"
-		echo "$SPACER${C}apt-get update;apt-get install $installApps"
+		echo "$SPACER${C}$APT_TYPE update;$APT_TYPE install $installApps"
 		echo "${S}or let the script do it for you now."
 		echo $LINE
 		echo -e "${Q}Would you like to install those now? ${S}[${C}y${S} installs the missing programs, ${C}n${S} exits]$YNE"

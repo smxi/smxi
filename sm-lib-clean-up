@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.5.1
-####  Date: July 21 2008
+####  version: 2.5.2
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -75,11 +75,11 @@ clean_up()
 	echo "carefully before you run it."
 	echo $LINE
 	
-	echo "${C}1${S} - Runs the simple command ${C}apt-get clean${S}."
+	echo "${C}1${S} - Runs the simple command ${C}$APT_TYPE clean${S}."
 	echo "    This removes the apt files cached in ${C}/var/cache/apt/archives${S}. They hurt nothing by"
 	echo "    remaining, and can be interesting to look at, but they also take up diskspace."
 	
-	echo "${C}2${S} - Runs the command ${C}apt-get autoclean${S}."
+	echo "${C}2${S} - Runs the command ${C}$APT_TYPE autoclean${S}."
 	echo "    Like clean, autoclean clears out the local repository of retrieved package files."
 	echo "    The difference is it only removes package files that are not in apt."
 	echo "    This allows a cache to be maintained over a long period without it getting too big."
@@ -107,7 +107,7 @@ clean_up()
 	echo "    keep whichever you want, and remove the rest."
 	
 	echo "${C}8${S} - ${C}clean-cruft${S} will remove any parts of packages you removed via"
-	echo "    ${C}apt-get remove${S} without using ${C}dpkg --purge${S}. Has option to simulate first"
+	echo "    ${C}$APT_TYPE remove${S} without using ${C}dpkg --purge${S}. Has option to simulate first"
 	echo "    so you can see what would happen first. These packages are found via ${C}dpkg -l | grep ^rc${S}"
 	
 	eval $advanced
@@ -231,9 +231,9 @@ apt_clean()
 	fi
 	
 	echo $LINE
-	echo "${S}Running the command: ${C}apt-get $aptcommand${S}."
-	echo "${C}apt-get $aptcommand${S} will remove all the$text1 archived deb files in ${C}/var/cache/apt/archives${S}${N}"
-	apt-get $aptcommand
+	echo "${S}Running the command: ${C}$APT_TYPE $aptcommand${S}."
+	echo "${C}$APT_TYPE $aptcommand${S} will remove all the$text1 archived deb files in ${C}/var/cache/apt/archives${S}${N}"
+	$APT_TYPE $aptcommand
 	echo "${S}Your apt archives have been cleaned in the way you requested.${N}"
 	eval $LOGPE
 }
@@ -299,7 +299,7 @@ debian_orphans()
 # 	while orphan=$( deborphan )
 # 	test -n "$orphan"
 # 	do 
-# 		apt-get remove --purge --yes $orphan
+# 		package_remover $orphan 'purge -y' 
 # 	done
 # 	
 # 	# run this after the above, this is the old mini-script remove-orphans
@@ -617,9 +617,9 @@ remove_xorg_components()
 	
 	if [ "$X_ORG_LIST" != '' ]
 	then
-		echo "${S}Running ${C}apt-get remove --purge${S} on the modules you did not preserve.${N}"
+		echo "${S}Running ${C}$APT_TYPE purge${S} on the modules you did not preserve.${N}"
 		log_function_data "X_ORG_LIST: $X_ORG_LIST"
-		package_remover "$X_ORG_LIST" '--purge'
+		package_remover "$X_ORG_LIST" 'purge'
 		echo "${S}The following ${C}xorg modules${S} have been removed:"
 		echo "${C}$X_ORG_LIST"
 		echo $LINE

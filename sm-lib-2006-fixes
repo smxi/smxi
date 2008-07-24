@@ -70,7 +70,7 @@ console_tools_fix()
 		echo $LINE
 		echo "${S}Running ${C}console-tools${S} fix to improve Splashy performance...${N}"
 		rm -rf /etc/console-tools
-		apt-get install --reinstall --yes -o DPkg::Options::=--force-confmiss console-tools
+		apt-get install --reinstall -y -o DPkg::Options::=--force-confmiss console-tools
 		echo "${C}console-tools${S} is completed.${N}"
 		
 		set_sticky_prefs console-tools-1

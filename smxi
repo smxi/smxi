@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.1.5
+####  version: 8.2.0
 ####  Date: July 24 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -250,6 +250,7 @@ Z_SET=''
 
 # set function variables that will retain values: check hold is actually loaded top of
 # sm-lib-apt-tools
+APT_TYPE='apt-get'
 CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
 CON_DEB=''
@@ -497,8 +498,7 @@ error_handler()
 		errorLine="\n${LOG_INDENT}$WLINE\n${LOG_INDENT}"
 	fi
 	errorLogMessage="$errorMessage\n${LOG_INDENT}Error No: $errorCode- Function: $errorFunction"
-	errorMessage="$errorMessage\n${LOG_INDENT}${M}Error No: ${C}$errorCode ${M}- Function: ${C}$errorFunction"
-	errorPrintMessage="$errorLine${errorColor}$errorMessage$errorLine${N}"
+	errorPrintMessage="$errorLine${M}Error No: (${C}$errorCode${M}) ${errorColor}$errorMessage$errorLine${N}"
 	# strip out the spacer stuff for output if required, not testing null gives sed error
 	if [ "$LOG_INDENT" != '' -a "$LOG_INDENT" != ' '  ]
 	then
@@ -1107,6 +1107,7 @@ set_distro_data()
 	eval $LOGPS
 	local siduxSources=$( grep -sil '^[[:space:]]*deb.*sidux' $EAS $EAS.d/*.list )
 	local mepisSources=$( grep -sil '^[[:space:]]*deb.*mepis' $EAS $EAS.d/*.list )
+	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
@@ -1176,6 +1177,11 @@ set_distro_data()
 	case "$duUpgrade" in
 		upgrade|dist-upgrade)
 			DU_UPGRADE=$duUpgrade
+			;;
+	esac
+	case "$aptType" in
+		apt-get|aptitude)
+			APT_TYPE=$aptType
 			;;
 	esac
 	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
@@ -1702,7 +1708,7 @@ get_default_display_manager()
 	eval $LOGUE
 }
 
-# must run after, not before first apt-get update/ dist-upgrade
+# must run after, not before first apt update/ dist-upgrade
 # otherwise there is no policy set for xorg
 test_xorg_version()
 {
@@ -2493,8 +2499,8 @@ print_install_information()
 		echo -e "${S}The latest kernel for your system is: ${C}$latestKernel${N}"
 	fi
 	echo $LINE
-	echo "${S}Last apt-get package database update: ${C}$DPKG_UPDATE${S}"
-	echo "${S}Last apt-get package install or upgrade: ${C}$dpkgInstall${S}"
+	echo "${S}Last $APT_TYPE package database update: ${C}$DPKG_UPDATE${S}"
+	echo "${S}Last $APT_TYPE package install or upgrade: ${C}$dpkgInstall${S}"
 	echo "${S}Last use of $SCRIPT_NAME: ${C}$ScriptLastRun${S}"
 	echo "${S}Last $DU_UPGRADE using $SCRIPT_NAME: ${C}$ScriptLastDu${S}"
 	echo $LINE
@@ -2675,7 +2681,7 @@ print_quit()
 }
 
 ########################################################################
-### apt-get / dpkg tools: update/install/mirror switchers: sm-lib-apt-tools
+### apt / dpkg tools: update/install/mirror switchers: sm-lib-apt-tools
 ###---------------------------------------------------------------------
 
 # HANDLED BY EXTERNAL LIBARARY FILE sm-lib-apt-tools
@@ -2787,7 +2793,7 @@ install_dist_upgrade()
 		echo "${S}Make sure your $DU_UPGRADE goes all the way through"
 		echo "If it exits with errors select one of the following options:"
 		echo "${C}2${S} - for doing ${C}$DU_UPGRADE${S} again. Try the ${C}2${S} option first."
-		echo "${C}1${S} - for ${C}apt-get install -f${S}. Only select ${C}1${S} if ${C}2${S} returns errors"
+		echo "${C}1${S} - for ${C}$APT_TYPE install -f${S}. Only select ${C}1${S} if ${C}2${S} returns errors"
 		echo "That will force apt to install the parts that returned errors."
 		
 		# small cosmetic, to avoid printing double line with print-hec
@@ -2799,9 +2805,9 @@ install_dist_upgrade()
 		print_hec
 		if [ "$USE_LOG" != 'true' ]
 		then
-			apt-get $DU_UPGRADE
+			$APT_TYPE $DU_UPGRADE
 		else
-			apt-get $DU_UPGRADE 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
+			$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 		fi
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
@@ -2820,7 +2826,7 @@ install_dist_upgrade()
 		echo "${E}Your $DU_UPGRADE is reporting errors!"
 		echo $EBAR
 		echo "${S}Please make sure to do the following to correct the errors reported:"
-		echo "${C}apt-get install -f ${S}[option ${C}1${S}] - Use this first if you got errors!"
+		echo "${C}$APT_TYPE install -f ${S}[option ${C}1${S}] - Use this first if you got errors!"
 		
 		echo
 		echo "Run the ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] to make sure the $DU_UPGRADE completes."
@@ -2873,9 +2879,9 @@ install_dist_upgrade()
 			use-install-f)
 				if [ "$USE_LOG" != 'true' ]
 				then
-					apt-get install -f
+					$APT_TYPE install -f
 				else
-					apt-get install -f 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
+					$APT_TYPE install -f 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 				fi
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-f $exitStatus
@@ -2885,9 +2891,9 @@ install_dist_upgrade()
 			dist-upgrade-again|upgrade-again)
 				if [ "$USE_LOG" != 'true' ]
 				then
-					apt-get $DU_UPGRADE
+					$APT_TYPE $DU_UPGRADE
 				else
-					apt-get $DU_UPGRADE 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
+					$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
 				fi
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-2 $exitStatus
@@ -3143,7 +3149,7 @@ post_du_options()
 	echo "    One option is to remove all the german language packages from your system."
 	
 	echo "${C}3${S} - ${C}clean-up-stuff${S} This feature has a variety of clean up options:"
-	echo "    1: apt-get clean; 2: apt-get autoclean, clean up only non-current deb files;"
+	echo "    1: $APT_TYPE clean; 2: $APT_TYPE autoclean, clean up only non-current deb files;"
 	echo "    3: kernel removal options, remove all non-current kernels; 4: kernel module remover;"
 	echo "    5: backup file cleanup; 6: clean kanotix conversion packages; 7: clean unused xorg modules"
 	
@@ -3291,7 +3297,7 @@ print_usage()
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
 	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
 	
-	echo "${C}-p${S} Runs apt-get update without using ${C}p${S}diffs. Good for fast connections."
+	echo "${C}-p${S} Runs $APT_TYPE update without using ${C}p${S}diffs. Good for fast connections."
 	echo "${C}-P${S} Run script with ${C}P${S}roxy settings for connection, requires this syntax:"
 	echo "   ${C}-P http://[<username><:password>@]<server><:port>${S} Argument is required."
 	echo "${C}-U${S} Forces an ${C}U${S}pdate of script before it runs again."

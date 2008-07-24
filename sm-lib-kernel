@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.4.2
-####  Date: July 21 2008
+####  version: 2.4.3
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -422,7 +422,7 @@ remove_kernel_modules()
 		else
 			#echo "${S}Removing ${C}$module${S} now....${N}"
 			# we're doing a wildcard remover here so we can dump all the modules
-			package_remover "$module*" '--yes --purge'
+			package_remover "$module*" 'purge -y'
 			remove_kernel_modules
 		fi
 	else

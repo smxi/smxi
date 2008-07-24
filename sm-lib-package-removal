@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-removal
-####  version: 1.3.1
-####  Date: July 21 2008
+####  version: 1.3.2
+####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -187,14 +187,13 @@ package_removal()
 						fi
 						packages=$( dpkg -l | awk '/(hi|ii)[ \t]*'$kickit'/{print $2}' )
 						log_function_data "packages: $packages"
-						package_remover "$packages $extraPackage"  '--purge'
-						#COLUMNS=200 dpkg -l | awk '/'$kickit'/{print $2}' | xargs -r apt-get remove --purge
+						package_remover "$packages $extraPackage"  'purge'
 					elif [ "$kickit" == 'captive' ]
 					then
-						package_remover 'captive' '--purge'
+						package_remover 'captive' 'purge'
 					elif [ "$kickit" == 'manpages-de' ]
 					then
-						package_remover 'manpages-de'  '--purge'
+						package_remover 'manpages-de'  'purge'
 					fi
 				done
 				
