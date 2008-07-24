@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.17.0
+####  version: 1.18.0
 ####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -119,8 +119,10 @@ misc_hacks()
 advanced_tweaks()
 {
 	eval $LOGPS
-	local opt='' repeat='' options='' tempCount=0 advancedOption1='' advanced1=''
-	local cont=''
+	local opt='' repeat='' options='' tempCount=0 advancedOption1='' advanced1Text=''
+	local cont='' aptOpt='' duOpt='' aptText='' duText=''
+	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
+	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
 	
 	options="change-debian-mirrors change-sidux-mirrors update-bashrc update-locales alternate-print-hec default-system-kernel "
 	
@@ -131,9 +133,23 @@ advanced_tweaks()
 	then
 		tempCount=$(( $tempCount + 1 ))
 		advancedOption1='restore-sources.list'
-		advanced1='echo -e "${C}'$tempCount'${S} - ${C}restore-sources.list${S} Move contents of ${C}sources.list.d${S} files to ${C}sources.list${S}"'
+		advanced1Text='echo -e "${C}'$tempCount'${S} - ${C}restore-sources.list${S} Move contents of ${C}sources.list.d${S} files to ${C}sources.list${S}"'
 	fi
-	options="$options $advancedOption1 continue"
+	options="$options $advancedOption1"
+	if [ -n "$aptType" ]
+	then
+		tempCount=$(( $tempCount + 1 ))
+		aptOpt='apt-type'
+		aptText='echo -e "${C}'$tempCount'${S} - ${C}apt-type${S} Set default $SCRIPT_NAME apt type: ${C}apt-get/aptitude${S}"'
+	fi
+	options="$options $aptOpt"
+	if [ -n "$duUpgrade" ]
+	then
+		tempCount=$(( $tempCount + 1 ))
+		duOpt='upgrade-dist-upgrade'
+		duText='echo -e "${C}'$tempCount'${S} - ${C}upgrade-dist-upgrade${S} Set default $SCRIPT_NAME upgrade type: ${C}upgrade/dist-upgrade${S}"'
+	fi
+	options="$options $duOpt continue"
 	tempCount=$( echo $options | wc -w )
 	cont=$tempCount
 	
@@ -157,7 +173,9 @@ advanced_tweaks()
 	
 	echo "${C}6${S} - ${C}default-system-kernel${S} Change default ${C}$SCRIPT_NAME${S} system kernel type."
 	echo "    Depending on your base system, this will either be only one, or a list, like sidux or debian."
-	eval $advanced1
+	eval $advanced1Text
+	eval $aptText
+	eval $duText
 	echo "${C}$cont${S} - Return to Miscellaneous Tweaks Main Menu."
 	echo $LINE
 	echo -e $SLE
@@ -166,12 +184,20 @@ advanced_tweaks()
 	select opt in $options
 	do
 		case $opt in
+			apt-type)
+				set_apt_type
+				repeat='true'
+				;;
 			change-debian-mirrors)
 				change_debian_mirrors
 				repeat='true'
 				;;
 			change-sidux-mirrors)
 				change_kernel_mirrors
+				repeat='true'
+				;;
+			upgrade-dist-upgrade)
+				set_upgrade_type
 				repeat='true'
 				;;
 			update-bashrc)
@@ -1031,7 +1057,6 @@ set_apt_type()
 	local smPref='apt-type'
 	local aptType=$( sm_pref_tester $smPref 'equal' )
 	local aptTypeSetting=''
-	local typeData='' tempTest='' altHecSetting=''
 	local repeat='' opt='' options='apt-get aptitude continue exit'
 	
 	if [ -n "$aptType"  ]
@@ -1044,7 +1069,7 @@ set_apt_type()
 	echo "${S}Set ${C}$SCRIPT_NAME${S} to use package manager ${C}apt-get${S} or ${C}aptitude${S}."
 	echo $WLINE
 	echo "${W}Only use ${C}aptitude${W} if you have not already used ${C}apt-get${W}, or if this is"
-	echo " a fresh install. If you have used ${C}apt-get${W}, ${C}aptitude${W} will try to remove  "
+	echo "a fresh install. If you have used ${C}apt-get${W}, ${C}aptitude${W} will try to remove  "
 	echo "all apt-get installed packages unless you manually take care of that before running this."
 	echo $WLINE
 	echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S}"
@@ -1071,14 +1096,11 @@ set_apt_type()
 				set_sm_pref_values "$smPref" "$opt"
 				set_distro_data # have to reset globals now
 				echo "${C}$SCRIPT_NAME${S} will now use apt type: ${C}$APT_TYPE${N}"
-				if [ "$1" == 'conversion' ]
-				then
-					echo "${S}To change your preference, edit $SM_CONFIG_FILE to apt-get or aptitude${N}"
-				fi
+				echo "${S}To change your preference, go to Miscellaneous Tweaks, Advanced Options${N}"
 				print_hec
 				;;
 			continue)
-				echo "${S}Ok, not changing anything, $continueText2.${N}"
+				echo "${S}Ok, not changing anything.${N}"
 				;;
 			exit)
 				print_quit
@@ -1095,6 +1117,81 @@ set_apt_type()
 	if [ "$repeat" == 'true' ]
 	then
 		set_apt_type
+	fi
+}
+
+# args: $1 - optional, conversion
+set_upgrade_type()
+{
+	eval $LOGPS
+	local smPref='du-upgrade'
+	local upgradeType=$( sm_pref_tester $smPref 'equal' )
+	local upgradeTypeSetting=''
+	local tempTest=''
+	local repeat='' opt='' options='dist-upgrade upgrade continue exit'
+	
+	if [ -n "$aptType"  ]
+	then
+		aptTypeSetting=$aptType
+	else
+		aptTypeSetting='unset'
+	fi
+	echo $MLINE
+	echo "${S}Set ${C}$SCRIPT_NAME${S} to use upgrade type ${C}dist-upgrade${S} or ${C}upgrade${S}."
+	echo $MLINE
+	echo "${M}Your system base appears to be: ${C}Debian $SYSTEM_BASE"
+	echo
+	echo "${S}In general, for ${C}Debian Sid${S}, ${C}dist-upgrade${S} is the better choice for maintaining your system."
+	echo "For ${C}Debian Testing${S}, ${C}dist-upgrade${S} should work fine, but some users prefer ${C}upgrade${S} because"
+	echo "it's more stable. If you choose ${C}upgrade${S} for either Sid or Testing systems, you must run"
+	echo "dist-upgrade manually now and then to fully update your system, or change it here,"
+	echo "then change it back. ${C}Debian Stable${S} always uses ${C}upgrade${S} by default."
+	echo $MLINE
+	echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S}"
+	echo "will use that for all its operations. If you are in doubt, maybe exit here to learn more"
+	echo "about the pros and cons of each method."
+	echo
+	echo "Your current setting is: ${C}$upgradeType"
+	echo $LINE
+	echo "${C}1 - dist-upgrade${S} Solid, reliable, good for Debian Sid."
+	echo "${C}2 - upgrade${S} For users who know how to maintain their systems, and will dist-upgrade manually."
+	echo
+	echo "${C}3 - continue${S} Don't change or set."
+	echo "${C}4 - exit${S} Don't want to decide now, I'll study up on this and try later."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		case $opt in
+			dist-upgrade|upgrade)
+				echo $LINE
+				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default upgrade type: ${C}$opt${N}"
+				set_sm_pref_values "$smPref" "$opt"
+				set_distro_data # have to reset globals now
+				echo "${C}$SCRIPT_NAME${S} will now use upgrade type: ${C}$DU_UPGRADE${N}"
+				echo "${S}To change your preference, go to Miscellaneous Tweaks, Advanced Options${N}"
+				print_hec
+				;;
+			continue)
+				echo "${S}Ok, not changing anything...${N}"
+				;;
+			exit)
+				print_quit
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+
+	eval $LOGPE
+	if [ "$repeat" == 'true' ]
+	then
+		set_upgrade_type
 	fi
 }
 
