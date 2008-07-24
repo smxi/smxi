@@ -679,7 +679,7 @@ log_function_data()
 		
 		if [ -n "$3" ]
 		then
-			log_writer "${logSpacer}Func Args: $3"
+			log_writer "${logSpacer}Args: $3"
 		fi
 	fi
 }
