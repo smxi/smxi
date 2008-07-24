@@ -1184,6 +1184,7 @@ set_distro_data()
 			APT_TYPE=$aptType
 			;;
 	esac
+	log_function_data "APT_TYPE: $APT_TYPE"
 	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
 	log_function_data "DU_UPGRADE: $DU_UPGRADE"
 	log_function_data "DEFAULT_KERNEL: $DEFAULT_KERNEL"
