@@ -852,7 +852,7 @@ test_version_info()
 	eval $LOGUE
 }
 
-# arguments: $1 filename; $2 chm/other, for chmod +x $1; $3 for userscript only
+# arguments: $1 filename; $2 chm/other, for chmod +x $1
 update_scripts()
 {
 	eval $LOGUS
