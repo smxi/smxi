@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.2.1
-####  Date: July 24 2008
+####  version: 8.3.0
+####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -201,6 +201,9 @@ LIB_2008_FIXES='sm-lib-2008-fixes'
 MOD_GFX='sgfxi'
 MOD_KM='kremover'
 MOD_VM='svmi'
+# optional user set scripts
+USER_SCRIPT=''
+USER_SCRIPT_URL=''
 
 # script import test values
 SET_APT_TOOLS=''
@@ -446,6 +449,10 @@ error_handler()
 			errorCode=35
 			errorMessage="The operation you requested requires the library file: $errorExtra but it is missing.\nThe script cannot run the requested action without this library.\n please find out what is wrong."
 			;;
+		bad-user-script-url)
+			errorCode=36
+			errorMessage="The script url you provided: $errorExtra is not working,\nplease check your typing, and make sure the url actually exists."
+			;;
 		# failures in actions/functions not requiring script exit: 100-150: serious
 		missing-lib)
 			errorCode=100
@@ -651,7 +658,8 @@ create_log()
 run_script_import()
 {
 	eval $LOGUS
-	local loadIt='' runIt='' options='' noTestDownloadOnly=''
+	local loadIt='' runIt='' options='' noTestDownloadOnly='' runCommand='test_version_info'
+	local runScript=''
 	
 	case $1 in
 		$LIB_APT_TOOLS)
@@ -751,29 +759,30 @@ run_script_import()
 			;;
 		$MOD_GFX)
 			runIt='true'
+			runScript=$1
 			;;
 		$MOD_KM)
 			runIt='true'
+			runScript=$1
 			;;
 		$MOD_VM)
 			options='-D'
 			runIt='true'
+			runScript=$1
 			if [ "$MONOCHROME" == 'true' ]
 			then
 				options='-j'
 			fi
 			;;
-		$MOD_ADVANCED)
-			if [ -n "$NO_PDIFFS" ]
-			then
-				options='-dp'
-			else
-				options='-d'
-			fi
-			runIt='true'
-			;;
 		*)
-			error_handler 'value-bad' $FUNCNAME "$1"
+			if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ]
+			then
+				runIt='true'
+				runCommand='update_scripts'
+				runScript=$USER_SCRIPT
+			else
+				error_handler 'value-bad' $FUNCNAME "$1"
+			fi
 			;;
 	esac
 	
@@ -800,8 +809,8 @@ run_script_import()
 		fi
 	elif [ "$runIt" == 'true' ]
 	then
-		test_version_info $1 'chm'
-		DISPLAY= ./$1 $options # run module
+		$runCommand $1 'chm'
+		DISPLAY= ./$runScript $options # run module
 	fi
 	eval $LOGUE
 }
@@ -843,7 +852,7 @@ test_version_info()
 	eval $LOGUE
 }
 
-# arguments: $1 filename; $2 chm/other, for chmod +x $1
+# arguments: $1 filename; $2 chm/other, for chmod +x $1; $3 for userscript only
 update_scripts()
 {
 	eval $LOGUS
@@ -867,32 +876,42 @@ update_scripts()
 download_test_file()
 {
 	eval $LOGUS
-	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
-	local isGood='' wgetError=0 update=''
+	local fileName=$1 fileNameTemp=''
+	local isGood='' wgetError=0 update='' 
+	local downloadLocation=$TECH_PATTERNS_DISTRO downloadFile=$1 downloadUrl=''
 	
 	if [ -f "$fileNameTemp" ]
 	then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
 	fi
-	if [ "$1" == "$LIB_WARNING" ]
+	if [ "$downloadFile" == "$LIB_WARNING" ]
 	then
 		update="?$DISTRO_F"
 	fi
+	if [ "$downloadFile" == "$USER_SCRIPT_URL" ]
+	then
+		downloadLocation=$USER_SCRIPT_URL
+		downloadFile=''
+		fileName=$USER_SCRIPT
+	fi
+	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
+	downloadUrl="$downloadLocation$downloadFile$update"
+	log_function_data "download url: $downloadUrl"
 	# always using -O here because -Nc is really buggy over time lines and fast file changes
-	wget -T$TIME_OUT -t 2 -q -O $fileNameTemp $TECH_PATTERNS_DISTRO$1$update &>/dev/null || wgetError="$?"
+	wget -T$TIME_OUT -t 2 -q -O$fileNameTemp $downloadUrl &>/dev/null || wgetError="$?"
 	if [ "$wgetError" -gt 0 ]
  	then
- 		file_download_error "$1" 'server-problem' "$wgetTest"
+ 		file_download_error "$fileName" 'server-problem' "$wgetTest"
 	else
 		# all smxi files have this string as last line, so if it's there, the file should usually
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
 		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
-		if [ -n "$isGood" ]
+		if [ -n "$isGood" -o "$1" == "$USER_SCRIPT_URL" ]
 		then
-			mv -f $fileNameTemp $1
+			mv -f $fileNameTemp $fileName
 			if [ "$2" == 'chm' ]
 			then
-				chmod +x $1
+				chmod +x $fileName
 			fi
 			eval $LOGUE
 			return 0
@@ -903,7 +922,7 @@ download_test_file()
 			if [ "$3" != 'repeat' ]
 			then
 				# let's try this once again to make sure it wasn't just a temp problem
-				echo "${E}The file ${C}$1${E} did not download correctly, retrying download now...${N}"
+				echo "${E}The file ${C}$fileName${E} did not download correctly, retrying download now...${N}"
 				download_test_file "$1" "$2" 'repeat'
 			else
 				file_download_error "$1" 'file-corrupt'
@@ -957,6 +976,12 @@ file_download_error()
 			;;
 	esac
 	eval $LOGPE
+}
+
+# args: $1 url to test, returns 0/1 for success/fail
+wget_test()
+{
+	wget -T5 -t 1 -q --spider $1 && return 0 || return 1
 }
 
 # compare 2 dot [5.34.6] or 1/0 dot [3.45,3] version numbers
@@ -3112,16 +3137,17 @@ post_du_options()
 		advanced1='echo -e "${C}'$tempCount'${S} - ${C}kernel-options${S} Install kernels. Install latest, and older, kernels.\n\t${M}NEW: metapackage options; NEW: kernel-module-remover"'
 		tempCount=''
 	fi
+	options="$options $advanced1Option"
 	# catch the count up again for options
 	tempCount=$( echo $options | wc -w )
-	if [ "$EXTRA_OPTIONS2" == 'true' ] # legacy, not currently used
+	if [ -n "$USER_SCRIPT_URL" ]
 	then
 		tempCount=$(( $tempCount + 1 ))
-		advanced2Option='advanced-install-options'
-		advanced2='echo -e "${C}'$tempCount'${S} - ${C}advanced-install-options${S} Gives more package install options\n    not listed in standard package install."'
+		advanced2Option='run-user-script'
+		advanced2='echo -e "${C}'$tempCount'${S} - ${C}run-user-script${S} Download and start the script: ${C}$USER_SCRIPT${S}"'
 		tempCount=''
 	fi
-	options="$options $advanced1Option $advanced2Option continue-to-graphics start-desktop quit"
+	options="$options $advanced2Option continue-to-graphics start-desktop quit"
 	
 	tempCount=$( echo $options | wc -w )
 	
@@ -3212,8 +3238,8 @@ post_du_options()
 				kernel_question post-du
 				repeat='true'
 				;;
-			advanced-install-options)
-				run_script_import $MOD_ADVANCED
+			run-user-script)
+				run_script_import $USER_SCRIPT_URL
 				repeat='true'
 				;;
 			continue-to-graphics)
@@ -3303,6 +3329,9 @@ print_usage()
 	echo "   ${C}-P http://[<username><:password>@]<server><:port>${S} Argument is required."
 	echo "${C}-U${S} Forces an ${C}U${S}pdate of script before it runs again."
 	echo "${C}-x${S} Runs e${C}x${S}tra script features that are not core to central functionality."
+	echo "${C}-X${S} Download and run a custom user script. Syntax: ${C}-X userscript-name#userscript-url"
+	echo "    ${S}Example: ${C}-X my-cleanup-script#somewebsite.com/my-cleanup-script${S}"
+	echo "    The script will show as an additional option in the Post upgrade section."
 	
 	echo
 	echo "${S}The following can be run in X/kde:"
@@ -3322,7 +3351,7 @@ print_usage()
 # this must be set before anything else runs in script, -j will reset to no colors
 set_script_colors 
 ## this is not in a function because these variables need to be set on startup
-while getopts :dDeEhgiI:jkKlmMNpP:sStTvwW:fruUxZ: opt
+while getopts :dDeEhgiI:jkKlmMNpP:sStTvwW:fruUxX:Z: opt
 do
 	case $opt in
 		h)	print_usage;;
@@ -3423,6 +3452,18 @@ do
 		x)	EXTRA_OPTIONS='true'
 			START_OPTIONS=$START_OPTIONS'x'
 			;;
+		X)	if [ -z "$( egrep "^.*#.*$" <<< $OPTARG )" ]
+			then
+				echo "${E}The -X option requires the following syntax:"
+				echo "${C}script-name#script-url${S} (script name + # script web address/url"
+				echo "Example: ${C}my-system-cleaner#http://somesite.com/my-system-cleaner.sh${N}"
+				exit 1
+			else
+				USER_SCRIPT=$( cut -d '#' -f 1 <<< $OPTARG )
+				USER_SCRIPT_URL=$( cut -d '#' -f 2 <<< $OPTARG )
+				wget_test $USER_SCRIPT_URL || error_handler 'bad-user-script-url' 'script_option_handler' "$USER_SCRIPT_URL"
+			fi
+			;;
 		Z)	Z_SET="$OPTARG"
 			;;
 		?)	print_usage err;;
@@ -3437,6 +3478,11 @@ if [ -n "$Z_SET" ]
 then
 	START_OPTIONS="$START_OPTIONS -Z $Z_SET"
 fi
+if [ -n "$USER_SCRIPT_URL" -a -n $USER_SCRIPT ]
+then
+	START_OPTIONS="$START_OPTIONS -X $USER_SCRIPT#$USER_SCRIPT_URL"
+fi
+
 
 ########################################################################
 ####  EXECUTE
