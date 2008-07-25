@@ -3237,7 +3237,7 @@ if [ "$SKIP_FUNCTION" != 'true' -a "$PRINT_VER" != 'true' ]
 then
 	create_log
 fi
-if [ "$PRINT_VER" != 'true' -a -z "$PACKAGE_MANAGER" -a "$SM_INSTALL" != 'true' ]
+if [ "$PRINT_VER" != 'true' -a -z "$PACKAGE_MANAGER" -a "$SM_INSTALL" != 'true' -a "$AUTORUN" != 'true' ]
 then
 	check_apt_aptitude
 fi
