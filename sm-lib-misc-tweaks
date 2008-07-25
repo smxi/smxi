@@ -1136,7 +1136,7 @@ set_upgrade_type()
 	else
 		aptTypeSetting='unset'
 	fi
-	echo $MLINE
+	echo $LINE
 	echo "${S}Set ${C}$SCRIPT_NAME${S} to use upgrade type ${C}dist-upgrade${S} or ${C}upgrade${S}."
 	echo $MLINE
 	echo "${M}Your system base appears to be: ${C}Debian $SYSTEM_BASE"

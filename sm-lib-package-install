@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.9.2
+####  version: 2.9.4
 ####  Date: July 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -62,7 +62,7 @@ package_group_installer()
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local streamTuner='streamtuner streamripper'
-	local systemUtils='alsa-base alsa-utils gpm dbus dbus-X11 hal pmount powersaved udev'
+	local systemUtils='alsa-base alsa-utils gpm dbus dbus-X11 hal net-tools pmount powersaved udev'
 	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 	
@@ -1013,7 +1013,7 @@ h2_faves()
 	then
 		ceni=''
 	fi
-	local addItems="$ceni elinks htop libmms0 links2 nano sysv-rc-conf w3m net-tools rdiff-backup"
+	local addItems="$ceni elinks htop libmms0 links2 nano net-tools rdiff-backup sysv-rc-conf w3m"
 	local addItemsKde='karm konq-plugins kmoon' # kdeaddons kde-extras
 	local mozItems='iceweasel icedove'
 	
