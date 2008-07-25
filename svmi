@@ -459,7 +459,7 @@ check_apt_aptitude()
 install_package()
 {
 	eval $LOGUS
-	local useUntrusted='--allow-unauthenticated' install='install'
+	local useUntrusted='--allow-unauthenticated' install='install' doYes='-y'
 	if [ "$UPDATED" != 'true' ]
 	then
 		echo "${S}Running $APT_TYPE update now...${N}"
@@ -468,11 +468,12 @@ install_package()
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
 		useUntrusted='--allow-untrusted'
+		doYes=''
 	fi
 	if  [ -n "$1" ]
 	then
 		echo "${S}Installing required package ${C}$1${S} now...${N}"
-		$APT_TYPE install $useUntrusted -y $1 || error_handler 200 $1
+		$APT_TYPE install $useUntrusted $doYes $1 || error_handler 200 $1
 	fi
 	eval $LOGUE
 }
