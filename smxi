@@ -3455,8 +3455,8 @@ do
 		X)	if [ -z "$( egrep "^.*#.*$" <<< $OPTARG )" ]
 			then
 				echo "${E}The -X option requires the following syntax:"
-				echo "${C}script-name#script-url${S} (script name + # script web address/url"
-				echo "Example: ${C}my-system-cleaner#http://somesite.com/my-system-cleaner.sh${N}"
+				echo "${C}$SCRIPT_NAME -X script-name#script-url${S} (script name + # script web address/url"
+				echo "Example: ${C}$SCRIPT_NAME -X my-system-cleaner#http://somesite.com/my-system-cleaner.sh${N}"
 				exit 1
 			else
 				USER_SCRIPT=$( cut -d '#' -f 1 <<< $OPTARG )
