@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.2
+####  version: 8.3.3
 ####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1795,7 +1795,7 @@ start_up_tests()
 		error_handler 'not-root' $FUNCNAME
 	fi
 	# no ubuntu support
-	if [ "$( cat /etc/issue | grep -i -c 'buntu' )" -gt 0 ]
+	if [ "$( cat /etc/issue | grep -i -c 'buntu' )" -gt 0 -a ! -f "$ATX" ]
 	then
 		error_handler 'unsupported-distro' $FUNCNAME 'Ubuntu derived'
 	fi
