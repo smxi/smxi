@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.3.6
-####  Date: July 23 2008
+####  version: 1.4.0
+####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -29,6 +29,7 @@
 ########################################################################
 
 # options and global data
+APT_TYPE='apt-get'
 AUTO_RUN=''
 AUTORUN_ANYANY=''
 AUTORUN_QEMU_IMAGE=''
@@ -38,6 +39,7 @@ AUTORUN_VMPLAYER=''
 AUTORUN_VMSERVER=''
 FORCE_UPDATE=''
 MONOCHROME=''
+PACKAGE_MANAGER=''
 SKIP_CONNECT=''
 SKIP_FUNCTION=''
 SKIP_RESTART=''
@@ -287,6 +289,9 @@ error_handler()
 		250)
 			errorData="Could not detect gcc version: $errorExtra, or it is not installed.\nPlease let the script maintainer know, this may be a bug in the script."
 			;;
+		249) 
+			errorData="The option you selected: $errorExtra is not supported."
+			;;
 		# specific install issues
 		200) 
 			errorData="The package: $errorExtra failed to install, please check apt for any problems."
@@ -420,19 +425,54 @@ check_install_tools()
 	eval $LOGPE
 }
 
+check_apt_aptitude()
+{
+	eval $LOGUS
+	local opt='' managers='apt-get aptitude'
+	
+	if [ -f /var/log/aptitude ]
+	then
+		echo ${B}$LINE
+		echo "${B}It appears you are using aptitude. It is not good to mix apt-get and aptitude."
+		echo "Please pick your preferred package manager before you continue:"
+		echo $LINE${N}
+		
+		select opt in $managers 
+		do
+			case $opt in
+				apt-get|aptitude)
+					APT_TYPE=$opt
+					log_function_data "Selected package manager: $opt"
+					;;
+				*)
+					echo "${E}You have to pick one before you can continue!${N}"
+					ask_apt_aptitude
+					;;
+			esac
+			break
+		done
+	fi
+	eval $LOGUE
+}
+
 # arg: $1 - package names
 install_package()
 {
 	eval $LOGUS
+	local useUntrusted='--allow-unauthenticated' install='install'
 	if [ "$UPDATED" != 'true' ]
 	then
-		echo "${S}Updating apt now...${N}"
-		apt-get update && UPDATED='true' 
+		echo "${S}Running $APT_TYPE update now...${N}"
+		$APT_TYPE update && UPDATED='true' 
+	fi
+	if [ "$APT_TYPE" == 'aptitude' ]
+	then
+		useUntrusted='--allow-untrusted'
 	fi
 	if  [ -n "$1" ]
 	then
 		echo "${S}Installing required package ${C}$1${S} now...${N}"
-		apt-get install --allow-unauthenticated --yes $1 || error_handler 200 $1
+		$APT_TYPE install $useUntrusted -y $1 || error_handler 200 $1
 	fi
 	eval $LOGUE
 }
@@ -453,7 +493,7 @@ remove_package()
 			if [ -n "$( dpkg -l | grep $package )" ]
 			then
 				echo "${S}Removing ${C}$package${S}...${N}"
-				apt-get remove --purge $package || error_handler 196 "$package"
+				$APT_TYPE purge $package || error_handler 196 "$package"
 			else
 				echo "${S}The package ${C}$package${S} is not installed, continuing...${N}"
 			fi
@@ -653,34 +693,31 @@ log_function_data()
 {
 	local funcInfo='' logSpacer='  '
 	
-	if [ "$PRINT_VER" != 'true' ]
+	case $1 in
+		ps)
+			funcInfo="Function: $2 - Primary: Start"
+			;;
+		pe)
+			funcInfo="Function: $2 - Primary: End"
+			;;
+		us)
+			funcInfo="Function: $2 - Utility: Start"
+			;;
+		ue)
+			funcInfo="Function: $2 - Utility: End"
+			;;
+	esac
+	
+	if [ -n "$funcInfo" ]
 	then
-		case $1 in
-			ps)
-				funcInfo="Function: $2 - Primary: Start"
-				;;
-			pe)
-				funcInfo="Function: $2 - Primary: End"
-				;;
-			us)
-				funcInfo="Function: $2 - Utility: Start"
-				;;
-			ue)
-				funcInfo="Function: $2 - Utility: End"
-				;;
-		esac
-		
-		if [ -n "$funcInfo" ]
-		then
-			log_writer "$funcInfo"
-		else
-			log_writer "${logSpacer}$1"
-		fi
-		
-		if [ -n "$3" ]
-		then
-			log_writer "${logSpacer}Args: $3"
-		fi
+		log_writer "$funcInfo"
+	else
+		log_writer "${logSpacer}$1"
+	fi
+	
+	if [ -n "$3" ]
+	then
+		log_writer "${logSpacer}Args: $3"
 	fi
 }
 
@@ -1357,7 +1394,7 @@ show_options()
 
 # this must be set before anything else runs in script, -j will reset to no colors
 set_script_colors 
-while getopts ABDFhjMPRSTuUvV:Z opt
+while getopts ABDFhjMpP:RSTuUvV:Z opt
 do
 	case $opt in
 		A) AUTORUN_ANYANY='true'
@@ -1383,8 +1420,16 @@ do
 		M) AUTORUN_VBOX_MODULE='true'
 			START_OPTIONS=$START_OPTIONS'M'
 			;;
-		P) AUTORUN_VMPLAYER='true'
-			START_OPTIONS=$START_OPTIONS'P'
+		p) AUTORUN_VMPLAYER='true'
+			START_OPTIONS=$START_OPTIONS'p'
+			;;
+		P)	if [ -n $( egrep '^(apt-get|aptitude)$' <<< $OPTARG ) ]
+			then
+				PACKAGE_MANAGER=$OPTARG
+				APT_TYPE=$OPTARG
+			else
+				error_handler 249 $OPTARG
+			fi
 			;;
 		R) SKIP_RESTART='true'
 			;;
@@ -1428,6 +1473,10 @@ if [ -n "$VBOX_ALT_VERSION" ]
 then
 	START_OPTIONS=$START_OPTIONS" -V $VBOX_ALT_VERSION"
 fi
+if [ -n "$PACKAGE_MANAGER" ]
+then
+	START_OPTIONS=$START_OPTIONS" -P $PACKAGE_MANAGER"
+fi
 
 ########################################################################
 ####  EXECUTE
@@ -1455,6 +1504,10 @@ then
 fi
 # will run non interactive and set the AUTO_UPDATE flag
 run_non_interactive
+if [ -z "$PACKAGE_MANAGER" -a "$SM_INSTALL" != 'true' -a "$AUTO_UPDATE" != 'true' ]
+then
+	check_apt_aptitude
+fi
 
 print_information
 check_install_tools

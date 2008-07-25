@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.3.9
-####  Date: July 23 2008
+####  version: 3.4.0
+####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -26,6 +26,7 @@
 #### VARIABLES
 ########################################################################
 
+APT_TYPE='apt-get'
 CARD='' # card type: fglrx or nvidia
 AUTORUN=''
 DISPLAY_DEVICES=''
@@ -39,6 +40,7 @@ NATIVE_OVERRIDE=''
 # this is the actual pattern that will be used to search for this stuff in script
 NATIVE_OVERRIDE_SUPPORTED='ati|i128|i740|i810|i810-modesetting|intel|mga|neomagic|nv|openchrome|radeon|radeonhd|sis|tdfx|vesa|via|vga|voodoo'
 NO_XVMC=''
+PACKAGE_MANAGER=''
 PRINT_VER='' # utilities for smxi
 REMOVE_MODELINES=''
 
@@ -338,6 +340,9 @@ error_handler()
 			;;
 		229) 
 			errorData="The driver: $DRIVER_DEFAULT does not work on sidux kernels.\nYou are trying to install it to this kernel: $KERNEL_VERSION\nCurrently $FGLRX only works on new Debian kernels."
+			;;
+		228) 
+			errorData="The option you selected: $errorExtra is not supported."
 			;;
 		# specific install issues
 		200) 
@@ -874,17 +879,52 @@ check_install_tools()
 	eval $LOGPE
 }
 
+check_apt_aptitude()
+{
+	eval $LOGUS
+	local opt='' managers='apt-get aptitude'
+	
+	if [ -f /var/log/aptitude ]
+	then
+		echo ${B}$LINE
+		echo "${B}It appears you are using aptitude. It is not good to mix apt-get and aptitude."
+		echo "Please pick your preferred package manager before you continue:"
+		echo $LINE${N}
+		
+		select opt in $managers 
+		do
+			case $opt in
+				apt-get|aptitude)
+					APT_TYPE=$opt
+					log_function_data "Selected package manager: $opt"
+					;;
+				*)
+					echo "${E}You have to pick one before you can continue!${N}"
+					ask_apt_aptitude
+					;;
+			esac
+			break
+		done
+	fi
+	eval $LOGUE
+}
+
 # arg: $1 - package name; $2 - /experimental/unstable/testing/stable; $3 - --reinstall
 # optional args. Note that if you use 3, you have to set 2 by '' if blank.
 install_package()
 {
 	eval $LOGUS
-	local distroVersion='' optionalArgs=''
+	local distroVersion='' optionalArgs='' 
+	local useUntrusted='--allow-unauthenticated' install='install'
 	local packageInstalled=$( dpkg -l | grep "$1" | cut -d ' ' -f  3 )
 	
 	if [ "$UPDATED" != 'true' ]
 	then
-		apt-get update && UPDATED='true'
+		$APT_TYPE update && UPDATED='true'
+	fi
+	if [ "$APT_TYPE" == 'aptitude' ]
+	then
+		useUntrusted='--allow-untrusted'
 	fi
 	# this will force install of sid to get rid of experimental if required
 	if [ -n "$2" ]
@@ -896,7 +936,13 @@ install_package()
 		--reinstall)
 			if [ -n "$packageInstalled" ]
 			then
-				optionalArgs=$3
+				if [ "$APT_TYPE" == 'aptitude' ]
+				then
+					optionalArgs=''
+					install='reinstall'
+				else
+					optionalArgs=$3
+				fi
 			fi
 			;;
 		*)
@@ -904,7 +950,7 @@ install_package()
 			;;
 	esac
 	# then install the package with all options
-	apt-get install --allow-unauthenticated --yes $optionalArgs $1$distroVersion || error_handler 200 $1
+	$APT_TYPE $install $useUntrusted -y $optionalArgs $1$distroVersion || error_handler 200 $1
 	eval $LOGUE
 }
 # install_package nano '' --reinstall
@@ -922,7 +968,7 @@ remove_package()
 		if [ -n "$( dpkg -l | grep "$package" )" ]
 		then
 			echo "${B}Removing ${C}$package${S}...${N}"
-			apt-get remove --purge $package || error_handler 190 "$package"
+			$APT_TYPE purge $package || error_handler 190 "$package"
 		else
 			echo "${B}The package ${C}$package${B} is not installed, continuing...${N}"
 		fi
@@ -962,7 +1008,7 @@ update_to_nonfree_sources()
 				sed -i -r 's%(#?deb.*(sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|ftp-mirror\.internap\.com|ftp\.tw.debian\.org|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\snon-free)%\1 firmware fix.contrib fix.non-free %' $i
 			fi
 		done
-		apt-get update && UPDATED='true' # need to refresh
+		$APT_TYPE update && UPDATED='true' # need to refresh
 	fi
 	eval $LOGPE
 }
@@ -2997,7 +3043,7 @@ show_options()
 
 # this must be set before anything else runs in script, -j will reset to no colors
 set_script_colors $COLOR_DEFAULT
-while getopts AbcCdDeEFhjK:nN:o:pQrRsStTUvWXxZ opt
+while getopts AbcCdDeEFhjK:nN:o:pP:QrRsStTUvWXxZ opt
 do
 	case $opt in
 		A) AUTORUN='true'
@@ -3048,7 +3094,7 @@ do
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -n - Auto install of native xorg intel, nvidia, 3dfx, or ati drivers.\n"
 			;;
 		N) NATIVE_OVERRIDE="$OPTARG"
-			if [ -z $( echo $NATIVE_OVERRIDE | egrep '('$NATIVE_OVERRIDE_SUPPORTED')' ) ]
+			if [ -z $( egrep '('$NATIVE_OVERRIDE_SUPPORTED')' <<< $NATIVE_OVERRIDE ) ]
 			then
 				error_handler 237 $NATIVE_OVERRIDE
 			fi
@@ -3060,6 +3106,14 @@ do
 			;;
 		p) PRINT_VER='true'
 			START_OPTIONS=$START_OPTIONS'p'
+			;;
+		P)	if [ -n $( egrep '^(apt-get|aptitude)$' <<< $OPTARG ) ]
+			then
+				PACKAGE_MANAGER=$OPTARG
+				APT_TYPE=$OPTARG
+			else
+				error_handler 228 $OPTARG
+			fi
 			;;
 		Q)	SKIP_X_QUESTION='true'
 			START_OPTIONS=$START_OPTIONS'Q'
@@ -3126,6 +3180,10 @@ if [ -n "$INSTALL_TO_KERNEL" ]
 then
 	START_OPTIONS=$START_OPTIONS" -K $INSTALL_TO_KERNEL"
 fi
+if [ -n "$PACKAGE_MANAGER" ]
+then
+	START_OPTIONS=$START_OPTIONS" -P $PACKAGE_MANAGER"
+fi
 
 #in case -n is used too - note: this will never be true, have to fix this one
 if [ "$NATIVE_DRIVER" == "true" -a -n "$INSTALL_TO_KERNEL" ]
@@ -3179,7 +3237,10 @@ if [ "$SKIP_FUNCTION" != 'true' -a "$PRINT_VER" != 'true' ]
 then
 	create_log
 fi
-
+if [ "$PRINT_VER" != 'true' -a -z "$PACKAGE_MANAGER" -a "$SM_INSTALL" != 'true' ]
+then
+	check_apt_aptitude
+fi
 if [ "$NATIVE_DRIVER" == 'true' ]
 then
 	install_native_driver
