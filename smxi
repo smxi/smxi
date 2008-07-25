@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.1
+####  version: 8.3.2
 ####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -3125,7 +3125,7 @@ post_du_options()
 {
 	eval $LOGMS
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
-	local  advanced1Option='' advanced2Option='run-' initX=''
+	local  advanced1Option='' advanced2Option='' initX=''
 	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
 	
 	local tempCount=$( echo $options | wc -w )
@@ -3143,7 +3143,7 @@ post_du_options()
 	if [ -n "$USER_SCRIPT_URL" ]
 	then
 		tempCount=$(( $tempCount + 1 ))
-		advanced2Option="$advanced2Option$USER_SCRIPT"
+		advanced2Option="run-$USER_SCRIPT"
 		advanced2='echo -e "${C}'$tempCount'${S} - ${C}$advanced2Option${S} Download and start the script: ${C}$USER_SCRIPT${S}"'
 		tempCount=''
 	fi
@@ -3238,7 +3238,7 @@ post_du_options()
 				kernel_question post-du
 				repeat='true'
 				;;
-			$advanced2Option)
+			run-$USER_SCRIPT)
 				run_script_import $USER_SCRIPT_URL
 				repeat='true'
 				;;
