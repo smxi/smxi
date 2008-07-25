@@ -451,7 +451,7 @@ error_handler()
 			;;
 		bad-user-script-url)
 			errorCode=36
-			errorMessage="The script url you provided: $errorExtra is not working,\nplease check your typing, and make sure the url actually exists."
+			errorMessage="The script url you provided: $errorExtra is not working.\nPlease check your typing, and make sure the url actually exists."
 			;;
 		# failures in actions/functions not requiring script exit: 100-150: serious
 		missing-lib)
