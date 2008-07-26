@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.0
+####  version: 3.4.1
 ####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -882,30 +882,74 @@ check_install_tools()
 check_apt_aptitude()
 {
 	eval $LOGUS
-	local opt='' managers='apt-get aptitude'
+	local opt='' managers='apt-get aptitude quit'
+	local aptPref=$( get_set_prefs 'get' 'apt-type' | cut -d '=' -f 2 | egrep '^(apt-get|aptitude)$' )
 	
 	if [ -f /var/log/aptitude ]
 	then
-		echo ${B}$LINE
-		echo "${B}It appears you are using aptitude. It is not good to mix apt-get and aptitude."
-		echo "Please pick your preferred package manager before you continue:"
-		echo $LINE${N}
-		
-		select opt in $managers 
-		do
-			case $opt in
-				apt-get|aptitude)
-					APT_TYPE=$opt
-					log_function_data "Selected package manager: $opt"
-					;;
-				*)
-					echo "${E}You have to pick one before you can continue!${N}"
-					ask_apt_aptitude
-					;;
-			esac
-			break
-		done
+		if [ -z "$aptPref" ]
+		then
+			echo ${B}$LINE
+			echo "${B}It appears you are using aptitude. It is not good to mix apt-get and aptitude."
+			echo "Please pick your preferred package manager before you continue, or exit now."
+			echo
+			echo "Your selection (for example: ${C}apt-type=apt-get${B}) will be stored in ${C}/etc/smxi.conf${B}"
+			echo "${C}smxi${B} will also use this choice for its default package manager, so make sure it's correct."
+			echo $LINE${N}
+			
+			select opt in $managers 
+			do
+				case $opt in
+					apt-get|aptitude)
+						APT_TYPE=$opt
+						log_function_data "Selected package manager: $opt"
+						get_set_prefs 'set' "apt-type=$opt"
+						;;
+					exit)
+						echo "${B}Ok, figure it out and try again later...${N}"
+						exit 0
+						;;
+					*)
+						echo "${E}You have to pick one before you can continue!${N}"
+						ask_apt_aptitude
+						;;
+				esac
+				break
+			done
+		else # set apt type
+			APT_TYPE=$aptPref
+		fi
 	fi
+	eval $LOGUE
+}
+
+# args: $1 - get/set; $2 - prefname
+get_set_prefs()
+{
+	eval $LOGUS
+	local etcsm='/etc/smxi.conf' retValue='' name='' value=''
+	
+	case $1 in
+		get)
+			retValue=$( grep -s $2 $etcsm )
+			echo $retValue
+			log_function_data "Return value: $retValue"
+			;;
+		set)
+			touch $etcsm
+			# test = first, this will handle the base name and anything else
+			name=$( cut -d '=' -f 1 <<< $2 )
+			# check to see if it's there, if it is, it must be a = type thing
+			if [ -z "$( grep -s $name $etcsm )" ]
+			then
+				echo $2 >> $etcsm
+				log_function_data "Added $2 to $etcsm"
+			else
+				sed -i "s/$name.*/$2/" $etcsm
+				log_function_data "Updated $name to $2 in $etcsm"
+			fi
+			;;
+	esac
 	eval $LOGUE
 }
 
@@ -914,7 +958,7 @@ check_apt_aptitude()
 install_package()
 {
 	eval $LOGUS
-	local distroVersion='' optionalArgs='' 
+	local distroVersion='' optionalArgs='' doYes='-y'
 	local useUntrusted='--allow-unauthenticated' install='install'
 	local packageInstalled=$( dpkg -l | grep "$1" | cut -d ' ' -f  3 )
 	
@@ -925,6 +969,7 @@ install_package()
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
 		useUntrusted='--allow-untrusted'
+		doYes=''
 	fi
 	# this will force install of sid to get rid of experimental if required
 	if [ -n "$2" ]
@@ -950,7 +995,7 @@ install_package()
 			;;
 	esac
 	# then install the package with all options
-	$APT_TYPE $install $useUntrusted -y $optionalArgs $1$distroVersion || error_handler 200 $1
+	$APT_TYPE $install $useUntrusted $doYes $optionalArgs $1$distroVersion || error_handler 200 $1
 	eval $LOGUE
 }
 # install_package nano '' --reinstall
