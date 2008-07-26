@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.1
+####  version: 3.4.2
 ####  Date: July 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -54,6 +54,7 @@ SKIP_X_QUESTION=''
 SKIP_X_TEST=''
 START_OPTIONS_PRINT='' # for output to user of what options they used
 START_OPTIONS=''
+SYSTEM_BASE=''
 TESTING='' # for dev
 TRIPLE_BUFFER=''
 TWINVIEW=''
@@ -756,6 +757,11 @@ print_information()
 #print_information
 basic_startup_tests() 
 {
+	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
+	# these tests will be improved over time, but are ok for now
+	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
+	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
+	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 	### basic system requirements for this script to run, first so user doesn't 
 	### have to be root or out of x to get basic failure information
 	# make sure that it's a debian based system
@@ -809,6 +815,16 @@ basic_startup_tests()
 	if [ -n "$DISPLAY" -a "$SKIP_X_TEST" != 'true' ]
 	then
 		error_handler 250
+	fi
+	# set system type. This test will never be perfect, but it's a good approximation
+	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
+	then
+		SYSTEM_BASE='stable'
+	elif [ "$systemBase" == 'testing' ] || [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
+	then
+		SYSTEM_BASE='testing'
+	else
+		SYSTEM_BASE='sid'
 	fi
 }
 
@@ -905,7 +921,7 @@ check_apt_aptitude()
 						log_function_data "Selected package manager: $opt"
 						get_set_prefs 'set' "apt-type=$opt"
 						;;
-					exit)
+					quit)
 						echo "${B}Ok, figure it out and try again later...${N}"
 						exit 0
 						;;
@@ -1668,25 +1684,30 @@ driver_support_tests()
 					esac
 					;;
 				$NVIDIA)
-					case $KERNEL_THIRD in
-						24) # going to try just 2.6.24 links, see if any issues appear
-							# this doesn't work on debian kernels
-							if [ -n "$IS_SIDUX_KERNEL" ]
-							then
-								misc_fixes nvidia-24-link # this might always be needed, all cases?
-							fi
-							;;
-						26)
-							case $DRIVER_DEFAULT in
-								173.14.09|100.14.19|96.43.07|71.86.06)
-									: # do nothing
-									;;
-								*)
-									error_handler 234 26
-									;;
-							esac
-							;;
-					esac
+					if [ "$DRIVER_DEFAULT" == "$DEBIAN_NVIDIA" -a "$SYSTEM_BASE" == 'testing' ]
+					then
+						print_information_continue 'standard' "Your system appears to be Debian Testing based.\nThe $DEBIAN_NVIDIA driver cannot build on Debian Testing because of a missing package.\nIf your system is Sid based, continue, otherwise exit now."
+					else
+						case $KERNEL_THIRD in
+							24) # going to try just 2.6.24 links, see if any issues appear
+								# this doesn't work on debian kernels
+								if [ -n "$IS_SIDUX_KERNEL" ]
+								then
+									misc_fixes nvidia-24-link # this might always be needed, all cases?
+								fi
+								;;
+							26)
+								case $DRIVER_DEFAULT in
+									173.14.09|100.14.19|96.43.07|71.86.06)
+										: # do nothing
+										;;
+									*)
+										error_handler 234 26
+										;;
+								esac
+								;;
+						esac
+					fi
 					;;
 			esac
 			;;
