@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.2
-####  Date: July 25 2008
+####  version: 3.4.3
+####  Date: July 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  Code contributions copyright: Latino 2008
@@ -855,11 +855,15 @@ check_install_tools()
 	# nvidia and fglrx tools
 	if [ ! -x /usr/bin/module-assistant ]
 	then
-		install_package module-assistant
+		install_package 'module-assistant'
 	fi
 	if [ ! -d /usr/share/build-essential ]
 	then
-		install_package build-essential
+		install_package 'build-essential'
+	fi
+	if [ -z "$( which logrotate )" ]
+	then
+		install_package 'logrotate'
 	fi
 
 	if [ "$CARD" == $NVIDIA ]
@@ -870,16 +874,16 @@ check_install_tools()
 	then
 		if [ ! -x /usr/bin/dh_testdir ]
 		then
-			install_package debhelper
+			install_package 'debhelper'
 		fi
 		if [ ! -f /usr/lib/libstdc++.so.5 ]
 		then
-			install_package libstdc++5
+			install_package 'libstdc++5'
 		fi
 		# presence of this package will break fglrx install
 		if [ -n "$( dpkg -l | grep 'dpkg-cross' )" ]
 		then
-			remove_package dpkg-cross $CARD
+			remove_package 'dpkg-cross' $CARD
 		fi
 		# force update of xserver-xorg-core package to handle 8.37.6 update
 		# not for now... 
