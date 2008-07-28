@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.4.7
+####  version: 2.4.8
 ####  Date: July 27 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -170,12 +170,9 @@ kernel_question()
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 	fi
-	if [ "$DEFAULT_KERNEL" == 'sidux' -a "$USE_DEBIAN_KERNEL" == 'true' ]
+	if [ -n "$SIDUX_SOURCES" -o -n "$MEPIS_SOURCES" -o "$USE_DEBIAN_KERNEL" == 'true' ]
 	then
-		altKernelOption='echo "    ${C}*${S} ${M}NEW:${S} current ${C}Debian${S} apt vanilla kernel install, with module installer automated."'
-	elif [ -n "$SIDUX_SOURCES" -a "$DEFAULT_KERNEL" != 'sidux' ]
-	then
-		altKernelOption='echo "    ${C}*${S} ${M}NEW:${S} currrent ${C}sidux${S} apt kernel install, with module installer automated."'
+		altKernelOption='echo "    ${C}*${S} Any supported current apt kernel install(s) for your ${C}$DISTRO${S} system, with module installer automated."'
 	fi
 
 	echo "${W}Kernels do not come with these modules for GPL reasons: ${C}isdn adsl${S}"

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.7.8
-####  Date: July 25 2008
+####  version: 2.8.0
+####  Date: July 28 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
@@ -39,37 +39,46 @@ advanced_kernel_install()
 {
 	eval $LOGPS
 	local kernel='' options='' opt='' userSelection=''
-	local text_1='' text_2=''  rcMessage='' altKernelOption='' altKernelText1=''
-	local optionList='' listCount='' 
-	local altKernOpt='' altKernelOption='' altKernOpt2='' altKernelOption2=''
+	local text_1='' text_2=''  rcMessage='' 
+	local optionList='' listCount='' kernelCount=''
+	local altKernOpt1='' altKernelOption1='' altKernelText1=''
+	local altKernOpt2='' altKernelOption2='' altKernelText2=''
+	local altKernOpt3='' altKernelOption3='' altKernelText3=''
 	
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
+	
 	if [ "$SET_KERNEL_DATA" != 'true' ]
 	then
 		set_kernel_data
 		SET_KERNEL_DATA='true'
 	fi
 	# add the list closer items
-	local kernelCount=$( wc -w <<< $KERNEL_LIST )
-	
-	if [ "$DEFAULT_KERNEL" != 'debian' -a "$DEFAULT_KERNEL" != 'no-kernel' -a "$USE_DEBIAN_KERNEL" == 'true' ]
+	kernelCount=$( wc -w <<< $KERNEL_LIST )
+	optionList="$KERNEL_LIST "
+	if [ "$USE_DEBIAN_KERNEL" == 'true' ]
 	then
-		altKernelOption='install-debian-kernel'
+		altKernelOption1='install-debian-kernel'
 		altKernelText1='Debian'
-	elif [ -n "$SIDUX_SOURCES" -a "$DEFAULT_KERNEL" != 'sidux'  ]
-	then
-		altKernelOption='install-sidux-kernel'
-		altKernelText1='sidux'
 	fi
+	optionList="$optionList $altKernelOption1"
+	altKernOpt1=$( wc -w <<< $optionList )
+	if [ -n "$SIDUX_SOURCES" ]
+	then
+		altKernelOption2='install-sidux-kernel'
+		altKernelText2='sidux'
+	fi
+	optionList="$optionList $altKernelOption2"
+	altKernOpt2=$( wc -w <<< $optionList )
 	# this is inactive currently, but can be switched on with more testing
-	if [ -n "$MEPIS_SOURCES" -a "$DEFAULT_KERNEL" != 'mepis'  ]
+	if [ -n "$MEPIS_SOURCES" ]
 	then
-		altKernelOption2='install-mepis-kernel'
-		altKernelText2='Mepis'
+		altKernelOption3='install-mepis-kernel'
+		altKernelText3='Mepis'
 	fi
-
-	optionList="$KERNEL_LIST $altKernelOption kernel-metapackage-options back-to-main-menu"
+	optionList="$optionList $altKernelOption3"
+	altKernOpt3=$( wc -w <<< $optionList )
+	optionList="$optionList kernel-metapackage-options back-to-main-menu"
 	
 	listCount=$( wc -w <<< $optionList )
 
@@ -84,15 +93,9 @@ advanced_kernel_install()
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
 	echo "       (${C}slh${S} marked kernels are sidux kernels)"
 	echo
-	if [ -n "$altKernelOption" ]
-	then
-		altKernOpt=$(( $listCount - 2 )) 
-		echo "${C}$altKernOpt - $altKernelOption${S} Installs current ${C}$altKernelText1${S} kernel"
-		echo "     as well as any any required ${C}$altKernelText1${S} kernel modules available in apt."
-		echo "     Note: you will see which specific ${C}$altKernelText1${S} kernel will be installed in the next step, "
-		echo "     and can skip the install if you don't want it."
-		echo
-	fi
+	print_alt_kernel_option "$altKernelOption1" "$altKernOpt1" "$altKernelText1"
+	print_alt_kernel_option "$altKernelOption2" "$altKernOpt2" "$altKernelText2"
+	print_alt_kernel_option "$altKernelOption3" "$altKernOpt3" "$altKernelText3"
 	echo "${C}$kmOption - kernel-metapackage-options${M} NEW!${S} Kernel metapackage options: remove, install"
 	echo "     sidux kernel/module metapackages. Also, install current apt kernel + modules."
 	echo
@@ -163,6 +166,17 @@ advanced_kernel_install()
 			double_check_kernel advanced
 			;;
 	esac
+}
+# args: $1 - altKernelOptionx; $2 - $altKernOptx; $3 - $altKernelTextx
+print_alt_kernel_option()
+{
+	if [ -n "$1" ]
+	then
+		echo "${C}$2 - $1${S} Installs current ${C}$3${S} kernel"
+		echo "     as well as any any required ${C}$3${S} kernel modules available in apt."
+		echo "     Note: you will see which specific ${C}$3${S} kernel will be installed in the next step, "
+		echo "     and can skip the install if you don't want it."
+	fi
 }
 
 # args: $1 - advanced/apt/apt-debian

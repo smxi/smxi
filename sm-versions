@@ -1,10 +1,10 @@
-smxi=8.3.6:July 27 2008
+smxi=8.3.7:July 28 2008
 sm-lib-apt-tools=1.15.9:July 24 2008
 sm-lib-clean-up=2.5.2:July 24 2008
 sm-lib-distro-conversion=3.2.2:July 27 2008
 sm-lib-graphics=2.2.2:July 25 2008
-sm-lib-kernel=2.4.7:July 27 2008
-sm-lib-kernel-install=2.7.8:July 25 2008
+sm-lib-kernel=2.4.8:July 27 2008
+sm-lib-kernel-install=2.8.0:July 28 2008
 sm-lib-misc-tweaks=1.18.1:July 26 2008
 sm-lib-package-install=2.9.4:July 24 2008
 sm-lib-package-removal=1.3.2:July 24 2008

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.6
-####  Date: July 27 2008
+####  version: 8.3.7
+####  Date: July 28 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1168,7 +1168,13 @@ set_distro_data()
 	if [ -f $ATX ]
 	then
 		DEFAULT_KERNEL='no-kernel'
-		USE_DEBIAN_KERNEL='false'
+		# this will help to debug debian kernel issues
+		if [ "$TESTING" != 'true' ]
+		then
+			USE_DEBIAN_KERNEL='false'
+		else
+			USE_DEBIAN_KERNEL='true'
+		fi
 		DISTRO='antix'
 	else
 		if [ -f $SID ]
