@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.4.5
+####  version: 2.4.6
 ####  Date: July 27 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -27,7 +27,7 @@
 ####  VARIABLES
 ########################################################################
 #   
-KERNEL_LIST_32='2.6.25.12-slh-smp-4 2.6.25.11-slh-smp-2 2.6.25.11-slh-smp-2 2.6.25.8-slh-smp-2 2.6.25.6-slh-smp-3 2.6.25.4-slh-smp-10 2.6.25.3-slh-smp-3 2.6.25.1-slh-smp-2 2.6.24.5-slh-smp-2 2.6.24.4-slh-smp-7 2.6.24.3-slh-smp-11 2.6.24.2-slh-smp-12 2.6.24-slh-smp-6 2.6.23.16-slh-smp-1 2.6.22.10-rc1-slh-smp-1 2.6.21.6-slh-smp-1 2.6.20.11-slh-smp-1 2.6.19.3-rc1-slh-smp-1 2.6.18.6-slh-smp-1'
+KERNEL_LIST_32='2.6.25.12-slh-smp-4 2.6.25.11-slh-smp-2 2.6.25.8-slh-smp-2 2.6.25.6-slh-smp-3 2.6.25.4-slh-smp-10 2.6.25.3-slh-smp-3 2.6.25.1-slh-smp-2 2.6.24.5-slh-smp-2 2.6.24.4-slh-smp-7 2.6.24.3-slh-smp-11 2.6.24.2-slh-smp-12 2.6.24-slh-smp-6 2.6.23.16-slh-smp-1 2.6.22.10-rc1-slh-smp-1 2.6.21.6-slh-smp-1 2.6.20.11-slh-smp-1 2.6.19.3-rc1-slh-smp-1 2.6.18.6-slh-smp-1'
 KERNEL_ADVANCED_LIST_32=''
 KERNEL_LIST_64='2.6.25.12-slh64-smp-4 2.6.25.11-slh64-smp-2 2.6.25.8-slh64-smp-2 2.6.25.6-slh64-smp-3 2.6.25.4-slh64-smp-10 2.6.25.3-slh64-smp-3 2.6.25.1-slh64-smp-2 2.6.24.5-slh64-smp-2 2.6.24.4-slh64-smp-7 2.6.24.3-slh64-smp-11 2.6.24.2-slh64-smp-12 2.6.24-slh64-smp-6  2.6.23.16-slh64-smp-1 2.6.22.10-rc1-slh64-smp-1 2.6.21.6-slh64-smp-1 2.6.20.11-slh64-smp-1 2.6.19.3-rc1-slh64-smp-1 2.6.18.6-slh64-smp-1'
 KERNEL_ADVANCED_LIST_64=''
