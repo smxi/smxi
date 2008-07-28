@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.1
-####  Date: July 24 2008
+####  version: 3.2.2
+####  Date: July 27 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -508,8 +508,8 @@ update_completion_handler()
 antix_fix_1()
 {
 	eval $LOGPS
-	run_script_import $LIB_2008_FIXES
-	libavutil_fix_1
+	# run_script_import $LIB_2008_FIXES
+	# libavutil_fix_1
 	eval $LOGPE
 }
 
