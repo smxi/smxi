@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.9
-####  Date: July 24 2008
+####  version: 1.15.10
+####  Date: July 28 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -438,16 +438,19 @@ set_hold_install()
 		then
 			rm -f $HOLD_INSTALL
 		fi
-		
-		# now let's fire the auto hold/install function to protect against those
-		# pesky gimp/pidgin breaks. That function updates the global DPKG_HOLD_INSTALL
-		broken_dependency_handler
-		# and handle package groups as well
-		advanced_broken_dependency_handler 'amarok'
-		advanced_broken_dependency_handler 'gimp'
-		advanced_broken_dependency_handler 'hplip'
-		advanced_broken_dependency_handler 'ooo'
-		advanced_broken_dependency_handler 'wesnoth'
+		# in theory, only sid fails like this, we'll see how reality compares to theory now
+		if [ "$SYSTEM_BASE" == 'sid' ]
+		then
+			# now let's fire the auto hold/install function to protect against those
+			# pesky gimp/pidgin breaks. That function updates the global DPKG_HOLD_INSTALL
+			broken_dependency_handler
+			# and handle package groups as well
+			advanced_broken_dependency_handler 'amarok'
+			advanced_broken_dependency_handler 'gimp'
+			advanced_broken_dependency_handler 'hplip'
+			advanced_broken_dependency_handler 'ooo'
+			advanced_broken_dependency_handler 'wesnoth'
+		fi
 	fi
 	log_function_data "Post test hold packages: $DPKG_HOLD_INSTALL"
 	if [ -n "$DPKG_HOLD_INSTALL" ]
