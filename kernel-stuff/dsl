@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.1.0
-####  Date: July 16 2008
+####  version: 2.1.1
+####  Date: July 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -192,7 +192,7 @@ download_kernel_files()
 
 create_sub_directories()
 {
-	local directories='32 32-meta 64 kernel-installer-files kernel-full-zips' 
+	local directories='32 32-meta 64 64-meta kernel-installer-files kernel-full-zips' 
 	local directory=''
 	
 	echo $LINE
