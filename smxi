@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.5
-####  Date: July 25 2008
+####  version: 8.3.6
+####  Date: July 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1687,7 +1687,7 @@ x_is_running()
 	local returnVal=''
 	# we'll do one final X is running test here, note, handling a bunch of
 	# different possible X detections in etch, lenny, and sid, then filtering out the grep
-	local xIsRunning=$( ps aux | grep '/usr.*/X' | grep -vc 'grep' )
+	local xIsRunning=$( ps aux | grep '/usr.*/X' | egrep -ivc '(grep|/Xprt)' )
 	
 	if [ "$xIsRunning" -gt 0 ]
 	then
