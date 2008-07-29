@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.1.1
-####  Date: July 27 2008
+####  version: 2.1.2
+####  Date: July 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -117,7 +117,7 @@ start_up_tests()
 	then
 		error_handler 3 'KERNEL_SUB'
 	fi
-	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s)$' <<< "$KERNEL_TYPE" )" ]
+	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s|redo)$' <<< "$KERNEL_TYPE" )" ]
 	then
 		error_handler 8 
 	fi
@@ -274,14 +274,28 @@ finish_it_up()
 #### EXECUTE
 ########################################################################
 
-start_up_tests
-create_kernel_directory
-check_kernel_exists
-download_kernel_files
-create_sub_directories
-move_files_to_directories
-add_update_installer_files
-make_zip_files
-clean_up
-finish_it_up
+if [ "$KERNEL_TYPE" == 'redo' ]
+then
+	#start_up_tests
+	create_kernel_directory
+	#check_kernel_exists
+	#download_kernel_files
+	create_sub_directories
+	move_files_to_directories
+	add_update_installer_files
+	make_zip_files
+	clean_up
+	finish_it_up
+else
+	start_up_tests
+	create_kernel_directory
+	check_kernel_exists
+	download_kernel_files
+	create_sub_directories
+	move_files_to_directories
+	add_update_installer_files
+	make_zip_files
+	clean_up
+	finish_it_up
+fi
 exit 0
