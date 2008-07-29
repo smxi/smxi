@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.4
+####  version: 3.4.5
 ####  Date: July 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1702,7 +1702,7 @@ driver_support_tests()
 								;;
 							26)
 								case $DRIVER_DEFAULT in
-									177.13|173.14.09|100.14.19|96.43.07|71.86.06)
+									173.14.09|100.14.19|96.43.07|71.86.06)
 										: # do nothing
 										;;
 									*)
