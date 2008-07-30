@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.19.1
+####  version: 1.19.2
 ####  Date: July 30 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1345,13 +1345,13 @@ set_default_runlevels()
 		echo $LINE
 		echo "${S}Set Default Display Manager Startup Runlevel"
 		echo $LINE
-		echo "${S}Your current default display manager is: ${C}$defaultDm${S}"
-		echo "Your display manager is set to start in runlevel(s): ${C}$dmRunlevels${S}"
+		echo "${M}Your current default display manager is: ${C}$defaultDm${M}"
+		echo "Your display manager is set to start in runlevel(s): ${C}$dmRunlevels${M}"
 		echo "Your current default runlevel is: ${C}$defaultRunlevel${S}"
-		echo
+		echo $LINE
 		echo "${S}You can now change your system default init level and display manager level."
 		echo "Select one of the following default runlevels, or set it to Debian default (2-5)."
-		echo
+		echo $LINE
 		echo "${C}1${S} - ${C}$defaultOpt${S} - Restore your ${C}$DISTRO${S} system defaults."
 		echo 
 		echo "${C}2-5${S} - Set your default init startup level, and the default display manager level to this."
