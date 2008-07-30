@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.18.1
-####  Date: July 26 2008
+####  version: 1.19.0
+####  Date: July 30 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -124,7 +124,7 @@ advanced_tweaks()
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
 	
-	options="change-debian-mirrors change-sidux-mirrors update-bashrc update-locales alternate-print-hec default-system-kernel "
+	options="change-debian-mirrors change-sidux-mirrors update-bashrc update-locales set-default-runlevel alternate-print-hec default-system-kernel "
 	
 	# catch the count up again for options
 	tempCount=$( echo $options | wc -w )
@@ -168,10 +168,12 @@ advanced_tweaks()
 	echo "${C}4${S} - ${C}update-locales${S} Get rid of all those extra languages and locales"
 	echo "    you don't need and that slow down your $DU_UPGRADE. Includes instructions on what to do."
 	
-	echo "${C}5${S} - ${C}alternate-print-hec${S} Change default  ${C}$SCRIPT_NAME${M} hit enter to continue"
+	echo "${C}5${S} - ${C}set-default-runlevel${S} Set default display manager (ie, kdm) start / stop runlevel."
+	
+	echo "${C}6${S} - ${C}alternate-print-hec${S} Change default  ${C}$SCRIPT_NAME${M} hit enter to continue"
 	echo "    ${S}option to either hit any, or custom, key to continue. A great ${C}Crust${S} snippet."
 	
-	echo "${C}6${S} - ${C}default-system-kernel${S} Change default ${C}$SCRIPT_NAME${S} system kernel type."
+	echo "${C}7${S} - ${C}default-system-kernel${S} Change default ${C}$SCRIPT_NAME${S} system kernel type."
 	echo "    Depending on your base system, this will either be only one, or a list, like sidux or debian."
 	eval $advanced1Text
 	eval $aptText
@@ -206,6 +208,10 @@ advanced_tweaks()
 				;;
 			update-locales)
 				update_locales
+				repeat='true'
+				;;
+			set-default-runlevel)
+				set_default_runlevels
 				repeat='true'
 				;;
 			alternate-print-hec)
@@ -1304,6 +1310,111 @@ update_bash_completion()
 	eval $LOGUE
 }
 
+set_default_runlevels()
+{
+	eval $LOGPS
+	local defaultDm=$( get_default_display_manager )
+	local dmRunlevels=$( get_display_manager_runlevels )
+	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	local stopLevels='0 1 2 3 4 5 6' 
+	local defaultOpt='' opt='' option='' repeat=''
+	
+	if [ "$defaultDm" == 'entrance' ]
+	then
+		defaultDm='entranced'
+	fi
+	case $DISTRO in
+		sidux)
+			defaultOpt='sidux-default'
+			;;
+		debian)
+			defaultOpt='debian_default'
+			;;
+		antix)
+			defaultOpt='antix-default'
+			;;
+		mepis)
+			defaultOpt='mepis-default'
+			;;
+	esac
+	
+	if [ -n "$defaultDm" ]
+	then
+		log_function_data "defaultOpt: $defaultOpt"
+		log_function_data "defaultDm: $defaultDm"
+		echo $LINE
+		echo "${S}Set Default Display Manager Startup Runlevel"
+		echo $LINE
+		echo "${S}Your current default display manager is: ${C}$defaultDm${S}"
+		echo "Your display manager is set to start in runlevel(s): ${C}$dmRunlevels${S}"
+		echo "Your current default runlevel is: ${C}$defaultRunlevel${S}"
+		echo
+		echo "${S}You can now change your system default init level and display manager level."
+		echo "Select one of the following default runlevels, or set it to Debian default (2-5)."
+		echo
+		echo "${C}1${S} - ${C}$defaultOpt${S} - Restore your ${C}$DISTRO${S} system defaults."
+		echo 
+		echo "${C}2-5${S} - Set your default init startup level, and the default display manager level to this."
+		echo 
+		echo "${C}6${S} - ${C}continue${S} - Return to main menu."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="debian-default 2 3 4 5 continue"
+		select opt in $options
+		do
+			log_function_data "opt: $opt"
+			case $opt in
+				debian-default)
+					echo "${S}Updating to use ${C}$opt${S} defaults...${N}"
+					update-rc.d -f remove $defaultDm
+					update-rc.d $defaultDm defaults 99 01 
+					set_default_inittab 2
+					repeat='true'
+					;;
+				sidux-default|antix-default)
+					echo "${S}Updating to use ${C}$opt${S} defaults...${N}"
+					update-rc.d -f remove $defaultDm
+					update-rc.d $defaultDm start 99 5 . stop 01 0 1 2 3 4 6 .
+					set_default_inittab 5
+					repeat='true'
+					;;
+				2|3|4|5)
+					echo "${S}Setting system default and startup runlevel to: ${C}$opt${N}"
+					stopLevels=$( sed "s/$opt//" <<< $stopLevels )
+					update-rc.d -f remove $defaultDm
+					update-rc.d $defaultDm start 99 $opt . stop 01 $stopLevels .
+					set_default_inittab $opt
+					repeat='true'
+					;;
+				continue)
+					echo "${S}Ok, going on with the script now...${N}"
+					;;
+			esac
+			break 
+		done
+		eval $LOGPE
+		if [ "$repeat" == 'true' ]
+		then
+			set_default_runlevels
+		fi
+	else
+		log_function_data "No dm found so not available."
+		echo "${M}You do not have any default display manager (${C}kdm/gdm/xdm${M} etc) in your system."
+		echo "There is no default display manager runlevel to adjust.${N}"
+		eval $LOGPE
+	fi
+}
+
+# args: $1 - default level
+set_default_inittab()
+{
+	eval $LOGUS
+	local etcit='/etc/inittab'
+	echo "${S}Updating system default startup level in ${C}$etcit${S}to: ${C}$1${N}"
+	sed -i "s/id:[1-5]:initdefault:/id:$1:initdefault:/" $etcit
+	eval $LOGUE
+}
 ###---------------------------------------------------------------------
 ### Legacy Tweaks
 ###---------------------------------------------------------------------
