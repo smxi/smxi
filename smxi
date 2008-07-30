@@ -2538,10 +2538,6 @@ print_install_information()
 	echo $LINE
 	echo "${S}If something scrolls by in the script before you can read it, you can move up or down"
 	echo "in your terminal window by hitting ${C}Shift + Page Up${S} or ${C}Page Down${S}.${N}"
-	if [ "$PRINT_VERSION" != 'true' ]
-	then
-		print_hec
-	fi
 	log_function_data "Operating system: $BITS bit"
 	log_function_data "CPU: $CPU_NAME"
 	log_function_data "File System Info: $rootHomeData"
@@ -2551,6 +2547,10 @@ print_install_information()
 	log_function_data "Last package install or upgrade: $dpkgInstall"
 	log_function_data "Last use of $SCRIPT_NAME: $ScriptLastRun"
 	log_function_data "Last $DU_UPGRADE using $SCRIPT_NAME: $ScriptLastDu"
+	if [ "$PRINT_VERSION" != 'true' ]
+	then
+		print_hec
+	fi
 	eval $LOGPE
 }
 ## DEBUGGER
