@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.8
-####  Date: July 28 2008
+####  version: 8.3.9
+####  Date: July 30 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -2487,6 +2487,7 @@ print_install_information()
 	eval $LOGPS
 	local AdvancedOptions=''
 	local dpkgUpdate='' dpkgInstall='' 
+	local rootHomeData="$( df -h -T | egrep '(/|/boot|/var|/home)$'  | awk '{print $7," - ", "Type:",$2," Size:", $3, " Used:",$4,"(",$6,")"," Free:",$5}' )"
 	local latestKernel='NO KERNEL DATA'
 	if [ -n "$CURRENT_APT_KERNEL" ]
 	then
@@ -2521,6 +2522,8 @@ print_install_information()
 	
 	echo "${S}Operating system: ${C}$BITS bit${S}"
 	echo "${S}Your CPU is: ${C}$CPU_NAME"
+	echo "${S}File System Information:"
+	echo "${C}$rootHomeData"
 	echo "${S}Your current kernel version is:       ${C}$currentKernel"
 	if [ "$PRINT_VERSION" != 'true' ]
 	then
@@ -2540,6 +2543,7 @@ print_install_information()
 	fi
 	log_function_data "Operating system: $BITS bit"
 	log_function_data "CPU: $CPU_NAME"
+	log_function_data "File System Info: $rootHomeData"
 	log_function_data "Current kernel version: $currentKernel"
 	log_function_data "Latest kernel: $latestKernel"
 	log_function_data "Last package database update: $DPKG_UPDATE"
