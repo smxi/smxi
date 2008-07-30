@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.2
-####  Date: July 27 2008
+####  version: 3.2.3
+####  Date: July 30 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -274,10 +274,8 @@ update_smxi_data()
 {
 	eval $LOGPS
 	run_script_import $LIB_MISC_TWEAKS
-	if [ ! -f $ATX ]
-	then
-		set_apt_type 'conversion' # too risky, users would destroy systems
-	fi
+	# this tests for presence of aptitude, and only offers itself if user has aptitude installed
+	set_apt_type 'conversion' 
 	set_upgrade_type 'conversion'
 	distro_number_calculator
 	set_distro_version # just in case user exits, we'll still have the level set
@@ -507,10 +505,11 @@ update_completion_handler()
 
 antix_fix_1()
 {
-	eval $LOGPS
-	# run_script_import $LIB_2008_FIXES
-	# libavutil_fix_1
-	eval $LOGPE
+# 	eval $LOGPS
+# 	run_script_import $LIB_2008_FIXES
+# 	libavutil_fix_1
+# 	eval $LOGPE
+	:
 }
 
 ###**EOF**###
