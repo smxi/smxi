@@ -2524,6 +2524,7 @@ print_install_information()
 	echo "${S}Your CPU is: ${C}$CPU_NAME"
 	echo "${S}File System Information:"
 	echo "${C}$rootHomeData"
+	echo $LINE
 	echo "${S}Your current kernel version is:       ${C}$currentKernel"
 	if [ "$PRINT_VERSION" != 'true' ]
 	then
