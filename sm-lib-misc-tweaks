@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.19.0
+####  version: 1.19.1
 ####  Date: July 30 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1367,14 +1367,14 @@ set_default_runlevels()
 			case $opt in
 				debian-default)
 					echo "${S}Updating to use ${C}$opt${S} defaults...${N}"
-					update-rc.d -f remove $defaultDm
+					update-rc.d -f $defaultDm remove 
 					update-rc.d $defaultDm defaults 99 01 
 					set_default_inittab 2
 					repeat='true'
 					;;
 				sidux-default|antix-default)
 					echo "${S}Updating to use ${C}$opt${S} defaults...${N}"
-					update-rc.d -f remove $defaultDm
+					update-rc.d -f $defaultDm remove 
 					update-rc.d $defaultDm start 99 5 . stop 01 0 1 2 3 4 6 .
 					set_default_inittab 5
 					repeat='true'
@@ -1382,7 +1382,7 @@ set_default_runlevels()
 				2|3|4|5)
 					echo "${S}Setting system default and startup runlevel to: ${C}$opt${N}"
 					stopLevels=$( sed "s/$opt//" <<< $stopLevels )
-					update-rc.d -f remove $defaultDm
+					update-rc.d -f $defaultDm remove 
 					update-rc.d $defaultDm start 99 $opt . stop 01 $stopLevels .
 					set_default_inittab $opt
 					repeat='true'
