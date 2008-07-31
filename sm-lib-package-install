@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.9.4
-####  Date: July 24 2008
+####  version: 2.10.0
+####  Date: July 31 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -42,27 +42,34 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
-	local pdfLight='epdfview'
+	local pdfLight='epdfview' ceni='ceni'
 	
 	# note: epdfview is not in stable currently
 	if [ "$SYSTEM_BASE" == 'stable' ]
 	then
 		pdfLight='xpdf'
 	fi
+	if [ "$SIDUX_SOURCES" != 'true' ]
+	then
+		ceni=''
+	fi
 	
 	# package groups
-	local baseLightPackages="aterm dillo elinks htop irssi leafpad links2 lynx mc nano pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
-	local ceniStuff='ceni libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf'
 	local consoleBrowsers='lynx links elinks links2 w3m'
+	local consoleTools='bzip2 htop irssi nano gzip p7zip-full p7zip-rar sysv-rc-conf zip unzip'
+	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
+	
+	local ceniStuff="$ceni ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
 	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
-	local kdeExtras='kdeaddons kdemultimedia-kio-plugins konq-plugins'
+	local kdeExtras='karm kdeaddons kdemultimedia-kio-plugins kmoon konq-plugins ksensors ksnapshot'
 	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse"
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
+	local mozillaGroup='icedove iceweasel'
 	local streamTuner='streamtuner streamripper'
-	local systemUtils='alsa-base alsa-utils gpm dbus dbus-X11 hal net-tools pmount powersaved udev'
+	local systemUtils='alsa-base alsa-utils gpm dbus dbus-X11 hal lm-sensors net-tools pmount powersaved rdiff-backup udev'
 	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 	
@@ -75,6 +82,9 @@ package_group_installer()
 			;;
 		console-browsers)
 			packageName="$consoleBrowsers"
+			;;
+		console-tools)
+			packageName="$consoleTools"
 			;;
 		fluxbox)
 			packageName="$fluxPackages $dmUse"
@@ -102,6 +112,9 @@ package_group_installer()
 			;;
 		koffice)
 			packageName="$kofficePackages"
+			;;
+		mozilla-group)
+			packageName="$mozillaGroup"
 			;;
 		streamtuner)
 			packageName="$streamTuner"
@@ -135,7 +148,7 @@ package_group_installer()
 		eval $3 # this removes stuff, or does other operations, first
 	fi
 	update_sources $1
-	package_installer "$packageName" 'install-user'
+	package_installer "$packageName" 'install-user-ok'
 	eval $LOGUE
 }
 
@@ -446,86 +459,93 @@ utilities_installer()
 	echo $MLINE
 	echo "${S}A small, and to increase, collection of useful utilities you might not know about:"
 	echo $LINE
-	echo "${C}1${S} - ${C}sysv-rc-conf${S} A really nice debian runlevel editor. Very feature rich."
-	echo "    Highly recommended, a modern, advanced console tool, better than the gui crap."
+	echo "${C}1${S} - ${C}console-tools${S} Wide range of useful console tools: sysv-rc-conf."
+	echo "    (good runlevel editor), htop, zip/bzip/gzip/p7zip, irssi (nice irc client)."
 
 	echo "${C}2${S} - ${C}console-browsers${S} Installs a full suite of console browsrs."
 	echo "    Check it out, these are small, fast, and really pleasant. See how the non-gui side."
-	echo "    Installs: ${C}lynx links elinks links2 w3m${S} (w3m is my favorite)"
+	echo "    Installs: ${C}lynx links elinks links2 w3m${S} (links2 is my favorite)"
 	echo "    Hey, everyone has their favorite! See if you find one you like..."
-
-	echo "${C}3${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
+	
+	
+	echo "${C}3${S} - ${C}system-utilities${S} All the basics (plus related packages), and a few nice tools:"
+	echo "    alsa gpm dbus dbus-X11 hal lm-sensors net-tools pmount powersaved rdiff-backup udev"
+	
+	echo "${C}4${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
 	echo "    for optimal performance. Will show your installed cpu so you can make the right choice."
 	
-	echo "${C}4${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
+	echo "${C}5${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
 	echo "    These are convient tools to listen to audio streams, and record them."
 	echo 
-	echo "${C}5${S} - ${C}captive-to-ntfs-3g${S} Replaces ${C}Captive${S} with ${C}ntfs-3g${S} for ntfs read/write on linux."
+	echo "${C}6${S} - ${C}captive-to-ntfs-3g${S} Replaces ${C}Captive${S} with ${C}ntfs-3g${S} for ntfs read/write on linux."
 	echo "    Highly recommended if you dual boot with ntfs partitions and want to write to them."
 	
-	echo "${C}6${S} - ${C}yakuake${S} Quake style terminal emulator for ${C}kde${S}."
+	echo "${C}7${S} - ${C}yakuake${S} Quake style terminal emulator for ${C}kde${S}."
 	
 # 	echo "${C}6${S} - ${C}kpowersave${S} Install ${C}kpowersave / powersaved${S}."
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
-	echo "${C}7${S} - ${C}h2-favorites${S} This will setup a machine to be the way I want."
-	echo "    Asks before installing each package group."
+	echo "${C}8${S} - ${C}h2-favorites${S} This will setup a machine with all the apps I like to use."
+	echo "    Asks before installing each package group, so you can decide for yourself if you want each group."
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
 	echo
-	echo "${C}8${S} - ${C}ceni${S} Install ${C}ceni${S}, a nice command line tool to configure"
+	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a nice command line tool to configure"
 	echo "    and setup wired and wireless networking. A nice alternative to netcardconfig."
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 	
 	echo
-	echo "${C}9${S} - ${C}back-to-install-menu${S}"
+	echo "${C}10${S} - ${C}back-to-install-menu${S}"
 	
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="sysv-rc-conf  console-browsers swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni back-to-install-menu"
+	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
-			sysv-rc-conf)
-				package_group_installer plain sysv-rc-conf
+			captive-to-ntfs-3g)
+				update_sources 'plain'
+				install_ntfs_3g
+				repeat='true'
+				;;
+			ceni)
+				# package_group_installer plain ceni-stuff
+				install_ceni
+				repeat='true'
+				;;
+			console-tools)
+				package_group_installer 'plain' 'console-tools'
 				repeat='true'
 				;;
 			console-browsers)
-				package_group_installer plain console-browsers
+				package_group_installer 'plain' 'console-browsers'
+				repeat='true'
+				;;
+			h2-favorites)
+				h2_faves
+				repeat='true'
+				;;
+			kpowersave)
+				update_sources 'plain'
+				install_kpowersave
+				repeat='true'
+				;;
+			streamtuner)
+				package_group_installer 'plain' 'streamtuner'
 				repeat='true'
 				;;
 			swiftfox)
 				swiftfox_installer
 				repeat='true'
 				;;
-			streamtuner)
-				package_group_installer plain streamtuner
-				repeat='true'
-				;;
-			captive-to-ntfs-3g)
-				update_sources plain
-				install_ntfs_3g
-				repeat='true'
-				;;
-			kpowersave)
-				update_sources plain
-				install_kpowersave
+			system-utilities)
+				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
 			yakuake)
-				package_group_installer plain yakuake
-				repeat='true'
-				;;
-			h2-favorites)
-				update_sources plain
-				h2_faves
-				repeat='true'
-				;;
-			ceni)
-				# package_group_installer plain ceni-stuff
-				install_ceni
+				package_group_installer 'plain' 'yakuake'
 				repeat='true'
 				;;
 			back-to-install-menu)
@@ -983,7 +1003,7 @@ install_ceni()
 {
 	eval $LOGPS
 	local appName='Ceni'
-	
+
 	echo $LINE
 	echo "${C}$appName${S} is especially nice for wifi console networking configuration, or if you"
 	echo "have any kind of complicated networking, multiple eth cards, etc."
@@ -998,7 +1018,13 @@ install_ceni()
 		echo "${S}Removing previous manual script install of ${C}$appName${N}"
 		rm -f $SCRIPT_HOME/ceni
 	fi
-	package_group_installer plain ceni-stuff
+	if [ "$SIDUX_SOURCES" != 'true' ]
+	then
+		echo "${M}You do not have sidux sources enabled, so this installer will only install the"
+		echo  "required dependencies for Ceni, not Ceni itself. You will need to install Ceni manually.${N}"
+		print_hec
+	fi
+	package_group_installer 'plain' 'ceni-stuff'
 	echo  "${S}Congratulations. ${C}$appName${S} is now installed. To redo your networking, simply type, as root: ${C}$appName${S} (uppercase C)${N}"
 	print_hec
 	eval $LOGPE
@@ -1008,22 +1034,21 @@ h2_faves()
 {
 	eval $LOGPS
 	local response='' ceni='ceni'
-	local removeItems='ifrename splashy'
-	if [ "$SIDUX_SOURCES" != 'true' ]
-	then
-		ceni=''
-	fi
-	local addItems="$ceni elinks htop libmms0 links2 nano net-tools rdiff-backup sysv-rc-conf w3m"
-	local addItemsKde='karm konq-plugins kmoon' # kdeaddons kde-extras
-	local mozItems='iceweasel icedove'
+	local removeItems='splashy'
+	
 	
 	echo $LINE
+	echo "${S}Starting the h2 favorites install process now...${N}"
 	h2_package_group_remover "$removeItems"
-	h2_package_group_installer "$addItems"
-	h2_package_group_installer "$addItemsKde"
-	h2_package_group_installer "$mozItems"
-
+	h2_package_group_installer 'console-tools'
+	h2_package_group_installer 'console-browsers'
+	h2_package_group_installer 'system-utilities'
+	h2_package_group_installer 'mozilla-group'
+	h2_package_group_installer 'kde-extras'
+	echo
+	echo $LINE
 	echo "${S}Ok, all done with h2 favorite installs.${N}"
+	print_hec
 	eval $LOGPE
 }
 
@@ -1037,6 +1062,7 @@ h2_package_group_remover()
 	do
 		if [ -n "$( package_tester $package )" ]
 		then
+			echo
 			echo "${S}Removing ${C}$package${S}..."
 			echo "${M}Type ${C}y + <enter>${M} to remove it, or ${C}n + <enter>${M} to keep it.${N}"
 			read response
@@ -1060,12 +1086,13 @@ h2_package_group_installer()
 	eval $LOGUS
 	local response=''
 	
-	echo "${S}Installing ${C}$1${S}..."
+	echo
+	echo "${S}Installing ${C}$1${S}... "
 	echo "${M}Type ${C}y + <enter>${M} to continue, or ${C}n + <enter>${M} to skip these now.${N}"
 	read response
 	case $response in
 		y|Y|yes)
-			package_installer "$1" 'install-missing'
+			package_group_installer 'plain' "$1"
 			;;
 		*)
 			echo "${S}Ok, skipping that group of packages...${N}"
