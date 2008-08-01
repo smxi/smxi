@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.4.1
-####  Date: July 25 2008
+####  version: 1.4.2
+####  Date: July 31 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -114,6 +114,17 @@ ANYANY_FILE_DASH=''
 
 # # # use alternate name and location for 2.6.24
 case $KERNEL_THIRD in
+	26)
+		# source url:
+		# http://groups.google.com/group/vmkernelnewbies/web/vmware-any-any-update117c.tar.gz
+		# author blog:
+		# http://opensuse-linux-blog.blogspot.com/2008/07/how-to-install-vmware-in-2626-linux.html#links
+		ANYANY_PREFIX='http://techpatterns.com/downloads/distro/patches/'
+		#ANYANY_Z='.tgz'
+		ANYANY_ALT='c'
+		ANYANY_NUMBER=117
+		#ANYANY_FILE_DASH=''
+		;;
 	25)
 		# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
 		# vmware-any-any-update-116.tgz
