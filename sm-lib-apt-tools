@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.12
+####  version: 1.15.13
 ####  Date: August 1 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -272,6 +272,10 @@ package_remover()
 	then
 		extraArgs=$( sed 's/purge//g' <<< $extraArgs  )
 		removePurge='purge'
+		if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'stable' ]
+		then
+			removePurge='remove --purge'
+		then
 	fi
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
