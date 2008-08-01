@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.10
-####  Date: July 28 2008
+####  version: 1.15.11
+####  Date: August 1 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1447,7 +1447,7 @@ alt-usa-3:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/
 ###---------------------------------------------------------------------
 
 # check apt for latest kernel version
-# args: $1 - debian/sidux - optional, to get current sid kernel version if needed
+# args: $1 - debian/debian-486/sidux - optional, to get current sid kernel version if needed
 get_current_apt_kernel()
 {
 	eval $LOGUS
@@ -1473,6 +1473,10 @@ get_current_apt_kernel()
 			debian)
 				distro='Debian'
 				;;
+			debian-486)
+				distro='Debian-486'
+				platform='486'
+				;;
 			sidux)
 				kernelStringExtra='-sidux'
 				distro='sidux'
@@ -1490,7 +1494,7 @@ get_current_apt_kernel()
 		log_function_data "Platform: $platform"
 		
 		# little trick here to present just debian kernels if not distro
-		if [ "$SIDUX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' ]
+		if [ "$SIDUX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486' ]
 		then
 			kernelStringExtra=''
 			distro='Debian'
@@ -1522,7 +1526,7 @@ get_current_apt_kernel()
 		currentKernel=$kernel2
 
 		case "$defaultKernel" in
-			debian)
+			debian|debian-486)
 				CURRENT_DEBIAN_KERNEL=$currentKernel
 				log_function_data "CURRENT_DEBIAN_KERNEL: $CURRENT_DEBIAN_KERNEL"
 				;;

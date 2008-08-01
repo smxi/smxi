@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.8.3
-####  Date: July 31 2008
+####  version: 2.8.4
+####  Date: August 1 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
@@ -44,6 +44,7 @@ advanced_kernel_install()
 	local altKernOpt1='' altKernelOption1='' altKernelText1=''
 	local altKernOpt2='' altKernelOption2='' altKernelText2=''
 	local altKernOpt3='' altKernelOption3='' altKernelText3=''
+	local altKernOpt4='' altKernelOption4='' altKernelText4=''
 	
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
@@ -60,9 +61,16 @@ advanced_kernel_install()
 	then
 		altKernelOption1='install-debian-kernel'
 		altKernelText1='Debian'
+		if [ "$BITS" == '32' ]
+		then
+			altKernelOption4='install-debian-486-kernel' 
+			altKernelText4='Debian-486'
+		fi
 	fi
 	optionList="$optionList $altKernelOption1"
 	altKernOpt1=$( wc -w <<< $optionList )
+	optionList="$optionList $altKernelOption4"
+	altKernOpt4=$( wc -w <<< $optionList )
 	if [ -n "$SIDUX_SOURCES" ]
 	then
 		altKernelOption2='install-sidux-kernel'
@@ -94,6 +102,7 @@ advanced_kernel_install()
 	echo "       (${C}slh${S} marked kernels are sidux kernels)"
 	echo
 	print_alt_kernel_option "$altKernelOption1" "$altKernOpt1" "$altKernelText1"
+	print_alt_kernel_option "$altKernelOption4" "$altKernOpt4" "$altKernelText4"
 	print_alt_kernel_option "$altKernelOption2" "$altKernOpt2" "$altKernelText2"
 	print_alt_kernel_option "$altKernelOption3" "$altKernOpt3" "$altKernelText3"
 	echo "${C}$kmOption - kernel-metapackage-options${M} NEW!${S} Kernel metapackage options: remove, install"
@@ -150,6 +159,10 @@ advanced_kernel_install()
 			get_current_apt_kernel debian
 			double_check_kernel apt-debian
 			;;
+		install-debian-486-kernel)
+			get_current_apt_kernel debian-486
+			double_check_kernel apt-debian-486
+			;;
 		install-mepis-kernel)
 			get_current_apt_kernel mepis
 			double_check_kernel apt-mepis
@@ -194,6 +207,10 @@ double_check_kernel()
 		apt-debian)
 			kernelFile="$CURRENT_DEBIAN_KERNEL" 
 			extraText='Debian'
+			;;
+		apt-debian-486)
+			kernelFile="$CURRENT_DEBIAN_KERNEL" 
+			extraText='Debian-486'
 			;;
 		apt-mepis)
 			kernelFile="$CURRENT_MEPIS_KERNEL" 
