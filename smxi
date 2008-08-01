@@ -3299,7 +3299,7 @@ print_usage()
 	echo "${M}OPTION HELP MENU: $SCRIPT_NAME"
 	echo $MBAR
 	eval $ErrorMessage
-	echo "${S}Options: together: ${C}-deghiIklmrstuwx${S} or separated: ${C}-giktw -f -x${S}"
+	echo "${S}Options: together: ${C}-deghiklmrstuwx${S} or separated: ${C}-giktw -f -x${S}"
 	echo "You can run this script with any combination of these options."
 	echo "You can put them together, like this: ${C}-ik${S}, or separate, like this: ${C}-w -x${S}"
 	echo "Each option, or group of options, must begin with a ${C}-${S}"
