@@ -205,7 +205,7 @@ print_alt_kernel_option()
 		then
 			debianExtraText=' (type matches your running kernel),'
 		fi
-		echo "${C}$2 - $1${S} Installs current ${C}$3${S} kernel"
+		echo "${C}$2 - $1${S} Installs current ${C}$3${S} kernel$debianExtraText"
 		echo "     as well as any any required ${C}$3${S} kernel modules available in apt."
 		echo "     Note: you will see which specific ${C}$3${S} kernel will be installed in the next step, "
 		echo "     and can skip the install if you don't want it."
