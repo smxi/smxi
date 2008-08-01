@@ -565,6 +565,7 @@ install_apt_kernel_modules()
 		
 		if [ -n "${modulePath}" ]
 		then
+			log_function_data "module: $module"
 			log_function_data "modulePath: $modulePath"
 			#echo "${SPACER}${S}module path: ${C}$modulePath${N}"
 			modulePackage="$(dpkg -S ${modulePath} 2>/dev/null)"
