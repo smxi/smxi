@@ -272,6 +272,7 @@ package_remover()
 	then
 		extraArgs=$( sed 's/purge//g' <<< $extraArgs  )
 		removePurge='purge'
+		# etch doesn't support purge in apt-get
 		if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'stable' ]
 		then
 			removePurge='remove --purge'
