@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.9.3
+####  version: 2.9.4
 ####  Date: August 3 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -300,14 +300,7 @@ double_check_kernel()
 				no-return-to-menu)
 					echo "${S}Ok, let's try it again, please make your selection.${N}"
 					eval $LOGPE
-					case $1 in 
-						advanced|apt-debian|apt-debian-686|apt-debian-486|apt-sidux)
-							advanced_kernel_install
-							;;
-						*)
-							kernel_question
-							;;
-					esac
+					kernel_return_location $1
 					;;
 				continue-no-kernel)
 					echo "${S}OK, continuing with script without installing new kernel."
@@ -326,8 +319,22 @@ double_check_kernel()
 			double_check_kernel $1
 		fi
 	else
+		eval $LOGPE
 		error_handler 'null-kernel-file-data' "$FUNCNAME" "$1" 
+		kernel_return_location $1
 	fi
+}
+# args: $1 - the arg for kernel confirm question
+kernel_return_location()
+{
+	case $1 in 
+		advanced|apt-debian|apt-debian-686|apt-debian-486|apt-sidux)
+			advanced_kernel_install
+			;;
+		*)
+			kernel_question
+			;;
+	esac
 }
 # kernel_question
 #check_kernel
