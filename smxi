@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.10
-####  Date: July 31 2008
+####  version: 8.3.11
+####  Date: August 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -474,7 +474,7 @@ error_handler()
 		# internal script errors/failures in system: 151-254: normal
 		null-kernel-file-data)
 			errorCode=251
-			errorMessage="The kernel installer received a null value for the kernel to install.\nInstall request type: $errorExtra "
+			errorMessage="The kernel installer received a null value for the kernel to install.\nThis probably means that the requested kernel is not in apt at the moment\because of a metapackage kernel version mismatch. Try it again later.\nInstall request type: $errorExtra "
 			;;
 		value-bad)
 			errorCode=253
