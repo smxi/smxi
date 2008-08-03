@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.17
+####  version: 1.15.18
 ####  Date: August 3 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1538,6 +1538,7 @@ get_current_apt_kernel()
 		kernelPackageExists=$( check_package_status "linux-image-$currentKernel" )
 		if [ -z "$kernelPackageExists" ]
 		then
+			log_function_data "Error: the kernel package: linux-image-$currentKernel has no installation candidate.\Setting kernel version to null for this kernel type."
 			currentKernel=''
 		fi
 
