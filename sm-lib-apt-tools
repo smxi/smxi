@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.14
-####  Date: August 1 2008
+####  version: 1.15.15
+####  Date: August 3 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1533,6 +1533,9 @@ get_current_apt_kernel()
 		done
 		
 		currentKernel=$kernel2
+		
+		# test that the kernel actually exists, metapackages can be wrong, out of date
+		apt-get install -s $currentKernel &>/dev/null || currentKernel=''
 
 		case "$defaultKernel" in
 			debian|debian-486|debian-686)
