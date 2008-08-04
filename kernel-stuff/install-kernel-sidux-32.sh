@@ -8,6 +8,9 @@
 # zip file created, this is only the working template.
 # Changes and modifications are by Harald Hope, and neither slh nor kelmo should be blamed
 # for any mistakes I make.
+# Utility version and date:
+# version: 1.0.1
+# date: 2008-08-04
 
 VER="2.6.24-2.6.24.3.slh.11-sidux-686"
 
@@ -138,7 +141,7 @@ fi
 ln -fs "linux-headers-${VER}" /usr/src/linux >/dev/null 2>&1
 
 # try to install external dfsg-free module packages
-for i in acer_acpi acerhk acx atl2 aufs av5100 btrfs eeepc_acpi et131x fsam7400 gspca kqemu ndiswrapper omnibook qc_usb quickcam r5u870 rfswitch sfc sqlzma squashfs tp_smapi vboxadd vboxdrv; do
+for i in acer_acpi acerhk acx atl2 aufs av5100 btrfs drbd8 eeepc_acpi em8300 et131x fsam7400 gspca kqemu lirc_modules lirc loop_aes lzma ndiswrapper nilfs omnibook qc_usb quickcam r5u870 r6040 rfswitch rt73 sfc speakup sqlzma squashfs tp_smapi vboxadd vboxdrv; do
 	MODULE_PATH="$(/sbin/modinfo -k $(uname -r) -F filename "${i}" 2>/dev/null)"
 	if [ -n "${MODULE_PATH}" ]; then
 		MODULE_PACKAGE="$(dpkg -S ${MODULE_PATH} 2>/dev/null)"

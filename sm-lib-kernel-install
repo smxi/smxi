@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.9.6
-####  Date: August 3 2008
+####  version: 2.9.7
+####  Date: August 4 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
@@ -585,7 +585,7 @@ install_the_apt_kernel()
 install_apt_kernel_modules()
 {
 	eval $LOGUS
-	local supportedModules='acer_acpi acerhk acx atl2 aufs av5100 btrfs eeepc_acpi et131x fsam7400 gspca kqemu ndiswrapper omnibook qc_usb quickcam r5u870 rfswitch sfc sqlzma squashfs tp_smapi vboxadd vboxdrv'
+	local supportedModules='acer_acpi acerhk acx atl2 aufs av5100 btrfs drbd8 eeepc_acpi em8300 et131x fsam7400 gspca kqemu lirc_modules lirc loop_aes lzma ndiswrapper nilfs omnibook qc_usb quickcam r5u870 r6040 rfswitch rt73 sfc speakup sqlzma squashfs tp_smapi vboxadd vboxdrv'
 	local module='' modulePath='' modulePackage='' moduleType='' kernelArch='686'
 	local extraModuleText=''
 	if [ "$BITS" == '64' ]
@@ -1235,17 +1235,25 @@ print_module_list()
 	btrfs-modules-
 	drbd8-modules-
 	eeepc-acpi-modules-
+	em8300-modules-
 	et131x-modules-
 	fsam7400-modules-
 	gspca-modules-
 	kqemu-modules-
+	lirc-modules-
+	lirc-modules-modules-
+	loop-aes-modules-
 	lzma-modules-
 	ndiswrapper-modules-
+	nilfs-modules-
 	omnibook-modules-
 	qc-usb-modules-
 	r5u870-modules-
+	r6040-modules-
 	rfswitch-modules-
+	rt73-modules-
 	sfc-modules-
+	speakup-modules-
 	squashfs-modules-
 	tp-smapi-modules-
 	virtualbox-ose-guest-modules-
