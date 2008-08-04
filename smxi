@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.12
+####  version: 8.3.13
 ####  Date: August 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -909,9 +909,13 @@ download_test_file()
 		if [ -n "$isGood" -o "$1" == "$USER_SCRIPT_URL" ]
 		then
 			mv -f $fileNameTemp $fileName
+			# I'm not sure why this changed, but I've been seeing some 700 and 704 here
+			# so this is going to be done explicitly now instead.
 			if [ "$2" == 'chm' ]
 			then
-				chmod +x $fileName
+				chmod 705 $fileName
+			else
+				chmod 604 $fileName
 			fi
 			eval $LOGUE
 			return 0
