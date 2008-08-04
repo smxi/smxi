@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.13
+####  version: 8.3.14
 ####  Date: August 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1284,6 +1284,9 @@ cleanup_extra_files()
 	then
 		sed -i 's/no-set//' $SM_CONFIG_FILE
 	fi
+	# this fixes the bad permissions and lets people run the stuff as user again, or view it
+	chmod 604 sm-lib-* &>/dev/null
+	chmod 705 sgfxi svmi smxi &>/dev/null
 	eval $LOGPE
 }
 
