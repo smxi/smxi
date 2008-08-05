@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.15.18
-####  Date: August 3 2008
+####  version: 1.16.0
+####  Date: August 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1578,19 +1578,13 @@ get_current_apt_kernel()
 ###---------------------------------------------------------------------
 
 # args: $1 can trigger 'post' test, for running this after initial tests
-test_app_exists()
+test_required_startup_apps()
 {
-	eval $LOGPS
+	eval $LOGUS
 	local p='' r='' missing='' installApps='' response='' updateError='' appPath='' appExists=''
 	local requiredApps="awk basename bzip2 cat chmod chown cut date egrep gawk gcc grep ln logrotate make mkdir perl pidof ps readlink sed sleep sort tar touch unzip wc wget whoami"
 	# dctr is for grep-aptavail
 	local dpkgCheck='dctrl-tools initramfs-tools' 
-	local siduxRequired='deborphan' #  install-binary-gfx
-	
-	if [ "$1" == 'post' ]
-	then
-		requiredApps=$siduxRequired
-	fi
 	
 	for r in $dpkgCheck
 	do
@@ -1614,35 +1608,96 @@ test_app_exists()
 	
 	if [ "$missing" == 'true' ]
 	then
-		echo $EBAR
-		echo "${E}You must install the following application(s) to continue running this script:" 
-		echo "${C}$installApps"
-		echo $EBAR
-		echo "${S}Run the following manually to install the missing programs:"
-		echo "$SPACER${C}$APT_TYPE update;$APT_TYPE install $installApps"
-		echo "${S}or let the script do it for you now."
-		echo $LINE
-		echo -e "${Q}Would you like to install those now? ${S}[${C}y${S} installs the missing programs, ${C}n${S} exits]$YNE"
-		echo $LINE
-		read response
-		eval $LOGPE
-		case $response in
-			y)	apt_update_handler 'update-apps'
-				package_installer "$installApps" 'install-missing'
-				echo "${S}Finished installing missing programs, continuing with script.${N}"
-				;;
-			n)	print_quit
-				;;
-			*)	print_error yn
-				test_app_exists "$1"
-				;;
-		esac
+		eval $LOGUE
+		install_missing_apps "$installApps" 'required'
 	else
-		log_function_data "No missing apps"
-		eval $LOGPE
+		log_function_data "No missing required script apps"
+		eval $LOGUE
 	fi
 }
 ## DEBUGGER
-#script_debugger test_app_exists
+#script_debugger test_required_startup_apps
+
+# check if app is present in system, then if missing, ask if they want it installed
+# for required, will exit script, for feature will just return false, 1
+# args: $1 - apps to install; $2 - required/feature
+install_missing_apps()
+{
+	eval $LOGUS
+	local opt='' option='' repeat='' returnValue='' noOpt='' 
+	local message1='' message2='' plural1=''
+	if [ "$( wc -w <<< $1 )" -gt 1 ]
+	then
+		plural1='s'
+	fi
+	
+	case $2 in
+		required)
+			noOpt='no-quit-now'
+			message1="${M}You must install the following application$plural1 to run ${C}$SCRIPT_NAME${M}:"
+			message2="Quit ${C}$SCRIPT_NAME${S} now, do not install required script applications."
+			;;
+		feature)
+			noOpt='no-skip-feature'
+			message1="${M}You must install the following package$plural1 to use this feature of ${C}$SCRIPT_NAME${M}:"
+			message2="Skip this feature of ${C}$SCRIPT_NAME${S}, do not install missing packages."
+			;;
+	esac
+	
+	echo $MLINE
+	echo "$message1"
+	echo $MLINE
+	echo "$SPACER${C}$1"
+	echo $LINE
+	
+	echo "${C}1 - yes-install${S} - Install the missing apps then continue with script."
+	echo "${C}2 - $noOpt${S} - $message2"
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="yes-install $noOpt"
+	select opt in $options
+	do
+		log_function_data "opt selected: $opt"
+		case $opt in
+			yes-install)
+				apt_update_handler 'update-apps'
+				package_installer "$1" 'install-missing'
+				returnValue=$?
+				;;
+			no-skip-feature)
+				returnValue=1
+				;;
+			no-quit-now)
+				returnValue=1
+				print_quit
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	log_function_data "Return Value: $returnValue"
+	eval $LOGUE
+	
+	if [ "$repeat" == 'true' ]
+	then
+		install_missing_apps "$1" "$2"
+	else
+		if [ "$returnValue" -gt 0 ]
+		then
+			echo $MLINE
+			echo "${M}Cannot run the requested feature, skipping it and continuing with script.${N}"
+			print_hec
+		else
+			echo $LINE
+			echo "${S}Finished installing missing applications, continuing with script.${N}"
+		fi
+		return $returnValue
+	fi
+}
 
 ###**EOF**###

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.5.2
-####  Date: July 24 2008
+####  version: 2.6.0
+####  Date: August 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -37,6 +37,7 @@ clean_up()
 {
 	eval $LOGMS
 	local repeat='' opt='' currentKernelsPrint='' advanced='' xOption='' cont=''
+	local runFeature=0
 	#local currentKernels=$(dpkg -l | grep headers-2 | cut -d " " -f 3 | cut -d '-' -f 3-9 )
 	local currentKernels=$(package_tester 'linux-image-2' 'wild' | cut -d '-' -f 3-9 )
 	local options="apt-clean apt-autoclean kernel-remover remove-kernel-modules clean-old-backups debian-orphans remove-xorg-modules clean-cruft "
@@ -142,8 +143,15 @@ clean_up()
 				repeat='true'
 				;;
 			debian-orphans)
-				test_app_exists post # just running this test here in case it's missing
-				debian_orphans
+				if [ -z "$( package_tester 'deborphan' )" ]
+				then
+					install_missing_apps 'deborphan' 'feature'
+					runFeature=$?
+				fi
+				if [ "$runFeature" -eq 0 ]
+				then
+					debian_orphans
+				fi
 				repeat='true'
 				;;
 			remove-xorg-modules)
@@ -287,11 +295,16 @@ debian_orphans()
 	echo
 	echo "${M}ALWAYS confirm individual packages on this list manually."
 	echo "${W}Do not use automated methods to remove these! Breakage can occur if you do.${N}"
+	echo $LINE
 	echo "${C}$orphans${N}"
+	echo $LINE
 	echo "${S}You can copy these by highlighting the list, then moving to another terminal"
 	echo "using ${C}ctrl+alt+<F2-F6>${S}, assuming you are currently in terminal 1, then"
 	echo "pasting them into your favorite text editor like ${C}nano${S} or ${C}mcedit${S} using"
 	echo "the center mouse wheel button click to paste into the editor."
+	echo
+	echo "They are also logged in: ${C}$LOG_FILE${S}"
+	echo "Just search for ${C}orphan:${S} in the log file to locate the list."
 	echo
 	echo "Often multimedia library files are called orphaned even though your systems multimedia"
 	echo "use them. So make sure the package is truly obsolete and unused before removing it!"
@@ -327,56 +340,73 @@ remove_kernels()
 	local kernelStringMatch=''
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 	local ssftCheck=$( package_tester 'ssft' )
+	local dialogCheck=$( package_tester 'dialog' )
+	local skhCheck='' installValue=0
+	local missingPackages=''
 	
 	if [ -z "$ssftCheck" ]
 	then
-		package_installer 'ssft' 'install-missing'
-		# dialogue wasn't in stable, but now it is, so can default
-		package_installer 'dialogue' 'install-missing'
+		missingPackages="ssft"
+	fi
+	if [ -z "$dialogCheck" ]
+	then
+		missingPackages="$missingPackage dialog"
 	fi
 	
 	# test to make sure that required scripts are installed, if not, install:
 	if [ -n "$SIDUX_SOURCES" -a -f $SID ]
 	then
-		test_for_kernel_tools || return 1
-		eval $KernelCommand
-	elif [ -x /usr/sbin/kernel-remover ]
-	then
-		eval $KernelCommand
-	elif [ ! -x /usr/sbin/kernel-remover ]
-	then
-		run_script_import $MOD_KM
-	fi
-	
-	#echo $KernelCommand
-	echo "${S}Your requested kernel removal action has been completed."
-	echo $LINE
-	
-	if [ -d $KernDown ]
-	then
-		if [ "$KernelRemoval" == 'all' ]
+		skhCheck=$( package_tester 'sidux-kernelhacking' )
+		if [ -z "$skhCheck" ]
 		then
-			SubDirectories=$( ls $KernDown )
-			for directory in $SubDirectories
-			do
-				# this handles new randomness in kernel naming conventions
-				kernelStringMatch=$( test_kernel_strings $directory )
-				if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
-				then
-					remove_the_directory $KernDown $directory
-				fi
-			done
-		else
-			if [ -d $KernDown/$normalizedCurrentKernel ]
-			then
-				echo "${S}Removing kernel directory: ${C}$KernDown/$normalizedCurrentKernel${S}...${N}"
-				rm -fr $KernDown/$normalizedCurrentKernel
-			fi
+			missingPackages="$missingPackage sidux-kernelhacking"
 		fi
-	else
-		echo "${E}No kernel install directories were located.${N}"
 	fi
-	print_hec
+	
+	if [ -n "$missingPackages" ]
+	then
+		install_missing_apps "$missingPackages" 'feature'
+		installValue=$?
+	fi
+	
+	if [ "$installValue" -eq 0 ]
+	then
+		if [ -x /usr/sbin/kernel-remover ]
+		then
+			eval $KernelCommand
+		else
+			run_script_import $MOD_KM
+		fi
+		
+		echo "${S}Your requested kernel removal action has been completed."
+		echo $LINE
+		
+		if [ -d $KernDown ]
+		then
+			if [ "$KernelRemoval" == 'all' ]
+			then
+				SubDirectories=$( ls $KernDown )
+				for directory in $SubDirectories
+				do
+					# this handles new randomness in kernel naming conventions
+					kernelStringMatch=$( test_kernel_strings $directory )
+					if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
+					then
+						remove_the_directory $KernDown $directory
+					fi
+				done
+			else
+				if [ -d $KernDown/$normalizedCurrentKernel ]
+				then
+					echo "${S}Removing kernel directory: ${C}$KernDown/$normalizedCurrentKernel${S}...${N}"
+					rm -fr $KernDown/$normalizedCurrentKernel
+				fi
+			fi
+		else
+			echo "${E}No kernel install directories were located.${N}"
+		fi
+		print_hec
+	fi
 	eval $LOGPE
 }
 
@@ -406,21 +436,6 @@ remove_the_directory()
 				remove_the_directory $1 $2
 				;;
 		esac
-	fi
-	eval $LOGUE
-}
-
-# args: $1 command/app
-test_for_kernel_tools()
-{
-	eval $LOGUS
-	local skh='sidux-kernelhacking' 
-	
-	if [ ! -e /usr/sbin/kernel-remover ]
-	then
-		echo "${M}You are missing the required kernel removal package, script will now install: ${C}$skh${N}"
-		apt_update_handler 'kernel-tools'
-		package_installer "$skh" 'install-missing' || return $?
 	fi
 	eval $LOGUE
 }

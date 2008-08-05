@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.14
-####  Date: August 3 2008
+####  version: 8.3.15
+####  Date: August 5 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -3546,7 +3546,7 @@ run_script_components()
 		run_script_import $LIB_APT_TOOLS 'no-download'
 	fi
 	check_dpkg_update
-	test_app_exists
+	test_required_startup_apps
 	# must be set after check_distro_version to set SIDUX_SOURCES global
 	set_distro_data
 	# checks for first run or -m option to run change_debian_mirrors
