@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.6.0
-####  Date: August 5 2008
+####  version: 2.6.1
+####  Date: August 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -37,7 +37,6 @@ clean_up()
 {
 	eval $LOGMS
 	local repeat='' opt='' currentKernelsPrint='' advanced='' xOption='' cont=''
-	local runFeature=0
 	#local currentKernels=$(dpkg -l | grep headers-2 | cut -d " " -f 3 | cut -d '-' -f 3-9 )
 	local currentKernels=$(package_tester 'linux-image-2' 'wild' | cut -d '-' -f 3-9 )
 	local options="apt-clean apt-autoclean kernel-remover remove-kernel-modules clean-old-backups debian-orphans remove-xorg-modules clean-cruft "
@@ -143,15 +142,7 @@ clean_up()
 				repeat='true'
 				;;
 			debian-orphans)
-				if [ -z "$( package_tester 'deborphan' )" ]
-				then
-					install_missing_apps 'deborphan' 'feature'
-					runFeature=$?
-				fi
-				if [ "$runFeature" -eq 0 ]
-				then
-					debian_orphans
-				fi
+				check_deborphans
 				repeat='true'
 				;;
 			remove-xorg-modules)
@@ -272,6 +263,25 @@ remove_backup_files()
 	esac
 	print_hec
 	eval $LOGPE
+}
+
+check_deborphans()
+{
+	eval $LOGUS
+	local orphanFeature=0
+	
+	if [ -z "$( package_tester 'deborphan' )" ]
+	then
+		install_missing_apps 'deborphan' 'feature'
+		orphanFeature=$?
+	fi
+	if [ "$orphanFeature" -eq 0 ]
+	then
+		eval $LOGUE
+		debian_orphans
+	else
+		eval $LOGUE
+	fi
 }
 
 # cleans out all orphaned packages from various removals.

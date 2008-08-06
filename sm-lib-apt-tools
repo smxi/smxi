@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.16.1
-####  Date: August 5 2008
+####  version: 1.16.2
+####  Date: August 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -238,26 +238,6 @@ package_installer()
 		eval $LOGUE
 		return 0
 	fi
-}
-
-# simple thing to just install/start package if needed
-# args: $1: package name; $2 - run/optional
-check_install_run_package()
-{
-	eval $LOGUS
-	local packageCheck=$( package_tester $1 )
-	
-	if [ -z "$packageCheck" ]
-	then
-		package_installer $1 'install-missing'
-	fi
-	
-	if [ "$2" == 'run' ]
-	then
-		echo "${S}Starting ${C}$1${S} now...${N}"
-		$1
-	fi
-	eval $LOGUE
 }
 
 # args: $1 - package; $2 - extra args: purge etc

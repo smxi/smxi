@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.15
-####  Date: August 5 2008
+####  version: 8.3.16
+####  Date: August 6 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -441,6 +441,10 @@ error_handler()
 			errorCode=33
 			errorMessage="User initiated $DU_UPGRADE component termination via ctrl+c or kill."
 			;;
+		user-killed-conversion)
+			errorCode=37
+			errorMessage="User initiated conversion component termination via ctrl+c or kill."
+			;;
 		warning-status-file-missing)
 			errorCode=34
 			errorMessage="Missing Warning Section file: $errorExtra\n$SCRIPT_NAME cannot execute the requested action without this file."
@@ -453,6 +457,7 @@ error_handler()
 			errorCode=36
 			errorMessage="The script url you provided: $errorExtra is not working.\nPlease check your typing, and make sure the url actually exists."
 			;;
+		
 		# failures in actions/functions not requiring script exit: 100-150: serious
 		missing-lib)
 			errorCode=100
@@ -2940,7 +2945,7 @@ install_dist_upgrade()
 				repeat='true' # reset so no log if no error
 				;;
 			check-services)
-				check_install_run_package 'rcconf' 'run'
+				check_services
 				repeat='true' 
 				;;
 			continue)
@@ -2982,15 +2987,32 @@ install_dist_upgrade()
 	fi
 }
 
+check_services()
+{
+	eval $LOGUS
+	local rcconfFeature=0
+	
+	if [ -z "$( package_tester 'rcconf' )" ]
+	then
+		install_missing_apps 'rcconf' 'feature'
+		rcconfFeature=$?
+	fi
+	if [ "$rcconfFeature" -eq 0 ]
+	then
+		rcconf
+	fi
+	eval $LOGUE
+}
+
 # arg: $1 - trap function name
 du_trap_handler()
 {
 	# first echo is to clear the top line
-	echo ""
+	echo ''
 	echo $WLINE
 	echo "${W}You exited with ctrl+c or kill, removing holds if needed.${N}"
 	set_hold_install install
-	error_handler user-killed-du $1
+	error_handler 'user-killed-du' "$1"
 }
 
 ## DEBUGGER
