@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.3
+####  version: 2.10.4
 ####  Date: August 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1015,14 +1015,9 @@ install_ceni()
 		echo "${S}Removing previous manual script install of ${C}$appName${N}"
 		rm -f $SCRIPT_HOME/ceni
 	fi
-	if [ "$SIDUX_SOURCES" != 'true' ]
-	then
-		echo "${M}You do not have sidux sources enabled, so this installer will only install the"
-		echo  "required dependencies for Ceni, not Ceni itself. You will need to install Ceni manually.${N}"
-		print_hec
-	fi
 	package_group_installer 'plain' 'ceni-stuff'
 	check_install_package 'ceni'
+	echo
 	echo  "${S}Congratulations. ${C}$appName${S} is now installed. To redo your networking, simply type, as root: ${C}$appName${S} (uppercase C)${N}"
 	print_hec
 	eval $LOGPE
@@ -1037,21 +1032,24 @@ check_install_package()
 	echo $LINE
 	if [ -n "$( check_package_status "$1" )" ]
 	then
-		package_installer "$1" 'install-missing'
+		package_installer "$1" 'install-missing' || success=$?
 	else
-		echo "${S}Downloading and installing $1 deb now...${N}"
+		echo "${S}Downloading and installing ${C}$1${S} deb now...${N}"
 		wget -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
 		if [ -f $packageDeb ]
 		then
 			dpkg -i $packageDeb || success=$?
 		fi
 		rm -f $packageDeb
-		if [ "$success" -gt 0 ]
-		then
-			log_function_data "Error: $packageDeb download/install failed, error code: $success"
-			echo "${E}Download/install failed, sorry...${N}"
-		fi
 	fi
+	if [ "$success" -gt 0 ]
+	then
+		log_function_data "Error: $packageDeb download/install failed, error code: $success"
+		echo "${E}Install of ${C}$1${E} failed, sorry.${N}"
+	else
+		echo "${S}Install of ${C}$1${S} was successful.${N}"
+	fi
+	print_hec
 	eval $LOGUE
 }
 
