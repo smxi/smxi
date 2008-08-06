@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.2
-####  Date: August 5 2008
+####  version: 2.10.3
+####  Date: August 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -42,23 +42,19 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
-	local pdfLight='epdfview' ceni='ceni'
+	local pdfLight='epdfview'
 	
 	# note: epdfview is not in stable currently
 	if [ "$SYSTEM_BASE" == 'stable' ]
 	then
 		pdfLight='xpdf'
 	fi
-	if [ "$SIDUX_SOURCES" != 'true' ]
-	then
-		ceni=''
-	fi
 	
 	# package groups, console stuff first so it's included in following
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local consoleTools='bzip2 htop irssi nano gzip net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip'
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
-	local ceniStuff="$ceni ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
+	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
 	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
@@ -487,20 +483,21 @@ utilities_installer()
 	echo "    Asks before installing each package group, so you can decide for yourself if you want each group."
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
-	echo
 	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a nice command line tool to configure"
-	echo "    and setup wired and wireless networking. A nice alternative to netcardconfig."
+	echo "    and setup wired and wireless networking. "
+	echo "${C}10${S} - ${C}infobash${S} Install ${C}infobash${S}, a nice command line tool to see"
+	echo "    your system technical data."
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 	
 	echo
-	echo "${C}10${S} - ${C}back-to-install-menu${S}"
+	echo "${C}11${S} - ${C}back-to-install-menu${S}"
 	
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni back-to-install-menu"
+	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni infobash back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -524,6 +521,10 @@ utilities_installer()
 				;;
 			h2-favorites)
 				h2_faves
+				repeat='true'
+				;;
+			infobash)
+				check_install_package 'infobash'
 				repeat='true'
 				;;
 			kpowersave)
@@ -1007,9 +1008,6 @@ install_ceni()
 	echo "${C}$appName${S} is especially nice for wifi console networking configuration, or if you"
 	echo "have any kind of complicated networking, multiple eth cards, etc."
 	echo "Installing ${C}$appName${S} for you now to ${C}$SCRIPT_HOME${S}...${N}"
-# 	cd $SCRIPT_HOME
-# 	wget -T$TIME_OUT -t 2 $TECH_PATTERNS_DISTRO$appName
-# 	chmod +x $appName
 
 	# clean up manual ceni install...
 	if [ -f $SCRIPT_HOME/ceni ]
@@ -1024,9 +1022,36 @@ install_ceni()
 		print_hec
 	fi
 	package_group_installer 'plain' 'ceni-stuff'
+	check_install_package 'ceni'
 	echo  "${S}Congratulations. ${C}$appName${S} is now installed. To redo your networking, simply type, as root: ${C}$appName${S} (uppercase C)${N}"
 	print_hec
 	eval $LOGPE
+}
+
+# args: $1 - package name to test/download/install
+check_install_package()
+{
+	eval $LOGUS
+	local packageDeb="$1.deb" success=0
+	local downloadUrl="$TECH_PATTERNS_DISTRO$packageDeb"
+	echo $LINE
+	if [ -n "$( check_package_status "$1" )" ]
+	then
+		package_installer "$1" 'install-missing'
+	else
+		echo "${S}Downloading and installing $1 deb now...${N}"
+		wget -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
+		if [ -f $packageDeb ]
+		then
+			dpkg -i $packageDeb || success=$?
+		fi
+		if [ "$success" -gt 0 ]
+		then
+			log_function_data "Error: $packageDeb download/install failed, error code: $success"
+			echo "${E}Download/install failed, sorry...${N}"
+		fi
+	fi
+	eval $LOGUE
 }
 
 h2_faves()
@@ -1040,6 +1065,7 @@ h2_faves()
 	h2_package_group_installer 'console-tools'
 	h2_package_group_installer 'console-browsers'
 	h2_package_group_installer 'system-utilities'
+	check_install_package 'infobash'
 	h2_package_group_installer 'rsync rdiff-backup'
 	echo "${S}mozilla-group is ${C}iceweasel${S} and ${C}icedove${S}...${N}"
 	h2_package_group_installer 'mozilla-group'
