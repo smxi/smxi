@@ -483,10 +483,9 @@ utilities_installer()
 	echo "    Asks before installing each package group, so you can decide for yourself if you want each group."
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
-	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a nice command line tool to configure"
-	echo "    and setup wired and wireless networking. "
-	echo "${C}10${S} - ${C}infobash${S} Install ${C}infobash${S}, a nice command line tool to see"
-	echo "    your system technical data."
+	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a good command line tool to configure"
+	echo "    and setup wired and wireless networking. Includes all required wifi packages."
+	echo "${C}10${S} - ${C}infobash${S} Install ${C}infobash${S}, a nice command line tool to show system data."
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 	
