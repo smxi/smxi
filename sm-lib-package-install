@@ -1045,6 +1045,7 @@ check_install_package()
 		then
 			dpkg -i $packageDeb || success=$?
 		fi
+		rm -f $packageDeb
 		if [ "$success" -gt 0 ]
 		then
 			log_function_data "Error: $packageDeb download/install failed, error code: $success"
