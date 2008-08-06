@@ -481,7 +481,7 @@ list_modules()
 
 		if [ "$modtype" == "undef" ]
 		then
-			msg_off  skipping... 
+			msg_off  'skipping...'
 		else
 			msg_off "Module $currentName is $modtype"
 			# now if the module is in the actual loaded list we skip it
@@ -498,7 +498,7 @@ list_modules()
 				elif [ "${currentName}" == "fglrx" ]
 				then
 					ati=1
-				fi						
+				fi
 			else
 				#msg_on "Module $module vom type $modtype is not currently used" 
 				modlist="$modlist $module"
