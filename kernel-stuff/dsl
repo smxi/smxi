@@ -182,6 +182,8 @@ download_kernel_files()
 	echo "Grabbing all kernel debs now..."
 	## download kernels and all related debs
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES
+	# grab source zips/debs for modules
+	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN
 	
 	if [ "$KERNEL_TYPE" == 'a' ]
