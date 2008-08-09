@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.4.3
-####  Date: August 3 2008
+####  version: 1.4.4
+####  Date: August 9 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -823,8 +823,8 @@ vm_main_selector()
 	echo "any-any patch version: ${C}$ANYANY_NUMBER"
 	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player, and any-any patch."
 	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required."
-	echo "${C}3${S} - ${C}make-qemu-image${S} Installs qemu if required, then uses it to create"
-	echo "   a machine image file for you. (incomplete now: only installs qemu if needed)"
+	echo "${C}3${S} - ${C}install-qemu${S} Installs qemu if required. ${M}NEW: great site to make your"
+	echo "   vmdk/vmx files, super easy, make a note of it. Highly recommended: ${C}www.easyvmx.com"
 	echo $LINE
 	echo "${M}Please NOTE: ose means open source edition. Ose and non-ose components are NOT compatible."
 	echo "${S}UPDATE: as of current 1.5.4, there is only one additions version, no ose/non ose."
