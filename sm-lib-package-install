@@ -604,7 +604,7 @@ display_manager_installer()
 	echo "${C}6${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
 	echo "${C}7${S} - ${C}kde${S} Base packages for kde desktop + kpdf, konversation, konqueror."
 	echo "${C}8${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
-	echo "${C}9${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, kde addons."
+	echo "${C}9${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, other useful kde things."
 	echo "${C}10${S} - ${C}kde-pim${S} karm, kontact, korganizer, kalarm."
 	echo "${C}11${S} - ${C}fluxbox${S} Installs lightweight package group. No gtk/qt apps. Good for old hardware."
 	echo "${C}12${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies + display manager."
