@@ -83,6 +83,8 @@ AA='anyany'
 DIR_NAME=''
 FILE_NAME=''
 FILE_URL=''
+## extra url data.. for vmware tools:
+# http://download3.vmware.com/software/wkst/VMware-workstation-5.5.0-18463.tar.gz
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.i386.tar.gz
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.x86_64.tar.gz
 VMPLAYER_PREFIX='http://download3.vmware.com/software/vmplayer/'

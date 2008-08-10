@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.5
-####  Date: August 8 2008
+####  version: 2.10.7
+####  Date: August 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -58,7 +58,7 @@ package_group_installer()
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
 	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
-	local kdeExtras='karm kate-plugins kdeaddons-kfile-plugins kdemultimedia-kio-plugins kicker-applets kmoon konq-plugins ksensors ksnapshot'
+	local kdeExtras='karm kate-plugins kdeaddons-kfile-plugins kdemultimedia-kio-plugins kicker-applets kmix kmoon knemo konq-plugins kpowersave ksensors ksnapshot kuser'
 	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse"
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
