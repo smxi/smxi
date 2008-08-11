@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.19.5
-####  Date: July 31 2008
+####  version: 1.19.6
+####  Date: August 11 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1294,13 +1294,13 @@ update_bash_completion()
 		echo >> $rbrc
 		echo 'if [ -f /etc/bash_completion ]' >> $rbrc
 		echo 'then' >> $rbrc
-		echo '	. /etc/bash_completion' >> $rbrc
+		echo '	source /etc/bash_completion' >> $rbrc
 		echo 'fi' >> $rbrc
 		echo  >> $rbrc
 # 		cat >> /root/.bashrc <<EOF
 # if [ -f /etc/bash_completion ]
 # then
-# 	. /etc/bash_completion
+#		source /etc/bash_completion
 # fi
 # EOF
 		echo "${C}$rbrc${S} was successfully updated.${N}"
@@ -1535,7 +1535,7 @@ splashy_control()
 		fi
 		if [ -r /etc/default/distro ]
 		then
-			. /etc/default/distro
+			source /etc/default/distro
 		fi
 		if [ -x /etc/init.d/splashy-init ]
 		then

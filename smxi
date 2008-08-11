@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.16
-####  Date: August 6 2008
+####  version: 8.3.17
+####  Date: August 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -98,7 +98,7 @@ DISTRO_LEVEL=0
 IS_LIVE=''
 if [ -s $EDD ]
 then
-	. $EDD
+	source $EDD
 	if [ "$FLL_DISTRO_MODE" == 'live' ]
 	then
 		IS_LIVE='true'
@@ -808,7 +808,7 @@ run_script_import()
 		fi
 		if [ -f $1 ] # if the file is already present, do this
 		then
-			. ./$1 # load include file
+			source ./$1 # load include file
 		else
 			error_handler 'missing-lib' $FUNCNAME $1
 		fi

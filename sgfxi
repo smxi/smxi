@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.11
-####  Date: August 9 2008
+####  version: 3.4.12
+####  Date: August 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -1141,7 +1141,7 @@ check_update_script()
 			then
 				error_handler 199 $1 # if no file, exit with file name + error
 			fi
-			. ./$1 # load the library file
+			source ./$1 # load the library file
 			;;
 	esac
 }
