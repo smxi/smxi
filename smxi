@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.17
-####  Date: August 11 2008
+####  version: 8.3.18
+####  Date: August 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1215,7 +1215,7 @@ set_distro_data()
 	esac
 	# user set upgrade method
 	case "$duUpgrade" in
-		upgrade|dist-upgrade)
+		upgrade|safe-upgrade|dist-upgrade)
 			DU_UPGRADE=$duUpgrade
 			;;
 	esac
