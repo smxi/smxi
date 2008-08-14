@@ -2015,6 +2015,7 @@ run_patches()
 					;;
 				26)
 					apply_module_patch pre
+					
 					case $DRIVER_DEFAULT in
 						173.14.05)
 							patchFile='NVIDIA_kernel-173.14.05-2419292.diff'
@@ -2034,6 +2035,10 @@ run_patches()
 					apply_module_patch pre
 					case $DRIVER_DEFAULT in
 						177.13)
+							# patch author: zander, nvidia; patch src: 
+							# http://www.nvnews.net/vbulletin/showthread.php?t=117209
+							# patch url:
+							# http://www.nvnews.net/vbulletin/attachment.php?attachmentid=32559&d=1218212371
 							patchFile='NVIDIA_kernel-177.13-2627763.diff'
 							apply_patch_file $patchFile
 							;;
