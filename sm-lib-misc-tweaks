@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.0
+####  version: 1.21.1
 ####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -895,10 +895,10 @@ install_grub_gfxboot()
 	eval $LOGUS
 		
 	# this adds, updates, then removes temp repo
-	check_add_remove_sources 'sidux'
+	check_add_remove_sources 'sidux' 'add'
 	package_installer 'grub-gfxboot' 'install-always'
 	# make sure to not keep temp repo data
-	apt_update_handler 'temp-repo'
+	check_add_remove_sources 'sidux' 'remove'
 	check_gfxboot_in_menu
 	check_message_debian
 	update_grub_install
