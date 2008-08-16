@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.19.7
-####  Date: August 14 2008
+####  version: 1.20.0
+####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -48,8 +48,8 @@ misc_hacks()
 	echo "    tweak_gecko_prefs: create more sane user defaults in prefs.js"
 	echo "    swiftfox-plugins creates symbolic link to iceweasel plugins from swiftfox."
 	
-	echo "${C}2${S} - ${C}sidux-artwork${S} Options to install sidux ${C}s${S} taskbar icon,"
-	echo "    sidux ${C}kmenu${S} sidebar graphics by drb and raider700, and Cathbard grub graphics."
+	echo "${C}2${S} - ${C}install-graphics${S} Options to install sidux ${C}s${S} taskbar icon,"
+	echo "    sidux ${C}kmenu${S} sidebar graphics by drb and raider700, and various grub graphics images."
 	
 	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
 	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors, change-sidux-mirrors"
@@ -66,7 +66,7 @@ misc_hacks()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="mozilla-tweaks sidux-artwork advanced-tweaks legacy-tweaks openoffice-hold-install continue"
+	options="mozilla-tweaks install-graphics advanced-tweaks legacy-tweaks openoffice-hold-install continue"
 	select opt in $options
 	do
 		case $opt in
@@ -74,8 +74,8 @@ misc_hacks()
 				mozilla_tweaks
 				repeat='true'
 				;;
-			sidux-artwork)
-				latino_cathbard_sidux_kde
+			install-graphics)
+				main_graphics_installer
 				repeat='true'
 				;;
 			fix-broken-openoffice)
@@ -548,7 +548,7 @@ tweak_gecko_prefs()
 ###---------------------------------------------------------------------
 ### Small graphics tweaks, basic logic by latino
 ###---------------------------------------------------------------------
-latino_cathbard_sidux_kde()
+main_graphics_installer()
 {
 	eval $LOGPS
 	local opt='' option='' repeat=''
@@ -570,19 +570,13 @@ latino_cathbard_sidux_kde()
 	echo "${C}2${S} - Will give you a choice of 3 different kmenu side bars to install, then"
 	echo "    will install them for you."
 	echo
-	echo "${C}3${S} - ${C}grub-gfx-cathbard-1${S} A cathbard black/red design, with debian swirls."
-	echo "    down the left side. Updates ${C}$GRUB_PATH${S} as well."
+	echo "${C}3${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics from Cathbard, original sidux, and h2."
 	echo
-	echo "${C}4${S} - ${C}grub-gfx-sidux-1${S} Original sidux grub graphics design,"
-	echo "    Simple black/red motiff. Updates ${C}$GRUB_PATH${S} as well."
-	echo
-	echo "${C}5${S} - ${C}grub-gfx-restore${S} Returns to standard sidux grub default gfx."
-	echo
-	echo "${C}6${S} - Returns to main menu."
+	echo "${C}4${S} - Returns to main menu."
 	echo $LINE
 	echo $SLE
 	echo $LINE
-	options="kmenu-icon kmenu-sidebar grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-restore continue"
+	options="kmenu-icon kmenu-sidebar grub-gfx-options continue"
 	select opt in $options
 	do
 		case $opt in
@@ -594,16 +588,8 @@ latino_cathbard_sidux_kde()
 				install_kmenu_sidebar
 				repeat='true'
 				;;
-			grub-gfx-cathbard-1)	
-				cathbard_grub_gfx_installer cath.brd
-				repeat='true'
-				;;
-			grub-gfx-sidux-1)	
-				cathbard_grub_gfx_installer sidux.original
-				repeat='true'
-				;;
-			grub-gfx-restore)
-				restore_grub_gfx
+			grub-gfx-options)
+				grub_gfx_selector
 				repeat='true'
 				;;
 			continue)
@@ -618,7 +604,7 @@ latino_cathbard_sidux_kde()
 	eval $LOGPE
 	if [ "$repeat" == 'true' ]
 	then
-		latino_cathbard_sidux_kde
+		main_graphics_installer
 	fi
 }
 
@@ -724,8 +710,78 @@ install_kmenu_icon()
 	eval $LOGUE
 }
 
+grub_gfx_selector()
+{
+	eval $LOGPS
+	echo $LINE
+	echo "${S}Please select one of the following grub options."
+	echo
+	echo "Each updates ${C}$GRUB_PATH${S} to use the new grub image as well."
+	echo 
+	echo "Items 3-5 are by me, h2, and are very simple, just colored fonts on black background."
+	echo $LINE
+	echo "${C}1${S} - ${C}grub-gfx-cathbard-1${S} A cathbard black/red design, with debian swirls."
+	echo "    down the left side. Updates ${C}$GRUB_PATH${S} as well."
+	echo
+	echo "${C}2${S} - ${C}grub-gfx-sidux-1${S} Original sidux grub graphics design,"
+	echo "    Simple black/red motiff."
+	echo
+	echo "${C}3${S} - ${C}grub-gfx-debian-1${S} Simple black, with large blue Debian text."
+	echo "${C}4${S} - ${C}grub-gfx-debian-sidux${S} Simple black, with blue Debian, small red sidux."
+	echo "${C}5${S} - ${C}grub-gfx-debian-smxi${S} Simple black, with blue Debian, small smxi (in smxi colors)."
+	echo
+	echo "${C}6${S} - ${C}grub-gfx-restore${S} Returns to standard sidux grub default gfx."
+	echo
+	echo "${C}7${S} - Returns to main menu."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+	options="grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-debian-1 grub-gfx-debian-sidux grub-gfx-debian-smxi grub-gfx-restore continue"
+	select opt in $options
+	do
+		case $opt in
+			grub-gfx-cathbard-1)	
+				grub_gfx_message_installer 'cath.brd'
+				repeat='true'
+				;;
+			grub-gfx-sidux-1)	
+				grub_gfx_message_installer 'sidux.original'
+				repeat='true'
+				;;
+			grub-gfx-debian-1)	
+				grub_gfx_message_installer 'debian'
+				repeat='true'
+				;;
+			grub-gfx-debian-sidux)	
+				grub_gfx_message_installer 'debian.sidux'
+				repeat='true'
+				;;
+			grub-gfx-debian-smxi)	
+				grub_gfx_message_installer 'debian.smxi'
+				repeat='true'
+				;;
+			grub-gfx-restore)
+				restore_grub_gfx
+				repeat='true'
+				;;
+			continue)
+				echo "${S}Ok, you are ready to go on now.${N}"
+				;;
+			*)
+				print_error opt
+				;;
+		esac
+		break
+	done
+	eval $LOGPE
+	if [ "$repeat" == 'true' ]
+	then
+		grub_gfx_selector
+	fi
+}
+
 # args: $1 which grub graphic package
-cathbard_grub_gfx_installer()
+grub_gfx_message_installer()
 {
 	eval $LOGUS
 	local cbrd='message.'$1
