@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.16.2
-####  Date: August 6 2008
+####  version: 1.17.0
+####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -706,6 +706,9 @@ apt_update_handler()
 			aehv='distro-conversion'
 			forceUpdate='true'
 			;;
+		temp-repo)
+			forceUpdate='true'
+			;;
 		update-apps)
 			aehv='up-app'
 			;;
@@ -1042,6 +1045,36 @@ create_apt_source_item()
 		eval $LOGUE
 		return 1
 	fi
+}
+
+# args $1 - repo/search string
+check_add_remove_sources()
+{
+	eval $LOGUS
+	local grepSearch=$1
+	local sourceFile="$EAS.d/$1.khsdgkd.list"
+	local sourceData=''
+	local sourcePresent=$( egrep -ils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
+	
+	case $1 in
+		sidux)
+			sourceData='deb http://sidux.com/debian/ sid main'
+			;;
+		cathbard)
+			sourceData=''
+			;;
+	esac
+	
+	if [ -z "$sourcePresent" ]
+	then
+		echo "${S}Updating apt to use temporary ${C}$1${S} sources....${N}"
+		echo "$sourceData" > $sourceFile
+		# then update apt
+		apt_update_handler 'temp-repo'
+		# then remove the file to cleanup
+		rm -f $sourceFile
+	fi
+	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
