@@ -231,8 +231,8 @@ sidux_graphics()
 sidux_graphics_legacy()
 {
 	local prefId='sidux-graphics-2'
-	local smPref=$( sm_pref_tester $prefId )
-	local OldGrub=$( awk -F= '/^# groot/{print $2}' $GRUB_PATH )
+	local smPref=$( sm_pref_tester $prefId ) #$GRUB_PATH
+	local OldGrub=$( awk -F= '/^# groot/{print $2}' /boot/grub/menu.lst | sed -r 's/\((.*)\)/\1/' )
 	local bm='/boot/message'
 	
 	if [ "$1" == 'grub1' -a "$smPref" -eq 0 ]

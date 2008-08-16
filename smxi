@@ -2799,7 +2799,7 @@ install_dist_upgrade()
 	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
-	local options="use-install-f $DU_UPGRADE-again check-services continue $reboot"
+	local options="use-install-f $DU_UPGRADE-again check-services continue "
 	
 	if [ "$SYSTEM_BASE" != 'stable' ]
 	then
