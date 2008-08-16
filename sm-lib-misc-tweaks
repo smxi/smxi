@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.1
+####  version: 1.21.2
 ####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -713,79 +713,84 @@ install_kmenu_icon()
 grub_gfx_selector()
 {
 	eval $LOGPS
-	grub_gfxboot_question
 	
-	if [ "$?" -eq 0 ]
+	if [ "$SYSTEM_BASE" != 'stable' ]
 	then
-		echo $LINE
-		echo "${S}Please select one of the following grub options."
-		echo
-		echo "Each updates ${C}$GRUB_PATH${S} to use the new grub image as well."
-		echo 
-		echo "Items 3-5 are by me, h2, and are very simple, just colored fonts on black background."
-		echo $LINE
-		echo "${C}1${S} - ${C}grub-gfx-cathbard-1${S} A cathbard black/red design, with debian swirls."
-		echo "    down the left side. Updates ${C}$GRUB_PATH${S} as well."
-		echo
-		echo "${C}2${S} - ${C}grub-gfx-sidux-1${S} Original sidux grub graphics design,"
-		echo "    Simple black/red motiff."
-		echo
-		echo "${C}3${S} - ${C}grub-gfx-debian-1${S} Simple black, with large blue Debian text."
-		echo "${C}4${S} - ${C}grub-gfx-debian-sidux${S} Simple black, with blue Debian, small red sidux."
-		echo "${C}5${S} - ${C}grub-gfx-debian-smxi${S} Simple black, with blue Debian, small smxi (in smxi colors)."
-		echo
-		echo "${C}6${S} - ${C}grub-gfx-restore${S} Returns to standard sidux grub default gfx."
-		echo
-		echo "${C}7${S} - Returns to main menu."
-		echo $LINE
-		echo $SLE
-		echo $LINE
-		options="grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-debian-1 grub-gfx-debian-sidux grub-gfx-debian-smxi grub-gfx-restore continue"
-		select opt in $options
-		do
-			case $opt in
-				grub-gfx-cathbard-1)	
-					grub_gfx_message_installer 'cath.brd'
-					repeat='true'
-					;;
-				grub-gfx-sidux-1)	
-					grub_gfx_message_installer 'sidux.original'
-					repeat='true'
-					;;
-				grub-gfx-debian-1)	
-					grub_gfx_message_installer 'debian'
-					repeat='true'
-					;;
-				grub-gfx-debian-sidux)	
-					grub_gfx_message_installer 'debian.sidux'
-					repeat='true'
-					;;
-				grub-gfx-debian-smxi)	
-					grub_gfx_message_installer 'debian.smxi'
-					repeat='true'
-					;;
-				grub-gfx-restore)
-					restore_grub_gfx
-					repeat='true'
-					;;
-				continue)
-					echo "${S}Ok, you are ready to go on now.${N}"
-					;;
-				*)
-					print_error opt
-					;;
-			esac
-			break
-		done
-		eval $LOGPE
-		if [ "$repeat" == 'true' ]
+		grub_gfxboot_question
+		if [ "$?" -eq 0 ]
 		then
-			grub_gfx_selector
+			echo $LINE
+			echo "${S}Please select one of the following grub options."
+			echo
+			echo "Each updates ${C}$GRUB_PATH${S} to use the new grub image as well."
+			echo 
+			echo "Items 3-5 are by me, h2, and are very simple, just colored fonts on black background."
+			echo $LINE
+			echo "${C}1${S} - ${C}grub-gfx-cathbard-1${S} A cathbard black/red design, with debian swirls."
+			echo "    down the left side. Updates ${C}$GRUB_PATH${S} as well."
+			echo
+			echo "${C}2${S} - ${C}grub-gfx-sidux-1${S} Original sidux grub graphics design,"
+			echo "    Simple black/red motiff."
+			echo
+			echo "${C}3${S} - ${C}grub-gfx-debian-1${S} Simple black, with large blue Debian text."
+			echo "${C}4${S} - ${C}grub-gfx-debian-sidux${S} Simple black, with blue Debian, small red sidux."
+			echo "${C}5${S} - ${C}grub-gfx-debian-smxi${S} Simple black, with blue Debian, small smxi (in smxi colors)."
+			echo
+			echo "${C}6${S} - ${C}grub-gfx-restore${S} Returns to standard sidux grub default gfx."
+			echo
+			echo "${C}7${S} - Returns to main menu."
+			echo $LINE
+			echo $SLE
+			echo $LINE
+			options="grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-debian-1 grub-gfx-debian-sidux grub-gfx-debian-smxi grub-gfx-restore continue"
+			select opt in $options
+			do
+				case $opt in
+					grub-gfx-cathbard-1)	
+						grub_gfx_message_installer 'cath.brd'
+						repeat='true'
+						;;
+					grub-gfx-sidux-1)	
+						grub_gfx_message_installer 'sidux.original'
+						repeat='true'
+						;;
+					grub-gfx-debian-1)	
+						grub_gfx_message_installer 'debian'
+						repeat='true'
+						;;
+					grub-gfx-debian-sidux)	
+						grub_gfx_message_installer 'debian.sidux'
+						repeat='true'
+						;;
+					grub-gfx-debian-smxi)	
+						grub_gfx_message_installer 'debian.smxi'
+						repeat='true'
+						;;
+					grub-gfx-restore)
+						restore_grub_gfx
+						repeat='true'
+						;;
+					continue)
+						echo "${S}Ok, you are ready to go on now.${N}"
+						;;
+					*)
+						print_error opt
+						;;
+				esac
+				break
+			done
+			eval $LOGPE
+			if [ "$repeat" == 'true' ]
+			then
+				grub_gfx_selector
+			fi
+		else
+			log_function_data "User opted not to install grub-gfxboot, skipping feature. "
+			echo "${M}Skipping this feature since you didn't chose to install grub-gfxboot.${N}"
+			eval $LOGPE
 		fi
 	else
-		log_function_data "User opted not to install grub-gfxboot, skipping feature. "
-		echo "${M}Skipping this feature since you didn't chose to install grub-gfxboot.${N}"
-		eval $LOGPE
+		echo "${M}This feature is only available for Debian Testing or Sid, sorry.${N}"
 	fi
 }
 
@@ -855,9 +860,12 @@ grub_gfxboot_question()
 	local opt='' option='' repeat='' returnValue=0
 	local hasGrubGfx=$(package_tester 'grub-gfxboot' )
 	
+	
 	if [ -z "$hasGrubGfx" ]
 	then
 		echo $LINE
+		echo "${S}You need to install grub-gfxboot to use this feature. It will replace your"
+		echo "current grub. This feature only works in Testing and Sid."
 		echo $LINE
 		echo "${C}1${S} - ${C}yes-install-grub-gfxboot${S} Install missing grub-gfxboot to replace default grub first."
 		echo
@@ -886,7 +894,6 @@ grub_gfxboot_question()
 		then
 			grub_gfxboot_question
 		fi
-		
 	fi
 	return $returnValue
 }
@@ -896,7 +903,8 @@ install_grub_gfxboot()
 		
 	# this adds, updates, then removes temp repo
 	check_add_remove_sources 'sidux' 'add'
-	package_installer 'grub-gfxboot' 'install-always'
+	
+	package_installer 'grub-gfxboot' 'install-always' '--allow-unauthenticated'
 	# make sure to not keep temp repo data
 	check_add_remove_sources 'sidux' 'remove'
 	check_gfxboot_in_menu
@@ -914,7 +922,7 @@ check_gfxboot_in_menu()
 	local colorLineNu=$( egrep -in '^color[[:space:]]' $GRUB_PATH | cut -d ':' -f 1 )
 	local grootGrub=$( awk -F= '/^# groot/{print $2}' $GRUB_PATH  )
 	log_function_data "gfxGrubExists: $gfxGrubExists - colorExists: $colorExists - colorLineNu: $colorLineNu - grootGrub: $grootGrub"
-	if [ -z "$gfxGrubExist	s" ]
+	if [ -z "$gfxGrubExist" ]
 	then
 		if [ -n "$colorExists" ]
 		then
