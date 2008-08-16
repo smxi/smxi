@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.18
-####  Date: August 14 2008
+####  version: 8.3.19
+####  Date: August 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1292,6 +1292,11 @@ cleanup_extra_files()
 	# this fixes the bad permissions and lets people run the stuff as user again, or view it
 	chmod 604 sm-lib-* &>/dev/null
 	chmod 705 sgfxi svmi smxi &>/dev/null
+	
+	if [ -f $LIB_WARNING ]
+	then
+		sed -i 's/continue-no-dist-upgrade|continue-no-upgrade)/continue-no-dist-upgrade|continue-no-upgrade|continue-no-safe-upgrade)/' $LIB_WARNING
+	fi
 	eval $LOGPE
 }
 
