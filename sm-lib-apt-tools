@@ -1078,6 +1078,7 @@ check_add_remove_sources()
 			;;
 		remove)
 			# then remove, update apt to cleanup
+			echo "${S}Removing temporary ${C}$1${S} sources...${N}"
 			rm -f $sourceFile
 			apt_update_handler 'temp-repo'
 			;;
