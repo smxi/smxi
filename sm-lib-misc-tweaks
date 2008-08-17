@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.8
+####  version: 1.21.9
 ####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -49,7 +49,7 @@ misc_hacks()
 	echo "    swiftfox-plugins creates symbolic link to iceweasel plugins from swiftfox."
 	
 	echo "${C}2${S} - ${C}install-graphics${S} Options to install sidux ${C}s${S} taskbar icon,"
-	echo "    sidux ${C}kmenu${S} sidebar graphics by drb and raider700, and various grub graphics images."
+	echo "    sidux ${C}kmenu${S} sidebar graphics, and various grub graphics images."
 	
 	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
 	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors, change-sidux-mirrors"
@@ -570,7 +570,8 @@ main_graphics_installer()
 	echo "${C}2${S} - Will give you a choice of 3 different kmenu side bars to install, then"
 	echo "    will install them for you."
 	echo
-	echo "${C}3${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics from Cathbard, original sidux, and h2."
+	echo "${C}3${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics from Cathbard,"
+	echo "    original black/red sidux, and a few new Debian themed ones by h2."
 	echo
 	echo "${C}4${S} - Returns to main menu."
 	echo $LINE
