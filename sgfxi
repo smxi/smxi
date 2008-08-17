@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.13
-####  Date: August 14 2008
+####  version: 3.4.14
+####  Date: August 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -994,7 +994,7 @@ install_package()
 	# this will force install of sid to get rid of experimental if required
 	if [ -n "$2" ]
 	then
-		distroVersion="/$2 --force-yes" # requird to avoid apt downgrade error
+		distroVersion="/$2" #  --force-yesrequird to avoid apt downgrade error
 	fi
 	# only do --reinstall if arg is set and package is installed
 	case "$3" in
@@ -1390,7 +1390,7 @@ install_native_driver()
 				else
 					echo "${B}Reinstalling driver ${C}$driver${B} now...${N}"
 					install_package $driver
-					install_package libdrm2 unstable # this may need some work to undo it
+					# install_package libdrm2 unstable # this may need some work to undo it
 				fi
 				;;
 			*)
