@@ -181,7 +181,7 @@ upgrade_warning()
 				# start xorg install, update, dist-upgrade, xorg component install
 				install_dist_upgrade first
 				;;
-			continue-no-dist-upgrade|continue-no-upgrade|continue-no-safe-upgrade)
+			continue-no-$DU_UPGRADE)
 				echo "${S}Skipping ${C}$DU_UPGRADE${S} for now. Continuing with script.${N}"
 				;;
 			quit|q)
