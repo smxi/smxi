@@ -555,12 +555,7 @@ du_gtk_fix_1()
 		echo "${S}Running a new ${C}dist-upgrade${S} to solve a gtk issue. Please read"
 		echo "the following very carefully, check for any packages to be removed. If present,"
 		echo "say n to the continue question and report to forums or irc.${N}"
-		if [ "$USE_LOG" != 'true' ]
-		then
-			$APT_TYPE dist-upgrade
-		else
-			$APT_TYPE dist-upgrade 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
-		fi
+		$APT_TYPE dist-upgrade 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-temp $exitStatus
 		set_sticky_prefs $prefId

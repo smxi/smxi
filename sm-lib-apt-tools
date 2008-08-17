@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.2
+####  version: 1.17.3
 ####  Date: August 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -333,7 +333,6 @@ apt_error_handling()
 		echo $ELINE
 		if  [ "$distUpgrade" == 'true' ]
 		then
-			USE_LOG='true'
 			echo "${S}Please run ${C}$fixText${S} again to try to resolve the problem."
 			print_hec
 		elif [ "$aptUpdate" == 'true' ]

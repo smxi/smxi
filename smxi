@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.21
+####  version: 8.3.22
 ####  Date: August 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -248,7 +248,6 @@ SKIP_RESTART=''
 SKIP_TWEAKS=''
 SKIP_WARNING=''
 TESTING=''
-USE_LOG=''
 Z_SET=''
 
 # set function variables that will retain values: check hold is actually loaded top of
@@ -3348,8 +3347,8 @@ print_usage()
 	echo 
 	echo "The following are advanced script options:"
 	echo "${C}-j${S} Turns off all text/output script colors, sets to console/tty default."
-	echo "${C}-l${S} Turn on ${C}l${S}ogging for update and $DU_UPGRADE data."
-	echo "   Logfile is located here: ${C}$LOG_FILE${S}"
+# 	echo "${C}-l${S} Turn on ${C}l${S}ogging for update and $DU_UPGRADE data."
+# 	echo "   Logfile is located here: ${C}$LOG_FILE${S}"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
 	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
@@ -3440,8 +3439,9 @@ do
 			;;
 		f)	FORCE_DOWNLOAD='true'
 			;;
-		l)	USE_LOG='true'
-			START_OPTIONS=$START_OPTIONS'l'
+		l)	echo $MLINE
+			echo "${M}The ${C}-l${M} option has been deprecated because full logging is now always on.${N}"
+			print_hec
 			;;
 		m)	CHANGE_MIRRORS='true'
 			START_OPTIONS=$START_OPTIONS'm'
