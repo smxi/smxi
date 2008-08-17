@@ -866,9 +866,9 @@ grub_gfxboot_question()
 	if [ -z "$hasGrubGfx" ]
 	then
 		echo $LINE
-		echo "${S}You need to install grub-gfxboot to use this feature. It will replace your"
-		echo "current grub. This feature only works in Testing and Sid. The package will be"
-		echo "installed from sidux repos, by temporarily adding, then removing those after the install."
+		echo "${S}You need to install grub-gfxboot to use this feature. It will replace your current grub."
+		echo "This feature only works in Testing and Sid. The package will be installed from sidux repos,"
+		echo "by temporarily adding, updating, installing, then removing repos after the install."
 		echo $LINE
 		echo "${C}1${S} - ${C}yes-install-grub-gfxboot${S} Install missing grub-gfxboot to replace default grub first."
 		echo
