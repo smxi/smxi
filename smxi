@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.20
-####  Date: August 16 2008
+####  version: 8.3.21
+####  Date: August 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -2857,12 +2857,7 @@ install_dist_upgrade()
 		fi
 		#echo "${Q}Please hit ${C}enter${Q} to start ${C}$DU_UPGRADE${S}."
 		print_hec
-		if [ "$USE_LOG" != 'true' ]
-		then
-			$APT_TYPE $DU_UPGRADE
-		else
-			$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
-		fi
+		$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
 	fi
@@ -2931,24 +2926,14 @@ install_dist_upgrade()
 		eval $LOGME
 		case $opt in
 			use-install-f)
-				if [ "$USE_LOG" != 'true' ]
-				then
-					$APT_TYPE install -f
-				else
-					$APT_TYPE install -f 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
-				fi
+				$APT_TYPE install -f 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-f $exitStatus
 				# we will repeat this over and over until it's definitely done
 				repeat='true'
 				;;
 			dist-upgrade-again|upgrade-again)
-				if [ "$USE_LOG" != 'true' ]
-				then
-					$APT_TYPE $DU_UPGRADE
-				else
-					$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
-				fi
+				$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-2 $exitStatus
 				repeat='true' # reset so no log if no error

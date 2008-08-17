@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.1
-####  Date: August 16 2008
+####  version: 1.17.2
+####  Date: August 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -726,12 +726,7 @@ apt_update_handler()
 		echo $LINE
 		echo "${S}Starting ${C}$APT_TYPE update${S} now to bring your system into sync with apt...${N}"
 		
-		if [ "$USE_LOG" != 'true' -a "$1" != 'up-error-1' ]
-		then
-			$APT_TYPE update $NO_PDIFFS
-		else
-			$APT_TYPE update $NO_PDIFFS 2>>$LOG_FILE 2>&1 | tee >> $LOG_FILE
-		fi
+		$APT_TYPE update $NO_PDIFFS 2>>$LOG_FILE 2>&1
 		# get the success/fail exit code of update
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling $aehv $exitStatus
