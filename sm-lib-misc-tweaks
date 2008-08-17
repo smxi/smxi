@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.3
+####  version: 1.21.4
 ####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -924,10 +924,10 @@ check_gfxboot_in_menu()
 	then
 		if [ -n "$colorExists" ]
 		then
-			sed -i "s|^color[[:space:]].*|&\
+			sed -i 's|^color[[:space:]].*|&\
 \
-gfxmenu $grootGrub/boot/message.debian\
-|" $GRUB_PATH
+gfxmenu '$grootGrub'/boot/message.debian\
+|' $GRUB_PATH
 		else
 			error_handler 'bad-file-format' $FUNCNAME "$GRUB_PATH: '^color' not found." 
 		fi
