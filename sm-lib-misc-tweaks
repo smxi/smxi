@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.5
+####  version: 1.21.6
 ####  Date: August 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -794,7 +794,7 @@ grub_gfx_selector()
 	fi
 }
 
-# args: $1 which grub graphic package
+# args: $1 which grub graphic package; $2 - gfxboot - optional
 grub_gfx_message_installer()
 {
 	eval $LOGUS
@@ -825,7 +825,10 @@ grub_gfx_message_installer()
 		echo "${E}Your ${C}$GRUB_PATH${E} does not appear to have a ${C}gfxmenu${E} item configured yet."
 		echo "Please update it to use this feature.${N}"
 	fi
-	print_hec
+	if [ "$2" != 'gfxboot' ]
+	then
+		print_hec
+	fi
 	eval $LOGUE
 }
 
@@ -940,7 +943,7 @@ check_message_debian()
 	eval $LOGUS
 	if [ ! -f /boot/message.debian ]
 	then
-		grub_gfx_message_installer 'debian'
+		grub_gfx_message_installer 'debian' 'gfxboot'
 	fi
 	eval $LOGUE
 }
