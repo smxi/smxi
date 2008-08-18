@@ -764,6 +764,7 @@ create_log()
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
+	echo "SYSTEM_BASE: $SYSTEM_BASE" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 	
 	LOGGING_STARTED='true'
