@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.3
-####  Date: August 17 2008
+####  version: 1.17.4
+####  Date: August 18 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -171,7 +171,13 @@ package_installer()
 	
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
-		extraInstallArgs=$( sed -e 's/--allow-unauthenticated/--allow-untrusted/' <<< $extraInstallArgs )
+		if [ "$SYSTEM_BASE" == 'stable' ]
+		then
+			# I can't find the etch aptitude command for this, so removing it for now
+			extraInstallArgs=$( sed -e 's/--allow-unauthenticated//' <<< $extraInstallArgs )
+		else
+			extraInstallArgs=$( sed -e 's/--allow-unauthenticated/--allow-untrusted/' <<< $extraInstallArgs )
+		fi
 		if [ -n "$( grep '\--reinstall' <<< $extraInstallArgs )" ]
 		then
 			extraInstallArgs=$( sed 's/--reinstall//' <<< $extraInstallArgs )

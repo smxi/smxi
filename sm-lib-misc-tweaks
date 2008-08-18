@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.9
-####  Date: August 16 2008
+####  version: 1.21.10
+####  Date: August 18 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1335,6 +1335,10 @@ set_upgrade_type()
 	then
 		upgradeStyle='safe-upgrade'
 	fi
+	if [ "$SYSTEM_BASE" == 'stable' ]
+	then
+		upgradeStyle='upgrade' # etch aptitude doesn't have safe-upgrade option
+	fi
 	local options="dist-upgrade $upgradeStyle continue exit"
 	
 	echo $LINE
@@ -1366,7 +1370,7 @@ set_upgrade_type()
 	select opt in $options
 	do
 		case $opt in
-			dist-upgrade|upgrade|safe-upgrade)
+			$upgradeStyle)
 				echo $LINE
 				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default upgrade type: ${C}$opt${N}"
 				set_sm_pref_values "$smPref" "$opt"

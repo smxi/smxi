@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.23
-####  Date: August 17 2008
+####  version: 8.3.24
+####  Date: August 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1222,6 +1222,11 @@ set_distro_data()
 			DU_UPGRADE=$duUpgrade
 			;;
 	esac
+	 # etch aptitude doesn't have safe-upgrade option
+	if [ "$SYSTEM_BASE" == 'stable' -a "$DU_UPGRADE" == 'safe-upgrade' ]
+	then
+		DU_UPGRADE='upgrade'
+	fi
 	case "$aptType" in
 		apt-get|aptitude)
 			APT_TYPE=$aptType
