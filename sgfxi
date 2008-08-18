@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.15
+####  version: 3.4.16
 ####  Date: August 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -158,6 +158,7 @@ COMPOSITE='' # default false
 # RENDER_ACCEL='true' # default use, true
 
 # system paths
+EAS='/etc/apt/sources.list'
 EXXC='/etc/X11/xorg.conf'
 EDV='/etc/debian_version'
 SCRIPT_HOME='/usr/local/bin'
@@ -1245,6 +1246,7 @@ create_log()
 	then
 		logrotate $SCRIPT_ROTATE
 	fi
+	
 	touch $LOG_FILE # and if rotated, need a new one
 	echo "=========================================================" >> $LOG_FILE
 	echo "START $SCRIPT_NAME LOGGING:" >> $LOG_FILE

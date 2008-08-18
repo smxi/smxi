@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.5.0
+####  version: 1.5.1
 ####  Date: August 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -156,6 +156,7 @@ VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
 VBOX_INSTALLED_VERSION='' # will be set dynamically
 
 # script paths
+EAS='/etc/apt/sources.list'
 SCRIPT_HOME='/usr/local/bin'
 SCRIPT_NAME=$( basename $0 )
 
