@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.14
-####  Date: August 8 2008
+####  version: 1.3.15
+####  Date: August 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -51,6 +51,7 @@ run_2008_fixes()
 		then
 			gpm_fix_1 # preview requires this fix, unfortunately
 			libavutil_fix_1
+			libpigment_fix_1
 		fi
 		
 	elif [ "$1" == 'post' ]
@@ -62,6 +63,25 @@ run_2008_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+libpigment_fix_1()
+{
+	local prefId='libpigment-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'libpigment0.3-4'  )
+	local isAvailable=$( check_package_status 'libpigment0.3-5' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}libpigment0.3-4/5${S} update fix now...${N}"
+		package_installer 'libpigment0.3-5' 'install-always'
+		dpkg --purge libpigment0.3-4
+		$APT_TYPE install -f
+		set_sticky_prefs $prefId 
+	fi
+}
+
+
 libdjvulibre15_fix_1()
 {
 	local prefId='libdjvulibre15-fix-1'
