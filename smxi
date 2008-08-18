@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.22
+####  version: 8.3.23
 ####  Date: August 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2806,13 +2806,8 @@ install_dist_upgrade()
 	local exitStatus=$2 # only for script re-runs, $2 not set first time
 	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
-	local reboot='' exitNo='' rebootNo='' rebootText='' rebootTopText=''
+	local exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f $DU_UPGRADE-again check-services continue "
-	
-	if [ "$SYSTEM_BASE" != 'stable' ]
-	then
-		duUpgrade='upgrade'
-	fi
 	
 	# set the trap here
 	trap 'du_trap_handler $FUNCNAME' INT TERM
@@ -2854,7 +2849,6 @@ install_dist_upgrade()
 		then
 			echo $LINE
 		fi
-		#echo "${Q}Please hit ${C}enter${Q} to start ${C}$DU_UPGRADE${S}."
 		print_hec
 		$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
@@ -2887,10 +2881,13 @@ install_dist_upgrade()
 	fi
 	
 	# if current kernel was not in grub prior to du, and is in grub post du
+	# metapackage users need this alert because otherwise they might not even
+	# realize a new kernel installed. Regular kernel users of course don't need
+	# to see this information since they know they installed one, and the post kernel
+	# install step gives them all the information they need.
 	if [ "$currentAptKernelGrub" != "$CURRENT_APT_KERNEL_GRUB" -a -n "$metaExists" -a -n "$currentAptKernelGrub" ]
 	then
-		reboot='reboot'
-		options="$options $reboot"
+		options="$options reboot"
 		rebootNo=$( echo $options | wc -w )
 		rebootTopText='echo -e "${M}You are using ${C}kernel metapackages${M} and your ${C}$DU_UPGRADE${M} installed a new kernel.\nYour new ${C}$CURRENT_APT_KERNEL${M} kernel will not become active until you reboot.\n$MLINE"'
 		rebootText='echo -e "${C}$rebootNo - reboot${M} Reboot into your new ${C}$CURRENT_APT_KERNEL${M} kernel."'
