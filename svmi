@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.4.4
-####  Date: August 9 2008
+####  version: 1.5.0
+####  Date: August 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -45,6 +45,7 @@ SKIP_FUNCTION=''
 SKIP_RESTART=''
 SM_INSTALL=''
 START_OPTIONS=''
+SYSTEM_BASE=''
 TESTING=''
 UPDATED=''
 USER_NAME=''
@@ -360,6 +361,12 @@ error_handler()
 #print_information
 basic_startup_tests() 
 {
+	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
+	# these tests will be improved over time, but are ok for now
+	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
+	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
+	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
+	
 	### basic system requirements for this script to run, first so user doesn't 
 	### have to be root or out of x to get basic failure information
 	# make sure that it's a debian based system
@@ -389,6 +396,17 @@ basic_startup_tests()
 	if [ "$FORCE_UPDATE" == 'true' ]
 	then
 		check_update_script $SCRIPT_NAME
+	fi
+	
+	# set system type. This test will never be perfect, but it's a good approximation
+	if [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
+	then
+		SYSTEM_BASE='stable'
+	elif [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
+	then
+		SYSTEM_BASE='testing'
+	else
+		SYSTEM_BASE='sid'
 	fi
 }
 
@@ -524,7 +542,12 @@ install_package()
 	fi
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
-		useUntrusted='--allow-untrusted'
+		if [ "$SYSTEM_BASE" == 'stable' ]
+		then
+			useUntrusted='' # etch aptitude doesn't support this
+		else
+			useUntrusted='--allow-untrusted'
+		fi
 		doYes=''
 	fi
 	if  [ -n "$1" ]

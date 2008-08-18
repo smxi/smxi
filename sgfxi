@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.14
-####  Date: August 16 2008
+####  version: 3.4.15
+####  Date: August 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -817,10 +817,10 @@ basic_startup_tests()
 		error_handler 250
 	fi
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
+	if [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
 		SYSTEM_BASE='stable'
-	elif [ "$systemBase" == 'testing' ] || [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
+	elif [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
 	then
 		SYSTEM_BASE='testing'
 	else
@@ -988,7 +988,12 @@ install_package()
 	fi
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
-		useUntrusted='--allow-untrusted'
+		if [ "$SYSTEM_BASE" == 'stable' ]
+		then
+			useUntrusted='' # etch aptitude doesn't support this
+		else
+			useUntrusted='--allow-untrusted'
+		fi
 		doYes=''
 	fi
 	# this will force install of sid to get rid of experimental if required
