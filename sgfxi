@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.17
-####  Date: August 19 2008
+####  version: 3.4.18
+####  Date: August 20 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -121,12 +121,12 @@ NV_DEBIAN_LEGACY_2='96xx'
 
 # other options: nothing now
 # IMPORTANT: on function set_download_info the actual path file name is set:
-FG_VERSIONS='8-7:8-6:8-5'
-FG_DEFAULT='8-7'
+FG_VERSIONS='8-8:8-7:8-6'
+FG_DEFAULT='8-8'
 
 FG_LEGACY='' # no legacy for ati + xorg >= 7.1
 FG_TESTING=''
-FG_OTHERS='8-4'
+FG_OTHERS='8-4:8-5'
 DRIVER_LEGACY=''
 DRIVER_INSTALL=''
 DRIVER_DEFAULT=''
@@ -1690,6 +1690,15 @@ driver_support_tests()
 												;;
 										esac
 										;;
+# 									27)
+# 										case $DRIVER_DEFAULT in
+# 											*)
+# 												#fglrx is working on sid kernels, so users who want up to date
+# 												#system will need to use debian sid kernels + fglrx
+# 												error_handler 234 27
+# 												;;
+# 										esac
+# 										;;
 								esac
 							fi
 							;;
