@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.4
-####  Date: August 18 2008
+####  version: 1.17.5
+####  Date: August 21 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -218,12 +218,14 @@ package_installer()
 		
 		if [ "$forceIt" == 'true' ]
 		then
-			$APT_TYPE install -f $doYes
+			log_function_data "install -f pre"
+			$APT_TYPE install -f $doYes 2>>$LOG_FILE 2>&1
 		fi
-		$APT_TYPE $install $doYes $extraInstallArgs $1 || installError=$?
+		$APT_TYPE $install $doYes $extraInstallArgs $1 2>>$LOG_FILE 2>&1 || installError=$?
 		if [ "$forceIt" == 'true' ]
 		then
-			$APT_TYPE install -f $doYes || forceError=$?
+			log_function_data "install -f post"
+			$APT_TYPE install -f $doYes 2>>$LOG_FILE 2>&1 || forceError=$?
 		fi
 	# if user install and already installed...
 	elif [ "$installAbsent" == 'true' -a -n "$packageExists"  ]
@@ -280,7 +282,7 @@ package_remover()
 			removeError=0 # reset to no error
 			echo 
 			echo "${SPACER}${S}Removing package ${C}$item${S}...${N}"
-			$APT_TYPE $removePurge $extraArgs $item || removeError=$?
+			$APT_TYPE $removePurge $extraArgs $item 2>>$LOG_FILE 2>&1 || removeError=$?
 			if [ "$removeError" -gt 0 ]
 			then
 				echo "${SPACER}${E}Error ${C}$removeError${E} removing package: ${C}$item${N}"
