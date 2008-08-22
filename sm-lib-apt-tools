@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.5
-####  Date: August 21 2008
+####  version: 1.17.6
+####  Date: August 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -171,7 +171,7 @@ package_installer()
 	
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
-		if [ "$SYSTEM_BASE" == 'stable' ]
+		if [ "$SYSTEM_BASE" == 'etch' ]
 		then
 			# I can't find the etch aptitude command for this, so removing it for now
 			extraInstallArgs=$( sed -e 's/--allow-unauthenticated//' <<< $extraInstallArgs )
@@ -261,7 +261,7 @@ package_remover()
 		extraArgs=$( sed 's/purge//g' <<< $extraArgs  )
 		removePurge='purge'
 		# etch apt-get doesn't support apt-get purge, just apt-get remove --purge
-		if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'stable' ]
+		if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'etch' ]
 		then
 			removePurge='remove --purge'
 		fi

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.24
-####  Date: August 18 2008
+####  version: 8.3.25
+####  Date: August 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1151,13 +1151,20 @@ set_distro_data()
 	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
 	
 	# these tests will be improved over time, but are ok for now
+	local isEtch=$( grep -is '^4.' $EDV )
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 	
+	# set system type. This test will never be perfect, but it's a good approximation
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
-		SYSTEM_BASE='stable'
+		if [ -n "$isEtch" ]
+		then
+			SYSTEM_BASE='etch'
+		else
+			SYSTEM_BASE='stable'
+		fi
 		DU_UPGRADE='upgrade' 
 		WARNING_BODY='warning_message_s'
 		ALERT_BODY='alert_message_s'
@@ -1223,7 +1230,7 @@ set_distro_data()
 			;;
 	esac
 	 # etch aptitude doesn't have safe-upgrade option
-	if [ "$SYSTEM_BASE" == 'stable' -a "$DU_UPGRADE" == 'safe-upgrade' ]
+	if [ "$SYSTEM_BASE" == 'etch' -a "$DU_UPGRADE" == 'safe-upgrade' ]
 	then
 		DU_UPGRADE='upgrade'
 	fi
@@ -2767,7 +2774,7 @@ pre_du_tasks()
 	eval $LOGMS
 	# begin update tasks
 	apt_update_handler 'pre-du'
-	if [ "$SYSTEM_BASE" != 'stable' ]
+	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ]
 	then
 		echo $LINE
 		echo "${S}These are assorted tasks the script will do before the upgrade:${N}"
@@ -3019,7 +3026,7 @@ post_du_tasks()
 {
 	eval $LOGMS
 	# set the trap here
-	if [ "$SYSTEM_BASE" != 'stable' ]
+	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ]
 	then
 		trap 'du_trap_handler $FUNCNAME' INT TERM
 		

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.5
-####  Date: August 6 2008
+####  version: 3.2.6
+####  Date: August 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -45,7 +45,7 @@ check_debian()
 	local conversionOptions='sidux-sources sidux-conversion'
 	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
 	
-	if [ "$SYSTEM_BASE" == 'stable' ]
+	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'etch' ]
 	then
 		conversionOptions=''
 		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."

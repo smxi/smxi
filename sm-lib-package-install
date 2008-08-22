@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.8
-####  Date: August 12 2008
+####  version: 2.10.9
+####  Date: August 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -44,15 +44,15 @@ package_group_installer()
 	local dmUse=$( assign_display_manager $itemName )
 	local pdfLight='epdfview'
 	
-	# note: epdfview is not in stable currently
-	if [ "$SYSTEM_BASE" == 'stable' ]
+	# note: epdfview is not in every Debian level
+	if [ -z "$( check_package_status 'epdfview' )" ]
 	then
 		pdfLight='xpdf'
 	fi
 	
 	# package groups, console stuff first so it's included in following
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local consoleTools='bzip2 htop irssi nano gzip net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip'
+	local consoleTools='bzip2 htop irssi nano gzip net-tools p7zip-full p7zip-rar rcconf rename sysv-rc-conf zip unzip'
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
@@ -725,8 +725,8 @@ select_display_manager()
 		do
 			case $opt in
 				kdm|gdm|xdm|wdm|slim)
-					# note: epdfview is not in stable currently
-					if [ "$SYSTEM_BASE" == 'stable' -a "$opt" == 'slim' ]
+					# note: slim is not in every Debian level
+					if [ -z "$( check_package_status 'slim' )" -a "$opt" == 'slim' ]
 					then
 						echo "${E}The display manager ${C}$opt${E} is not currently in Debian Stable. Please select another one.${N}"
 						repeat='true'
