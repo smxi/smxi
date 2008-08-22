@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.6
+####  version: 1.17.7
 ####  Date: August 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1606,15 +1606,15 @@ get_current_apt_kernel()
 test_required_startup_apps()
 {
 	eval $LOGUS
-	local p='' r='' missing='' installApps='' response='' updateError='' appPath='' appExists=''
+	local p='' r='' missing='' installApps='' response='' updateError='' appPath=''
 	local requiredApps="awk bzip2 gawk logrotate make perl sed tar unzip wget"
-	# dctr is for grep-aptavail
-	local dpkgCheck='dctrl-tools initramfs-tools' 
+	# dctr is for grep-aptavail; findutils is for xargs and find
+	local dpkgCheck='dctrl-tools findutils initramfs-tools' 
 	
 	for r in $dpkgCheck
 	do
-		appExists=$( package_tester $r ) # see if it's in dpkg
-		if [ -z "$appExists" ]
+		# see if it's in dpkg
+		if [ -z "$( package_tester $r )" ]
 		then
 			installApps="$installApps $r"
 			missing='true'
