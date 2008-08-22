@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.25
+####  version: 8.3.26
 ####  Date: August 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1149,13 +1149,12 @@ set_distro_data()
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
 	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
-	
+
 	# these tests will be improved over time, but are ok for now
-	local isEtch=$( grep -is '^4.' $EDV )
+	#local isEtch=$( grep -is '^4.' $EDV )
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
-	
 	# set system type. This test will never be perfect, but it's a good approximation
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
@@ -1182,7 +1181,7 @@ set_distro_data()
 	else
 		SYSTEM_BASE='sid'
 	fi
-	
+
 	# this test goes before the next two to set defaults
 	if [ -f $ATX ]
 	then
@@ -1203,6 +1202,7 @@ set_distro_data()
 		DEFAULT_KERNEL='debian'
 		USE_DEBIAN_KERNEL='true'
 	fi
+
 	# then tweak defaults if needed, this order is also important to get right defaults
 	if [ -n "$mepisSources" ]
 	then
