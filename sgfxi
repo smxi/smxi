@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.21
+####  version: 3.5.0
 ####  Date: August 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -110,6 +110,10 @@ NV_VERSIONS='173.14.12:169.12:96.43.07:71.86.06'
 NV_DEFAULT='173.14.12'
 NV_LEGACY=$( echo $NV_VERSIONS | cut -d ':' -f 4 )
 NV_OLDER=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
+# until 177.xx goes stable, then change to cut -d 2. This will change how smxi
+# graphics data is handled too, instead of a one previous, there will be 3 legacy levels
+# plus current driver. Given how many 5xxx cards are, that's worth doing.
+NV_5XXX=$( echo $NV_VERSIONS | cut -d ':' -f 1 ) 
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
 NV_QUAD=$NV_DEFAULT # no more individual quad drivers
 NV_TESTING='177.68:177.13' 
@@ -136,9 +140,12 @@ DRIVER_DEFAULT=''
 DRIVER_OVERRIDE=''
 DRIVER_QUAD=''
 DRIVER_TESTING=''
-IS_LEGACY_0='' # unsupported completely by any non-free driver
-IS_LEGACY_1='' # oldest card versions supported
-IS_LEGACY_2='' # midrange legacy card versions supported
+# 0 - unsupported completely by any non-free driver
+# 1 - nvidia oldest card versions supported
+# 2 - nvidia midrange legacy card versions supported
+# 3 - nvidia 5xxx cards only
+# 100 - fully supported with latest driver
+LEGACY_LEVEL=''
 
 DRIVER_FILE=''
 USE_XVMC=''
@@ -348,6 +355,9 @@ error_handler()
 			;;
 		228) 
 			errorData="The option you selected: $errorExtra is not supported."
+			;;
+		227)
+			errorData="The newest $CARD drivers ( >= 177.167 ) no longer support your $CARD GeForce 5xxx card.\nYou must use the $NV_5XXX driver or lower.\nThat is the default driver when you run this script."
 			;;
 		# specific install issues
 		200) 
@@ -587,21 +597,27 @@ detect_card_version()
 			isQuad=$( lspci | grep 'VGA' | grep -i -o 'quadro' )
 			is8xxx=$( lspci | grep 'VGA' | egrep -o '8[0-9]{3}' )
 			case $cardNumber in
-				# http://listing.driveragent.com/pci/10de/?q=94c3
-				# http://listing.driveragent.com/pci/12d2/?q=94c3
+				# http://listing.driveragent.com/pci/10de/?q=94c3 # later series
+				# http://listing.driveragent.com/pci/12d2/?q=94c3 # full legacy
 				0008|0009|0010|0018|0019)
 					error_handler 253 # if card in this list exit
-					IS_LEGACY_0='true'
+					LEGACY_LEVEL=0
 					;;
 				0020|0028|0029|002c|002d|00a0|0100|0101|0103|0150|0151|0152|0153|0170)
 					DRIVER_INSTALL=$NV_LEGACY # force this driver for these cards
 					# RENDER_ACCEL='' # set default to false
-					IS_LEGACY_1='true'
+					LEGACY_LEVEL=1
 					;;
-				0110|0111|0112|0113|0170|0171|0172|0173|0174|0175|0176|0177|0178|0179|017a|017c|017d|0181|0182|0183|0185|0188|018a|018b|018c|01a0|01f0|0200|0201|0202|0203|0250|0251|0253|0258|0259|025b|0280|0281|0282|0286|0288|0289|028c)
+				0110|0111|0112|0113|0170|0171|0172|0173|0174|0175|0176|0177|0178|0179|017a|017c|017d|0180|0181|0182|0183|0185|0186|0187|0188|018a|018b|018c|01a0|01f0|0200|0201|0202|0203|0250|0251|0253|0258|0259|025b|0280|0281|0282|0286|0288|0289|028c)
 					DRIVER_INSTALL=$NV_OLDER
-					IS_LEGACY_2='true'
+					LEGACY_LEVEL=2
 					# RENDER_ACCEL='' # set default to false
+					;;
+				# This is for the GeForce FX 5xxx series. Not sure about the quadro fx series: 
+				# 004d 004e 09d0 009d 00cd 00ce 00fe 019d 019e
+				0320|0321|0322|0323|0324|0325|0326|0327|0328|0329|032c|032d|0330|0331|0332|0333|0334|0341|0342|0343|0344|0347|0348)
+					DRIVER_INSTALL=$NV_5XXX
+					LEGACY_LEVEL=3
 					;;
 # 				0191|0193)
 # 					: # this handles the lack of xvmc support in 8xxx cards
@@ -609,6 +625,7 @@ detect_card_version()
 				*)
 					# set flags for fully supported non-legacy cards
 					USE_XVMC='true'
+					LEGACY_LEVEL=100
 					;;
 			esac
 			# this handles 8xxx xvmc issue
@@ -636,31 +653,32 @@ detect_card_version()
 				# http://wiki.cchtml.com/index.php/Hardware
 				# note: 4e50 should work with 8.4 driver
 				3154|3e54|4147|4154|4a4d|4e47|4e4b|4e54|5464|5550|5551|564a|564b|5b64|5d49|5e48|5e49|71C4)
-					IS_LEGACY_0='true'
+					LEGACY_LEVEL=0
 					error_handler 253
 					;;
 				# http://listing.driveragent.com/pci/1002/?q=94c3
 				0544)
-					IS_LEGACY_0='true'
+					LEGACY_LEVEL=0
 					error_handler 253
 					;;
 				# removed from list: 4337 - laptop chip
 				4136|4137|4237|4242|4243|4336|4337|4354|4358|4437|4554|4654|4742|4744|4747|4749|474c|474d|474e|474f|4750|4751|4752|4753|4754|4755|4756|4757|4758|4759|475a|4964|4965|4966|4967|496e|496f|4c42|4c44|4c45|4c46|4c47|4c49|4c4d|4c4e|4c50|4c51|4c52|4c53|4c54|4c57|4c58|4c59|4c5a|4c64|4c65|4c66|4c67|4c6e|4c6f|4d46|4d4c|4f72|4f73)
-					IS_LEGACY_0='true'
+					LEGACY_LEVEL=0
 					error_handler 253
 					;;
 				5041|5042|5043|5044|5045|5046|5047|5048|5049|504a|504b|504c|504d|504e|504f|5050|5051|5052|5053|5054|5055|5056|5057|5058|5144|5145|5146|5147|5148|5149|514a|514b|514c|514d|514e|514f|5154|5155|5157|5158|5159|515a|515e|515f|5168|5169|516a|516b|516c|516d|516f|5245|5246|5247|524b|524c|5345|5346|5347|5348|534b|534c|534d|534e|5354|5446|544c|5452|5453|5454|5455|5654|5655|5656|5833|5834|5835|5838|5854|5874|5940|5941|5942|5944|5960|5961|5962|5964|5965|5969|5c41|5c43|5c61|5c63|5d44)
-					IS_LEGACY_0='true'
+					LEGACY_LEVEL=0
 					error_handler 253
 					;;
 				728c|7834|7835)
-					IS_LEGACY_0='true'
+					LEGACY_LEVEL=0
 					error_handler 253
 					;;
 				*) 
 					# if no working driver via standard ati installer. Here we're also handling
 					# the monthly releases, so users can do an experimental test if needed 
 					# if [ "$SID_FLAG" == 'true' -a "$TESTING" != 'true' ]
+					LEGACY_LEVEL=100
 					if [ "$SID_FLAG" == 'true' ]
 					then
 						USE_DEBIAN_DRIVER='true' 
@@ -1685,27 +1703,27 @@ driver_support_tests()
 							if [ -n "$IS_SIDUX_KERNEL" ]
 							then
 								error_handler 229
-								#print_information_continue 'standard' "You must be using sidux kernel of at least version ${C}2.6.25-4.slh.8${B} to install fglrx ${C}$DRIVER_DEFAULT\n${B}Your kernel version is: ${C}$KERNEL_VERSION${N}"
+							#fglrx is working on Debian kernels, so users who want up to date
+							#system will need to use debian kernels + fglrx
 							else
 								case $KERNEL_THIRD in
 									26)
 										case $DRIVER_DEFAULT in
 											8-4|8-5)
-												#fglrx is working on sid kernels, so users who want up to date
-												#system will need to use debian sid kernels + fglrx
 												error_handler 234 26
 												;;
 										esac
 										;;
-# 									27)
-# 										case $DRIVER_DEFAULT in
-# 											*)
-# 												#fglrx is working on sid kernels, so users who want up to date
-# 												#system will need to use debian sid kernels + fglrx
-# 												error_handler 234 27
-# 												;;
-# 										esac
-# 										;;
+									27)
+										case $DRIVER_DEFAULT in
+											8-4|8-5)
+												error_handler 234 27
+												;;
+											*)
+												: # not yet, let's see: error_handler 234 27
+												;;
+										esac
+										;;
 								esac
 							fi
 							;;
@@ -1722,7 +1740,17 @@ driver_support_tests()
 								NVIDIA_DOWNLOAD_SITE='ftp://download.nvidia.com'
 								;;
 						esac
-						# basic version handling and support tests
+						# handle change to legacy 5xxx level cards
+						case $DRIVER_DEFAULT in
+							177.68|177.67)
+								if [ "$LEGACY_LEVEL" -eq 3 ]
+								then
+									error_handler 227
+								fi
+								;;
+						esac
+						# basic version handling and support tests, unless otherwise reported,
+						# $DEBIAN_NVIDIA will be supported by default
 						case $KERNEL_THIRD in
 							24) # going to try just 2.6.24 links, see if any issues appear
 								# this doesn't work on debian kernels
@@ -1733,7 +1761,7 @@ driver_support_tests()
 								;;
 							26)
 								case $DRIVER_DEFAULT in
-									177.68|177.13|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06)
+									177.68|177.13|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -1743,7 +1771,7 @@ driver_support_tests()
 								;;
 							27)
 								case $DRIVER_DEFAULT in
-									177.68|177.13)
+									177.68|177.13|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -2250,14 +2278,14 @@ install_debian_drivers()
 	
 	case $CARD in
 		$NVIDIA)
-			if [ "$IS_LEGACY_1" == 'true' ]
+			if [ "$LEGACY_LEVEL" -eq 1 ]
 			then
 				# nvidiaGlx='nvidia-glx-legacy'
 				# nvidiaSource='nvidia-kernel-legacy-source'
 				# if the two lines below don't work, comment them and uncomment the ones above
 				nvidiaGlx="nvidia-glx-legacy-$NV_DEBIAN_LEGACY_1"
 				nvidiaSource="nvidia-kernel-legacy-$NV_DEBIAN_LEGACY_1-source"
-			elif [ "$IS_LEGACY_2" == 'true' ]
+			elif [ "$LEGACY_LEVEL" -eq 2 ]
 			then
 				nvidiaGlx="nvidia-glx-legacy-$NV_DEBIAN_LEGACY_2"
 				nvidiaSource="nvidia-kernel-legacy-$NV_DEBIAN_LEGACY_2-source"
@@ -2266,7 +2294,7 @@ install_debian_drivers()
 				nvidiaSource='nvidia-kernel-source'
 			fi
 			# start the install
-			if [ "$IS_LEGACY_0" != 'true' ]
+			if [ "$LEGACY_LEVEL" -ne 0 ]
 			then
 				echo "${B}Installing ${C}$DEBIAN_NVIDIA${B} components...${N}"
 				install_package nvidia-kernel-common
@@ -3130,7 +3158,8 @@ show_options()
 # 	echo "-E Adds extra experimental driver features. Currently libdrm2 things for ati."
 	echo "-h View this help menu."
 	echo "-j Turns off all text/output script colors, sets to console/tty default."
-	echo "-K Installs nVidia/fglrx driver for another kernel. Syntax: sgfxi -K 2.6.24-2.6.24.5.slh.2"
+	echo "-K Installs nVidia/fglrx driver for another kernel. Syntax: sgfxi -K 2.6.25-2"
+	echo "   $SCRIPT_NAME will double check that the kernel exists."
 	echo "-n Automatically installs correct native xorg nv, intel, or ati driver for your system."
 	echo "   Cleans up old binary driver stuff, updates xorg.conf with new driver information,"
 	echo "   and cleans nvidia and fgrlx stuff out of xorg.conf"
@@ -3138,7 +3167,7 @@ show_options()
 	echo "   Supported Xorg drivers: $nativeVersions"
 	echo "   Also configures xorg.conf as required. Full radeon xorg 3d configuration automatically."
 	echo "-o Override default: install a specific driver, this is an absolute override - syntax:"
-	echo "   -o 9746 (for nVidia, do not use the 1.0- part) or: -o 8.32.5 (for fglrx)"
+	echo "   -o 177.68 (for nVidia) or: -o 8-6 (for fglrx)"
 # 	echo "-p Print currently supported drivers, <default>:<latest>:<legacy1>:<legacy2>"
 # 	echo "   then exit the script without doing the driver download/install."
 	echo "-Q Skip start X Question, automatically start X post driver install."
