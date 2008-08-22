@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.3.26
+####  version: 8.3.27
 ####  Date: August 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -83,7 +83,7 @@ EDD='/etc/default/distro'
 GRUB_PATH='/boot/grub/menu.lst'
 GRUB_BU_PATH=$GRUB_PATH'-bu-'$(date +%y-%m-%d)
 ATX='/etc/antiX'
-DEB='/etc/debian_version'
+EDV='/etc/debian_version'
 KAN='/etc/kanotix-version'
 SID='/etc/sidux-version'
 EDI='/etc/issue'
@@ -1151,7 +1151,7 @@ set_distro_data()
 	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
 
 	# these tests will be improved over time, but are ok for now
-	#local isEtch=$( grep -is '^4.' $EDV )
+	local isEtch=$( grep -is '^4.' $EDV )
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
@@ -1841,7 +1841,7 @@ start_up_tests()
 	then
 		error_handler 'unsupported-distro' $FUNCNAME 'Kanotix'
 	fi
-	if [ ! -e $SID -a ! -e $DEB ]
+	if [ ! -e $SID -a ! -e $EDV ]
 	then
 		error_handler 'unidentified-distro' $FUNCNAME ''
 	fi
@@ -1990,9 +1990,9 @@ check_distro_version()
 # 		then
 # 			# DISTRO_VERSION=$( cat $SMDV )
 # 			DISTRO_VERSION=$( cat /etc/issue )
-		if [ -f $DEB ]
+		if [ -f $EDV ]
 		then
-			DISTRO_VERSION=$( cat $DEB )
+			DISTRO_VERSION=$( cat $EDV )
 		elif [ -f $SMDV ]
 		then
 			DISTRO_VERSION=$( cat $SMDV )
@@ -2023,7 +2023,7 @@ check_distro_version()
 		done
 	# run debian conversion options only if no id files for s/k present
 	# non supported tests have already been run in  start_up_tests
-	elif [ ! -f $SID -a -e $DEB ]
+	elif [ ! -f $SID -a -e $EDV ]
 	then
 		run_script_import $LIB_DISTRO_CONVERSION
 		check_debian
@@ -2639,8 +2639,8 @@ print_hec()
 print_distro_id()
 {
 	eval $LOGUS
-	# Note: $DEB is the default if all else fails
-	local knownDistroIds="$SID $ATX $EDI $SMDV $DEB" 
+	# Note: $EDV is the default if all else fails
+	local knownDistroIds="$SID $ATX $EDI $SMDV $EDV" 
 	local distroFile='' distroId=''
 	
 	for distroFile in $knownDistroIds
