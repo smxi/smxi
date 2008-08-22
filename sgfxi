@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.4.20
-####  Date: August 21 2008
+####  version: 3.4.21
+####  Date: August 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -118,6 +118,9 @@ NV_OTHERS='173.14.09:173.14.05:173.08:171.06:100.14.23:100.14.19:96.43.05:71.86.
 # debian sid legacies:
 NV_DEBIAN_LEGACY_1='71xx'
 NV_DEBIAN_LEGACY_2='96xx'
+
+# default download site for nvidia
+NVIDIA_DOWNLOAD_SITE='http://us.download.nvidia.com'
 
 # other options: nothing now
 # IMPORTANT: on function set_download_info the actual path file name is set:
@@ -760,6 +763,7 @@ basic_startup_tests()
 {
 	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
 	# these tests will be improved over time, but are ok for now
+	local isEtch=$( grep -is '^4.' $EDV )
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
@@ -818,7 +822,10 @@ basic_startup_tests()
 		error_handler 250
 	fi
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
+	if [ -n "$isEtch" ]
+	then
+		SYSTEM_BASE='etch'
+	elif [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
 		SYSTEM_BASE='stable'
 	elif [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
@@ -989,7 +996,7 @@ install_package()
 	fi
 	if [ "$APT_TYPE" == 'aptitude' ]
 	then
-		if [ "$SYSTEM_BASE" == 'stable' ]
+		if [ "$SYSTEM_BASE" == 'etch' ]
 		then
 			useUntrusted='' # etch aptitude doesn't support this
 		else
@@ -1709,6 +1716,13 @@ driver_support_tests()
 					then
 						print_information_continue 'standard' "Your system appears to be Debian Testing based.\nThe $DEBIAN_NVIDIA driver cannot build on Debian Testing because of a missing package.\nIf your system is Sid based, continue, otherwise exit now."
 					else
+						# set alternate download location if required
+						case $DRIVER_DEFAULT in
+							177.68)
+								NVIDIA_DOWNLOAD_SITE='ftp://download.nvidia.com'
+								;;
+						esac
+						# basic version handling and support tests
 						case $KERNEL_THIRD in
 							24) # going to try just 2.6.24 links, see if any issues appear
 								# this doesn't work on debian kernels
@@ -1787,15 +1801,14 @@ misc_fixes()
 set_download_info()
 {
 	eval $LOGPS
-	local packageName='' downloadUrl='' response='' country='us'
+	local packageName='' downloadUrl='' response=''
 
 	case $CARD in
 		$NVIDIA)
 			PKG=0
-			SERVER=$country'.download.nvidia.com'
 			# set the package name, .run is added to it when it's needed
 			DRIVER_FILE="NVIDIA-Linux-x86$ARCH-$DRIVER_DEFAULT-pkg$PKG"
-			downloadUrl="http://$SERVER/XFree86/Linux-x86$ARCH/$DRIVER_DEFAULT/"
+			downloadUrl="$NVIDIA_DOWNLOAD_SITE/XFree86/Linux-x86$ARCH/$DRIVER_DEFAULT/"
 			;;
 		$FGLRX)
 			# set driver package name
