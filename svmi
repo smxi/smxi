@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.5.2
-####  Date: August 22 2008
+####  version: 1.6.0
+####  Date: August 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -38,7 +38,7 @@ AUTORUN_VBOX_MODULE=''
 AUTORUN_VMPLAYER=''
 AUTORUN_VMSERVER=''
 FORCE_UPDATE=''
-MONOCHROME=''
+SCRIPT_COLORS=1
 PACKAGE_MANAGER=''
 SKIP_CONNECT=''
 SKIP_FUNCTION=''
@@ -178,30 +178,42 @@ DOWNLOAD_COUNTER=0
 ########################################################################
 
 # set global color variables
-# args: $1 - optional: monochrome, turn off all colors
+# options: 0 - turns off all colors; 1 - defaults
 set_script_colors()
 {
-	# colors
-	if [ "$1" != 'monochrome' ]
-	then
-		W="[1;31m" # red: Warning message
-		E="[1;33m" # yellow: script Error
-		S="[1;32m" # green: Standard message
-		Q="[1;36m" # CYAN: Questions
-		M="[1;36m" # CYAN: Message
-		B="[1;34m" # BLUE: Message
-		C="[1;35m" # MAGENTA: Command or Path
-		N="[0;39m" # default system console color: Normal :: make last in colors
-	else
-		W='' # red: Warning message
-		E='' # yellow: script Error
-		S='' # green: Standard message
-		Q='' # CYAN: Questions
-		M='' # CYAN: Message
-		B='' # BLUE: Message
-		C='' # MAGENTA: Command or Path
-		N='' # default system console color: Normal :: make last in colors
-	fi
+	# set colors
+	case $SCRIPT_COLORS in
+		0)
+			W='' # red: Warning message
+			E='' # yellow: script Error
+			S='' # green: Standard message
+			Q='' # CYAN: Questions
+			M='' # CYAN: Message
+			B='' # BLUE: Message
+			C='' # MAGENTA: Command or Path
+			N='' # default system console color: Normal :: make last in colors
+			;;
+		1)
+			W="[1;31m" # red: Warning message
+			E="[1;33m" # yellow: script Error
+			S="[1;32m" # green: Standard message
+			Q="[1;36m" # CYAN: Questions
+			M="[1;36m" # CYAN: Message
+			B="[1;34m" # BLUE: Message
+			C="[1;35m" # MAGENTA: Command or Path
+			N="[0;39m" # default system console color: Normal :: make last in colors
+			;;
+		2)
+			W="[1;31m" # red: Warning message
+			E="[1;33m" # yellow: script Error
+			S="[0;37m" # Standard message
+			Q="[0;36m" # CYAN: Questions
+			M="[1;36m" # CYAN: Message
+			B="[1;34m" # BLUE: Message
+			C="[1;35m" # MAGENTA: Command or Path
+			N="[0;39m" # default system console color: Normal :: make last in colors
+			;;
+	esac
 
 	CALLER_DEF=${S} # will switch default output color to the calling script's
 	S=${B} # this is slightly tricky, making standard blue AFTER the caller def is set.
@@ -1457,7 +1469,8 @@ show_options()
 	echo "-A Run the any any install non-interactively."
 # 	echo "-g Lets you use a specific gcc version to compile module. Example: -g 4.1"
 	echo "-h View this help menu."
-	echo "-j Turns off all text/output script colors, sets to console/tty default."
+	echo "-j Alternate text/output script colors. Requires this syntax: -j 0 (sets to monochrome )"
+	echo "   -j 1 (script default); -j 2 (alternate color scheme)"
 	echo "-M Run the vbox module install non-interactively."
 	echo "-R Skips self updating feature. No restart."
 	echo "-u Enter the username that will be used for vbox group membership and other functions."
@@ -1481,7 +1494,7 @@ show_options()
 
 # this must be set before anything else runs in script, -j will reset to no colors
 set_script_colors 
-while getopts ABDFhjMpP:RSTuUvV:Z opt
+while getopts ABDFhj:MpP:RSTuUvV:Z opt
 do
 	case $opt in
 		A) AUTORUN_ANYANY='true'
@@ -1500,9 +1513,13 @@ do
 			SKIP_FUNCTION='true'
 			START_OPTIONS=$START_OPTIONS'F'
 			;;
-		j)	MONOCHROME='true'
-			set_script_colors 'monochrome'
-			START_OPTIONS=$START_OPTIONS'j'
+		j)	if [ -n $( egrep '^[0-2]$' <<< $OPTARG ) ]
+			then
+				SCRIPT_COLORS=$OPTARG
+				set_script_colors
+			else
+				error_handler 249 $OPTARG
+			fi
 			;;
 		M) AUTORUN_VBOX_MODULE='true'
 			START_OPTIONS=$START_OPTIONS'M'
@@ -1563,6 +1580,10 @@ fi
 if [ -n "$PACKAGE_MANAGER" ]
 then
 	START_OPTIONS=$START_OPTIONS" -P $PACKAGE_MANAGER"
+fi
+if [ "$SCRIPT_COLORS" != 1 ]
+then
+	START_OPTIONS=$START_OPTIONS" -j $SCRIPT_COLORS"
 fi
 
 ########################################################################

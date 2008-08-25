@@ -530,10 +530,8 @@ final_graphics_install()
 		# extraArgs=$extraArgs' -XTF'
 		extraArgs="$extraArgs -T "
 	fi
-	if [ "$MONOCHROME" == 'true' ]
-	then
-		extraArgs="$extraArgs -j "
-	fi
+	# send trigger colors to the receiving script
+	extraArgs="$extraArgs -j $SCRIPT_COLORS"
 
 	if [ "$installDriver" == 'true' ]
 	then

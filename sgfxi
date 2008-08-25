@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.5.0
-####  Date: August 22 2008
+####  version: 3.6.0
+####  Date: August 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -34,7 +34,6 @@ SM_INSTALL='' # utilities for smxi
 EXPERIMENTAL=''
 EXTRA_EXPERIMENTAL=''
 FORCE_UPDATE=''
-MONOCHROME=''
 NATIVE_DRIVER=''
 NATIVE_OVERRIDE=''
 # this is the actual pattern that will be used to search for this stuff in script
@@ -43,7 +42,8 @@ NO_XVMC=''
 PACKAGE_MANAGER=''
 PRINT_VER='' # utilities for smxi
 REMOVE_MODELINES=''
-
+# options: 0 - monochrome; 1 default; more coming?
+SCRIPT_COLORS=1
 SKIP_AUTOSTART=''
 SKIP_CONFIG=''
 SKIP_CONNECT=''
@@ -207,30 +207,42 @@ LOGIN_PID=$( echo $LOGIN_PID | grep -o "[0-9]*" )
 #### FUNCTIONS
 ########################################################################
 # set global color variables
-# args: $1 - optional: monochrome, turn off all colors
+# options: 0 - turns off all colors; 1 - defaults
 set_script_colors()
 {
-	# colors
-	if [ "$1" != 'monochrome' ]
-	then
-		W="[1;31m" # red: Warning message
-		E="[1;33m" # yellow: script Error
-		S="[1;32m" # green: Standard message
-		Q="[1;36m" # CYAN: Questions
-		M="[1;36m" # CYAN: Message
-		B="[1;34m" # BLUE: Message
-		C="[1;35m" # MAGENTA: Command or Path
-		N="[0;39m" # default system console color: Normal :: make last in colors
-	else
-		W='' # red: Warning message
-		E='' # yellow: script Error
-		S='' # green: Standard message
-		Q='' # CYAN: Questions
-		M='' # CYAN: Message
-		B='' # BLUE: Message
-		C='' # MAGENTA: Command or Path
-		N='' # default system console color: Normal :: make last in colors
-	fi
+	# set colors
+	case $SCRIPT_COLORS in
+		0)
+			W='' # red: Warning message
+			E='' # yellow: script Error
+			S='' # green: Standard message
+			Q='' # CYAN: Questions
+			M='' # CYAN: Message
+			B='' # BLUE: Message
+			C='' # MAGENTA: Command or Path
+			N='' # default system console color: Normal :: make last in colors
+			;;
+		1)
+			W="[1;31m" # red: Warning message
+			E="[1;33m" # yellow: script Error
+			S="[1;32m" # green: Standard message
+			Q="[1;36m" # CYAN: Questions
+			M="[1;36m" # CYAN: Message
+			B="[1;34m" # BLUE: Message
+			C="[1;35m" # MAGENTA: Command or Path
+			N="[0;39m" # default system console color: Normal :: make last in colors
+			;;
+		2)
+			W="[1;31m" # red: Warning message
+			E="[1;33m" # yellow: script Error
+			S="[0;37m" # Standard message
+			Q="[0;36m" # CYAN: Questions
+			M="[1;36m" # CYAN: Message
+			B="[1;34m" # BLUE: Message
+			C="[1;35m" # MAGENTA: Command or Path
+			N="[0;39m" # default system console color: Normal :: make last in colors
+			;;
+	esac
 	
 	CALLER_DEF=${S} # will switch default output color to the calling script's
 	S=${B} # this is slightly tricky, making standard blue AFTER the caller def is set.
@@ -3157,7 +3169,8 @@ show_options()
 # 	echo "-e Use experimental drivers (currently: xorg ati only)."
 # 	echo "-E Adds extra experimental driver features. Currently libdrm2 things for ati."
 	echo "-h View this help menu."
-	echo "-j Turns off all text/output script colors, sets to console/tty default."
+	echo "-j Alternate text/output script colors. Requires this syntax: -j 0 (sets to monochrome )"
+	echo "   -j 1 (script default); -j 2 (alternate color scheme)"
 	echo "-K Installs nVidia/fglrx driver for another kernel. Syntax: sgfxi -K 2.6.25-2"
 	echo "   $SCRIPT_NAME will double check that the kernel exists."
 	echo "-n Automatically installs correct native xorg nv, intel, or ati driver for your system."
@@ -3196,7 +3209,7 @@ show_options()
 
 # this must be set before anything else runs in script, -j will reset to no colors
 set_script_colors $COLOR_DEFAULT
-while getopts AbcCdDeEFhjK:nN:o:pP:QrRsStTUvWXxZ opt
+while getopts AbcCdDeEFhj:K:nN:o:pP:QrRsStTUvWXxZ opt
 do
 	case $opt in
 		A) AUTORUN='true'
@@ -3234,9 +3247,13 @@ do
 			START_OPTIONS=$START_OPTIONS'F'
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -F - You are using an advanced testing option. Only proceed if you know what you are doing!\n"
 			;;
-		j)	MONOCHROME='true'
-			set_script_colors 'monochrome'
-			START_OPTIONS=$START_OPTIONS'j'
+		j)	if [ -n $( egrep '^[0-2]$' <<< $OPTARG ) ]
+			then
+				SCRIPT_COLORS=$OPTARG
+				set_script_colors
+			else
+				error_handler 228 $OPTARG
+			fi
 			;;
 		K)	INSTALL_TO_KERNEL="$OPTARG"
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -K - You are installing a graphic driver onto the kernel: ${C}$INSTALL_TO_KERNEL${B}\n"
@@ -3246,13 +3263,15 @@ do
 			START_OPTIONS=$START_OPTIONS'n'
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -n - Auto install of native xorg intel, nvidia, 3dfx, or ati drivers.\n"
 			;;
-		N) NATIVE_OVERRIDE="$OPTARG"
-			if [ -z $( egrep '('$NATIVE_OVERRIDE_SUPPORTED')' <<< $NATIVE_OVERRIDE ) ]
+		N) 
+			if [ -n $( egrep '('$NATIVE_OVERRIDE_SUPPORTED')' <<< $NATIVE_OVERRIDE ) ]
 			then
+				NATIVE_OVERRIDE="$OPTARG"
+				NATIVE_DRIVER='true'
+				START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -N - Native driver custom install. You have requested to install the xorg driver: $NATIVE_OVERRIDE\n"
+			else
 				error_handler 237 $NATIVE_OVERRIDE
 			fi
-			NATIVE_DRIVER='true'
-			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -N - Native driver custom install. You have requested to install the xorg driver: $NATIVE_OVERRIDE\n"
 			;;
 		o) DRIVER_OVERRIDE="$OPTARG"
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -o - Driver override. Forces install of this driver: $DRIVER_OVERRIDE (nVdia|ATI fglrx only)\n"
@@ -3337,7 +3356,10 @@ if [ -n "$PACKAGE_MANAGER" ]
 then
 	START_OPTIONS=$START_OPTIONS" -P $PACKAGE_MANAGER"
 fi
-
+if [ "$SCRIPT_COLORS" != 1 ]
+then
+	START_OPTIONS=$START_OPTIONS" -j $SCRIPT_COLORS"
+fi
 #in case -n is used too - note: this will never be true, have to fix this one
 if [ "$NATIVE_DRIVER" == "true" -a -n "$INSTALL_TO_KERNEL" ]
 then
