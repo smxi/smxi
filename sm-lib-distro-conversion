@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.6
-####  Date: August 22 2008
+####  version: 3.2.7
+####  Date: August 25 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -295,7 +295,7 @@ set_distro_version()
 	debian-other
 	'
 	
-	if [ ! -f $SMDV -a ! -f $ATX ]
+	if [ ! -f $SMDV -a ! -f $EAX ]
 	then
 		echo $MLINE
 		echo "${M}Set Distro Version Data"
@@ -330,7 +330,7 @@ set_distro_version()
 		then
 			set_distro_version
 		fi
-	elif [ ! -f $SMDV -a -f $ATX ]
+	elif [ ! -f $SMDV -a -f $EAX ]
 	then
 		write_smdv_file 'anti-x'
 		eval $LOGPE

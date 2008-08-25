@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.6.1
-####  Date: August 6 2008
+####  version: 2.6.2
+####  Date: August 25 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -364,7 +364,7 @@ remove_kernels()
 	fi
 	
 	# test to make sure that required scripts are installed, if not, install:
-	if [ -n "$SIDUX_SOURCES" -a -f $SID ]
+	if [ -n "$SIDUX_SOURCES" -a -f $ESV ]
 	then
 		skhCheck=$( package_tester 'sidux-kernelhacking' )
 		if [ -z "$skhCheck" ]
