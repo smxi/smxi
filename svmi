@@ -209,7 +209,7 @@ set_script_colors()
 			S="[0;37m" # Standard message
 			Q="[0;36m" # CYAN: Questions
 			M="[1;36m" # CYAN: Message
-			B="[1;34m" # BLUE: Message
+			B="[0;37m" # BLUE: Message
 			C="[1;35m" # MAGENTA: Command or Path
 			N="[0;39m" # default system console color: Normal :: make last in colors
 			;;
