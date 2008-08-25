@@ -1513,7 +1513,7 @@ do
 			SKIP_FUNCTION='true'
 			START_OPTIONS=$START_OPTIONS'F'
 			;;
-		j)	if [ -n $( egrep '^[0-2]$' <<< $OPTARG ) ]
+		j)	if [ -n "$( egrep '^[0-2]$' <<< $OPTARG )" ]
 			then
 				SCRIPT_COLORS=$OPTARG
 				set_script_colors

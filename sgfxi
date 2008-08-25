@@ -3247,7 +3247,7 @@ do
 			START_OPTIONS=$START_OPTIONS'F'
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -F - You are using an advanced testing option. Only proceed if you know what you are doing!\n"
 			;;
-		j)	if [ -n $( egrep '^[0-2]$' <<< $OPTARG ) ]
+		j)	if [ -n "$( egrep '^[0-2]$' <<< $OPTARG )" ]
 			then
 				SCRIPT_COLORS=$OPTARG
 				set_script_colors
