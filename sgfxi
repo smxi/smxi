@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.6.0
+####  version: 3.6.1
 ####  Date: August 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -451,7 +451,7 @@ error_handler()
 	then
 		log_function_data "$ErrorMessage"
 		echo
-		echo "${B}Log file is located here: $LOG_FILE"
+		echo "${S}Log file is located here: $LOG_FILE"
 	fi
 	echo "${M}Exiting script now.${N}"
 	
@@ -472,19 +472,19 @@ select_card()
 	local timeStampXorg=$EXXC-bu-$( date +%Y-%m-%d-%H:%M:%S )
 
 	echo ${M}$LINE
-	echo "${B}The script detected more than one video card in your system:"
+	echo "${S}The script detected more than one video card in your system:"
 	echo "${C}$cardData"
 	echo
 	echo "${M}If you want to preserve your current xorg.conf, for example if you use dual"
 	echo "card setup, and your system is working fine with the driver you are installing,"
 	echo "please restart sgfxi with extra -C option and it will not change xorg.conf."
 	echo
-	echo "${B}sgfxi will adjust your xorg.conf busID. For typical, single monitor/dual card setups, this is desirable,"
+	echo "${S}sgfxi will adjust your xorg.conf busID. For typical, single monitor/dual card setups, this is desirable,"
 	echo "but for rare cases of dual card, dual monitor setups, you may want to start with -C "
 	echo
 	echo "If you proceed without -C, a copy of your current xorg.conf will be made here: ${C}$timeStampXorg"
 	echo
-	echo "${B}Please select which card you want to install a driver for now to proceed:"
+	echo "${S}Please select which card you want to install a driver for now to proceed:"
 	echo ${M}$LINE${N}
 	
 	options="$cardData exit"
@@ -496,11 +496,11 @@ select_card()
 			then
 				if [ "$card" == 'exit' ]
 				then
-					echo "${B}Exiting script now.${N}"
+					echo "${S}Exiting script now.${N}"
 					exit 0
 				else
 					singleCardId=$( echo $card | egrep -o -i '[a-z0-9]{4}:[a-z0-9]{4}' )
-					echo "${B}You have elected to install drivers for this video card:"
+					echo "${S}You have elected to install drivers for this video card:"
 					echo "${C}$card${N}"
 					# override the global values and handle this explicitly
 					CARD_DATA=$singleCardId
@@ -518,7 +518,7 @@ select_card()
 						BUS_ID=$( lspci -n | grep "$CARD_DATA" | egrep -io '^[0-9]{1,2}:[0-9a-z]{1,2}(\.|:)[0-9]' | sed 's/\./:/')
 						
 						# handle explicit assignment of busid to avoid errors
-						echo "${B}Updating ${C}xorg.conf${B} to use the card with this BusID: ${C}$BUS_ID${N}"
+						echo "${S}Updating ${C}xorg.conf${S} to use the card with this BusID: ${C}$BUS_ID${N}"
 						if [ -n "$BUS_ID" ]
 						then
 							# create a dummy in case it's needed by new xorg system
@@ -746,7 +746,7 @@ test_install_kernel_version()
 {
 	if [ ! -d /lib/modules/$INSTALL_TO_KERNEL ] 
 	then
-		echo "${B}These are your currently installed kernels:${C}"
+		echo "${S}These are your currently installed kernels:${C}"
 		ls /lib/modules
 		echo ${N}
 		error_handler 232 $INSTALL_TO_KERNEL
@@ -774,17 +774,17 @@ print_information()
 		cardVendor=$( lspci -v -s $busId 2>/dev/null | egrep '.*Subsystem:[[:space:]]*(.*)' | sed -r 's/.*Subsystem:[[:space:]]*(.*)/\1/' | sed 's/[dD]evice.*$//g' | sed 's/[uU]nknown//g' )
 	fi
 	echo ${M}$LINE
-	echo " ${M}$SCRIPT_NAME${B} :: version: ${C}$scriptVersion${B} :: last updated: ${C}$scriptDate"
+	echo " ${M}$SCRIPT_NAME${S} :: version: ${C}$scriptVersion${S} :: last updated: ${C}$scriptDate"
 	echo ${M}$LINE
-	echo " ${B}graphics card information:"
-	echo "   ${B}series: ${C}$cardInfo"
+	echo " ${S}graphics card information:"
+	echo "   ${S}series: ${C}$cardInfo"
 	if [ -n "$cardVendor" ]
 	then
-		echo "   ${B}vendor: ${C}$cardVendor"
+		echo "   ${S}vendor: ${C}$cardVendor"
 	fi
 	if [ -n "$cardRam" ]
 	then
-		echo "   ${B}ram:    ${C}$cardRam MegaBytes ${B}(note: not accurate for built in graphics)"
+		echo "   ${S}ram:    ${C}$cardRam MegaBytes ${S}(note: not accurate for built in graphics)"
 	fi
 	echo ${M}$LINE${N}
 }
@@ -947,12 +947,12 @@ check_apt_aptitude()
 	then
 		if [ -z "$aptPref" ]
 		then
-			echo ${B}$LINE
-			echo "${B}It appears you are using aptitude. It is not good to mix apt-get and aptitude."
+			echo ${S}$LINE
+			echo "${S}It appears you are using aptitude. It is not good to mix apt-get and aptitude."
 			echo "Please pick your preferred package manager before you continue, or exit now."
 			echo
-			echo "Your selection (for example: ${C}apt-type=apt-get${B}) will be stored in ${C}/etc/smxi.conf${B}"
-			echo "${C}smxi${B} will also use this choice for its default package manager, so make sure it's correct."
+			echo "Your selection (for example: ${C}apt-type=apt-get${S}) will be stored in ${C}/etc/smxi.conf${S}"
+			echo "${C}smxi${S} will also use this choice for its default package manager, so make sure it's correct."
 			echo $LINE${N}
 			
 			select opt in $managers 
@@ -964,7 +964,7 @@ check_apt_aptitude()
 						get_set_prefs 'set' "apt-type=$opt"
 						;;
 					quit)
-						echo "${B}Ok, figure it out and try again later...${N}"
+						echo "${S}Ok, figure it out and try again later...${N}"
 						exit 0
 						;;
 					*)
@@ -1075,13 +1075,13 @@ remove_package()
 	do
 		if [ -n "$( dpkg -l | grep "$package" )" ]
 		then
-			echo "${B}Removing ${C}$package${S}...${N}"
+			echo "${S}Removing ${C}$package${S}...${N}"
 			$APT_TYPE purge $package || error_handler 190 "$package"
 		else
-			echo "${B}The package ${C}$package${B} is not installed, continuing...${N}"
+			echo "${S}The package ${C}$package${S} is not installed, continuing...${N}"
 		fi
 	done
- 	echo "${B}Package(s) removed successfully, continuing with driver install.${N}"
+ 	echo "${S}Package(s) removed successfully, continuing with driver install.${N}"
  	eval $LOGUE
 }
 
@@ -1109,7 +1109,7 @@ update_to_nonfree_sources()
 		do
 			if [ -f "$i" ]
 			then
-				echo "${B}Updating your ${C}$i${B} to use non-free / contrib now...${N}"
+				echo "${S}Updating your ${C}$i${S} to use non-free / contrib now...${N}"
 				sed -i -r 's%(#?deb.*(debian\.org|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
 				# the second test requires the results of the first to work
 				# note that spaces are required for this to work more reliably for most patterns
@@ -1155,7 +1155,7 @@ check_update_script()
 					./$1 -R$START_OPTIONS
 				else
 					print_information
-					echo "${C}$SCRIPT_NAME${B} was successfully updated. Please start the script again"
+					echo "${C}$SCRIPT_NAME${S} was successfully updated. Please start the script again"
 					echo "to access the latest features and drivers. Exiting now.${N}"
 				fi
 				exit 0
@@ -1201,18 +1201,18 @@ apply_patch_file()
 	
 	log_function_data "Patch URL: $patchUrl"
 
-	echo "${B}Retrieving patch ${C}$patchFile${B}...${N}"
+	echo "${S}Retrieving patch ${C}$patchFile${S}...${N}"
 	wget -q -O $patchDirectory$patchFile $patchUrl || error_handler 180 $patchFile
 	
 	if [ -f $patchFile ]
 	then
 		log_function_data "Patch File: $patchDirectory$patchFile"
-		echo "${B}Running patch ${C}$patchFile${B}...${N}"
+		echo "${S}Running patch ${C}$patchFile${S}...${N}"
 
 		patch -p0 < $patchDirectory$patchFile || error_handler 179 $patchFile
 		# remove the patch file after use just to keep the stuff neat long term
 		rm -f $patchFile
-		echo "${B}Patching completed...${N}"
+		echo "${S}Patching completed...${N}"
 	else
 		error_handler 181 $patchFile
 	fi
@@ -1227,7 +1227,7 @@ print_information_continue()
 	
 	case $1 in
 		standard|info)
-			echo -e "${B}$2"
+			echo -e "${S}$2"
 			;;
 	esac
 	
@@ -1407,7 +1407,7 @@ install_native_driver()
 		
 		if [ "$PRINT_VER" != 'true' ]
 		then
-			print_information_continue 'standard' "The graphics installer will be installing the${C}$experimentalText Free xorg${B} driver: ${C}$driverInstall${N}"
+			print_information_continue 'standard' "The graphics installer will be installing the${C}$experimentalText Free xorg${S} driver: ${C}$driverInstall${N}"
 		else
 			exit 0 # this is required for smxi native driver tests
 		fi
@@ -1426,14 +1426,14 @@ install_native_driver()
 				# prep_native_driver # remove all the possible packages installed by experimental
 				if [ "$EXPERIMENTAL" == 'true' ]
 				then
-	# 				echo "${B}There is no current experimental ${C}$driver${B}. Installing sid ${C}$driver${N}"
+	# 				echo "${S}There is no current experimental ${C}$driver${S}. Installing sid ${C}$driver${N}"
 	# 				install_package $driver
 	# 				install_package libdrm2 unstable # this may need some work to undo it
-					echo "${B}Installing experimental driver ${C}$driver${B} now...${N}"
+					echo "${S}Installing experimental driver ${C}$driver${S} now...${N}"
 					native_driver_experimental "$driver"
 				# this will clean up experimental stuff if present
 				else
-					echo "${B}Reinstalling driver ${C}$driver${B} now...${N}"
+					echo "${S}Reinstalling driver ${C}$driver${S} now...${N}"
 					install_package $driver
 					# install_package libdrm2 unstable # this may need some work to undo it
 				fi
@@ -1444,10 +1444,10 @@ install_native_driver()
 				then
 					# intel i810
 					#  libc6 (>= 2.3.6-6), libdrm2, libexpat1 (>= 1.95.8), libgl1-mesa-glx (= 6.5.1-0.6)
-					echo "${B}Installing missing driver ${C}$driver${B} now...${N}"
+					echo "${S}Installing missing driver ${C}$driver${S} now...${N}"
 					install_package $driver
 				else
-					echo "${B}Using your currently installed ${C}$driver${B} driver...${N}"
+					echo "${S}Using your currently installed ${C}$driver${S} driver...${N}"
 				fi
 				;;
 		esac
@@ -1501,7 +1501,7 @@ native_driver_experimental()
 		# step one, check and install basic drivers
 		if [ -n "$EXPERIMENTAL_XORG_ATI" ]
 		then
-			echo "${B}Starting experimental driver ${C}$1${B} install now...${N}"
+			echo "${S}Starting experimental driver ${C}$1${S} install now...${N}"
 			download_install_package freedesktop-ati
 			unset packageExists
 		else
@@ -1510,7 +1510,7 @@ native_driver_experimental()
 		# step 2, if required, check and install extra packages
 		if [ "$EXTRA_EXPERIMENTAL" == 'true' -a -n "$EXPERIMENTAL_LIBDRM2" ]
 		then
-			echo "${B}Adding experimental components for ${C}$1${B} now...${N}"
+			echo "${S}Adding experimental components for ${C}$1${S} now...${N}"
 			download_install_package freedesktop-ati-drm2
 			download_install_package freedesktop-ati-drm-dev
 			unset packageExists
@@ -1550,12 +1550,12 @@ download_install_package()
 	# slice out first part of name for package display purposes
 	shortPackage=$( echo $packageToInstall | cut -d '_' -f 1 )
 	
-	echo "${B}Downloading Experimental package ${C}$shortPackage${B} now...${N}"
+	echo "${S}Downloading Experimental package ${C}$shortPackage${S} now...${N}"
 	wget -Nc $url || error_handler 189 $packageToInstall
 	
 	if [ -s "$packageToInstall" ]
 	then
-		echo "${B}Experimental package ${C}$shortPackage${B} downloaded successfully, installing now.${N}"
+		echo "${S}Experimental package ${C}$shortPackage${S} downloaded successfully, installing now.${N}"
 		dpkg -i $packageToInstall
 		rm -f $packageToInstall
 	else
@@ -1689,9 +1689,9 @@ set_version()
 		print_information_continue 'info' "You are using the following options:\n$START_OPTIONS_PRINT"
 	elif [ "$SM_INSTALL" == 'true' -a -n "$INSTALL_TO_KERNEL" ]
 	then
-		newKernelText="\n${B}onto the kernel: ${C}$INSTALL_TO_KERNEL${N}"
+		newKernelText="\n${S}onto the kernel: ${C}$INSTALL_TO_KERNEL${N}"
 	fi
-	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${B} driver: ${C}$DRIVER_DEFAULT${N}$newKernelText"
+	print_information_continue 'standard' "The graphics installer will be installing the ${C}$CARD${S} driver: ${C}$DRIVER_DEFAULT${N}$newKernelText"
 
 	log_function_data "Installing this driver: $DRIVER_DEFAULT"
 	
@@ -1819,14 +1819,14 @@ misc_fixes()
 				rm -f $headersDir/asm
 			fi
 			
-			echo "${B}Creating symbolic link ${C}asm-x86 asm${B}...${N}"
+			echo "${S}Creating symbolic link ${C}asm-x86 asm${S}...${N}"
 			
 			ln -sf $headersDir/asm-x86 $headersDir/asm || error_handler 233 "link -s asm-x86 asm"
 				
 			if [ ! -e $headersDir/asm-i386 -a "$BITS" == '32' ]
 			then
 				log_function_data "Creating soft link asm-x86 asm-i386 in $headersDir"
-				echo "${B}Creating symbolic link ${C}asm-x86 asm-i386${B}...${N}"
+				echo "${S}Creating symbolic link ${C}asm-x86 asm-i386${S}...${N}"
 			
 				ln -s $headersDir/asm-x86 $headersDir/asm-i386 || error_handler 233 "link -s asm-x86 asm-i386"
 				log_function_data "Link successfully created."
@@ -1902,13 +1902,13 @@ download_extract_driver()
 	# have to keep it in a clean if to avoid error
 	if [ ! -f $runPackage ]
 	then
-		echo "${B}Downloading ${C}$runPackage${B} from ${C}$1${B}...${N}"
+		echo "${S}Downloading ${C}$runPackage${S} from ${C}$1${S}...${N}"
 		wget -Nc $atiRef$1$runPackage || error_handler 197 $runPackage 
 	else
-		echo "${B}Using the previously downloaded installer package: ${C}$runPackage${N}"
+		echo "${S}Using the previously downloaded installer package: ${C}$runPackage${N}"
 	fi
 	
-	echo "${B}Extracting ${C}$runPackage${B}...${N}"
+	echo "${S}Extracting ${C}$runPackage${S}...${N}"
 	case $CARD in
 		$NVIDIA)
 			# extract it, on error delete and call error handling
@@ -1951,7 +1951,7 @@ prep_install()
 			;;
 	esac
 
-	echo "${B}Preparing driver install...${N}"
+	echo "${S}Preparing driver install...${N}"
 
 	if [ -f /etc/debian_version -a ! -f /etc/sidux-version ]
 	then
@@ -1974,7 +1974,7 @@ preinstall_cleanup()
 	eval $LOGPS
 	local oldNvidia='' divertedPackages='' installer='nvidia-installer' oldFglrx=''
 
-	echo "${B}Running preinstall cleanup...${N}"
+	echo "${S}Running preinstall cleanup...${N}"
 	# this is not set as a path if native driver install
 	if [ "$NATIVE_DRIVER" != 'true' ]
 	then
@@ -2173,12 +2173,12 @@ apply_module_patch()
 		cd $lmkv
 		case $1 in 
 			pre)
-				echo "${B}Running pre-install module patches (this might take a while)...${N}"
+				echo "${S}Running pre-install module patches (this might take a while)...${N}"
 				grep 'CONFIG_XEN' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_XEN/CONFIG_LUPO/g' {}
 				export IGNORE_XEN_PRESENCE=1
 				;;
 			post)
-				echo "${B}Reverting pre-install module patches (this might take a while)...${N}"
+				echo "${S}Reverting pre-install module patches (this might take a while)...${N}"
 				grep 'CONFIG_LUPO' . -Rl 2> /dev/null | xargs -i sed -i -e 's/CONFIG_LUPO/CONFIG_XEN/g' {}
 				;;
 		esac
@@ -2201,7 +2201,7 @@ run_driver_installer()
 
 	# this was set in prep_install()
 	cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY
-	echo "${B}Running driver installer for ${C}$DRIVER_DEFAULT${B} (this might take a while)...${N}"
+	echo "${S}Running driver installer for ${C}$DRIVER_DEFAULT${S} (this might take a while)...${N}"
 
 	log_function_data "driver: $DRIVER_DEFAULT"
 	
@@ -2255,7 +2255,7 @@ post_installer_steps()
 	eval $LOGPS
 	local ema='/etc/modutils/aliases' oldFglrx=''
 
-	echo "${B}Running post installer steps...${N}"
+	echo "${S}Running post installer steps...${N}"
 
 	cd $INSTALL_WORKING_DIR
 	
@@ -2308,11 +2308,11 @@ install_debian_drivers()
 			# start the install
 			if [ "$LEGACY_LEVEL" -ne 0 ]
 			then
-				echo "${B}Installing ${C}$DEBIAN_NVIDIA${B} components...${N}"
+				echo "${S}Installing ${C}$DEBIAN_NVIDIA${S} components...${N}"
 				install_package nvidia-kernel-common
 				install_package nvidia-settings
 				install_package $nvidiaSource
-				echo "${B}Creating  ${C}$DEBIAN_NVIDIA${B} kernel module for kernel ${C}$KERNEL_VERSION${B}...${N}"
+				echo "${S}Creating  ${C}$DEBIAN_NVIDIA${S} kernel module for kernel ${C}$KERNEL_VERSION${S}...${N}"
 				# m-a --text-mode --non-inter -f -l ${KERNEL_VERSION} a-i $nvidiaSource
 				m-a update 1>> $LOG_FILE 2>> $LOG_FILE || error_handler 184 $DEBIAN_NVIDIA
 				m-a prepare $nvidiaSource 1>> $LOG_FILE 2>> $LOG_FILE || error_handler 185 $DEBIAN_NVIDIA
@@ -2322,7 +2322,7 @@ install_debian_drivers()
 				
 				#m-a prepare && m-a qa-i nvidia
 				#nvdiaGlx has dependences problems. Workaround is to build-install the driver before install nvidiaglx
-				echo "${B}Installing ${C}$nvidiaGlx${B} now...${N}"
+				echo "${S}Installing ${C}$nvidiaGlx${S} now...${N}"
 				install_package $nvidiaGlx
 				
 				if [ -z "$( grep '^nvidia' /etc/modules )" ]
@@ -2332,12 +2332,12 @@ install_debian_drivers()
 			fi
 			;;
 		$FGLRX)
-			echo "${B}Installing ${C}$DEBIAN_FGLRX${B} components...${N}"
+			echo "${S}Installing ${C}$DEBIAN_FGLRX${S} components...${N}"
 			install_package fglrx-driver
 			install_package fglrx-control
 			# install_package fglrx-amdcccle
 			install_package fglrx-kernel-src
-			echo "${B}Creating  ${C}$DEBIAN_FGLRX${B} kernel module for kernel ${C}$KERNEL_VERSION${B}...${N}"
+			echo "${S}Creating  ${C}$DEBIAN_FGLRX${S} kernel module for kernel ${C}$KERNEL_VERSION${S}...${N}"
 			
 			# damentz suggestion to make sure old module is used
 			# m-a a-i -f fglrx-kernel-src
@@ -2435,7 +2435,7 @@ install_fglrx_debs()
 
 		log_function_data "These installation debs have been created: $availableDebs"
 		
-		echo "${B}Installing fglrx debs for kernel ${C}$KERNEL_VERSION${B}...${N}"
+		echo "${S}Installing fglrx debs for kernel ${C}$KERNEL_VERSION${S}...${N}"
 		# unfreeze/freeze stuff may be required for some legacy type systems
 		if [ -f /etc/frozen-rc.d ]
 		then
@@ -2461,7 +2461,7 @@ install_fglrx_debs()
 		fi
 		
 		# put packages on hold fglrx-amdcccle, fglrx-driver, fglrx module
-		echo "${B}Placing ATI packages on hold to avoid dist-upgrade issues with Debian fglrx drivers...${N}"
+		echo "${S}Placing ATI packages on hold to avoid dist-upgrade issues with Debian fglrx drivers...${N}"
 		echo fglrx-amdcccle hold | dpkg --set-selections
 		echo fglrx-driver hold | dpkg --set-selections
 		eval $LOGPE
@@ -2475,7 +2475,7 @@ final_install_steps()
 	eval $LOGPS
 	local emod='/etc/modules' fgModules='radeon drm fglrx' fgModule=''
 	
-	echo "${B}Finalizing install...${N}"
+	echo "${S}Finalizing install...${N}"
 	process_xvmc
 	depmod $KERNEL_VERSION -a # Probe all modules
 	
@@ -2508,7 +2508,7 @@ final_install_steps()
 
 	sync # Force changed blocks to disk, update the super block
 	echo ${M}$LINE
-	echo "${B}Congratulations! It looks like your new ${C}$DRIVER_DEFAULT $CARD${B} driver installed successfully!${N}"
+	echo "${S}Congratulations! It looks like your new ${C}$DRIVER_DEFAULT $CARD${S} driver installed successfully!${N}"
 	eval $LOGPE
 }
 
@@ -2552,7 +2552,7 @@ x_start_stop_master()
 						start_x_question
 					# handles case where sgfxi is run in X
 					else
-						echo "${B}All done with driver install. Remember, you have to restart X for the new"
+						echo "${S}All done with driver install. Remember, you have to restart X for the new"
 						echo "driver you installed to be active (ctrl+backspace).${N}"
 					fi
 				fi
@@ -2597,7 +2597,7 @@ start_x_question()
 	fi
 	
 	echo ${M}$LINE
-	echo "${B}Your driver install is now finished. You have the following options:"
+	echo "${S}Your driver install is now finished. You have the following options:"
 	eval $ia32Alert
 	eval $fgGlxAlert
 	echo $LINE
@@ -2613,7 +2613,7 @@ start_x_question()
 			install-ia32libs)	
 				if [ "$BITS" == '64' ]
 				then
-					echo "${B}Installing the package ${C}$ia32libs${B} now...${N}"
+					echo "${S}Installing the package ${C}$ia32libs${S} now...${N}"
 					install_package $ia32libs '' '--reinstall'
 					log_function_data "Final Step: Installed: $ia32libs"
 				else
@@ -2626,7 +2626,7 @@ start_x_question()
 			install-fglrx-glx)	
 				if [ "$BITS" == '64' -a "$CARD" == $FGLRX ]
 				then
-					echo "${B}Installing packages ${C}$fgGlx${B} now...${N}"
+					echo "${S}Installing packages ${C}$fgGlx${S} now...${N}"
 					for package in $fgGlx
 					do
 						install_package $package '' '--reinstall'
@@ -2640,19 +2640,19 @@ start_x_question()
 				repeat='true'
 				;;
 			start-x) 
-				echo "${B}Ok, starting X now, thanks for using this script.${N}"
+				echo "${S}Ok, starting X now, thanks for using this script.${N}"
 				log_function_data "Final Step: start-x"
 				start_stop_x start
 				;;
 			reboot-now)
-				echo "${B}Ok, rebooting into kernel ${C}$INSTALL_TO_KERNEL${B} and your"
-				echo "${C}$DRIVER_DEFAULT${B} video driver. Thanks for using this script.${N}"
+				echo "${S}Ok, rebooting into kernel ${C}$INSTALL_TO_KERNEL${S} and your"
+				echo "${C}$DRIVER_DEFAULT${S} video driver. Thanks for using this script.${N}"
 				log_function_data "Final Step: reboot to kernel: $INSTALL_TO_KERNEL"
 				reboot
 				exit 100 # need to exit with 100 to not trigger root pid kill in smxi
 				;;
 			quit)
-				echo "${B}Ok, exiting now, thanks for using this script.${N}"
+				echo "${S}Ok, exiting now, thanks for using this script.${N}"
 				# this is to send calling script message that it should not do its success action
 				log_function_data "Final Step: quit"
 				exit 100 # need to exit with 100 to not trigger pid root kill in smxi
@@ -3016,9 +3016,9 @@ update_xorg()
 			cp $EXXC $timeStampXorg
 		fi
 		log_function_data "xorg.conf was backed up to: $timeStampXorg"
-		echo "${B}Backup copy of your previous version: ${C}$timeStampXorg${N}"
+		echo "${S}Backup copy of your previous version: ${C}$timeStampXorg${N}"
 	fi
-	echo "${B}Updating your ${C}$EXXC${B} file now...${N}"
+	echo "${S}Updating your ${C}$EXXC${S} file now...${N}"
 	create_section_device # create section "device" if missing
 	update_xorgconf_driver_version # will set to correct version
 	clear_prep_xorg # bring xorg.conf to default condition
@@ -3233,7 +3233,7 @@ do
 			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -d - IgnoreDisplayDevices is off. TV will be used. nVidia only.\n"
 			;;
 		D) SM_INSTALL='true'
-			B=${CALLER_DEF} # change standard text color to caller standard text
+			S=${CALLER_DEF} # change standard text color to caller standard text
 			START_OPTIONS=$START_OPTIONS'D'
 			;;
 # 		e) EXPERIMENTAL='true'
@@ -3256,7 +3256,7 @@ do
 			fi
 			;;
 		K)	INSTALL_TO_KERNEL="$OPTARG"
-			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -K - You are installing a graphic driver onto the kernel: ${C}$INSTALL_TO_KERNEL${B}\n"
+			START_OPTIONS_PRINT=$START_OPTIONS_PRINT"  -K - You are installing a graphic driver onto the kernel: ${C}$INSTALL_TO_KERNEL${S}\n"
 			test_install_kernel_version
 			 ;;
 		n) NATIVE_DRIVER='true'
