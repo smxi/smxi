@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.6.1
+####  version: 3.6.2
 ####  Date: August 25 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -2266,9 +2266,12 @@ post_installer_steps()
 	case $CARD in
 		$NVIDIA)
 			rm -f /etc/modutils/nvidia
-			perl -pi -e 's|.*char-major-195.*[\n]?||' $ema
-			perl -pi -e 's|[\n]?$|\n|' $ema
-			echo "alias char-major-195 nvidia" >> $ema
+			if [ -f $ema ]
+			then
+				perl -pi -e 's|.*char-major-195.*[\n]?||' $ema
+				perl -pi -e 's|[\n]?$|\n|' $ema
+				echo "alias char-major-195 nvidia" >> $ema
+			fi
 			;;
 		$FGLRX)
 			clean_up_fglrx_junk
