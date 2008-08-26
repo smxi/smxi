@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.2
-####  Date: August 25 2008
+####  version: 8.4.3
+####  Date: August 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -168,6 +168,8 @@ UPGRADE_DATA='upgrade-data/'
 TECH_PATTERNS_DISTRO='http://techpatterns.com/downloads/distro/'
 TECH_PATTERNS_KERNELS='http://techpatterns.com/downloads/distro/kernels/'
 SM_CONFIG_FILE='/etc/smxi.conf'
+# user set global variable values, mostly for hard coding options
+SM_VALUES='/etc/smxi-values'
 
 # xorg stuff
 X_VERSIONS_PRE=''
@@ -1258,6 +1260,11 @@ set_distro_data()
 			APT_TYPE=$aptType
 			;;
 	esac
+	# it's important to log these in case there's some issue or bug in the values
+	if [ -f $SM_VALUES ]
+	then
+		log_function_data "USER SET $SM_VALUES:\n$( cat $SM_VALUES)"
+	fi
 	log_function_data "APT_TYPE: $APT_TYPE"
 	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
 	log_function_data "DU_UPGRADE: $DU_UPGRADE"
@@ -1841,6 +1848,14 @@ launch_from_X()
 ### checks of various script / system requirements / connections / update script
 ###---------------------------------------------------------------------
 
+# user set globals, if they want
+set_values()
+{
+	if [ -f $SM_VALUES ]
+	then
+		source $SM_VALUES
+	fi
+}
 # basic support tests
 start_up_tests()
 {
@@ -3557,6 +3572,7 @@ fi
 # triggers main script features depending on options given
 run_script_components()
 {
+	set_values # any user set configs etc
 	start_up_tests
 	create_log
 	check_display_and_x
