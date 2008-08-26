@@ -3374,7 +3374,7 @@ print_usage()
 	echo "   $DU_UPGRADE sections automatically if used without ${C}-d${S}. Be careful!"
 	echo 
 	echo "The following are advanced script options:"
-	echo "-j Alternate text/output script colors. Requires this syntax: -j 0 (sets to monochrome )"
+	echo "${C}-j${S} Alternate text/output script colors. Requires this syntax: -j 0 (sets to monochrome )"
 	echo "   -j 1 (script default); -j 2 (alternate color scheme); -j 3 (nice earthy scheme)"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
