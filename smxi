@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.3
+####  version: 8.4.4
 ####  Date: August 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -296,6 +296,12 @@ USE_DEBIAN_KERNEL=''
 # miscellaneous settings
 MAX_AGE=300 # due to 'fewer' script changes, no need to be as careful
 TIME_OUT=25
+
+# allow user set globals to override script globals
+if [ -f $SM_VALUES ]
+then
+	source $SM_VALUES
+fi
 
 ########################################################################
 ####  FUNCTIONS 
@@ -1848,14 +1854,6 @@ launch_from_X()
 ### checks of various script / system requirements / connections / update script
 ###---------------------------------------------------------------------
 
-# user set globals, if they want
-set_values()
-{
-	if [ -f $SM_VALUES ]
-	then
-		source $SM_VALUES
-	fi
-}
 # basic support tests
 start_up_tests()
 {
@@ -3572,7 +3570,6 @@ fi
 # triggers main script features depending on options given
 run_script_components()
 {
-	set_values # any user set configs etc
 	start_up_tests
 	create_log
 	check_display_and_x
