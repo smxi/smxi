@@ -1269,7 +1269,7 @@ set_distro_data()
 	# it's important to log these in case there's some issue or bug in the values
 	if [ -f $SM_VALUES ]
 	then
-		log_function_data "USER SET $SM_VALUES:\n$( cat $SM_VALUES)"
+		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
 	fi
 	log_function_data "APT_TYPE: $APT_TYPE"
 	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
