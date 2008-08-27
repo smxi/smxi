@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.6.3
-####  Date: August 25 2008
+####  version: 3.6.4
+####  Date: August 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -189,6 +189,7 @@ LOGUE='log_function_data ue $FUNCNAME'
 
 SCRIPT_NAME='sgfxi'
 SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
+SM_VALUES='/etc/sgfxi-values'
 
 EXPERIMENTAL_XORG_ATI='xserver-xorg-video-ati_6.6.193-1'
 EXPERIMENTAL_LIBDRM2='libdrm2_2.4.0~git20070625-1'
@@ -202,6 +203,12 @@ then
 	LOGIN_PID=$( ps | grep ' su' )
 fi
 LOGIN_PID=$( echo $LOGIN_PID | grep -o "[0-9]*" )
+
+# allow user set globals to override script globals
+if [ -f $SM_VALUES ]
+then
+	source $SM_VALUES
+fi
 
 ########################################################################
 #### FUNCTIONS
@@ -1311,6 +1318,11 @@ create_log()
 	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
 	echo "SYSTEM_BASE: $SYSTEM_BASE" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
+	# it's important to log these in case there's some issue or bug in the values
+	if [ -f $SM_VALUES ]
+	then
+		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
+	fi
 	
 	LOGGING_STARTED='true'
 }

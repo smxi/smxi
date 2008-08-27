@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.6.1
-####  Date: August 25 2008
+####  version: 1.6.2
+####  Date: August 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -159,6 +159,7 @@ VBOX_INSTALLED_VERSION='' # will be set dynamically
 EAS='/etc/apt/sources.list'
 SCRIPT_HOME='/usr/local/bin'
 SCRIPT_NAME=$( basename $0 )
+SM_VALUES='/etc/svmi-values'
 
 CONFIG_FILE='/etc/svmi.conf'
 LOG_FILE='/var/log/svmi.log'
@@ -172,6 +173,12 @@ SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
 # miscellaneous settings
 TIME_OUT=25
 DOWNLOAD_COUNTER=0
+
+# allow user set globals to override script globals
+if [ -f $SM_VALUES ]
+then
+	source $SM_VALUES
+fi
 
 ########################################################################
 ####  FUNCTIONS 
@@ -793,6 +800,11 @@ create_log()
 	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
 	echo "SYSTEM_BASE: $SYSTEM_BASE" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
+	# it's important to log these in case there's some issue or bug in the values
+	if [ -f $SM_VALUES ]
+	then
+		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
+	fi
 	
 	LOGGING_STARTED='true'
 }
