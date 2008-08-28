@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.6.5
+####  version: 3.7.0
 ####  Date: August 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -282,6 +282,7 @@ set_test_data()
 # 		username=$( getent passwd 1000|cut -d \: -f1 )
 # 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
 # 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
+# 		LOG_FILE_DIR="/home/$username/bin/scripts/graphics/"
 # 		cd $SCRIPT_HOME
 # 		CARD_DATA=1002:7280 # fake ati
 # 		CARD_DATA=10de:0020 # fake nvidia legacy 
@@ -1215,7 +1216,7 @@ apply_patch_file()
 	local patchUrl="${TPD}patches/$patchFile"
 	
 	cd $INSTALL_WORKING_DIR$INSTALL_DIRECTORY # first change to the correct directory
-	
+	log_function_data "Patch File Dir: $INSTALL_WORKING_DIR$INSTALL_DIRECTORY"
 	log_function_data "Patch URL: $patchUrl"
 
 	echo "${S}Retrieving patch ${C}$patchFile${S}...${N}"
@@ -1944,15 +1945,12 @@ download_extract_driver()
 			;;
 	esac
 
-	if [ "$errorTemp" -gt 0 ]
+	if [ "$errorTemp" -gt 0 -a "$SKIP_FUNCTION" != 'true' ]
 	then
 		rm -f $runPackage
 		error_handler 196 $runPackage
 	fi
-	if [ "$SKIP_FUNCTION" == 'true' ]
-	then
-		exit # this is just to test up to download/extract point
-	fi
+	
 	eval $LOGPE
 }
 
@@ -2164,7 +2162,11 @@ run_patches()
 							apply_patch_file $patchFile
 							;;
 						8-7)
-							patchFile='FGLRX-0004-Linux-2.6.26.x-kernels-support.patch'
+							# patch url: http://bugs.gentoo.org/attachment.cgi?id=161335
+							# found at: http://bugs.gentoo.org/show_bug.cgi?id=232609
+							patchFile='FGLRX-8.7-2.6.26.patch'
+							# this one is crap, bad hunks
+							#patchFile='FGLRX-0004-Linux-2.6.26.x-kernels-support.patch'
 							apply_patch_file $patchFile
 							;;
 					esac
@@ -3434,7 +3436,7 @@ fi
 
 ## This has to run after card version detection to log that data
 ## don't log the first start if restart/print output happens
-if [ "$SKIP_FUNCTION" != 'true' -a "$PRINT_VER" != 'true' ]
+if [ "$PRINT_VER" != 'true' ]
 then
 	create_log
 fi
@@ -3459,18 +3461,22 @@ if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 then
 	set_download_info # also triggers the download / extract function
 	# must be after set_version for output of data to smxi
+	# note this must occur before binary driver install
+	
 fi
+
+
 x_start_stop_master stop
 
 if [ "$SKIP_FUNCTION" != 'true' -a "$PRINT_VER" != 'true' -a "$NATIVE_DRIVER" != 'true' ]
 then
 	check_install_tools
 fi
+prep_install
 # for testing/debugging and alt driver/card download testing,
 # I don't want to remove this stuff from system
 if [ "$SKIP_FUNCTION" != 'true' ]
 then
-	prep_install
 	preinstall_cleanup
 fi
 
@@ -3478,8 +3484,11 @@ fi
 ### both have same function name, so no detection is required, we did it already
 if [ "$USE_DEBIAN_DRIVER" != 'true' ]
 then
-	# note this must occur before binary driver install
 	run_patches
+	if [ "$SKIP_FUNCTION" == 'true' ]
+	then
+		exit # this is just to test up to download/extract point
+	fi
 	run_driver_installer
 	post_installer_steps
 	install_fglrx_debs
