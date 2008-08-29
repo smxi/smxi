@@ -3375,8 +3375,8 @@ print_usage()
 	echo "${C}-g${S} Skips the ${C}g${S}raphics install question."
 	echo "${C}-i${S} Skips the system ${C}i${S}nformation section."
 	echo "${C}-k${S} Skips the ${C}k${S}ernel install question."
-	echo "${C}-r${S} Skips check for latest, restart, and downloading latest script version."
-	echo "   This skips the ${C}r${S}estart of the script, that is. Not recommended for most users except"
+	echo "${C}-R${S} Skips check for latest, restart, and downloading latest script version."
+	echo "   This skips the ${C}R${S}estart of the script, that is. Not recommended for most users except"
 	echo "   when they are rebooting from a fresh kernel install and running the script again."
 	echo "${C}-s${S} Skips some parts of script that require an internet connection."
 	echo "   Avoid using this since it disables almost all script functionality."
@@ -3420,7 +3420,7 @@ print_usage()
 # this must be set before anything else runs in script, -j will reset to no colors
 set_script_colors 
 ## this is not in a function because these variables need to be set on startup
-while getopts :dDeEhgiI:j:kKlmMNpP:sStTvwW:fruUxX:Z: opt
+while getopts :dDeEhgiI:j:kKlmMNpP:sStTvwW:frRuUxX:Z: opt
 do
 	case $opt in
 		h)	print_usage;;
@@ -3443,7 +3443,7 @@ do
 		k)	SKIP_KERNEL='true'
 			START_OPTIONS=$START_OPTIONS'k'
 			;;
-		r)	SKIP_RESTART='true'
+		r|R)	SKIP_RESTART='true'
 			;;
 		s)	SKIP_CONNECTIONS='true'
 			START_OPTIONS=$START_OPTIONS's'
