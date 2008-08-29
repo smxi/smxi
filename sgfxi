@@ -284,11 +284,8 @@ set_test_data()
 # 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
 # 		LOG_FILE_DIR="/home/$username/bin/scripts/graphics/"
 # 		cd $SCRIPT_HOME
-#  	# if you want to test error handling or patching cases for a specific
-#  	# kernel version, uncomment this one.
-#		KERNEL_THIRD=26
- 		# sgfxi doesn't support any legacy ATI stuff
- 		CARD_DATA=1002:7280 # fake ati
+# 		# sgfxi doesn't support any legacy ATI stuff
+# 		CARD_DATA=1002:7280 # fake ati
 # 		CARD_DATA=10de:0020 # fake nvidia oldest legacy (7x.xx.xx drivers) 
 # 		CARD_DATA=10de:0280 # fake nvidia mid legacy (9x.xx.xx drivers)
 # 		CARD_DATA=10de:0322 # fake nvidia 5xxx legacy (173.xx.xx drivers)
