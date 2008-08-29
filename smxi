@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.4
-####  Date: August 26 2008
+####  version: 8.4.5
+####  Date: August 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -169,7 +169,7 @@ TECH_PATTERNS_DISTRO='http://techpatterns.com/downloads/distro/'
 TECH_PATTERNS_KERNELS='http://techpatterns.com/downloads/distro/kernels/'
 SM_CONFIG_FILE='/etc/smxi.conf'
 # user set global variable values, mostly for hard coding options
-SM_VALUES='/etc/smxi-values'
+SM_VALUES='/usr/local/bin/smxi-values'
 
 # xorg stuff
 X_VERSIONS_PRE=''
