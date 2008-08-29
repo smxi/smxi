@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.7.4
+####  version: 3.7.5
 ####  Date: August 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -60,7 +60,7 @@ TRIPLE_BUFFER=''
 TWINVIEW=''
 USE_DEBIAN_DRIVER=''
 # triggers above automatically if required
-SID_FLAG=''
+DEBIAN_FLAG=''
 
 ARCH=''
 CPU=$(uname -m)
@@ -713,9 +713,9 @@ detect_card_version()
 				*) 
 					# if no working driver via standard ati installer. Here we're also handling
 					# the monthly releases, so users can do an experimental test if needed 
-					# if [ "$SID_FLAG" == 'true' -a "$TESTING" != 'true' ]
+					# if [ "$DEBIAN_FLAG" == 'true' -a "$TESTING" != 'true' ]
 					LEGACY_LEVEL=100
-					if [ "$SID_FLAG" == 'true' ]
+					if [ "$DEBIAN_FLAG" == 'true' ]
 					then
 						USE_DEBIAN_DRIVER='true' 
 					fi
@@ -3139,7 +3139,7 @@ show_options()
 	local nativeVersions=$( echo $NATIVE_OVERRIDE_SUPPORTED | sed 's/|/ /g' )
 	local fgTesting='' nvTesting='' testingText='' fgDebianSid=''
 	
-	if [ "$SID_FLAG" == 'true' ]
+	if [ "$DEBIAN_FLAG" == 'true' ]
 	then
 		fgDebianSid='echo -e "'${W}'ATI: installer package '$fgDefault' is currently BROKEN. Script will default to: '$DEBIAN_FGLRX${N}'"'
 	else
