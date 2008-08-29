@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.7.2
+####  version: 3.7.3
 ####  Date: August 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -277,18 +277,21 @@ set_test_data()
 ## NOTE: it's important to start all comments in here at first character for cleanup updater
 #		# this is required for testing to make sure we always are starting with true
 #		# latest script versions
-# 		rm -f sgfxi* 
+# 		rm -f sgfxi.log
 # 		# note: devs: double check this output to make sure it's your user name
 # 		username=$( getent passwd 1000|cut -d \: -f1 )
 # 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
 # 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
 # 		LOG_FILE_DIR="/home/$username/bin/scripts/graphics/"
 # 		cd $SCRIPT_HOME
+# 		# sgfxi doesn't support any legacy ATI stuff
 # 		CARD_DATA=1002:7280 # fake ati
-# 		CARD_DATA=10de:0020 # fake nvidia legacy 
-# 		CARD_DATA=10de:0322 # fake nvidia 
-# 		CARD_DATA=10de:0020
+# 		CARD_DATA=10de:0020 # fake nvidia oldest legacy (7x.xx.xx drivers) 
+# 		CARD_DATA=10de:0280 # fake nvidia mid legacy (9x.xx.xx drivers)
+# 		CARD_DATA=10de:0322 # fake nvidia 5xxx legacy (173.xx.xx drivers)
+# 		CARD_DATA=10de:0422 # fake nvidia current card (GS 8400)
 # 		FG_DEFAULT='8-5' 
+# 		NV_DEFAULT='177.80' 
 # leave this at first character or errors in updater tools will occur
 :
 	fi
