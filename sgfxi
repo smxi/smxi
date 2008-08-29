@@ -284,8 +284,8 @@ set_test_data()
 # 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
 # 		LOG_FILE_DIR="/home/$username/bin/scripts/graphics/"
 # 		cd $SCRIPT_HOME
-# 		# if you want to test error handling or patching cases for a specific
- 		# kernel version, uncomment this one.
+#  	# if you want to test error handling or patching cases for a specific
+#  	# kernel version, uncomment this one.
 #		KERNEL_THIRD=26
  		# sgfxi doesn't support any legacy ATI stuff
  		CARD_DATA=1002:7280 # fake ati
