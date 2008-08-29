@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.7.5
+####  version: 3.7.6
 ####  Date: August 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1738,8 +1738,9 @@ driver_support_tests()
 					case $KERNEL_THIRD in
 						# handle no sidux kernel support first
 						25|26|27)
-							# for testing/debugging going to let this run on sidux kernels
-							if [ -n "$IS_SIDUX_KERNEL" -a "$SKIP_FUNCTION" != 'true' ]
+							# for testing/debugging set this re:
+							# http://techpatterns.com/docs/sgfxi-set-test-data.htm
+							if [ -n "$IS_SIDUX_KERNEL" ]
 							then
 								error_handler 229
 							#fglrx is working on Debian kernels, so users who want up to date
