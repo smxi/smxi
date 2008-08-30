@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.8.0
-####  Date: August 29 2008
+####  version: 3.8.1
+####  Date: August 30 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -292,6 +292,8 @@ set_test_data()
 # 		CARD_DATA=10de:0422 # fake nvidia current card (GS 8400)
 # 		FG_DEFAULT='8-5' 
 # 		NV_DEFAULT='177.80' 
+# 		# set system bits to test 32/64 specific behaviors
+# 		BITS=64
 # 		# if you want to test for/without sidux kernels, set to null '' or 'true'
 # 		IS_SIDUX_KERNEL='' 
 # 		# to test patches/error handling for a specific kernel major version,
@@ -2599,26 +2601,29 @@ start_x_question()
 	local ia32libs='ia32-libs' iaOpt='install-ia32libs' 
 	local ia32Alert='echo -e "\n${M}You should probably (re)install ${C}$ia32libs${M} (even if already installed)\nif you use applications that depend on them in your ${C}64 bit${M} system,\nfor example ${C}Wine${M}.${N}"'
 	local ia32Install='echo -e "${C}$iaOpt${M} - Install ${C}$ia32libs${M} libs."'
-	local fgGlxOpt='install-fglrx-glx' fgGlx='fglrx-glx fglrx-glx-ia32' 
-	local fgGlxAlert='echo -e "\n${M}You might want to (re)install ${C}$fgGlx${M} (even if already installed)\nif you have problems with your ${C}64 bit ATI/fglrx${M} driver/apps.${N}"'
-	local fgGlxInstall='echo -e "${C}$fgGlxOpt${M} - Install ${C}$fgGlx${M}."'
+	local fgGlxOpt='' fgGlx='' fgGlxAlert='' fgGlxInstall=''
 	local startXReboot='start-x' startXRebootText='All finished, (re-)start X/kde now.'
-
-	# set this to null for standard 32 systems
-	if [ "$BITS" == '32' ]
-	then
-		ia32Alert=''
-		ia32Install=''
-		iaOpt=''
-		fgGlxAlert=''
-		fgGlxInstall=''
-		fgGlxOpt=''
-	elif [ "$BITS" == '64' -a "$CARD" != $FGLRX ]
-	then
-		fgGlxAlert=''
-		fgGlxInstall=''
-		fgGlxOpt=''
-	fi
+	
+	case $BITS in
+		32)
+			ia32Alert=''
+			ia32Install=''
+			iaOpt=''
+			;;
+		64)
+			case $CARD in
+				$FGLRX)
+					fgGlxOpt='install-fglrx-glx' 
+					fgGlx='fglrx-glx fglrx-glx-ia32' 
+					fgGlxAlert='echo -e "\n${M}You might want to (re)install ${C}$fgGlx${M} (even if already installed)\nif you have problems with your ${C}64 bit ATI/fglrx${M} driver/apps.${N}"'
+					fgGlxInstall='echo -e "${C}$fgGlxOpt${M} - Install ${C}$fgGlx${M}."'
+					;;
+				$NVIDIA)
+					:
+					;;
+			esac
+			;;
+	esac
 	
 	if [ -n "$INSTALL_TO_KERNEL" -a "$INSTALL_TO_KERNEL" != "$( uname -r )" ]
 	then
