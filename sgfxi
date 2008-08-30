@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.7.6
+####  version: 3.8.0
 ####  Date: August 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -292,6 +292,16 @@ set_test_data()
 # 		CARD_DATA=10de:0422 # fake nvidia current card (GS 8400)
 # 		FG_DEFAULT='8-5' 
 # 		NV_DEFAULT='177.80' 
+# 		# if you want to test for/without sidux kernels, set to null '' or 'true'
+# 		IS_SIDUX_KERNEL='' 
+# 		# to test patches/error handling for a specific kernel major version,
+# 		# ie: 2.6.25 here
+# 		KERNEL_THIRD=25 
+# 		# values: '' or 'true'
+# 		IS_XEN=''
+# 		# check for specific system base tests, can be: 
+# 		# 'sid' 'testing' 'stable' 'etch'
+# 		SYSTEM_BASE='testing' 
 # leave this at first character or errors in updater tools will occur
 :
 	fi
@@ -748,18 +758,6 @@ kernel_string_info()
 	KERNEL_BASE=$( echo $KERNEL_VERSION | cut -d '.' -f 1-2 ) # like: 2.6
 	KERNEL_THREE=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
 	KERNEL_THIRD=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
-
-	# to debug this function, run through with -T as well as -K
-	if [ "$TESTING" == 'true' ]
-	then
-# 		echo "INSTALL_TO_KERNEL: $INSTALL_TO_KERNEL"
-# 		echo "KERNEL_VERSION: $KERNEL_VERSION"
-# 		echo "KERNEL_BASE: $KERNEL_BASE -> 2.6"
-# 		echo "KERNEL_THREE: $KERNEL_THREE -> 2.6.19"
-# 		echo "KERNEL_THIRD: $KERNEL_THIRD -> 19"
-		:
-		#exit
-	fi
 }
 
 # The best test I've found so far to check whether the kernel exists or not:
@@ -1325,9 +1323,10 @@ create_log()
 	# it's important to log these in case there's some issue or bug in the values
 	if [ -f $SM_VALUES ]
 	then
-		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
+		echo -e "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values" >> $LOG_FILE
 	fi
-	
+	echo -e "INSTALL_TO_KERNEL: $INSTALL_TO_KERNEL\nKERNEL_VERSION: $KERNEL_VERSION\nKERNEL_BASE: $KERNEL_BASE\nKERNEL_THREE: $KERNEL_THREE\nKERNEL_THIRD: $KERNEL_THIRD\nIS_XEN: $IS_XEN" >> $LOG_FILE
+
 	LOGGING_STARTED='true'
 }
 
@@ -2193,10 +2192,9 @@ apply_module_patch()
 {
 	eval $LOGPS
 	local lmkv="/lib/modules/$KERNEL_VERSION"
-	local bccx=$( grep -i 'CONFIG_XEN=y' /boot/config-$KERNEL_VERSION )
 	
 	# the debian sid nvidia drivers are now working fine with xen enabled sid kernels
-	if [ "$USE_DEBIAN_DRIVER" != 'true' ] && [ -d "$lmkv" -a -n "$bccx" ]
+	if [ "$USE_DEBIAN_DRIVER" != 'true' ] && [ -d "$lmkv" -a -n "$IS_XEN" ]
 	then
 		# patch source: http://blog.creonfx.com/linux/how-to-install-nvidia-driver-on-2625-2-debian-kernel-with-xen
 		cd $lmkv
@@ -3466,9 +3464,7 @@ then
 	set_download_info # also triggers the download / extract function
 	# must be after set_version for output of data to smxi
 	# note this must occur before binary driver install
-	
 fi
-
 
 x_start_stop_master stop
 
