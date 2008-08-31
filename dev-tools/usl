@@ -134,7 +134,7 @@ clean_gfx_test_data()
 	setTestDataStart=$(( $setTestDataStart + 6 ))
 	echo "Cleaning gfx test data, start line: $setTestDataStart..."
 	# add # before any line in the function starting with space
-	sed -i ''${setTestDataStart}',/fi/ s/^[[:space:]].*/#&/' $svnGfx
+	sed -i ''${setTestDataStart}',/[[:space:]]fi/ s/^[[:space:]].*/#&/' $svnGfx
 }
 
 # trigger update_sm_data

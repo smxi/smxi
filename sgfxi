@@ -291,7 +291,7 @@ set_test_data()
 # 		FG_DEFAULT='8-5' 
 # 		NV_DEFAULT='177.80' 
 # 		# set system bits to test 32/64 specific behaviors
- 		BITS=64
+# 		BITS=64
 # 		# if you want to test for/without sidux kernels, set to null '' or 'true'
 # 		IS_SIDUX_KERNEL='' 
 # 		# to test patches/error handling for a specific kernel major version,
