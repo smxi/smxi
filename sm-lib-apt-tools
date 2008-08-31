@@ -530,8 +530,8 @@ broken_dependency_handler()
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases
 				elinks|k3b)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
-					tempHolder1=$( check_package_status "$package1"| cut -d '+' -f 1 | cut -d '~' -f 1 )
-					tempHolder2=$( check_package_status "$package2"| cut -d '+' -f 1 | cut -d '~' -f 1 )
+					tempHolder1=$( check_package_status "$package1" | cut -d '+' -f 1 | cut -d '~' -f 1 )
+					tempHolder2=$( check_package_status "$package2" | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 				*)
 					# adding in filter for + numbers: 2.8.4+2.8.4-1, returns: 2.8.4
