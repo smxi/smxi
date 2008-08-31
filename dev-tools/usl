@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.0.6
-####  Date: July 8 2008
+####  version: 2.0.7
+####  Date: August 31 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -134,6 +134,7 @@ clean_gfx_test_data()
 	setTestDataStart=$(( $setTestDataStart + 6 ))
 	echo "Cleaning gfx test data, start line: $setTestDataStart..."
 	# add # before any line in the function starting with space
+	# remember to search for ' fi', otherwise something like 'specific' triggers it
 	sed -i ''${setTestDataStart}',/[[:space:]]fi/ s/^[[:space:]].*/#&/' $svnGfx
 }
 
