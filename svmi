@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.6.3
-####  Date: August 29 2008
+####  version: 1.7.0
+####  Date: September 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -146,14 +146,16 @@ case $KERNEL_THIRD in
 		;;
 esac
 
-VBOX_VERSION='1.5.6'
+VBOX_VERSION='1.6.6'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
-VBOX_PACKAGE_NO='28266'
-VBOX_PREVIOUS="1.5.0:24069 1.5.2:25433 1.5.4:27034 $VBOX_VERSION:$VBOX_PACKAGE_NO"
+VBOX_PACKAGE_NO='35336'
+# 1.5.0:24069 1.5.2:25433 1.5.4:27034 1.5.6:28266 
+VBOX_PREVIOUS="1.6.0:30421 1.6.2:31466 1.6.4:33808 $VBOX_VERSION:$VBOX_PACKAGE_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
 VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
 VBOX_INSTALLED_VERSION='' # will be set dynamically
+VBOX_DOWNLOAD_SERVER='http://download.virtualbox.org/virtualbox/'
 
 # script paths
 EAS='/etc/apt/sources.list'
@@ -892,32 +894,35 @@ vm_main_selector()
 	echo "   vmdk/vmx files, super easy, make a note of it. Highly recommended: ${C}www.easyvmx.com"
 	echo $LINE
 	echo "${M}Please NOTE: ose means open source edition. Ose and non-ose components are NOT compatible."
-	echo "${S}UPDATE: as of current 1.5.4, there is only one additions version, no ose/non ose."
+
 	echo "${C}4${S} - ${C}install-vbox-ose${S} Installs vbox OSE. If you need to update modules after installing,"
 	echo "    please run ${C}build-vbox-module-ose${S} as well."
-	echo "${C}5${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules, adds module to $EMOD if required."
+	echo "${C}5${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules,"
+	echo "    adds module to $EMOD if required."
 	echo "    ${M}NOTE: System must be fully dist-upgraded for this to work right before you run this!"
-	echo "${C}6${S} - ${C}install-vbox-addons-ose${S} Downloads vbox guest additions iso. Helps with "
-	echo "    driver installation, and so on. Highly recommended. Will download the version"
-	echo "    for your currently installed virtualbox-ose: ${C}$VBOX_INSTALLED_VERSION"
-	
+
 	echo $LINE
 	echo "${M}For other vbox non-ose versions, use the ${C}svmi -V <vbox version>${M} option"
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
-	echo "${C}7${S} - ${C}install-vbox-non-ose${S} Installs the Debian Etch vbox deb. Module is built automatically (${M}broken for now${S})."
+	echo "${C}6${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
+	echo "    Module is built automatically."
+	echo "${C}7${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
+	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
 	echo "${C}8${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
-	
-	
-	echo "${C}9${S} - ${C}install-vbox-addons-non-ose${S} Downloads vbox guest addons iso. Helps with driver installation,"
-	echo
+	echo $LINE
+	echo "${C}9${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
+	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
+	echo "    for your currently installed virtualbox-ose: ${C}$VBOX_INSTALLED_VERSION"
+
+	echo $LINE
 	echo "${C}10${S} - ${C}$quitContinue${S}"
 	
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="install-vmware run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-addons-ose install-vbox-non-ose build-vbox-module-non-ose install-vbox-addons-non-ose $quitContinue"
+	options="install-vmware run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-non-ose-etch install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -941,22 +946,20 @@ vm_main_selector()
 				install_vbox_module ose
 				repeat='true'
 				;;
-			install-vbox-addons-ose)
-				install_vbox_addons ose
+			install-vbox-non-ose-etch)
+				install_vbox 'non-ose' 'etch'
 				repeat='true'
 				;;
-			install-vbox-non-ose)
-				echo "${M}Sorry, this vbox non ose is broken until Sun releases the new vbox for free distribution${N}"
-				print_hec
-				# install_vbox non-ose
+			install-vbox-non-ose-lenny)
+				install_vbox 'non-ose' 'lenny'
 				repeat='true'
 				;;
 			build-vbox-module-non-ose)
 				install_vbox_module non-ose
 				repeat='true'
 				;;
-			install-vbox-addons-non-ose)
-				install_vbox_addons non-ose
+			install-vbox-addons)
+				install_vbox_addons
 				repeat='true'
 				;;
 			$quitContinue)
@@ -1174,7 +1177,7 @@ set_installed_vbox_version()
 	eval $LOGUE
 }
 # create and install vbox module:
-# $1 is ose/non-ose
+# $1 is ose/non-ose; $2 - lenny/etch
 install_vbox()
 {
 	eval $LOGPS
@@ -1195,7 +1198,7 @@ install_vbox()
 	
 	if [ "$1" == 'non-ose' ]
 	then
-		install_vbox_non_ose
+		install_vbox_non_ose "$2"
 	fi
 	
 	add_vbox_user
@@ -1204,6 +1207,7 @@ install_vbox()
 	print_hec
 }
 
+# args: $1 - etch/lenny
 install_vbox_non_ose()
 {
 	eval $LOGPS
@@ -1212,8 +1216,8 @@ install_vbox_non_ose()
 	then
 		arch='amd64'
 	fi
-	local debName='virtualbox_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_etch_'$arch'.deb'
-	local vboxNonOseURL='http://www.virtualbox.org/download/'$VBOX_VERSION'/'$debName
+	local debName='virtualbox_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
+	local vboxNonOseURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$debName
 	
 	if [ ! -d $VBOX_INSTALL_PATH ]
 	then
@@ -1419,23 +1423,14 @@ add_vbox_user()
 	eval $LOGPE
 }
 
-# $1 is OSE or non OSE
 install_vbox_addons()
 {
 	eval $LOGPS
-	local isOSE='' 
-	
-	
-	# note: as of 1.5.4, there is no longer a separate _OSE download version for addons
-	if [ "$2" == 'ose' ] && [ "$VBOX_INSTALLED_VERSION" == '1.5.0' -o "$VBOX_INSTALLED_VERSION" == '1.5.2' ]
-	then
-		isOSE='_OSE'
-	fi
 	
 	local vboxLib='/usr/lib/virtualbox/'  vboxAddDir='additions'
-	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION$isOSE'.iso'
+	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION'.iso'
 	local vboxAddonName='VBoxGuestAdditions.iso'
-	local vboxAddonURL='http://www.virtualbox.org/download/'$VBOX_INSTALLED_VERSION'/'$vboxAddonFile
+	local vboxAddonURL=$VBOX_DOWNLOAD_SERVER$VBOX_INSTALLED_VERSION'/'$vboxAddonFile
 
 	echo $LINE
 	if [ -d $vboxLib ]
