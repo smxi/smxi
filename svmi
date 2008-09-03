@@ -1213,7 +1213,7 @@ install_vbox()
 install_vbox_non_ose()
 {
 	eval $LOGPS
-	local arch='i386' 
+	local arch='i386' installError=0
 	if [ "$BITS" == '64' ]
 	then
 		arch='amd64'
@@ -1239,13 +1239,18 @@ install_vbox_non_ose()
 	then
 		echo "${S}Installing non free debian virtual box deb now...${N}"
 		# dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName 
-		dpkg -i $debName 2>> $LOG_FILE
+		dpkg -i $debName 2>> $LOG_FILE || installError=1
 		echo "${S}Running ${C}$APT_TYPE install -f${S} to update any missing packages...${N}"
-		$APT_TYPE install -f  2>> $LOG_FILE
-		# note that this only runs if the above worked, otherwise exits
-		echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
-		echo "(Note uppercase ${C}V${S} and ${C}B${S})"
-		echo "${C}virtualbox${S} (lowercase ${C}v${S} and ${C}b${S}) is the ${C}virtualbox-ose${S} start command.${N}"
+		$APT_TYPE install -f  2>> $LOG_FILE || installError=2
+		# note that this only runs if the above worked, otherwise shows error
+		if [ "$installError" -lt 2 ]
+		then
+			echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
+			echo "(Note uppercase ${C}V${S} and ${C}B${S})"
+			echo "${C}virtualbox${S} (lowercase ${C}v${S} and ${C}b${S}) is the ${C}virtualbox-ose${S} start command.${N}"
+		else
+			echo "${E}Sorry, the install failed for some reason, let's find out why.${N}"
+		fi
 	else
 		echo "${E}Sorry, the download failed for some reason, let's find out why.${N}"
 		if [ -f $debName ]
