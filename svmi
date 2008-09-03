@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.0
-####  Date: September 2 2008
+####  version: 1.7.1
+####  Date: September 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1190,7 +1190,9 @@ install_vbox()
 	if [ "$1" == 'non-ose' ]
 	then
 		toRemove=$vboxGeneral
-		toInstall='libicu38 libxerces27 libxalan110'
+		# old dependencies: libxerces27 
+		#toInstall='libicu38 libxalan110'
+		toInstall=''
 	fi
 	
 	remove_package "$toRemove"
@@ -1236,7 +1238,10 @@ install_vbox_non_ose()
 	if [ -s $debName ]
 	then
 		echo "${S}Installing non free debian virtual box deb now...${N}"
-		dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName 
+		# dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName 
+		dpkg -i $debName 2>> $LOG_FILE
+		echo "${S}Running ${C}$APT_TYPE install -f${S} to update any missing packages...${N}"
+		$APT_TYPE install -f  2>> $LOG_FILE
 		# note that this only runs if the above worked, otherwise exits
 		echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
 		echo "(Note uppercase ${C}V${S} and ${C}B${S})"
