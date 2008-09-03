@@ -1230,7 +1230,7 @@ install_vbox_non_ose()
 	if [ ! -f $debName ]
 	then
 		echo "${S}Downloading package ${C}$debName${S}...${N}"
-		wget -Nc $vboxNonOseURL || echo -e "${E}The vbox $debName download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+		wget -O $debName $vboxNonOseURL || echo -e "${E}The vbox $debName download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
 	else
 		echo "${S}Using previously downloaded package: ${C}$debName${N}"
 	fi
