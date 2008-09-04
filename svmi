@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.2
+####  version: 1.8.3
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1341,6 +1341,8 @@ install_vbox_module()
 	if [ "$1" == 'ose' ]
 	then
 		preinstall_cleanup # get rid of previous modules
+		# then reset version information
+		set_installed_vbox_version
 		local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 		
 		modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
