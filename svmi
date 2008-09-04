@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.0
+####  version: 1.8.1
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -50,6 +50,7 @@ TESTING=''
 UPDATED=''
 USER_NAME=''
 VBOX_ALT_VERSION=''
+WITHOUT_RECOMMENDS=''
 
 # system paths etc
 EAS='/etc/apt/sources.list'
@@ -538,6 +539,10 @@ check_apt_aptitude()
 		else # set apt type
 			APT_TYPE=$aptPref
 		fi
+		if [ "$APT_TYPE" == 'aptitude' ]
+		then
+			WITHOUT_RECOMMENDS='--without-recommends'
+		fi
 	fi
 	eval $LOGUE
 }
@@ -595,7 +600,7 @@ install_package()
 	if  [ -n "$1" ]
 	then
 		echo "${S}Installing required package ${C}$1${S} now...${N}"
-		$APT_TYPE install $useUntrusted $doYes $1 || error_handler 200 $1
+		$APT_TYPE install $WITHOUT_RECOMMENDS $useUntrusted $doYes $1 || error_handler 200 $1
 	fi
 	eval $LOGUE
 }
@@ -1293,7 +1298,7 @@ install_vbox_non_ose()
 		elif [ "$APT_TYPE" == 'aptitude' ]
 		then
 			echo "${S}Running ${C}$APT_TYPE install $vboxName${S} to update any missing packages...${N}"
-			$APT_TYPE install $vboxName  2>> $LOG_FILE 2>&1 && installError=0 || installError=2 
+			$APT_TYPE install $WITHOUT_RECOMMENDS $vboxName  2>> $LOG_FILE 2>&1 && installError=0 || installError=2 
 		fi
 		# note that this only runs if the above worked, otherwise shows error
 		case $installError in
