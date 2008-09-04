@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.4
+####  version: 1.7.5
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1197,10 +1197,15 @@ install_vbox()
 		# old dependencies: 
 		#toInstall='libicu38 libxalan110'
 		# libqtcore4 libqtgui4
-		toInstall='libidl0 adduser'
-		if [ -n "$( grep '^2\.' <<< $VBOX_VERSION )" ]
+		if [ "$APT_TYPE" == 'apt-get' ]
 		then
-			toInstall="$toInstall libqtcore4 libqtgui4"
+			toInstall='libidl0 adduser'
+			if [ -n "$( grep '^2\.' <<< $VBOX_VERSION )" ]
+			then
+				toInstall="$toInstall libqtcore4 libqtgui4"
+			fi
+		else
+			toInstall=''
 		fi
 	fi
 	
@@ -1227,7 +1232,8 @@ install_vbox_non_ose()
 	then
 		arch='amd64'
 	fi
-	local debName='virtualbox'$VBOX_V'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
+	local vboxName='virtualbox'$VBOX_V
+	local debName=$vboxName'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
 	local vboxNonOseURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$debName
 	
 	if [ ! -d $VBOX_INSTALL_PATH ]
@@ -1248,9 +1254,16 @@ install_vbox_non_ose()
 	then
 		echo "${S}Installing non free debian virtual box deb now...${N}"
 		# dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName 
-		dpkg -i $debName 2>> $LOG_FILE || installError=1
-		echo "${S}Running ${C}$APT_TYPE install -f${S} to update any missing packages...${N}"
-		$APT_TYPE install -f  2>> $LOG_FILE && installError=0 || installError=2 
+		dpkg -i $debName 2>> $LOG_FILE 2>&1 || installError=1
+		if [ "$APT_TYPE" == 'apt-get' ]
+		then
+			echo "${S}Running ${C}$APT_TYPE install -f${S} to update any missing packages...${N}"
+			$APT_TYPE install -f  2>> $LOG_FILE 2>&1 && installError=0 || installError=2 
+		elif [ "$APT_TYPE" == 'aptitude' ]
+		then
+			echo "${S}Running ${C}$APT_TYPE install $vboxName${S} to update any missing packages...${N}"
+			$APT_TYPE install $vboxName  2>> $LOG_FILE 2>&1 && installError=0 || installError=2 
+		fi
 		# note that this only runs if the above worked, otherwise shows error
 		case $installError in
 			0)
