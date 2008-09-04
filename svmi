@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.5
+####  version: 1.7.6
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1200,7 +1200,7 @@ install_vbox()
 		if [ "$APT_TYPE" == 'apt-get' ]
 		then
 			toInstall='libidl0 adduser'
-			if [ -n "$( grep '^2\.' <<< $VBOX_VERSION )" ]
+			if [ -n "$( egrep '^[2-6]\.' <<< $VBOX_VERSION )" ]
 			then
 				toInstall="$toInstall libqtcore4 libqtgui4"
 			fi
@@ -1231,6 +1231,11 @@ install_vbox_non_ose()
 	if [ "$BITS" == '64' ]
 	then
 		arch='amd64'
+	fi
+	# set to null for 1.x.x versions
+	if [ -z "$( egrep '^[2-6]\.' <<< $VBOX_VERSION )" ]
+	then
+		VBOX_V=''
 	fi
 	local vboxName='virtualbox'$VBOX_V
 	local debName=$vboxName'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
