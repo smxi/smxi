@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.2
-####  Date: September 3 2008
+####  version: 1.7.3
+####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -146,11 +146,12 @@ case $KERNEL_THIRD in
 		;;
 esac
 
-VBOX_VERSION='1.6.6'
+VBOX_VERSION='2.0.0'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
-VBOX_PACKAGE_NO='35336'
+VBOX_PACKAGE_NO='36011'
+VBOX_V='-2.0' # vbox 2 and greater have this extra string
 # 1.5.0:24069 1.5.2:25433 1.5.4:27034 1.5.6:28266 
-VBOX_PREVIOUS="1.6.0:30421 1.6.2:31466 1.6.4:33808 $VBOX_VERSION:$VBOX_PACKAGE_NO"
+VBOX_PREVIOUS="1.6.0:30421 1.6.2:31466 1.6.4:33808 1.6.6:35336 $VBOX_VERSION:$VBOX_PACKAGE_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
 VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
@@ -261,14 +262,17 @@ set_test_data()
 	local username=''
 	if [ "$TESTING" == 'true' ] # set testing directories etc
 	then
-		# this is required for testing to make sure we always are starting with true
-		# latest script versions
-		#cd $SCRIPT_HOME
-		# rm -f sgfxi* 
-		# username='harald'
-		# SCRIPT_HOME="/home/$username/bin/scripts/sidux/"
-		# VMWARE_INSTALL_PATH="/home/$username/bin/scripts/sidux/src/"
-
+# 		# this is required for testing to make sure we always are starting with true
+# 		# latest script versions
+# 		username=$( getent passwd 1000|cut -d \: -f1 )
+# 		SCRIPT_HOME="/home/$username/bin/scripts/sidux/"
+# 		LOG_FILE="$SCRIPT_HOME"svmi.log
+# 		cd $SCRIPT_HOME
+# 		rm -f svmi.log
+# 		VMWARE_INSTALL_PATH="$SCRIPT_HOME"src/
+# 		VBOX_INSTALL_PATH="$SCRIPT_HOME"src/
+# 		SYSTEM_BASE='testing' 
+# 		KERNEL_THIRD=25
 		:
 	fi
 }
@@ -1190,7 +1194,7 @@ install_vbox()
 	if [ "$1" == 'non-ose' ]
 	then
 		toRemove=$vboxGeneral
-		# old dependencies: libxerces27 
+		# old dependencies: 
 		#toInstall='libicu38 libxalan110'
 		toInstall='libidl0 adduser'
 	fi
@@ -1218,7 +1222,7 @@ install_vbox_non_ose()
 	then
 		arch='amd64'
 	fi
-	local debName='virtualbox_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
+	local debName='virtualbox'$VBOX_V'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
 	local vboxNonOseURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$debName
 	
 	if [ ! -d $VBOX_INSTALL_PATH ]
@@ -1461,7 +1465,7 @@ install_vbox_addons()
 			mkdir $vboxAddDir
 		fi
 		cd $vboxAddDir
-		wget -Nc $vboxAddonURL || echo -e "${E}The vbox addons download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+		wget -O $vboxAddonFile $vboxAddonURL || echo -e "${E}The vbox addons download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
 		
 		if [ -s $vboxAddonFile ]
 		then
@@ -1634,11 +1638,7 @@ then
 fi
 set_test_data # this will set other test data for debugging
 
-### don't log the first start if restart/print output happens
-if [ "$SKIP_FUNCTION" != 'true' ]
-then
-	create_log
-fi
+create_log
 # will run non interactive and set the AUTO_UPDATE flag
 run_non_interactive
 if [ -z "$PACKAGE_MANAGER" -a "$SM_INSTALL" != 'true' -a "$AUTO_UPDATE" != 'true' ]

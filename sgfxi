@@ -275,13 +275,14 @@ set_test_data()
 ## NOTE: it's important to start all comments in here at first character for cleanup updater
 #		# this is required for testing to make sure we always are starting with true
 #		# latest script versions
-# 		rm -f sgfxi.log
+
 # 		# note: devs: double check this output to make sure it's your user name
 # 		username=$( getent passwd 1000|cut -d \: -f1 )
 # 		SCRIPT_HOME="/home/$username/bin/scripts/graphics/"
 # 		INSTALL_WORKING_DIR="/home/$username/bin/scripts/graphics/"
 # 		LOG_FILE_DIR="/home/$username/bin/scripts/graphics/"
 # 		cd $SCRIPT_HOME
+# 		rm -f sgfxi.log
 # 		# sgfxi doesn't support any legacy ATI stuff
 # 		CARD_DATA=1002:7280 # fake ati
 # 		CARD_DATA=10de:0020 # fake nvidia oldest legacy (7x.xx.xx drivers) 
