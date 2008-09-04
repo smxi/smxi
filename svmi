@@ -1192,7 +1192,7 @@ install_vbox()
 		toRemove=$vboxGeneral
 		# old dependencies: libxerces27 
 		#toInstall='libicu38 libxalan110'
-		toInstall='libidl0'
+		toInstall='libidl0 adduser'
 	fi
 	
 	remove_package "$toRemove"
