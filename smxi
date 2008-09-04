@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.5
-####  Date: August 29 2008
+####  version: 8.4.6
+####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -292,6 +292,7 @@ SKIP_CONNECTION_RETRY=''
 SYSTEM_BASE=''
 UPDATED=''
 USE_DEBIAN_KERNEL=''
+WITHOUT_RECOMMENDS=''
 
 # miscellaneous settings
 MAX_AGE=300 # due to 'fewer' script changes, no need to be as careful
@@ -1266,6 +1267,10 @@ set_distro_data()
 			APT_TYPE=$aptType
 			;;
 	esac
+	if [ "$APT_TYPE" == 'aptitude' ]
+	then
+		WITHOUT_RECOMMENDS='--without-recommends'
+	fi
 	# it's important to log these in case there's some issue or bug in the values
 	if [ -f $SM_VALUES ]
 	then
@@ -2894,7 +2899,7 @@ install_dist_upgrade()
 			echo $LINE
 		fi
 		print_hec
-		$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1
+		$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
 	fi
@@ -2966,14 +2971,14 @@ install_dist_upgrade()
 		eval $LOGME
 		case $opt in
 			use-install-f)
-				$APT_TYPE install -f 2>>$LOG_FILE 2>&1
+				$APT_TYPE install $WITHOUT_RECOMMENDS -f 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-f $exitStatus
 				# we will repeat this over and over until it's definitely done
 				repeat='true'
 				;;
 			$DU_UPGRADE-again)
-				$APT_TYPE $DU_UPGRADE 2>>$LOG_FILE 2>&1
+				$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-2 $exitStatus
 				repeat='true' # reset so no log if no error

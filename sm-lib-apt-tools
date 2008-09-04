@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.8
-####  Date: August 30 2008
+####  version: 1.17.9
+####  Date: September 4 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -219,13 +219,13 @@ package_installer()
 		if [ "$forceIt" == 'true' ]
 		then
 			log_function_data "install -f pre"
-			$APT_TYPE install -f $doYes 2>>$LOG_FILE 2>&1
+			$APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes 2>>$LOG_FILE 2>&1
 		fi
-		$APT_TYPE $install $doYes $extraInstallArgs $1 2>>$LOG_FILE 2>&1 || installError=$?
+		$APT_TYPE $install $WITHOUT_RECOMMENDS $doYes $extraInstallArgs $1 2>>$LOG_FILE 2>&1 || installError=$?
 		if [ "$forceIt" == 'true' ]
 		then
 			log_function_data "install -f post"
-			$APT_TYPE install -f $doYes 2>>$LOG_FILE 2>&1 || forceError=$?
+			$APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes 2>>$LOG_FILE 2>&1 || forceError=$?
 		fi
 	# if user install and already installed...
 	elif [ "$installAbsent" == 'true' -a -n "$packageExists"  ]

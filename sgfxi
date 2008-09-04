@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.9.0
-####  Date: August 31 2008
+####  version: 3.9.2
+####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -59,6 +59,7 @@ TESTING='' # for dev
 TRIPLE_BUFFER=''
 TWINVIEW=''
 USE_DEBIAN_DRIVER=''
+WITHOUT_RECOMMENDS=''
 # triggers above automatically if required
 DEBIAN_FLAG=''
 
@@ -997,6 +998,10 @@ check_apt_aptitude()
 		else # set apt type
 			APT_TYPE=$aptPref
 		fi
+		if [ "$APT_TYPE" == 'aptitude' ]
+		then
+			WITHOUT_RECOMMENDS='--without-recommends'
+		fi
 	fi
 	eval $LOGUE
 }
@@ -1078,7 +1083,7 @@ install_package()
 			;;
 	esac
 	# then install the package with all options
-	$APT_TYPE $install $useUntrusted $doYes $optionalArgs $1$distroVersion || error_handler 200 $1
+	$APT_TYPE $install $useUntrusted $WITHOUT_RECOMMENDS $doYes $optionalArgs $1$distroVersion || error_handler 200 $1
 	eval $LOGUE
 }
 # install_package nano '' --reinstall
