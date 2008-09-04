@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.6
+####  version: 1.8.0
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -146,6 +146,8 @@ case $KERNEL_THIRD in
 		;;
 esac
 
+APT_VBOX_VERSION=''
+APT_VBOX_VERSION_FULL=''
 VBOX_VERSION='2.0.0'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
 VBOX_PACKAGE_NO='36011'
@@ -624,6 +626,17 @@ remove_package()
 	eval $LOGUE
 }
 
+test_package_available()
+{
+	eval $LOGUS
+	local packageAvailable=''
+	
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageAvailable=$( apt-cache policy $1 2>/dev/null | grep -i 'Candidate:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	
+	echo $packageAvailable
+	eval $LOGUE
+}
+
 # args: $1 script to get/check; $2 - repeat, to only retest download failure once
 check_update_script()
 {
@@ -899,7 +912,7 @@ vm_main_selector()
 	echo $LINE
 	echo "${M}Please NOTE: ose means open source edition. Ose and non-ose components are NOT compatible."
 
-	echo "${C}4${S} - ${C}install-vbox-ose${S} Installs vbox OSE. If you need to update modules after installing,"
+	echo "${C}4${S} - ${C}install-vbox-ose${S} Installs virtualbox-ose. If you need to update modules after installing,"
 	echo "    please run ${C}build-vbox-module-ose${S} as well."
 	echo "${C}5${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules,"
 	echo "    adds module to $EMOD if required."
@@ -1176,8 +1189,17 @@ create_qemu_image()
 set_installed_vbox_version()
 {
 	eval $LOGUS
-	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox-ose virtualbox| grep 'Installed:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
-	log_function_data "VBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION"
+
+	APT_VBOX_VERSION=$( apt-cache search ^virtualbox-[2-9] | cut -d ' ' -f 1 | cut -d '-' -f 2 )
+	if [ -n "$APT_VBOX_VERSION" ]
+	then
+		APT_VBOX_VERSION_FULL="-$APT_VBOX_VERSION"
+	fi
+	# this is a hack made necessary by new naming method in debian for -2.0
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox$APT_VBOX_VERSION_FULL-ose virtualbox$APT_VBOX_VERSION_FULL 2>/dev/null | grep 'Installed:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
+	
+	log_function_data "APT_VBOX_VERSION: $APT_VBOX_VERSION\nVBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION"
+
 	eval $LOGUE
 }
 # create and install vbox module:
@@ -1185,11 +1207,15 @@ set_installed_vbox_version()
 install_vbox()
 {
 	eval $LOGPS
-	local vboxOSE='virtualbox-ose virtualbox-ose-source'
+	local vboxOSE="virtualbox-ose virtualbox-ose-source"
 	local vboxGeneral=$( dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox' )
 	local vboxBad='virtualbox virtualbox-source'
 	# default to ose install
 	local toInstall=$vboxOSE toRemove=$vboxBad' '$vboxGeneral
+	if [ -n "$( test_package_available 'virtualbox-2.0-ose' )" ]
+	then
+		vboxOSE='virtualbox-2.0-ose virtualbox-2.0-ose-source'
+	fi
 	
 	if [ "$1" == 'non-ose' ]
 	then
@@ -1297,14 +1323,14 @@ install_vbox_non_ose()
 install_vbox_module()
 {
 	eval $LOGPS 
-	local vbs='virtualbox-ose-source' vbdv='vboxdrv' vbo='virtualbox-ose' vboxSlhMod=''
+	local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source" vbdv='vboxdrv' vbo="virtualbox$APT_VBOX_VERSION_FULL-ose" vboxSlhMod=''
 	local vboxSource=$( dpkg -l | grep -i $vbs )
 	local isEMod=$( cat $EMOD | grep -i $vbdv )
 	local vbModLoaded=$( lsmod | grep $vbdv )
 	local kernelPath='/usr/src/kernel-downloads/' modDebPath=''
 	# need to grab all of them, not just the main stuff
-	local modDebName='virtualbox-ose-' modDeb=''
-	local nonOseInstalled='' nonOse='virtualbox' success=''
+	local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-" modDeb=''
+	local nonOseInstalled='' nonOse="virtualbox$APT_VBOX_VERSION_FULL" success=''
 	
 	echo $LINE
 	if [ "$1" == 'ose' ]
@@ -1389,7 +1415,7 @@ install_vbox_module()
 preinstall_cleanup()
 {
 	eval $LOGUS
-	local previousVbox='' oldVbSource='virtualbox-source'
+	local previousVbox='' oldVbSource="virtualbox-source"
 	local previousVbm='' vbdv='vboxdrv'
 	local vbModLoaded=$( lsmod | grep $vbdv )
 		
@@ -1400,7 +1426,7 @@ preinstall_cleanup()
 		rmmod vboxdrv 1>> $LOG_FILE 2>> $LOG_FILE
 	fi
 	
-	previousVbm=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox-modules' )
+	previousVbm=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | egrep '(virtualbox-modules|virtualbox-[2-9]..-modules)' )
 	if [ -n "$previousVbm" ]
 	then
 		dpkg --purge $previousVbm  1>> $LOG_FILE 2>> $LOG_FILE
@@ -1412,7 +1438,7 @@ preinstall_cleanup()
 		dpkg --purge $oldVbSource 1>> $LOG_FILE 2>> $LOG_FILE
 	fi
 	
-	previousVbox=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox-ose-modules' )
+	previousVbox=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | egrep '(virtualbox-ose-modules|virtualbox-[2-9]..-modules)' )
 	if [ -n "$previousVbox" ]
 	then
 		dpkg --purge $previousVbox  1>> $LOG_FILE 2>> $LOG_FILE
