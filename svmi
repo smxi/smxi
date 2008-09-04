@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.3
+####  version: 1.7.4
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1196,7 +1196,12 @@ install_vbox()
 		toRemove=$vboxGeneral
 		# old dependencies: 
 		#toInstall='libicu38 libxalan110'
+		# libqtcore4 libqtgui4
 		toInstall='libidl0 adduser'
+		if [ -n "$( grep '^2\.' <<< $VBOX_VERSION )" ]
+		then
+			toInstall="$toInstall libqtcore4 libqtgui4"
+		fi
 	fi
 	
 	remove_package "$toRemove"
