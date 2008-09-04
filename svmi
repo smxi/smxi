@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.3
+####  version: 1.8.4
 ####  Date: September 4 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -638,6 +638,7 @@ test_package_available()
 	
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageAvailable=$( apt-cache policy $1 2>/dev/null | grep -i 'Candidate:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
 	
+	log_function_data "packageAvailable: $packageAvailable"
 	echo $packageAvailable
 	eval $LOGUE
 }
@@ -1328,14 +1329,12 @@ install_vbox_non_ose()
 install_vbox_module()
 {
 	eval $LOGPS 
-	local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source" vbdv='vboxdrv' vbo="virtualbox$APT_VBOX_VERSION_FULL-ose" vboxSlhMod=''
-	local vboxSource=$( dpkg -l | grep -i $vbs )
+	local vbdv='vboxdrv'
 	local isEMod=$( cat $EMOD | grep -i $vbdv )
 	local vbModLoaded=$( lsmod | grep $vbdv )
-	local kernelPath='/usr/src/kernel-downloads/' modDebPath=''
+	local kernelPath='/usr/src/kernel-downloads/'
 	# need to grab all of them, not just the main stuff
-	local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-" modDeb=''
-	local nonOseInstalled='' nonOse="virtualbox$APT_VBOX_VERSION_FULL" success=''
+	local success=''
 	
 	echo $LINE
 	if [ "$1" == 'ose' ]
@@ -1343,10 +1342,13 @@ install_vbox_module()
 		preinstall_cleanup # get rid of previous modules
 		# then reset version information
 		set_installed_vbox_version
+		local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source"
+		local vboxSource=$( dpkg -l | grep -i $vbs )
+		local vbo="virtualbox$APT_VBOX_VERSION_FULL-ose"
 		local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
-		
-		modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
-		modDeb=$( ls $modDebPath 2> /dev/null )
+		local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-" 
+		local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
+		local modDeb=$( ls $modDebPath 2> /dev/null )
 		
 		# we'll only get the source if we need to build the module
 		# I'm going to try to force the update as well, since otherwise users
@@ -1361,7 +1363,7 @@ install_vbox_module()
 		
 		# we need to check that the kernel module version matches the installed version:
 		# that means it must have the right vbox version number in the deb string
-		vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
+		local vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
 		
 		# note: here we have to make sure that the installed stuff is the same version
 		# as the slh prebuilt modules. If not, we'll simply make the modules manually
@@ -1390,8 +1392,9 @@ install_vbox_module()
 		success='true'
 	elif [ "$1" == 'non-ose' ]
 	then
+		local nonOse="virtualbox$APT_VBOX_VERSION_FULL" 
 		# make sure vbox non ose is installed
-		nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
+		local nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
 		
 		if [ -n "$nonOseInstalled" ]
 		then
