@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.7.1
+####  version: 1.7.2
 ####  Date: September 3 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1192,7 +1192,7 @@ install_vbox()
 		toRemove=$vboxGeneral
 		# old dependencies: libxerces27 
 		#toInstall='libicu38 libxalan110'
-		toInstall=''
+		toInstall='libidl0'
 	fi
 	
 	remove_package "$toRemove"
@@ -1241,16 +1241,18 @@ install_vbox_non_ose()
 		# dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName 
 		dpkg -i $debName 2>> $LOG_FILE || installError=1
 		echo "${S}Running ${C}$APT_TYPE install -f${S} to update any missing packages...${N}"
-		$APT_TYPE install -f  2>> $LOG_FILE || installError=2
+		$APT_TYPE install -f  2>> $LOG_FILE && installError=0 || installError=2 
 		# note that this only runs if the above worked, otherwise shows error
-		if [ "$installError" -lt 2 ]
-		then
-			echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
-			echo "(Note uppercase ${C}V${S} and ${C}B${S})"
-			echo "${C}virtualbox${S} (lowercase ${C}v${S} and ${C}b${S}) is the ${C}virtualbox-ose${S} start command.${N}"
-		else
-			echo "${E}Sorry, the install failed for some reason, let's find out why.${N}"
-		fi
+		case $installError in
+			0)
+				echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
+				echo "(Note uppercase ${C}V${S} and ${C}B${S})"
+				echo "${C}virtualbox${S} (lowercase ${C}v${S} and ${C}b${S}) is the ${C}virtualbox-ose${S} start command.${N}"
+				;;
+			2)
+				echo "${E}Sorry, the install failed for some reason, let's find out why.${N}"
+				;;
+		esac
 	else
 		echo "${E}Sorry, the download failed for some reason, let's find out why.${N}"
 		if [ -f $debName ]
