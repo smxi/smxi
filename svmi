@@ -1343,10 +1343,10 @@ install_vbox_module()
 		# then reset version information
 		set_installed_vbox_version
 		local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source"
-		local vboxSource=$( dpkg -l | grep -i $vbs )
 		local vbo="virtualbox$APT_VBOX_VERSION_FULL-ose"
-		local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 		local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-" 
+		local vboxSource=$( dpkg -l | grep -i $vbs )
+		local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 		local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
 		local modDeb=$( ls $modDebPath 2> /dev/null )
 		
