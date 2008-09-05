@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.3.15
-####  Date: August 17 2008
+####  version: 1.3.16
+####  Date: September 5 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -49,6 +49,7 @@ run_2008_fixes()
 		fi
 		if [ "$DISTRO_LEVEL" -lt 12 ]
 		then
+			syslinux_fix_1
 			gpm_fix_1 # preview requires this fix, unfortunately
 			libavutil_fix_1
 			libpigment_fix_1
@@ -63,6 +64,23 @@ run_2008_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+syslinux_fix_1()
+{
+	local prefId='syslinux-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'syslinux'  )
+	local isAvailable=$( check_package_status 'syslinux-common' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}syslinux${S} update fix now...${N}"
+		package_remover 'syslinux' 'purge'
+		package_installer 'syslinux' 'force-always'
+		set_sticky_prefs $prefId 
+	fi
+}
+
 libpigment_fix_1()
 {
 	local prefId='libpigment-fix-1'
