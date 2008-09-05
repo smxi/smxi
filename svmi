@@ -1381,7 +1381,7 @@ install_vbox_module()
 			else
 				echo "${S}Installing prebuilt vbox kernel module from kernel download directory: ${C}$kernelPath$normalizedCurrentKernel${N}"
 				log_function_data "Installing prebuilt slh vbox kernel modules: $modDeb"
-				dpkg -i $modDeb 2>> $LOG_FILE || error_handler 191 $modDeb
+				dpkg -i $modDeb 2>> $LOG_FILE 2>&1 || error_handler 191 $modDeb
 			fi
 # 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
 			modprobe $vbdv
