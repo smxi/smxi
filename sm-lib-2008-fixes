@@ -75,7 +75,7 @@ syslinux_fix_1()
 	then
 		echo $LINE
 		echo "${S}Running ${C}syslinux${S} update fix now...${N}"
-		package_remover 'syslinux' 'purge'
+		package_remover 'syslinux' 'purge -y'
 		package_installer 'syslinux' 'force-always'
 		set_sticky_prefs $prefId 
 	fi
