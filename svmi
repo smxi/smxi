@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.5
-####  Date: September 10 2008
+####  version: 1.8.6
+####  Date: September 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -150,12 +150,12 @@ esac
 
 APT_VBOX_VERSION=''
 APT_VBOX_VERSION_FULL=''
-VBOX_VERSION='2.0.0'
+VBOX_VERSION='2.0.2'
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
-VBOX_PACKAGE_NO='36011'
+VBOX_PACKAGE_NO='36488'
 VBOX_V='-2.0' # vbox 2 and greater have this extra string
 # 1.5.0:24069 1.5.2:25433 1.5.4:27034 1.5.6:28266 
-VBOX_PREVIOUS="1.6.0:30421 1.6.2:31466 1.6.4:33808 1.6.6:35336 $VBOX_VERSION:$VBOX_PACKAGE_NO"
+VBOX_PREVIOUS="1.6.0:30421 1.6.2:31466 1.6.4:33808 1.6.6:35336 2.0.0:36011 $VBOX_VERSION:$VBOX_PACKAGE_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
 VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
