@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.6
-####  Date: September 4 2008
+####  version: 8.4.7
+####  Date: September 14 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -110,6 +110,8 @@ CURRENT_KERNEL=$(uname -r)
 CURRENT_APT_KERNEL=''
 CURRENT_APT_KERNEL_GRUB=''
 CURRENT_DEBIAN_KERNEL=''
+CURRENT_MEPIS_KERNEL=''
+CURRENT_SIDUX_KERNEL=''
 # 2.6.24-2.6.24.2.makke.rt1.s4-sidux-686
 # handle this syntax: 2.6.24-2.6.24.1.slh.3-sidux-amd64
 # by slicing first part out using -, we should end up 2.6.24 in most cases

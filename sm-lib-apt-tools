@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.9
-####  Date: September 4 2008
+####  version: 1.17.10
+####  Date: September 14 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1520,7 +1520,12 @@ get_current_apt_kernel()
 				fi
 				;;
 			mepis)
-				kernelStringExtra='-mepis'
+				if [ "$BITS" == '32' ]
+				then
+					kernelStringExtra='-mepis'
+				else
+					kernelStringExtra='-mepis64'
+				fi
 				distro='Mepis'
 				platform='smp'
 				;;
@@ -1575,6 +1580,10 @@ get_current_apt_kernel()
 			sidux)
 				CURRENT_SIDUX_KERNEL=$currentKernel
 				log_function_data "CURRENT_SIDUX_KERNEL: $CURRENT_SIDUX_KERNEL"
+				;;
+			mepis)
+				CURRENT_MEPIS_KERNEL=$currentKernel
+				log_function_data "CURRENT_MEPIS_KERNEL: $CURRENT_MEPIS_KERNEL"
 				;;
 		esac
 		
