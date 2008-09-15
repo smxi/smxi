@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.10
-####  Date: September 14 2008
+####  version: 1.17.11
+####  Date: September 15 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1019,6 +1019,7 @@ create_apt_source_item()
 	local searchIdentifier=$4
 	
 	sourcePresent=$( egrep -ils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
+	log_function_data "sourcePresent: $sourcePresent"
 	if [ -z "$sourcePresent" ]
 	then
 		# handle cases where users prefer single sources.list
@@ -1026,7 +1027,7 @@ create_apt_source_item()
 		then
 			sourceFile=$EAS
 		fi
-		
+		log_function_data "sourceFile: $sourceFile"
 		echo $LINE
 		echo "${S}Adding ${C}$searchIdentifier${S} to sourcefile: ${C}$sourceFile${N}"
 		if [ ! -f "$sourceFile" ]
