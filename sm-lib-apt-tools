@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.11
-####  Date: September 15 2008
+####  version: 1.17.12
+####  Date: September 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -442,6 +442,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'ooo'
 			advanced_broken_dependency_handler 'wesnoth'
+			advanced_broken_dependency_handler 'xpdf'
 		fi
 	fi
 	log_function_data "Post test hold packages: $DPKG_HOLD_INSTALL"
@@ -618,6 +619,14 @@ wesnoth-all
 "
 			packageGroup='Wesnoth'
 			;;
+		xpdf)
+			packages="
+xpdf
+xpdf-common
+xpdf-reader
+"
+			packageGroup='Xpdf'
+			;;
 		*)
 			error_handler 'value-bad' $FUNCNAME "$1"
 			;;
@@ -627,7 +636,7 @@ wesnoth-all
 	for package in $packages
 	do
 		# test for all cases hi/ii
-		packageInstalled1=$( package_tester $package ii )
+		packageInstalled1=$( package_tester "$package" 'ii' )
 		if [ -n "$packageInstalled1" ]
 		then
 			# append to list to add to holds
@@ -642,7 +651,7 @@ wesnoth-all
 				# shorter version number strings for less picky package groups
 				# I'm adding in the + test to handle those beta versions and some other odd
 				# syntaxes: 2.8.4+2.8.4-1; 
-				amarok|gimp|hplip|wesnoth)
+				amarok|gimp|hplip|wesnoth|xpdf)
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 			esac
