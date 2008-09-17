@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.11
-####  Date: September 5 2008
+####  version: 2.10.12
+####  Date: September 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -56,7 +56,7 @@ package_group_installer()
 	
 	# package groups, console stuff first so it's included in following
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local consoleTools="bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf rename sysv-rc-conf zip unzip"
+	local consoleTools="bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
@@ -66,6 +66,8 @@ package_group_installer()
 	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse"
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
+	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
+ 
 	local mozillaGroup='icedove iceweasel'
 	local streamTuner='streamtuner streamripper'
 	local systemUtils='alsa-base alsa-utils anacron gpm dbus dbus-X11 hal lm-sensors net-tools pmount powersaved udev'
@@ -111,6 +113,9 @@ package_group_installer()
 			;;
 		koffice)
 			packageName="$kofficePackages"
+			;;
+		light-office)
+			packageName="$lightOfficePackages"
 			;;
 		mozilla-group)
 			packageName="$mozillaGroup"
@@ -296,17 +301,18 @@ office_installer()
 	echo "    latest if ${C}openoffice.org${S} is already installed."
 	echo
 	echo "${C}3${S} - ${C}koffice${S} Installs the main koffice components."
-	echo
 	echo "${C}4${S} - ${C}kde-pim${S} Installs the kpim components. That's personal information"
 	echo "    manager stuff: ${C}kdepim karm kontact korganizer kalarm"
 	echo
-	echo "${C}5${S} - ${C}back-to-install-menu${S}"
+	echo "${C}5${S} - ${C}light-office${S} gtk based lightweight office tools: abiword, gnumeric, extras"
+	echo
+	echo "${C}6${S} - ${C}back-to-install-menu${S}"
 	
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 	
-	options="openoffice.org openoffice-hold-install koffice kde-pim back-to-install-menu"
+	options="openoffice.org openoffice-hold-install koffice kde-pim light-office back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -326,6 +332,10 @@ office_installer()
 				;;
 			kde-pim)
 				package_group_installer plain kde-pim
+				repeat='true'
+				;;
+			light-office)
+				package_group_installer plain light-office
 				repeat='true'
 				;;
 			back-to-install-menu)
