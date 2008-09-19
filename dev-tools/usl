@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.0.7
-####  Date: August 31 2008
+####  version: 2.0.8
+####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -42,7 +42,7 @@ SM_VERSIONS=$ALT_DIR'sm-versions'
 # scripts/libs
 SCRIPT_LIST_ALT='kremover svmi'
 SCRIPT_LIST_GRAPHICS="sgfxi"
-SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes"
+SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 
 ########################################################################
 #### FUNCTIONS

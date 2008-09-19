@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.9
-####  Date: September 18 2008
+####  version: 8.4.10
+####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -62,7 +62,7 @@
 #### 1 2005-04; 2 cebit; 3 Easter; 4 2006-01-rc1-x (only conversions: d:1-d:4 format)
 #### NOTE: all kanotix conversions are treated as 5
 #### 5 sidux test pre release, kanotix/debian conversions ( debian - d:d )
-#### 6 chaos, 7 tartaros, 8 gaia, 9 eros, 10 nyx 11 erberos 12 13
+#### 6 chaos, 7 tartaros, 8 gaia, 9 eros, 10 nyx 11 erberos 12 ourea 13
 ########################################################################
 
 ########################################################################
@@ -1206,6 +1206,7 @@ set_distro_data()
 		CONFIGS_BODY='configs_s'
 		HOLD_INSTALL='holds_s'
 		WARNING_STATUS='status_s'
+		LIB_2008_FIXES="$LIB_2008_FIXES-s"
 	elif [ "$systemBase" == 'testing' ] || [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
 	then
 		SYSTEM_BASE='testing'
@@ -1214,6 +1215,7 @@ set_distro_data()
 		CONFIGS_BODY='configs_t'
 		HOLD_INSTALL='holds_t'
 		WARNING_STATUS='status_t'
+		LIB_2008_FIXES="$LIB_2008_FIXES-t"
 	else
 		SYSTEM_BASE='sid'
 	fi
@@ -2824,11 +2826,11 @@ pre_du_tasks()
 	eval $LOGMS
 	# begin update tasks
 	apt_update_handler 'pre-du'
+	
+	echo $LINE
+	echo "${S}Running assorted tasks to prepare for the system $DU_UPGRADE...${N}"
 	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ]
 	then
-		echo $LINE
-		echo "${S}These are assorted tasks the script will do before the upgrade:${N}"
-		
 		set_hold_install hold
 		
 		# RUN FIRST CRITICAL FIXES. Must run before other fixes to avoid errors in apt
@@ -2844,17 +2846,19 @@ pre_du_tasks()
 			run_script_import $LIB_2007_FIXES
 			run_2007_fixes 'pre'
 		fi
-		# load the 2008 fixes
-		if [ "$DISTRO_LEVEL" -lt 14 ]
-		then
-			run_script_import $LIB_2008_FIXES
-			run_2008_fixes 'pre'
-		fi
-		# set xorg version pre upgrade, either unset or like 6. or 7. etc
-		test_xorg_version pre
-		echo $LINE
-		echo "${S}Finished with the pre-upgrade tasks.${N}"
 	fi
+	# set xorg version pre upgrade, either unset or like 6. or 7. etc
+	test_xorg_version pre
+	# load the 2008 fixes
+	if [ "$DISTRO_LEVEL" -lt 14 ]
+	then
+		run_script_import $LIB_2008_FIXES
+		run_2008_fixes 'pre'
+	fi
+		
+	echo $LINE
+	echo "${S}Finished with the pre-upgrade tasks.${N}"
+
 	eval $LOGME
 }
 

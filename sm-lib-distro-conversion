@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.7
-####  Date: August 25 2008
+####  version: 3.2.8
+####  Date: September 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -62,7 +62,7 @@ check_debian()
 	
 	print_lib_info $LIB_DISTRO_CONVERSION
 	echo $MBAR
-	echo "${M}You appear to be using Debian or a Debian derived distro."
+	echo "${M}You appear to be using Debian or a Debian derived distro based on ${C}Debian $SYSTEM_BASE${S}."
 	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
 	echo
 	echo "${W}There are no guarantees, support for all the options is still experimental.${S}"
@@ -303,6 +303,7 @@ set_distro_version()
 		echo "${S}The folowing Debian versions have been tested at some point, and have worked."
 		echo "Since it is very hard to detect for them reliably, please select the distro"
 		echo "identier that best fits your system and we can proceed."
+		echo "${C}$SCRIPT_NAME ${M}detects your system base as: ${C}Debian $SYSTEM_BASE${S}"
 		echo
 		echo "This is just an internal ${C}$SCRIPT_NAME${S} script identifier, and will not affect your system."
 		echo "${C}$SCRIPT_NAME${S} may use this information to determine which fixes to apply in the future."
@@ -358,18 +359,18 @@ distro_number_calculator()
 	local year=$( date +%Y )
 	local month=$( date +%m )
 	local distroYear='' distroMonth='' distroLevel='' item='' assembled=''
+	# assume system is reasonably up to date for fixes
 	local distroLevels='
-	2008:06:9 
-	2008:09:10 
-	2008:12:11 
-	2009:03:12 
-	2009:06:13 
-	2009:09:14 
-	2009:12:15
-	2010:03:16
-	2010:06:17
-	2010:09:18
-	2010:12:19
+	2008:09:12 
+	2008:12:13 
+	2009:03:14 
+	2009:06:15 
+	2009:09:16 
+	2009:12:17
+	2010:03:18
+	2010:06:19
+	2010:09:20
+	2010:12:21
 	'
 	
 	if [ ! -f $SMDL ]
