@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.3.0
-####  Date: August 22 2008
+####  version: 2.3.1
+####  Date: September 18 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -537,8 +537,9 @@ final_graphics_install()
 	then
 		echo $installMess
 		# note: DX and sgfxi Args need to be joined for -
-		log_function_data "gfx command string: $GFX_INSTALLER -DX$sgfxiArgs $extraArgs"
-		./$GFX_INSTALLER -DX$sgfxiArgs $extraArgs -P $APT_TYPE
+		# note: -j x will override the D color setting, so D needs to be last
+		log_function_data "gfx command string: $GFX_INSTALLER $extraArgs -DX$sgfxiArgs"
+		./$GFX_INSTALLER $extraArgs -DX$sgfxiArgs -P $APT_TYPE
 		# kill root pid on success. We don't want to kill pid on reboot here of sgfxi
 		# so sgfxi exits on quit/reboot with 100
 		if [ "$?" -eq 0 ]

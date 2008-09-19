@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.8
-####  Date: September 16 2008
+####  version: 8.4.9
+####  Date: September 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -808,7 +808,8 @@ run_script_import()
 			runScript=$1
 			;;
 		$MOD_VM)
-			options="-D -P $APT_TYPE -j $SCRIPT_COLORS"
+			# note: -j x will override the D color setting, so D needs to be last
+			options="-j $SCRIPT_COLORS -D -P $APT_TYPE"
 			runIt='true'
 			runScript=$1
 			;;
@@ -1182,9 +1183,14 @@ set_distro_data()
 
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
+	local isLennyStable=$( grep -is '^5.' $EDV )
+	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
+	local isSqueezeTesting=$( grep -is '^squeeze/sid' $EDV )
+	
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
+	
 	# set system type. This test will never be perfect, but it's a good approximation
 	if [ "$systemBase" == 'stable' ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
@@ -1328,6 +1334,10 @@ cleanup_extra_files()
 	if [ -f smxi.zip ]
 	then
 		rm -f smxi.zip
+	fi
+	if [ -f /usr/sbin/smxi-stub.zip ]
+	then
+		rm -f /usr/sbin/smxi-stub.zip
 	fi
 	# just in case a legacy user comes, don't want to lose the configs
 	if [ -f /etc/du-fixes.conf ]

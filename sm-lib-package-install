@@ -362,7 +362,8 @@ non_free_installer()
 	local repeat='' options='' opt='' gge64=''
 	if [ "$BITS" == "64" ]
 	then
-		gge64="\n${C}googleearth${M} install is not currently supported for ${C}64 bit${M}, sorry."
+		# gge64="\n${C}googleearth${M} install is not currently supported for ${C}64 bit${M}, sorry."
+		:
 	fi
 
 	echo $MLINE
