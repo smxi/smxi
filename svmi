@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.6
-####  Date: September 12 2008
+####  version: 1.8.7
+####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -404,8 +404,12 @@ basic_startup_tests()
 	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
+	local isLennyStable=$( grep -is '^5.' $EDV )
+	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
+	local isSqueezeTesting=$( grep -is '^squeeze/sid' $EDV )
+	
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
-	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing|lenny)' )
+	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 	
 	### basic system requirements for this script to run, first so user doesn't 
@@ -443,10 +447,10 @@ basic_startup_tests()
 	if [ -n "$isEtch" ]
 	then
 		SYSTEM_BASE='etch'
-	elif [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
+	elif [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
 		SYSTEM_BASE='stable'
-	elif [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
+	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLennyTesting" -o -n "$isSqueezeTesting" -o "$isTesting" -gt 0 ]
 	then
 		SYSTEM_BASE='testing'
 	else
