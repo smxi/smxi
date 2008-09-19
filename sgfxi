@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.9.3
-####  Date: September 4 2008
+####  version: 3.9.4
+####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -877,12 +877,14 @@ basic_startup_tests()
 		error_handler 250
 	fi
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ -n "$isEtch" ]
+	if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
-		SYSTEM_BASE='etch'
-	elif [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
-	then
-		SYSTEM_BASE='stable'
+		if [ -n "$isEtch" ]
+		then
+			SYSTEM_BASE='etch'
+		else
+			SYSTEM_BASE='stable'
+		fi
 	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLennyTesting" -o -n "$isSqueezeTesting" -o "$isTesting" -gt 0 ]
 	then
 		SYSTEM_BASE='testing'

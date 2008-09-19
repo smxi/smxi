@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.7
+####  version: 1.8.8
 ####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -444,12 +444,14 @@ basic_startup_tests()
 	fi
 	
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ -n "$isEtch" ]
+	if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
-		SYSTEM_BASE='etch'
-	elif [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
-	then
-		SYSTEM_BASE='stable'
+		if [ -n "$isEtch" ]
+		then
+			SYSTEM_BASE='etch'
+		else
+			SYSTEM_BASE='stable'
+		fi
 	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLennyTesting" -o -n "$isSqueezeTesting" -o "$isTesting" -gt 0 ]
 	then
 		SYSTEM_BASE='testing'
