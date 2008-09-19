@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.10
+####  version: 8.4.11
 ####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -200,7 +200,8 @@ LIB_PACKAGE_REMOVAL='sm-lib-package-removal'
 LIB_WARNING='sm-lib-warning'
 LIB_2006_FIXES='sm-lib-2006-fixes'
 LIB_2007_FIXES='sm-lib-2007-fixes'
-LIB_2008_FIXES='sm-lib-2008-fixes'
+LIB_2008_FIXES_STATIC='sm-lib-2008-fixes'
+LIB_2008_FIXES=''
 # script modules
 MOD_GFX='sgfxi'
 MOD_KM='kremover'
@@ -1206,7 +1207,7 @@ set_distro_data()
 		CONFIGS_BODY='configs_s'
 		HOLD_INSTALL='holds_s'
 		WARNING_STATUS='status_s'
-		LIB_2008_FIXES="$LIB_2008_FIXES-s"
+		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC-s"
 	elif [ "$systemBase" == 'testing' ] || [ "$isTesting" -gt 0 -a "$isUnstable" -eq 0 ]
 	then
 		SYSTEM_BASE='testing'
@@ -1215,9 +1216,10 @@ set_distro_data()
 		CONFIGS_BODY='configs_t'
 		HOLD_INSTALL='holds_t'
 		WARNING_STATUS='status_t'
-		LIB_2008_FIXES="$LIB_2008_FIXES-t"
+		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC-t"
 	else
 		SYSTEM_BASE='sid'
+		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC"
 	fi
 
 	# this test goes before the next two to set defaults
