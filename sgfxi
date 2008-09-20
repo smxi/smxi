@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.9.4
+####  version: 3.9.5
 ####  Date: September 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -115,7 +115,7 @@ NV_OLDER=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
 NV_5XXX=$( echo $NV_VERSIONS | cut -d ':' -f 1 ) 
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
 NV_QUAD=$NV_DEFAULT # no more individual quad drivers
-NV_TESTING='177.70:177.68:177.13' 
+NV_TESTING='177.76:177.70' 
 NV_OTHERS='173.14.09:173.14.05:173.08:171.06:100.14.23:100.14.19:96.43.05:71.86.04'
 
 # debian sid legacies:
@@ -1783,13 +1783,13 @@ driver_support_tests()
 					else
 						# set alternate download location if required
 						case $DRIVER_DEFAULT in
-							177.70|177.68)
+							177.76|177.70)
 								NVIDIA_DOWNLOAD_SITE='ftp://download.nvidia.com'
 								;;
 						esac
 						# handle change to legacy 5xxx level cards
 						case $DRIVER_DEFAULT in
-							177.70|177.68|177.67)
+							177.76|177.70)
 								if [ "$LEGACY_LEVEL" -eq 3 ]
 								then
 									error_handler 227
@@ -1808,7 +1808,7 @@ driver_support_tests()
 								;;
 							26)
 								case $DRIVER_DEFAULT in
-									177.70|177.68|177.13|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
+									177.76|177.70|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -1818,7 +1818,7 @@ driver_support_tests()
 								;;
 							27)
 								case $DRIVER_DEFAULT in
-									177.70|177.68|177.13|$DEBIAN_NVIDIA)
+									177.76|177.70|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
