@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.13
+####  version: 1.17.14
 ####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -303,7 +303,7 @@ package_remover()
 	else
 		echo 
 		echo "${SPACER}${S}Removing packages ${C}$1${S}...${N}"
-		$APT_TYPE $removePurge $extraArgs $item 2>>$LOG_FILE 2>&1 || log_function_data "package group removal error: $?"
+		$APT_TYPE $removePurge $extraArgs $1 2>>$LOG_FILE 2>&1 || log_function_data "package group removal error: $?"
 	fi
 	
 	eval $LOGUE
