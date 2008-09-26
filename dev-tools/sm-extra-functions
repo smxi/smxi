@@ -1,4 +1,91 @@
 #!/bin/bash
+
+#####################################
+## the old method using kernel-remover
+#####################################
+remove_kernels()
+{
+	eval $LOGPS
+	local KernelRemoval=$1 KernelCommand='DISPLAY= /usr/sbin/kernel-remover'
+	# KernelCommand='remove-all-kernels-completely'
+	local KernDown='/usr/src/kernel-downloads' SubDirectories='' directory=''
+	local kernelStringMatch=''
+	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+	local ssftCheck=$( package_tester 'ssft' )
+	local dialogCheck=$( package_tester 'dialog' )
+	local skhCheck='' installValue=0
+	local missingPackages=''
+	
+	if [ -z "$ssftCheck" ]
+	then
+		missingPackages="ssft"
+	fi
+	if [ -z "$dialogCheck" ]
+	then
+		missingPackages="$missingPackage dialog"
+	fi
+	
+	# test to make sure that required scripts are installed, if not, install:
+	if [ -n "$SIDUX_SOURCES" -a -f $ESV ]
+	then
+		skhCheck=$( package_tester 'sidux-kernelhacking' )
+		if [ -z "$skhCheck" ]
+		then
+			missingPackages="$missingPackage sidux-kernelhacking"
+		fi
+	fi
+	
+	if [ -n "$missingPackages" ]
+	then
+		install_missing_apps "$missingPackages" 'feature'
+		installValue=$?
+	fi
+	
+	if [ "$installValue" -eq 0 ]
+	then
+		if [ -x /usr/sbin/kernel-remover ]
+		then
+			eval $KernelCommand
+		else
+			run_script_import $MOD_KM
+		fi
+		
+		echo "${S}Your requested kernel removal action has been completed."
+		echo $LINE
+		
+		if [ -d $KernDown ]
+		then
+			if [ "$KernelRemoval" == 'all' ]
+			then
+				SubDirectories=$( ls $KernDown )
+				for directory in $SubDirectories
+				do
+					# this handles new randomness in kernel naming conventions
+					kernelStringMatch=$( test_kernel_strings $directory )
+					if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
+					then
+						remove_the_directory $KernDown $directory
+					fi
+				done
+			else
+				if [ -d $KernDown/$normalizedCurrentKernel ]
+				then
+					echo "${S}Removing kernel directory: ${C}$KernDown/$normalizedCurrentKernel${S}...${N}"
+					rm -fr $KernDown/$normalizedCurrentKernel
+				fi
+			fi
+		else
+			echo "${E}No kernel install directories were located.${N}"
+		fi
+		print_hec
+	fi
+	eval $LOGPE
+}
+
+
+
+
+
 # some misc crap
 
 # from get_current_apt_kerne lib apt tools, old detection, too slow

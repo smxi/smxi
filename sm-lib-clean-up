@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.6.3
-####  Date: September 21 2008
+####  version: 2.7.0
+####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -84,12 +84,8 @@ clean_up()
 	echo "    The difference is it only removes package files that are not in apt."
 	echo "    This allows a cache to be maintained over a long period without it getting too big."
 	
-	echo "${C}3${S} - Runs ${C}kernel-remover${S}. This removes all kernels ${M}EXCEPT${S} your current kernel: ${C}$CURRENT_KERNEL${S}"
-	echo "    The kernel-remover will give you the option to keep or delete all non running kernels."
-	echo "    I recommend you keep at least one known good kernel besides your current kernel."
-	echo "    To remove your current kernel, you will need to boot into another kernel,"
-	echo "    then run this option and select the kernel you need removed at that time."
-	echo "    Your installed kernels: ${C}$currentKernelsPrint${S}"
+	echo "${C}3${S} - ${C}kernel-remover${S}. This removes all kernels ${M}EXCEPT${S} your current kernel: ${C}$CURRENT_KERNEL${S}"
+	echo "    The kernel remover will give you the option to keep or delete all non running kernels."
 	
 	echo "${C}4${S} - Runs ${C}remove-kernel-modules${S}. This removes any kernel module you want."
 	
@@ -129,7 +125,7 @@ clean_up()
 				repeat='true'
 				;;
 			kernel-remover)
-				remove_kernels all
+				kernel_remover_main
 				repeat='true'
 				;;
 			remove-kernel-modules)
@@ -341,113 +337,204 @@ debian_orphans()
 ###---------------------------------------------------------------------
 ### kernel remover components
 ###---------------------------------------------------------------------
-remove_kernels()
+
+kernel_remover_main()
 {
-	eval $LOGPS
-	local KernelRemoval=$1 KernelCommand='DISPLAY= /usr/sbin/kernel-remover'
-	# KernelCommand='remove-all-kernels-completely'
-	local KernDown='/usr/src/kernel-downloads' SubDirectories='' directory=''
+	eval $LOGP
+	# get list of all installed kernels minus current running one
+	local installedKernels=$( ls /boot/vmlinuz-* | sed 's|/boot/vmlinuz-||g' | grep -v $CURRENT_KERNEL )
+	local kernelRemoveOptNu=$( wc -w <<< $installedKernels )
+	local options="$installedKernels back-to-main-menu" opt=''
+	local continueOptNu=$( wc -w <<< $options )
+	local kernel='' userSelection=''
+	
+	echo $MLINE
+	echo "${M}Kernel Remover"
+	echo $MLINE
+	echo "${S}Please select one by one which kernel you want to remove. ${C}$SCRIPT_NAME${S} will also"
+	echo "give you the option to remove the ${C}$SCRIPT_NAME${S} kernel download directory it creates each"
+	echo "time you install a new kernel after the primary kernel removal option is run."
+	echo 
+	echo "${M}Note: you cannot remove your currently running kernel: ${C}$CURRENT_KERNEL"
+	echo
+	echo "${S}Always keep at least one known good kernel besides your current kernel."
+	echo "To remove your current kernel, you will need to boot into another kernel,"
+	echo "then run this option and select the kernel you need removed at that time."
+	
+	echo $LINE
+	echo "${C}1-$kernelRemoveOptNu${S} - Remove any one of these installed kernels."
+	echo "${C}$continueOptNu - back-to-main-menu${S} All done? Ok, you can go on now."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		for kernel in $options
+		do
+			if [ "$opt" == "$kernel" ]
+			then
+				userSelection=$kernel
+				break
+			fi
+		done
+		break
+	done	
+
+	eval $LOGPE
+	case "$userSelection" in
+		# handle null case first
+		'')
+			print_error opt
+			kernel_remover_main
+			;;
+		back-to-main-menu)
+			echo "${S}Ok, continuing on with script...${N}3"
+			;;
+		*)
+			echo 'ok removing kernel: ' $userSelection
+			remove_the_kernel "$userSelection"
+			clean_download_directories 'all'
+			# and then repeat
+			kernel_remover_main
+			;;
+	esac
+}
+
+# args: $1 - kernel to remove
+remove_the_kernel()
+{
+	eval $LOGUS
+	local kernelToRemove=$1
+	local kernelCleaned=$( sed 's/\-sidux.*$//' <<< $kernelToRemove )
+	# need to remove headers/image metapackages if installed to avoid reinstalling package
+	local metaImagePackage=$( grep-available -F Depends linux-image-$kernelToRemove -s Package | awk '{print $2}' )
+	local metaHeadersPackage=$( grep-available -F Depends linux-headers-$kernelToRemove -s Package | awk '{print $2}' )
+	local removeList="$( package_tester "$kernelToRemove" 'wild-full' )"
+	
+	if [ "$kernelToRemove" != "$kernelCleaned" ]
+	then
+		removeList="$removeList $( package_tester "$kernelCleaned" 'wild-full' )"
+	fi
+	removeList="$removeList $metaHeadersPackage $metaImagePackage"
+	# echo removeList: $removeList
+	log_function_data "removeList: $removeList"
+	echo $LINE
+	echo "${S}Removing all ${C}$kernelToRemove${S} kernel packages now...${N}"
+	package_remover "$removeList" 'purge -y' 'group'
+	
+	echo "${S}Cleaning up any leftover kernel cruft from ${C}$kernelToRemove${S} now...${N}"
+	# dump empty directories/linux-headers if present, sometimes these are 
+	# left over after the operation for various reasons
+	if [ ! -e "/boot/vmlinuz-$kernelToRemove" ]
+	then
+		rm -rf /lib/modules/$kernelToRemove
+		rm -rf /usr/src/linux-headers-$kernelToRemove
+	fi
+
+	echo
+	echo "${S}Your kernel removal action for ${C}$kernelToRemove${S} has been completed.${N}"
+		
+	eval $LOGUE
+}
+
+# args: $1 - all[optional]
+clean_download_directories()
+{
+	eval $LOGUS
+	local KernelRemoval=$1
+	local kernDown='/usr/src/kernel-downloads' subDirectories='' directory=''
 	local kernelStringMatch=''
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
-	local ssftCheck=$( package_tester 'ssft' )
-	local dialogCheck=$( package_tester 'dialog' )
-	local skhCheck='' installValue=0
-	local missingPackages=''
 	
-	if [ -z "$ssftCheck" ]
-	then
-		missingPackages="ssft"
-	fi
-	if [ -z "$dialogCheck" ]
-	then
-		missingPackages="$missingPackage dialog"
-	fi
-	
-	# test to make sure that required scripts are installed, if not, install:
-	if [ -n "$SIDUX_SOURCES" -a -f $ESV ]
-	then
-		skhCheck=$( package_tester 'sidux-kernelhacking' )
-		if [ -z "$skhCheck" ]
-		then
-			missingPackages="$missingPackage sidux-kernelhacking"
-		fi
-	fi
-	
-	if [ -n "$missingPackages" ]
-	then
-		install_missing_apps "$missingPackages" 'feature'
-		installValue=$?
-	fi
-	
-	if [ "$installValue" -eq 0 ]
-	then
-		if [ -x /usr/sbin/kernel-remover ]
-		then
-			eval $KernelCommand
-		else
-			run_script_import $MOD_KM
-		fi
+	echo $LINE
 		
-		echo "${S}Your requested kernel removal action has been completed."
-		echo $LINE
-		
-		if [ -d $KernDown ]
+	if [ -d $kernDown ]
+	then
+		if [ "$KernelRemoval" == 'all' ]
 		then
-			if [ "$KernelRemoval" == 'all' ]
-			then
-				SubDirectories=$( ls $KernDown )
-				for directory in $SubDirectories
-				do
-					# this handles new randomness in kernel naming conventions
-					kernelStringMatch=$( test_kernel_strings $directory )
-					if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
-					then
-						remove_the_directory $KernDown $directory
-					fi
-				done
-			else
-				if [ -d $KernDown/$normalizedCurrentKernel ]
+			subDirectories=$( ls $kernDown )
+			for directory in $subDirectories
+			do
+				# this handles new randomness in kernel naming conventions
+				kernelStringMatch=$( test_kernel_strings $directory )
+				if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
 				then
-					echo "${S}Removing kernel directory: ${C}$KernDown/$normalizedCurrentKernel${S}...${N}"
-					rm -fr $KernDown/$normalizedCurrentKernel
+					remove_the_directory $kernDown $directory
 				fi
-			fi
+			done
 		else
-			echo "${E}No kernel install directories were located.${N}"
+			if [ -d $kernDown/$normalizedCurrentKernel ]
+			then
+				echo "${S}Removing kernel directory: ${C}$kernDown/$normalizedCurrentKernel${S}...${N}"
+				rm -fr $kernDown/$normalizedCurrentKernel
+			fi
 		fi
-		print_hec
+	else
+		echo "${E}No kernel install directories were located.${N}"
 	fi
-	eval $LOGPE
+	eval $LOGUE
+	# print_hec
 }
 
 # args: $1 kernel download main directory; $2 sub directory name
 remove_the_directory()
 {
 	eval $LOGUS
-	local response='' 
+	local options='' opt='' repeat=''
 	# quick hack to handle legacy kernel syntax in grub, changing back to old syntax here
 	local grubTester=$( echo $2 | sed -e 's/\.slh\./-slh.*-/' | sed -r 's/(-sidux-(686|amd64))//' )
+	local kernelInGrub=$( grep $2 $GRUB_PATH )
+	local cleanedKernelInGrub=$( egrep $grubTester $GRUB_PATH )
 	
-	# test to see if kernel is in /etc/fstab, if not, offer to remove
-	if [ -z "$( grep $2 $GRUB_PATH )" -a -z "$( egrep $grubTester $GRUB_PATH )" ]
+	log_function_data "Remove the kernel install directory $1/$2\nkernelInGrub: $kernelInGrub\ncleanedKernelInGrub: $cleanedKernelInGrub"
+	
+	# test to see if kernel is in /boot/grub/menu.lst, if not, offer to remove
+	if [ -z "$kernelInGrub" -a -z "$cleanedKernelInGrub" ]
 	then
 		echo $LINE
-		echo -e "${Q}Do you want to remove the kernel install directory ${C}$1/$2${Q}?$YNE"
+		echo "${Q}Do you want to remove the kernel install directory ${C}$1/$2"
 		echo $LINE
-		read response
-		case $response in
-			y)	echo "${S}Removing kernel directory: ${C}$1/$2${S}...${N}"
-				rm -fr $1/$2 && return 0 || return 1
-				;;
-			n)	echo "${S}Continuing without removing directory: ${C}$1/$2${N}"
-				return 0
-				;;
-			*)	print_error yn
-				remove_the_directory $1 $2
-				;;
-		esac
+		echo "${C}1 - yes-remove-install-directory${S}"
+		echo "${C}2 - no-keep-install-directory${S}"
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="yes-remove-install-directory no-keep-install-directory"
+		select opt in $options
+		do
+			case $opt in
+				yes-remove-install-directory)
+					echo "${S}Removing kernel directory: ${C}$1/$2${S}...${N}"
+					rm -fr $1/$2 && returnValue=0 || returnValue=2
+					;;
+				no-keep-install-directory)
+					echo "${S}Continuing without removing directory: ${C}$1/$2${N}"
+					returnValue=1
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+
+		log_function_data "Return Value: $returnValue"
+		eval $LOGUE
+		if [ "$repeat" == 'true' ]
+		then
+			remove_the_directory "$1" "$2"
+		else
+			return $returnValue
+		fi
+	else
+		echo "${E}Kernel ${C}$1${E} is still in ${C}$GRUB_PATH"
+		echo "${S}This is an error, please let the $SCRIPT_NAME maintainer know.${N}"
+		log_function_data "Kernel in grub: Return Value: 3"
+		eval $LOGUE
+		return 3
 	fi
-	eval $LOGUE
 }
 
 ###---------------------------------------------------------------------
