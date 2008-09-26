@@ -452,6 +452,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'gimp'
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'ooo'
+			advanced_broken_dependency_handler 'transmission'
 			advanced_broken_dependency_handler 'wesnoth'
 			advanced_broken_dependency_handler 'xpdf'
 		fi
@@ -630,6 +631,15 @@ wesnoth-all
 "
 			packageGroup='Wesnoth'
 			;;
+		transmission)
+			packages="
+transmission
+transmission-common
+transmission-cli 
+transmission-gtk  
+"
+			packageGroup='Tranmission'
+			;;
 		xpdf)
 			packages="
 xpdf
@@ -656,7 +666,7 @@ xpdf-reader
 			tempTwo=$tempOne
 			case $1 in
 				# full version strings for picky package groups
-				ooo)
+				ooo|transmission)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
