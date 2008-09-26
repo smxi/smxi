@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.12
-####  Date: September 16 2008
+####  version: 1.17.13
+####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -248,7 +248,7 @@ package_installer()
 	fi
 }
 
-# args: $1 - package; $2 - extra args: purge etc
+# args: $1 - package; $2 - extra args: purge etc; $3 - group - remove entire group
 package_remover()
 {
 	eval $LOGUS
@@ -271,30 +271,41 @@ package_remover()
 		extraArgs=$( sed 's/-y//' <<< $extraArgs ) # turn off auto yes until tested more
 	fi
 	
-	for item in $1
-	do
-		packageExists=$( package_tester $item )
-		# this is for a single case: eg: some-module*, only wild card ending
-		# we're only using this case when packages are already tested for by caller function
-		packageIsWild=$( egrep ".*\*" <<< $item )
-		if [ -n "$packageExists" -o -n "$packageIsWild" ]
-		then
-			removeError=0 # reset to no error
-			echo 
-			echo "${SPACER}${S}Removing package ${C}$item${S}...${N}"
-			$APT_TYPE $removePurge $extraArgs $item 2>>$LOG_FILE 2>&1 || removeError=$?
-			if [ "$removeError" -gt 0 ]
+	# note: group is only used when the calling function has already gotten the 
+	# installed packages using tests. Removing an entire group is easier in some
+	# cases where packages are dependent, like with kernels/modules and so on
+	if [ "$3" != 'group' ]
+	then
+		for item in $1
+		do
+			packageExists=$( package_tester $item )
+			# this is for a single case: eg: some-module*, only wild card ending
+			# we're only using this case when packages are already tested for by caller function
+			packageIsWild=$( egrep ".*\*" <<< $item )
+			if [ -n "$packageExists" -o -n "$packageIsWild" ]
 			then
-				echo "${SPACER}${E}Error ${C}$removeError${E} removing package: ${C}$item${N}"
-				removeErrorPackage="$removeErrorPackage $item"
+				removeError=0 # reset to no error
+				echo 
+				echo "${SPACER}${S}Removing package ${C}$item${S}...${N}"
+				$APT_TYPE $removePurge $extraArgs $item 2>>$LOG_FILE 2>&1 || removeError=$?
+				if [ "$removeError" -gt 0 ]
+				then
+					echo "${SPACER}${E}Error ${C}$removeError${E} removing package: ${C}$item${N}"
+					removeErrorPackage="$removeErrorPackage $item"
+					echo
+					log_function_data "Error $removeError removing package: $item"
+				fi
+			else
+				echo "${SPACER}${M}Cannot remove package ${C}$item${M} because it is not installed.${N}"
 				echo
-				log_function_data
 			fi
-		else
-			echo "${SPACER}${M}Cannot remove package ${C}$item${M} because it is not installed.${N}"
-			echo
-		fi
-	done
+		done
+	else
+		echo 
+		echo "${SPACER}${S}Removing packages ${C}$1${S}...${N}"
+		$APT_TYPE $removePurge $extraArgs $item 2>>$LOG_FILE 2>&1 || log_function_data "package group removal error: $?"
+	fi
+	
 	eval $LOGUE
 	if [ -n "$removeErrorPackage" ]
 	then
