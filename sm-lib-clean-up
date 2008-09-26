@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.5
+####  version: 2.7.6
 ####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -573,11 +573,13 @@ remove_the_directory()
 			return $returnValue
 		fi
 	else
-		echo "${E}Kernel ${C}$1${E} is still in ${C}$GRUB_PATH"
-		echo "${S}This is an error, please let the $SCRIPT_NAME maintainer know.${N}"
-		log_function_data "Kernel in grub: Return Value: 3"
-		eval $LOGUE
-		return 3
+		# don't use this, because for looping, it doesn't handle it right
+		: 
+# 		echo "${E}Kernel ${C}$1${E} is still in ${C}$GRUB_PATH"
+# 		echo "${S}This is an error, please let the $SCRIPT_NAME maintainer know.${N}"
+# 		log_function_data "Kernel in grub: Return Value: 3"
+# 		eval $LOGUE
+# 		return 3
 	fi
 }
 
