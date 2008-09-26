@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.2
+####  version: 2.7.3
 ####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -395,10 +395,9 @@ kernel_remover_main()
 			kernel_remover_main
 			;;
 		back-to-main-menu)
-			echo "${S}Ok, continuing on with script...${N}3"
+			echo "${S}Ok, continuing on with script...${N}"
 			;;
 		*)
-			echo 'ok removing kernel: ' $userSelection
 			remove_the_kernel "$userSelection"
 			clean_download_directories 'all'
 			# and then repeat
