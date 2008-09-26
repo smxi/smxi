@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.3
+####  version: 2.7.4
 ####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -398,12 +398,56 @@ kernel_remover_main()
 			echo "${S}Ok, continuing on with script...${N}"
 			;;
 		*)
-			remove_the_kernel "$userSelection"
-			clean_download_directories 'all'
+			confirm_kernel_removal "$userSelection"
+			if [ "$?" -eq 0 ]
+			then
+				remove_the_kernel "$userSelection"
+				clean_download_directories 'all'
+			fi
 			# and then repeat
 			kernel_remover_main
 			;;
 	esac
+}
+# args: $1 - kernel to remove
+confirm_kernel_removal()
+{
+	eval $LOGUS
+	local options='' opt='' repeat='' returnValue=''
+	
+	echo $LINE
+	echo "${Q}Are you sure you want to remove kernel: ${C}$1${Q}?"
+	echo $LINE
+	echo "${C}1 - yes-remove${S}"
+	echo "${C}2 - no-do-not-remove${S}"
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="yes-remove no-do-not-remove"
+	select opt in $options
+	do
+		case $opt in
+			yes-remove)
+				returnValue=0
+				;;
+			no-do-not-remove)
+				returnValue=1
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	eval $LOGUE
+	
+	if [ "$repeat" == 'true' ]
+	then
+		confirm_kernel_removal "$1"
+	else
+		return $returnValue
+	fi
 }
 
 # args: $1 - kernel to remove
