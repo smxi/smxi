@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.1
+####  version: 2.7.2
 ####  Date: September 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -362,7 +362,13 @@ kernel_remover_main()
 	echo "then run this option and select the kernel you need removed at that time."
 	
 	echo $LINE
-	echo "${C}1-$kernelRemoveOptNu${S} - Remove any one of these installed kernels."
+	if [ "$kernelRemoveOptNu" -gt 0 ]
+	then
+		echo "${C}1-$kernelRemoveOptNu${S} - Remove any one of these installed kernels."
+	else
+		echo "${M}There are no kernels to remove!"
+		echo $LINE
+	fi
 	echo "${C}$continueOptNu - back-to-main-menu${S} All done? Ok, you can go on now."
 	echo $LINE
 	echo -e $SLE
