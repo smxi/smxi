@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.1.2
-####  Date: July 29 2008
+####  version: 2.1.3
+####  Date: October 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -181,10 +181,11 @@ download_kernel_files()
 	echo $LINE
 	echo "Grabbing all kernel debs now..."
 	## download kernels and all related debs
-	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-deb
 	# grab source zips/debs for modules
-	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES
-	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN
+	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-tar.gz
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
+	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
 	
 	if [ "$KERNEL_TYPE" == 'a' ]
 	then
@@ -213,6 +214,8 @@ move_files_to_directories()
 	echo "Transferring files to directories..."
 	mv -f *2.6-sidux*i386.deb 32-meta
 	mv -f *2.6-sidux*amd64.deb 64-meta
+	cp -f *.gz 32
+	mv -f *.gz 64
 	mv -f *i386.deb 32
 	mv -f *amd64.deb 64
 	cp -f linux-patch-sidux* 32
