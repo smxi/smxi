@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.14
+####  version: 8.4.15
 ####  Date: October 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2924,7 +2924,7 @@ install_dist_upgrade()
 		echo "${S}You can continue on safely to do the rest of the script now."
 		echo
 		echo "It does not hurt to run ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] once after a"
-		echo "successful $DU_UPGRADE just to makes sure things are fine though."
+		echo "successful $DU_UPGRADE just to make sure things are fine though."
 	else
 		echo $EBAR
 		echo "${E}Your $DU_UPGRADE is reporting errors!"
