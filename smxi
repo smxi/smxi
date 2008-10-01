@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.13
-####  Date: September 26 2008
+####  version: 8.4.14
+####  Date: October 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -1830,8 +1830,8 @@ test_xorg_version()
 	then
 		# slice out the version numbers for these two, that way we can see if xorg
 		# has been updated after the du runs
-		xVersion1=$( check_package_status 'xserver-xorg' )
-		xVersion2=$( check_package_status 'xserver-xorg-core' )
+		xVersion1=$( check_package_status 'xserver-xorg' 'installed' )
+		xVersion2=$( check_package_status 'xserver-xorg-core' 'installed' )
 		xVersions="$xVersion1$xVersion2"
 
 		case $1 in
