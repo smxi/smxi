@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.9.7
-####  Date: September 27 2008
+####  version: 3.10.1
+####  Date: October 7 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -105,18 +105,18 @@ DISPLAY_MANAGER=$( basename $DISPLAY_MANAGER 2>/dev/null )
 VERSIONS=''
 OTHER_VERSIONS=''
 # other stuff: nothing now
-NV_VERSIONS='173.14.12:169.12:96.43.07:71.86.06'
-NV_DEFAULT='173.14.12'
-NV_LEGACY=$( echo $NV_VERSIONS | cut -d ':' -f 4 )
-NV_OLDER=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
+NV_VERSIONS='177.80:173.14.12:96.43.07:71.86.06'
+NV_DEFAULT='177.80'
+NV_LEGACY_1=$( echo $NV_VERSIONS | cut -d ':' -f 4 )
+NV_LEGACY_2=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
 # until 177.xx goes stable, then change to cut -d 2. This will change how smxi
 # graphics data is handled too, instead of a one previous, there will be 3 legacy levels
 # plus current driver. Given how many 5xxx cards are, that's worth doing.
-NV_5XXX=$( echo $NV_VERSIONS | cut -d ':' -f 1 ) 
+NV_LEGACY_3=$( echo $NV_VERSIONS | cut -d ':' -f 2 )
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
 NV_QUAD=$NV_DEFAULT # no more individual quad drivers
 NV_TESTING='177.78:177.70' 
-NV_OTHERS='173.14.09:173.14.05:173.08:171.06:100.14.23:100.14.19:96.43.05:71.86.04'
+NV_OTHERS='173.14.09:173.14.05:173.08:171.06:169.12:100.14.23:100.14.19:96.43.05:71.86.04'
 
 # debian sid legacies:
 NV_DEBIAN_LEGACY_1='71xx'
@@ -402,7 +402,7 @@ error_handler()
 			errorData="The option you selected: $errorExtra is not supported."
 			;;
 		227)
-			errorData="The newest $CARD drivers ( >= 177.167 ) no longer support your $CARD GeForce 5xxx card.\nYou must use the $NV_5XXX driver or lower.\nThat is the default driver when you run this script."
+			errorData="The newest $CARD drivers ( >= 177.167 ) no longer support your $CARD GeForce 5xxx card.\nYou must use the $NV_LEGACY_3 driver or lower.\nThat is the default driver when you run this script."
 			;;
 		# specific install issues
 		200) 
@@ -632,7 +632,7 @@ detect_card_version()
 	cardNumber=$( echo $CARD_DATA | cut -d ':' -f2 )
 	case $cardBrand in
 		10de|12d2)
-			DRIVER_LEGACY=$NV_LEGACY
+			DRIVER_LEGACY=$NV_LEGACY_1
 			DRIVER_DEFAULT=$NV_DEFAULT
 			DRIVER_TESTING=$NV_TESTING
 			VERSIONS=$NV_VERSIONS
@@ -649,19 +649,19 @@ detect_card_version()
 					LEGACY_LEVEL=0
 					;;
 				0020|0028|0029|002c|002d|00a0|0100|0101|0103|0150|0151|0152|0153|0170)
-					DRIVER_INSTALL=$NV_LEGACY # force this driver for these cards
+					DRIVER_INSTALL=$NV_LEGACY_1 # force this driver for these cards
 					# RENDER_ACCEL='' # set default to false
 					LEGACY_LEVEL=1
 					;;
 				0110|0111|0112|0113|0170|0171|0172|0173|0174|0175|0176|0177|0178|0179|017a|017c|017d|0180|0181|0182|0183|0185|0186|0187|0188|018a|018b|018c|01a0|01f0|0200|0201|0202|0203|0250|0251|0253|0258|0259|025b|0280|0281|0282|0286|0288|0289|028c)
-					DRIVER_INSTALL=$NV_OLDER
+					DRIVER_INSTALL=$NV_LEGACY_2
 					LEGACY_LEVEL=2
 					# RENDER_ACCEL='' # set default to false
 					;;
 				# This is for the GeForce FX 5xxx series. Not sure about the quadro fx series: 
 				# 004d 004e 09d0 009d 00cd 00ce 00fe 019d 019e
 				0320|0321|0322|0323|0324|0325|0326|0327|0328|0329|032c|032d|0330|0331|0332|0333|0334|0341|0342|0343|0344|0347|0348)
-					DRIVER_INSTALL=$NV_5XXX
+					DRIVER_INSTALL=$NV_LEGACY_3
 					LEGACY_LEVEL=3
 					;;
 # 				0191|0193)
@@ -1789,7 +1789,7 @@ driver_support_tests()
 						esac
 						# handle change to legacy 5xxx level cards
 						case $DRIVER_DEFAULT in
-							177.78|177.70)
+							177.80|177.78|177.70)
 								if [ "$LEGACY_LEVEL" -eq 3 ]
 								then
 									error_handler 227
@@ -1808,7 +1808,7 @@ driver_support_tests()
 								;;
 							26)
 								case $DRIVER_DEFAULT in
-									177.78|177.70|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
+									177.80|177.78|177.70|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -1818,7 +1818,7 @@ driver_support_tests()
 								;;
 							27)
 								case $DRIVER_DEFAULT in
-									177.78|177.70|$DEBIAN_NVIDIA)
+									177.80|177.78|177.70|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -3090,7 +3090,7 @@ update_xorg()
 					triple=$stateOn
 				fi
 				# this should let 3D work again for older cards, 400 etc
-				if [ "$DRIVER_DEFAULT" == "$NV_LEGACY" ]
+				if [ "$DRIVER_DEFAULT" == "$NV_LEGACY_1" ]
 				then
 					allowGlx='Option\t"AllowGLXWithComposite"\t"1"\n\t'
 				fi

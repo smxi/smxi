@@ -3,7 +3,7 @@
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
 ####  version: 2.0.8
-####  Date: September 19 2008
+####  Date: October 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -40,7 +40,7 @@ MAIN_DIR='/usr/local/bin/'
 SM_VERSIONS=$ALT_DIR'sm-versions'
 
 # scripts/libs
-SCRIPT_LIST_ALT='kremover svmi'
+SCRIPT_LIST_ALT='svmi'
 SCRIPT_LIST_GRAPHICS="sgfxi"
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 
@@ -164,6 +164,9 @@ update_sm_data()
 		LocalVersion=$( grep -m 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 		LocalDate=$( grep -m 1 -o -G "Date:\ [A-Za-z0-9\ ]*" $2$script | cut -f 2-4 -d ' ' )
 		echo $script'='$LocalVersion':'$LocalDate >> $SM_VERSIONS
+
+		# echo "copy $script to $SVN_DIR/$script"
+		# echo "$script'='$LocalVersion':'$LocalDate"
 		cp -f --preserve=timestamps $2$script $SVN_DIR/$script
 	done
 }

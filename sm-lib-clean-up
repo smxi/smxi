@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.7
-####  Date: September 26 2008
+####  version: 2.7.8
+####  Date: October 6 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -346,7 +346,7 @@ kernel_remover_main()
 	local kernelRemoveOptNu=$( wc -w <<< $installedKernels )
 	local options="$installedKernels back-to-main-menu" opt=''
 	local continueOptNu=$( wc -w <<< $options )
-	local kernel='' userSelection=''
+	local kernel='' userSelection='' removeValue=''
 	
 	echo $MLINE
 	echo "${M}Kernel Remover"
@@ -399,10 +399,18 @@ kernel_remover_main()
 			;;
 		*)
 			confirm_kernel_removal "$userSelection"
-			if [ "$?" -eq 0 ]
+			removeValue="$?"
+			if [ "$removeValue" -le 1 ]
 			then
 				remove_the_kernel "$userSelection"
-				clean_download_directories 'all'
+				case $removeValue in
+					0)
+						clean_download_directories 'all'
+						;;
+					1)
+						clean_download_directories "$userSelection"
+						;;
+				esac
 			fi
 			# and then repeat
 			kernel_remover_main
@@ -418,17 +426,26 @@ confirm_kernel_removal()
 	echo $LINE
 	echo "${Q}Are you sure you want to remove kernel: ${C}$1${Q}?"
 	echo $LINE
+	echo "${C}1 - yes-remove-kernel${S} - Will ask if you want to remove $SCRIPT_NAME kernel download directories."
+	echo "    Note: this will ask if you want to remove directories for all non-installed kernels."
+	echo "${C}2 - yes-remove-kernel-and-download-directory${S} - Automatically removes both kernel and"
+	echo "    $SCRIPT_NAME kernel download directory (removes only that specific directory)."
+	echo "${C}3 - no-do-not-remove${S} - I don't want to remove the kernel, return to kernel removal menu."
+	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="yes-remove no-do-not-remove"
+	options="yes-remove-kernel yes-remove-kernel-and-download-directory no-do-not-remove"
 	select opt in $options
 	do
 		case $opt in
-			yes-remove)
+			yes-remove-kernel)
 				returnValue=0
 				;;
-			no-do-not-remove)
+			yes-remove-kernel-and-download-directory)
 				returnValue=1
+				;;
+			no-do-not-remove)
+				returnValue=2
 				;;
 			*)
 				print_error opt
@@ -486,50 +503,57 @@ remove_the_kernel()
 	eval $LOGUE
 }
 
-# args: $1 - all[optional]
+# args: $1 - all/kernel version
 clean_download_directories()
 {
 	eval $LOGUS
-	local KernelRemoval=$1
+	local kernelRemoval=$1
 	local kernDown='/usr/src/kernel-downloads' subDirectories='' directory=''
+	local subDirectories=$( ls $kernDown 2>/dev/null )
 	local kernelStringMatch=''
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+	local normalizedRemovedKernel=''
 	
 	echo $LINE
 		
-	if [ -d $kernDown ]
+	if [ -d $kernDown -a -n "$subDirectories" ]
 	then
-		if [ "$KernelRemoval" == 'all' ]
-		then
-			subDirectories=$( ls $kernDown )
-			for directory in $subDirectories
-			do
-				# this handles new randomness in kernel naming conventions
-				kernelStringMatch=$( test_kernel_strings $directory )
-				if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
+		case $kernelRemoval in
+			all)
+				for directory in $subDirectories
+				do
+					# this handles new randomness in kernel naming conventions
+					kernelStringMatch=$( test_kernel_strings $directory )
+					if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
+					then
+						remove_the_directory $kernDown $directory
+					fi
+				done
+				;;
+			*)
+				normalizedRemovedKernel=$( normalize_kernel_string $kernelRemoval )
+				if [ -d $kernDown/$normalizedRemovedKernel ]
 				then
-					remove_the_directory $kernDown $directory
+					remove_the_directory $kernDown $normalizedRemovedKernel 'single'
+				else
+					echo "${M}Kernel directory: ${C}$kernDown/$normalizedRemovedKernel${M} does not exist.${N}"
+					log_function_data "Directory $normalizedRemovedKernel was not found so not removed."
 				fi
-			done
-		else
-			if [ -d $kernDown/$normalizedCurrentKernel ]
-			then
-				echo "${S}Removing kernel directory: ${C}$kernDown/$normalizedCurrentKernel${S}...${N}"
-				rm -fr $kernDown/$normalizedCurrentKernel
-			fi
-		fi
+				;;
+		esac
 	else
 		echo "${E}No kernel install directories were located.${N}"
+		log_function_data "no kernel install directories detected"
 	fi
 	eval $LOGUE
 	# print_hec
 }
 
-# args: $1 kernel download main directory; $2 sub directory name
+# args: $1 kernel download main directory; $2 sub directory name; $3 - single [optional]
 remove_the_directory()
 {
 	eval $LOGUS
-	local options='' opt='' repeat=''
+	local options='' opt='' repeat='' removeIt=''
 	# quick hack to handle legacy kernel syntax in grub, changing back to old syntax here
 	local grubTester=$( echo $2 | sed -e 's/\.slh\./-slh.*-/' | sed -r 's/(-sidux-(686|amd64))//' )
 	local kernelInGrub=$( grep $2 $GRUB_PATH )
@@ -541,29 +565,36 @@ remove_the_directory()
 	if [ -z "$kernelInGrub" -a -z "$cleanedKernelInGrub" ]
 	then
 		echo $LINE
-		echo "${Q}Do you want to remove the kernel install directory ${C}$1/$2"
-		echo $LINE
-		echo -e $SLE
-		echo $LINE
-		options="yes-remove-install-directory no-keep-install-directory"
-		select opt in $options
-		do
-			case $opt in
-				yes-remove-install-directory)
-					echo "${S}Removing kernel directory: ${C}$1/$2${S}...${N}"
-					rm -fr $1/$2 && returnValue=0 || returnValue=2
-					;;
-				no-keep-install-directory)
-					echo "${S}Continuing without removing directory: ${C}$1/$2${N}"
-					returnValue=1
-					;;
-				*)
-					print_error opt
-					repeat='true'
-					;;
-			esac
-			break
-		done
+		if [ "$3" != 'single' ]
+		then
+			echo "${Q}Do you want to remove the kernel install directory ${C}$1/$2"
+			echo $LINE
+			echo -e $SLE
+			echo $LINE
+			options="yes-remove-install-directory no-keep-install-directory"
+			select opt in $options
+			do
+				case $opt in
+					yes-remove-install-directory)
+						removeIt='true'
+						;;
+					no-keep-install-directory)
+						echo "${S}Continuing without removing directory: ${C}$1/$2${N}"
+						returnValue=1
+						;;
+					*)
+						print_error opt
+						repeat='true'
+						;;
+				esac
+				break
+			done
+		fi
+		if [ "$removeIt" == 'true' -o "$3" == 'single' ]
+		then
+			echo "${S}Removing kernel directory: ${C}$1/$2${S}...${N}"
+			rm -fr $1/$2 && returnValue=0 || returnValue=2
+		fi
 
 		log_function_data "Return Value: $returnValue"
 		eval $LOGUE
