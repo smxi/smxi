@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.18.0
+####  version: 1.18.1
 ####  Date: October 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -479,7 +479,16 @@ set_hold_install()
 {
 	eval $LOGPS
 	local packageName='' userPackages='' statusD='' packageInstalled='' hoIn='ii'
-	local dhiTemp=''
+	local dhiTemp='' holdType=''
+	
+	case $APT_TYPE in
+		apt-get)
+			holdType='dpkg'
+			;;
+		aptitude)
+			holdType='aptitude'
+			;;
+	esac
 	
 	# get the data, insert to global for rest of script run through
 	if [ "$1" == 'hold' ]
@@ -548,7 +557,7 @@ set_hold_install()
 				then
 					dhiTemp="$dhiTemp $packageName"
 				fi
-				echo "${S}${SPACER}Changing ${C}$packageName${S} package status to: ${C}$statusD${N}"
+				echo "${S}${SPACER}Changing ${C}$packageName${S} package status in ${C}$holdType${S}to: ${C}$statusD${N}"
 				case $APT_TYPE in
 					apt-get)
 						echo $packageName $statusD | dpkg --set-selections
