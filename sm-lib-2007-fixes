@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sm-lib-2007-fixes
 ####  version: 1.3.19
-####  Date: July 24 2008
+####  Date: October 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -544,7 +544,7 @@ du_gtk_fix_1()
 	local prefId='gtk-du-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local holdTest=''
-	if [ -n "$( echo $DPKG_HOLD_INSTALL | egrep '(libgnomeui-0|libgtk2.0-0|libmetacity0)' )" ]
+	if [ -n "$( echo $HOLD_INSTALL_ITEMS | egrep '(libgnomeui-0|libgtk2.0-0|libmetacity0)' )" ]
 	then
 		holdTest='true'
 	fi

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.12
-####  Date: August 22 2008
+####  version: 1.21.13
+####  Date: October 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -280,13 +280,13 @@ openoffice_hold_install()
 			case $opt in
 				ooo-hold)
 					echo "${S}Setting your ${C}openoffice${S} component status to: hold${N}"
-					DPKG_HOLD_INSTALL="$oooPackages"
+					HOLD_INSTALL_ITEMS="$oooPackages"
 					set_hold_install 'hold-utility'
 					repeat='true'
 					;;
 				ooo-remove-hold)
 					echo "${S}Setting your ${C}openoffice${S} component status to: install${N}"
-					DPKG_HOLD_INSTALL="$oooPackages"
+					HOLD_INSTALL_ITEMS="$oooPackages"
 					set_hold_install  'install'
 					repeat='true'
 					;;

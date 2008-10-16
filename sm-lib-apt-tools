@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.17.14
-####  Date: September 26 2008
+####  version: 1.18.0
+####  Date: October 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -38,6 +38,7 @@ package_tester()
 {
 	eval $LOGUS
 	local item=$1 doWild='+' installType='(hi|ii)' wildFull='' packageStatus=''
+	local runDefault='true'
 	
 	case "$2" in
 		wild)
@@ -76,11 +77,63 @@ package_tester()
 			error_handler 'value-bad' $FUNCNAME "$2"
 			;;
 	esac
-
-	# note that we need [ \t]+ so that only cases of whitespace after are counted
-	packageStatus=$( dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}' )
+	
+	if [ "$APT_TYPE" == 'aptitude' ]
+	then
+		if [ "$2" == 'hi' -o "$2" == 'ii' ]
+		then
+			packageStatus=$( package_tester_aptitude "$1" "$2" )
+		fi
+		# we're going to cascade down here, if it's never been set
+		# in aptitude, we'll check dpkg, this is a hack, but it's better
+		# than using aptitude search features
+		if [ -n "$packageStatus" ]
+		then
+			runDefault='false'
+		fi
+	fi
+	# basically, only run this is if not aptitude or if aptitude tests are null
+	if [ "$runDefault" == 'true' ]
+	then
+		# note that we need [ \t]+ so that only cases of whitespace after are counted
+		packageStatus=$( dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}' )
+	fi
+	
 	echo $packageStatus
 	log_function_data "Package $installType status: $packageStatus"
+	eval $LOGUE
+}
+
+# sadly, because of how poorly done the aptitude search method is,
+# it's unusable for these scripts, far too slow and awkward, and its
+# handling of hold/installs is totally different, so I'm creating this
+# small feature to handle that condition. Groan...
+# args: $1 - package name; $2 - hi/ii - same as above, but will do differen things
+package_tester_aptitude()
+{
+	eval $LOGUS
+	local aptitudeStates='/var/lib/aptitude/pkgstates' packageState=''
+	local packageName=$1 packageStatus=$2 packageHoldInstall=''
+	
+	case $packageStatus in
+		ii)
+			packageHoldInstall=1
+			;;
+		hi)
+			packageHoldInstall=2
+			;;
+	esac
+
+	#note: only if aptitude has been used to set hold or unhold on a package will it have a
+	# state of 1 or 2
+	packageState=$( grep ": $packageName$" -A 2 $aptitudeStates | grep -i '^State:' | egrep -o "$packageHoldInstall" )
+	
+	if [ -n "$packageState" ]
+	then
+		echo $packageState
+	fi
+
+	log_function_data "Package $packageName state: $packageState"
 	eval $LOGUE
 }
 
@@ -435,7 +488,7 @@ set_hold_install()
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
 		log_function_data "User held packages: $userPackages"
 		wget -T$TIME_OUT -t2 -Ncq $TECH_PATTERNS_DISTRO$UPGRADE_DATA$HOLD_INSTALL
-		DPKG_HOLD_INSTALL="$( cat $HOLD_INSTALL ) $userPackages"
+		HOLD_INSTALL_ITEMS="$( cat $HOLD_INSTALL ) $userPackages"
 		log_function_data "Backend hold packages: $( cat $HOLD_INSTALL )"
 		if [ -f "$HOLD_INSTALL" ]
 		then
@@ -445,7 +498,7 @@ set_hold_install()
 		if [ "$SYSTEM_BASE" == 'sid' ]
 		then
 			# now let's fire the auto hold/install function to protect against those
-			# pesky gimp/pidgin breaks. That function updates the global DPKG_HOLD_INSTALL
+			# pesky gimp/pidgin breaks. That function updates the global HOLD_INSTALL_ITEMS
 			broken_dependency_handler
 			# and handle package groups as well
 			advanced_broken_dependency_handler 'amarok'
@@ -457,8 +510,8 @@ set_hold_install()
 			advanced_broken_dependency_handler 'xpdf'
 		fi
 	fi
-	log_function_data "Post test hold packages: $DPKG_HOLD_INSTALL"
-	if [ -n "$DPKG_HOLD_INSTALL" ]
+	log_function_data "Post test hold packages: $HOLD_INSTALL_ITEMS"
+	if [ -n "$HOLD_INSTALL_ITEMS" ]
 	then
 		echo $LINE
 		statusD=$1
@@ -469,18 +522,24 @@ set_hold_install()
 		# set search for either ii or hi
 		if [ "$statusD" == 'install' ]
 		then
+			if [ "$APT_TYPE" == 'aptitude' ]
+			then
+				statusD='unhold'
+			fi
 			hoIn='hi'
 		fi
 		if [ "$statusD" == 'hold' ]
 		then
 			echo "${S}${SPACER}Testing hold/install list package status...${N}"
 		fi
-		for packageName in $DPKG_HOLD_INSTALL
+		for packageName in $HOLD_INSTALL_ITEMS
 		do
 			# only holding installed stuff, have to now handle cases where it's been held
 			# I am making this very specific to support users who want to manually set
 			# hold install, otherwise using ii|hi would remove holds from user set hold.
+			# this now tests for aptitude holds/unholds too, hopefully this will work.. grr
 			packageInstalled=$( package_tester $packageName $hoIn )
+
 			#packageInstalled=$( package_tester $packageName )
 			if [ -n "$packageInstalled" ]
 			then
@@ -489,8 +548,15 @@ set_hold_install()
 				then
 					dhiTemp="$dhiTemp $packageName"
 				fi
-				echo "${S}${SPACER}Changing ${C}$packageName${S} dpkg status to: ${C}$statusD${N}"
-				echo $packageName $statusD | dpkg --set-selections
+				echo "${S}${SPACER}Changing ${C}$packageName${S} package status to: ${C}$statusD${N}"
+				case $APT_TYPE in
+					apt-get)
+						echo $packageName $statusD | dpkg --set-selections
+						;;
+					aptitude)
+						aptitude $statusD $packageName
+						;;
+				esac
 				log_function_data "Package $packageName set to: $statusD"
 			fi 
 		done
@@ -499,7 +565,7 @@ set_hold_install()
 		# and b: are installed on user system
 		if [ "$1" == 'hold' ]
 		then
-			DPKG_HOLD_INSTALL="$dhiTemp"
+			HOLD_INSTALL_ITEMS="$dhiTemp"
 		fi
 	fi
 	eval $LOGPE
@@ -558,7 +624,7 @@ broken_dependency_handler()
 			then
 				echo # needed to handle the -n of the dots....
  				echo "${M}${SPACER}Adding ${C}$package1${M} and ${C}$package2${M} to hold/install. Mismatched versions: ${C}$tempHolder1 $tempHolder2${N}"
-				DPKG_HOLD_INSTALL="$DPKG_HOLD_INSTALL $package1 $package2"
+				HOLD_INSTALL_ITEMS="$HOLD_INSTALL_ITEMS $package1 $package2"
 				echo -n "${S}${SPACER}Continuing.."
 			fi
 		fi
@@ -693,7 +759,7 @@ xpdf-reader
 		echo
 		echo "${SPACER}${M}Package version mismatches were detected in ${C}$packageGroup"
 		echo "${SPACER}${S}Adding ${C}$packageGroup${S} package group to hold/install list...${N}"
-		DPKG_HOLD_INSTALL="$DPKG_HOLD_INSTALL $holdList"
+		HOLD_INSTALL_ITEMS="$HOLD_INSTALL_ITEMS $holdList"
 	elif [ -n "$holdList" ]
 	then
 		echo "${SPACER}${M}No version mismatches detected in ${C}$packageGroup${M}. Continuing...${N}"
