@@ -557,13 +557,13 @@ set_hold_install()
 				then
 					dhiTemp="$dhiTemp $packageName"
 				fi
-				echo "${S}${SPACER}Changing ${C}$packageName${S} package status in ${C}$holdType${S}to: ${C}$statusD${N}"
+				echo "${S}${SPACER}Changing ${C}$packageName${S} package status in ${C}$holdType${S} to: ${C}$statusD${N}"
 				case $APT_TYPE in
 					apt-get)
 						echo $packageName $statusD | dpkg --set-selections
 						;;
 					aptitude)
-						aptitude $statusD $packageName
+						aptitude $statusD $packageName 2>> $LOG_FILE 1>/dev/null
 						;;
 				esac
 				log_function_data "Package $packageName set to: $statusD"
