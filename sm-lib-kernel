@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.4.13
-####  Date: October 11 2008
+####  version: 2.4.14
+####  Date: October 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -27,9 +27,9 @@
 ####  VARIABLES
 ########################################################################
 #   
-KERNEL_LIST_32='2.6.26.5-slh-smp-12 2.6.26.3-slh-smp-4 2.6.25.14-slh-smp-2 2.6.25.13-slh-smp-2 2.6.25.12-slh-smp-4 2.6.25.11-slh-smp-2 2.6.25.8-slh-smp-2 2.6.25.6-slh-smp-3 2.6.25.4-slh-smp-10 2.6.24.5-slh-smp-2  2.6.23.16-slh-smp-1 2.6.22.10-rc1-slh-smp-1 2.6.21.6-slh-smp-1 2.6.20.11-slh-smp-1 2.6.19.3-rc1-slh-smp-1 2.6.18.6-slh-smp-1'
+KERNEL_LIST_32='2.6.26.6-slh-smp-3 2.6.26.5-slh-smp-12 2.6.26.3-slh-smp-4 2.6.25.14-slh-smp-2 2.6.25.13-slh-smp-2 2.6.25.12-slh-smp-4 2.6.25.11-slh-smp-2 2.6.25.8-slh-smp-2 2.6.25.6-slh-smp-3 2.6.25.4-slh-smp-10 2.6.24.5-slh-smp-2  2.6.23.16-slh-smp-1 2.6.22.10-rc1-slh-smp-1 2.6.21.6-slh-smp-1 2.6.20.11-slh-smp-1 2.6.19.3-rc1-slh-smp-1 2.6.18.6-slh-smp-1'
 KERNEL_ADVANCED_LIST_32=''
-KERNEL_LIST_64='2.6.26.5-slh64-smp-12 2.6.26.3-slh-smp64-4 2.6.25.14-slh64-smp-2 2.6.25.13-slh64-smp-2 2.6.25.12-slh64-smp-4 2.6.25.11-slh64-smp-2 2.6.25.8-slh64-smp-2 2.6.25.6-slh64-smp-3 2.6.25.4-slh64-smp-10 2.6.24.5-slh64-smp-2 2.6.23.16-slh64-smp-1 2.6.22.10-rc1-slh64-smp-1 2.6.21.6-slh64-smp-1 2.6.20.11-slh64-smp-1 2.6.19.3-rc1-slh64-smp-1 2.6.18.6-slh64-smp-1'
+KERNEL_LIST_64='2.6.26.6-slh64-smp-3 2.6.26.5-slh64-smp-12 2.6.26.3-slh-smp64-4 2.6.25.14-slh64-smp-2 2.6.25.13-slh64-smp-2 2.6.25.12-slh64-smp-4 2.6.25.11-slh64-smp-2 2.6.25.8-slh64-smp-2 2.6.25.6-slh64-smp-3 2.6.25.4-slh64-smp-10 2.6.24.5-slh64-smp-2 2.6.23.16-slh64-smp-1 2.6.22.10-rc1-slh64-smp-1 2.6.21.6-slh64-smp-1 2.6.20.11-slh64-smp-1 2.6.19.3-rc1-slh64-smp-1 2.6.18.6-slh64-smp-1'
 KERNEL_ADVANCED_LIST_64=''
 
 ########################################################################
