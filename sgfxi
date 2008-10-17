@@ -2153,10 +2153,14 @@ run_patches()
 							apply_patch_file $patchFile
 							;;
 						173.14.12|96.43.07)
+							# patch file source:
+							# http://www.nvnews.net/vbulletin/showthread.php?t=120884
 							patchFile='NVIDIA-173.14.12-2.6.27.patch'
 							apply_patch_file $patchFile
 							;;
 						71.86.06)
+							# patch file source:
+							# http://www.nvnews.net/vbulletin/showthread.php?t=120971
 							patchFile='NVIDIA-71.86.06-2.6.27.patch'
 							apply_patch_file $patchFile
 							;;
