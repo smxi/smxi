@@ -546,6 +546,7 @@ check_apt_aptitude()
 		else # set apt type
 			APT_TYPE=$aptPref
 		fi
+		log_function_data "APT_TYPE: $APT_TYPE"
 		if [ "$APT_TYPE" == 'aptitude' ]
 		then
 			WITHOUT_RECOMMENDS='--without-recommends'
@@ -604,6 +605,7 @@ install_package()
 		fi
 		doYes=''
 	fi
+	log_function_data "WITHOUT_RECOMMENDS: $WITHOUT_RECOMMENDS"
 	if  [ -n "$1" ]
 	then
 		echo "${S}Installing required package ${C}$1${S} now...${N}"
@@ -1224,7 +1226,7 @@ install_vbox()
 	local vboxGeneral=$( dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox' )
 	local vboxBad='virtualbox virtualbox-source'
 	# default to ose install
-	local toInstall=$vboxOSE toRemove=$vboxBad' '$vboxGeneral
+	local toInstall="$vboxOSE" toRemove="$vboxBad $vboxGeneral"
 	if [ -n "$( test_package_available 'virtualbox-2.0-ose' )" ]
 	then
 		vboxOSE='virtualbox-2.0-ose virtualbox-2.0-ose-source'
@@ -1247,7 +1249,8 @@ install_vbox()
 			toInstall=''
 		fi
 	fi
-	
+	log_function_data "To remove: $toRemove"
+	log_function_data "To install: $toInstall"
 	remove_package "$toRemove"
 	install_package "$toInstall"
 	
