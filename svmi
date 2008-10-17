@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.8
-####  Date: September 19 2008
+####  version: 1.8.9
+####  Date: October 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -125,8 +125,8 @@ case $KERNEL_THIRD in
 		# author blog:
 		# http://opensuse-linux-blog.blogspot.com/2008/07/how-to-install-vmware-in-2626-linux.html#links
 		ANYANY_PREFIX='http://techpatterns.com/downloads/distro/patches/'
-		#ANYANY_Z='.tgz'
-		ANYANY_ALT='c'
+		#ANYANY_Z='.tgz' # note, moving to 'd' patch from 'c'
+		ANYANY_ALT='d'
 		ANYANY_NUMBER=117
 		#ANYANY_FILE_DASH=''
 		;;
