@@ -917,7 +917,7 @@ vm_main_selector()
 	echo "have to do the vmx file creation and the image file creation manually currently."
 	echo
 	echo "${S}vmware player install version: ${C}${C}$VMPLAYER_NUMBER${S}${S}"
-	echo "any-any patch version: ${C}$ANYANY_NUMBER"
+	echo "any-any patch version: ${C}$ANYANY_NUMBER$ANYANY_ALT"
 	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player, and any-any patch."
 	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required."
 	echo "${C}3${S} - ${C}install-qemu${S} Installs qemu if required. ${M}NEW: great site to make your"
