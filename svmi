@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.9
+####  version: 1.8.10
 ####  Date: October 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -91,8 +91,13 @@ FILE_URL=''
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.x86_64.tar.gz
 # VMware-player-2.0.2-59824 VMware-workstation-5.5.0-18463 2.0.4-93057
 VMPLAYER_PREFIX='http://download3.vmware.com/software/vmplayer/'
-VMPLAYER_NUMBER='2.0.5'
-VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-109488"
+# Two version will be supported: previous major, latest, and current major
+VMPLAYER_NUMBER_PREVIOUS='2.0.5'
+VMPLAYER_BUILD_PREVIOUS='109488'
+VMPLAYER_NUMBER='2.5'
+VMPLAYER_BUILD='118166'
+VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
+VMPLAYER_VERSION_PREVIOUS="VMware-player-$VMPLAYER_NUMBER_PREVIOUS-$VMPLAYER_BUILD_PREVIOUS"
 VMWARE_Z='.tar.gz'
 if [ "$BITS" -eq 32 ]
 then
@@ -918,7 +923,7 @@ vm_main_selector()
 	echo "still quite basic, and will just download and run the installer, with any-any. You"
 	echo "have to do the vmx file creation and the image file creation manually currently."
 	echo
-	echo "${S}vmware player install version: ${C}${C}$VMPLAYER_NUMBER${S}${S}"
+	echo "${S}Current vmware player install version: ${C}${C}$VMPLAYER_NUMBER${S}${S}"
 	echo "any-any patch version: ${C}$ANYANY_NUMBER$ANYANY_ALT"
 	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player, and any-any patch."
 	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required."
@@ -1579,9 +1584,10 @@ show_options()
 	echo "   Best used with non-interactive mode, but is fine for normal mode too. Example: svmi -u jeff"
 	echo "-U Forces $SCRIPT_NAME to update itself, must be root, but can be in x. Exits after."
 	echo "-v Prints $SCRIPT_NAME current version information. Exits after."
-	echo "-V Allows you try a specific Version of vbox. Only applies to non-ose version."
-	echo "   Supported versions: $VBOX_VERSIONS"
-	echo "   Example: svmi -V 1.5.2"
+	echo "-V Allows you try a specific Version of vbox/vmware player. Only applies to non-ose version."
+	echo "   Supported vbox non ose versions: $VBOX_VERSIONS"
+	echo "   Supported previous vmware player: $VMPLAYER_NUMBER_PREVIOUS"
+	echo "   Example: svmi -V 1.5.2 [or] svmi -V 2.0.5"
 	echo "-Z Skips connection test. Use this if $SCRIPT_NAME gives you connection failed error but"
 	echo "   you are sure your connection is fine."
 	echo 
@@ -1652,15 +1658,24 @@ do
 		v) print_information
 			exit 0
 			;;
-		V) if [ -z "$( echo "$VBOX_PREVIOUS" | grep "$OPTARG:" )" ]
+		V) if [ -z "$( grep "$OPTARG:" <<< $VBOX_PREVIOUS )" -a -z "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ]
 			then
-				echo "${E}The -V option only supports non-ose vbox versions: $VBOX_VERSIONS${N}"
+				echo "${E}The -V option only supports non-ose vbox versions: ${C}$VBOX_VERSIONS"
+				echo "${E}or vmware player previous version: ${C}$VMPLAYER_NUMBER_PREVIOUS${N}"
 				exit 1
 			else
-				VBOX_VERSION="$OPTARG" # assign to main version global
-				VBOX_ALT_VERSION="$OPTARG" # and set the alt as well
-				VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | egrep -o "$VBOX_VERSION:[0-9]{5,6}" | cut -d ':' -f 2 )
-				#echo vb pn $VBOX_PACKAGE_NO
+				if [ -n "$( grep "$OPTARG:" <<< $VBOX_PREVIOUS )" ]
+				then
+					VBOX_VERSION="$OPTARG" # assign to main version global
+					VBOX_ALT_VERSION="$OPTARG" # and set the alt as well
+					VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | egrep -o "$VBOX_VERSION:[0-9]{5,6}" | cut -d ':' -f 2 )
+					#echo vb pn $VBOX_PACKAGE_NO
+				elif [ -z "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ]
+				then
+					VMPLAYER_NUMBER=$VMPLAYER_NUMBER_PREVIOUS
+					VMPLAYER_BUILD=$VMPLAYER_BUILD_PREVIOUS
+					VMPLAYER_VERSION=$VMPLAYER_VERSION_PREVIOUS
+				fi
 			fi
 			;;
 		Z) SKIP_CONNECT='true'
