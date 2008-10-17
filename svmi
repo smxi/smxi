@@ -1670,7 +1670,7 @@ do
 					VBOX_ALT_VERSION="$OPTARG" # and set the alt as well
 					VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | egrep -o "$VBOX_VERSION:[0-9]{5,6}" | cut -d ':' -f 2 )
 					#echo vb pn $VBOX_PACKAGE_NO
-				elif [ -z "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ]
+				elif [ -n "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ]
 				then
 					VMPLAYER_NUMBER=$VMPLAYER_NUMBER_PREVIOUS
 					VMPLAYER_BUILD=$VMPLAYER_BUILD_PREVIOUS
