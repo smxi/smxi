@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.8.11
-####  Date: October 17 2008
+####  version: 1.9.0
+####  Date: October 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -98,7 +98,8 @@ VMPLAYER_NUMBER='2.5.0'
 VMPLAYER_BUILD='118166'
 VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
 VMPLAYER_VERSION_PREVIOUS="VMware-player-$VMPLAYER_NUMBER_PREVIOUS-$VMPLAYER_BUILD_PREVIOUS"
-VMWARE_Z='.tar.gz'
+VMWARE_Z='.bundle'
+VMWARE_Z_PREVIOUS='.tar.gz'
 if [ "$BITS" -eq 32 ]
 then
 	VMWARE_32_64='.i386'
@@ -1091,7 +1092,7 @@ download_file()
 		echo "${M}You have already downloaded the package, proceeding with install now...${N}"
 		testExtract='true'
 	fi
-	
+	# don't extract for new bundle syntax stuff
 	if [ "$testExtract" == 'true' ]
 	then
 		test_extract_file
@@ -1106,7 +1107,13 @@ test_extract_file()
 	
 	if [ ! -d "$DIR_NAME" ]
 	then
-		tar xzf $FILE_NAME || error_handler 193 $FILE_NAME
+		if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ]
+		then
+			tar xzf $FILE_NAME || error_handler 193 $FILE_NAME
+		else
+			mkdir $DIR_NAME
+			mv $FILE_NAME $DIR_NAME
+		fi
 	fi
 	
 	if [ -d "$VMPLAYER_DIR" -a "$INSTALL_TYPE" == "$VMP" ]
@@ -1115,7 +1122,6 @@ test_extract_file()
 	fi
 	
 	eval $LOGUE
-	run_file
 }
 
 run_file()
@@ -1134,7 +1140,7 @@ run_file()
 			;;
 	esac
 	
-	./$runFile
+	sh ./$runFile
 	eval $LOGUE
 }
 
@@ -1159,9 +1165,14 @@ install_vmware()
 		print_hec
 		construct_file_name
 		download_file
-		# for vmp, we want to also run any any
-		INSTALL_TYPE=$AA
-		install_anyany
+		run_file
+		if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ]
+		then
+			# for vmp, we want to also run any any
+			INSTALL_TYPE=$AA
+			install_anyany
+			run_file
+		fi
 	fi
 	
 	eval $LOGPE
@@ -1674,6 +1685,7 @@ do
 					VMPLAYER_NUMBER=$VMPLAYER_NUMBER_PREVIOUS
 					VMPLAYER_BUILD=$VMPLAYER_BUILD_PREVIOUS
 					VMPLAYER_VERSION=$VMPLAYER_VERSION_PREVIOUS
+					VMWARE_Z=$VMWARE_Z_PREVIOUS
 				fi
 				V_ALT_VERSION="$OPTARG" # and set the alt as well
 			fi
