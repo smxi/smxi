@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.9.0
+####  version: 1.9.1
 ####  Date: October 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -94,10 +94,14 @@ VMPLAYER_PREFIX='http://download3.vmware.com/software/vmplayer/'
 # Two version will be supported: previous major, latest, and current major
 VMPLAYER_NUMBER_PREVIOUS='2.0.5'
 VMPLAYER_BUILD_PREVIOUS='109488'
+VMWARE_NAME_PREVIOUS='VMware-player'
+# current version
 VMPLAYER_NUMBER='2.5.0'
 VMPLAYER_BUILD='118166'
-VMPLAYER_VERSION="VMware-player-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
-VMPLAYER_VERSION_PREVIOUS="VMware-player-$VMPLAYER_NUMBER_PREVIOUS-$VMPLAYER_BUILD_PREVIOUS"
+VMWARE_NAME='VMware-Player'
+
+VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
+VMPLAYER_VERSION_PREVIOUS="$VMWARE_NAME_PREVIOUS-$VMPLAYER_NUMBER_PREVIOUS-$VMPLAYER_BUILD_PREVIOUS"
 VMWARE_Z='.bundle'
 VMWARE_Z_PREVIOUS='.tar.gz'
 if [ "$BITS" -eq 32 ]
