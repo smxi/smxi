@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.0
+####  version: 2.5.1
 ####  Date: October 20 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -138,18 +138,23 @@ check_kernel()
 check_debian_kernel_version()
 {
 	eval $LOGUS
+	
+	local debKernCandidate='' debKernInstalled=''
 	# only getting subversions if debian and appears the same
 	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$KERNEL_EQUAL_INSTALL" == 'true' ]
 	then
-		DEBIAN_KERNEL_INSTALLED=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'installed' )
-		DEBIAN_KERNEL_CANDIDATE=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'candidate' )
-		if [  -n "$DEBIAN_KERNEL_CANDIDATE" -a "$DEBIAN_KERNEL_INSTALLED" != "$DEBIAN_KERNEL_CANDIDATE" ]
+		debKernInstalled=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'installed' )
+		debKernCandidate=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'candidate' )
+		if [  -n "$debKernCandidate" ]
 		then
-			DEBIAN_KERNEL_CANDIDATE="-$( cut -d '-' -f 2 <<< $DEBIAN_KERNEL_CANDIDATE )"
-			if [ -n "$DEBIAN_KERNEL_INSTALLED" ]
-			then
-				DEBIAN_KERNEL_INSTALLED="-$( cut -d '-' -f 2 <<< $DEBIAN_KERNEL_INSTALLED )"
-			fi
+			DEBIAN_KERNEL_CANDIDATE="-$( cut -d '-' -f 2 <<< $debKernCandidate )"
+		fi
+		if [ -n "$debKernInstalled" ]
+		then
+			DEBIAN_KERNEL_INSTALLED="-$( cut -d '-' -f 2 <<< $debKernInstalled )"
+		fi
+		if [ "$debKernInstalled" != "$debKernCandidate" ]
+		then
 			KERNEL_EQUAL_INSTALL='false'
 		fi
 	fi
