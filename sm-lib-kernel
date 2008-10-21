@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.2
+####  version: 2.5.3
 ####  Date: October 20 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -171,6 +171,8 @@ kernel_question()
 	local tempCount=$( echo $options | wc -w ) altKernelText1=''
 	# sets KERNEL_EQUAL_INSTALL
 	test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
+	# set this data if required for debian type kernels
+	check_debian_kernel_version
 	# handle the switch of kernel install location text here
 	if [ "$KERNEL_POST_DU_INSTALL" == 'true' -o "$KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ]
 	then
