@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.4.16
-####  Date: October 18 2008
+####  version: 2.5.0
+####  Date: October 20 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -41,10 +41,10 @@ check_kernel()
 {
 	eval $LOGMS
 	local opt='' options='continue advanced-kernel-install' 
-	local advancedKernel='' kernelFile=''
+	local advancedKernel='' kernelFile='' 
 	
-	prefId='meta-package-selection'
-	smPref=$( sm_pref_tester $prefId 'equal' )
+	local prefId='meta-package-selection'
+	local smPref=$( sm_pref_tester $prefId 'equal' )
 	
 	# two cases, one it's not set, the other standard default
 	if [ -z "$smPref" -o "$smPref" == 'manual' ]
@@ -80,6 +80,9 @@ check_kernel()
 		local kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 )
 		local kernelMajorCurrent=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -o -G "2.6.[0-9]*" | cut -d '.' -f 3 )
 		local kernelCompare=$(( $kernelMajorCurrent - $kernelMajorInstalled ))
+		
+		# set this data if required for debian type kernels
+		check_debian_kernel_version
 	
 		# test to see if same kernel or newer is available
 		if [ "$KERNEL_EQUAL_INSTALL" == 'true' ]
@@ -116,8 +119,8 @@ check_kernel()
 				kernel_question
 			fi
 		else
-			echo "${M}Your current kernel:              ${C}$CURRENT_KERNEL${M}"
-			echo "is the same as the latest kernel: ${C}$kernelFile"
+			echo "${M}Your current kernel:              ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED${M}"
+			echo "is the same as the latest kernel: ${C}$kernelFile$DEBIAN_KERNEL_CANDIDATE"
 			echo
 			echo "${S}You can install other kernels in ${C}POST DIST-UPGRADE FIXES kernel-install${S}."
 			echo -n "${M}Continuing."
@@ -130,6 +133,27 @@ check_kernel()
 			eval $LOGME
 		fi
 	fi
+}
+
+check_debian_kernel_version()
+{
+	eval $LOGUS
+	# only getting subversions if debian and appears the same
+	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$KERNEL_EQUAL_INSTALL" == 'true' ]
+	then
+		DEBIAN_KERNEL_INSTALLED=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'installed' )
+		DEBIAN_KERNEL_CANDIDATE=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'candidate' )
+		if [  -n "$DEBIAN_KERNEL_CANDIDATE" -a "$DEBIAN_KERNEL_INSTALLED" != "$DEBIAN_KERNEL_CANDIDATE" ]
+		then
+			DEBIAN_KERNEL_CANDIDATE="-$( cut -d '-' -f 2 <<< $DEBIAN_KERNEL_CANDIDATE )"
+			if [ -n "$DEBIAN_KERNEL_INSTALLED" ]
+			then
+				DEBIAN_KERNEL_INSTALLED="-$( cut -d '-' -f 2 <<< $DEBIAN_KERNEL_INSTALLED )"
+			fi
+			KERNEL_EQUAL_INSTALL='false'
+		fi
+	fi
+	eval $LOGUE
 }
 
 # args: $1 - post-du, started via post du options
@@ -155,9 +179,9 @@ kernel_question()
 	then
 		tempCount=$(( $tempCount + 1 ))
 		kernelsNotEqualOpt='install-apt-kernel'
-		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL${S}\n"'
+		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
 	else
-		kernelsNotEqual='echo -e "${M}Your current kernel: ${C}$CURRENT_KERNEL${M}\nis the same as the latest kernel:  ${C}$CURRENT_APT_KERNEL\n$MLINE"'
+		kernelsNotEqual='echo -e "${M}Your current kernel: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED${M}\nis the same as the latest kernel:  ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE\n$MLINE"'
 	fi
 	advanced=$tempCount
 	removeModules=$(( $tempCount - 1 ))
