@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.9.1
+####  version: 1.9.2
 ####  Date: October 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1140,7 +1140,12 @@ run_file()
 			runFile=$ANYANY_RUN
 			;;
 		$VMP)
-			runFile=$VMPLAYER_RUN
+			if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ]
+			then
+				runFile=$VMPLAYER_RUN
+			else
+				runFile=$FILE_NAME
+			fi
 			;;
 	esac
 	
