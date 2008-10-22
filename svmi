@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.9.2
+####  version: 1.9.3
 ####  Date: October 21 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -922,16 +922,18 @@ vm_main_selector()
 	echo "${S}For most new or average users, I recommend running vbox, it's a simple, clean install,"
 	echo "and you'll have your vbox up and running almost immediately."
 	echo $LINE
-	echo "${M}vmware tools are currently quite rough. I do not recommend trying them"
-	echo "unless you already know how to do vmware stuff. The any-any updater is solid, and will"
-	echo "get your current vmware modules built for new kernels fine. The vmware installer is"
-	echo "still quite basic, and will just download and run the installer, with any-any. You"
-	echo "have to do the vmx file creation and the image file creation manually currently."
-	echo
-	echo "${S}Vmware player version to install: ${C}${C}$VMPLAYER_NUMBER${S}${S}"
-	echo "any-any patch version: ${C}$ANYANY_NUMBER$ANYANY_ALT"
-	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player, and any-any patch."
-	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required."
+	echo "${M}vmware tools are basic, and only support vmware player. To build your vmx files, and the"
+	echo "vmdk images if you don't know how to do that, please use this site: ${C}www.easyvmx.com"
+	echo 
+	echo "${M}As of VMPlayer 2.5.0, the any any patch is no longer needed, and will not be used in the install"
+	echo "process. I'm leaving any-any options for people with 2.0.5 or older vmware installs for now."
+	echo $LINE
+	echo "${M}To install other vbox non-ose/vmware versions, use the ${C}svmi -V <vbox/vmware version>${M} option"
+	echo $LINE
+	echo "${S}Vmware player version to install: ${C}$VMPLAYER_NUMBER${S}"
+	echo "any-any patch version (only for old vmware installs): ${C}$ANYANY_NUMBER$ANYANY_ALT"
+	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player (+ any-any patch if needed)."
+	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required (legacy)."
 	echo "${C}3${S} - ${C}install-qemu${S} Installs qemu if required. ${M}NEW: great site to make your"
 	echo "   vmdk/vmx files, super easy, make a note of it. Highly recommended: ${C}www.easyvmx.com"
 	echo $LINE
@@ -944,7 +946,6 @@ vm_main_selector()
 	echo "    ${M}NOTE: System must be fully dist-upgraded for this to work right before you run this!"
 
 	echo $LINE
-	echo "${M}For other vbox non-ose versions, use the ${C}svmi -V <vbox version>${M} option"
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
 	echo "${C}6${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
@@ -1174,7 +1175,7 @@ install_vmware()
 			echo
 			echo "${S}Answer 'n' to this question, and then $AA setup and install will begin automatically.${N}"
 		else
-			echo "${S}Starting $VMP install and setup now using the new .bundle file installer...${N}"
+			echo "${S}Starting $VMP install and setup now using the new ${C}.bundle${S} file installer...${N}"
 		fi
 		print_hec
 		construct_file_name
@@ -1182,7 +1183,7 @@ install_vmware()
 		run_file
 		if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ]
 		then
-			# for vmp, we want to also run any any
+			# for vmp tar.gz, we want to also run any any
 			INSTALL_TYPE=$AA
 			install_anyany
 			run_file
