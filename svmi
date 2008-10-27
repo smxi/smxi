@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 1.9.4
+####  version: 1.9.5
 ####  Date: October 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -1282,6 +1282,7 @@ install_vbox()
 	fi
 	log_function_data "To remove: $toRemove"
 	log_function_data "To install: $toInstall"
+	
 	remove_package "$toRemove"
 	install_package "$toInstall"
 	
@@ -1310,9 +1311,11 @@ install_vbox_non_ose()
 	then
 		VBOX_V=''
 	fi
+
 	local vboxName='virtualbox'$VBOX_V
 	local debName=$vboxName'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
 	local vboxNonOseURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$debName
+	log_function_data "debName: $debName\nvboxNonOseURL: $vboxNonOseURL"
 	
 	if [ ! -d $VBOX_INSTALL_PATH ]
 	then
