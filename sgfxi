@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.10.3
-####  Date: October 16 2008
+####  version: 3.10.4
+####  Date: October 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -127,12 +127,12 @@ NVIDIA_DOWNLOAD_SITE='http://us.download.nvidia.com'
 
 # other options: nothing now
 # IMPORTANT: on function set_download_info the actual path file name is set:
-FG_VERSIONS='8-9:8-7:8-6'
-FG_DEFAULT='8-9'
+FG_VERSIONS='8-10:8-9:8-8'
+FG_DEFAULT='8-10'
 
 FG_LEGACY='' # no legacy for ati + xorg >= 7.1
-FG_TESTING='8-8'
-FG_OTHERS='8-4:8-5'
+FG_TESTING=''
+FG_OTHERS='8-7:8-6:8-5:8-4'
 DRIVER_LEGACY=''
 DRIVER_INSTALL=''
 DRIVER_DEFAULT=''
@@ -1763,7 +1763,7 @@ driver_support_tests()
 										;;
 									27)
 										case $DRIVER_DEFAULT in
-											8-4|8-5)
+											8-4|8-5|8-6|8-7|8-8|8-9)
 												error_handler 234 27
 												;;
 											*)
