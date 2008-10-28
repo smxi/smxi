@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.0.8
-####  Date: October 11 2008
+####  version: 2.0.9
+####  Date: October 28 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  
@@ -30,6 +30,7 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 # paths, change these to suite your needs
 ALT_DIR="$HOME/bin/scripts/sidux/"
 SVN_DIR="$HOME/bin/scripts/sidux/svn/trunk"
+INXI_DIR="$HOME/bin/scripts/inxi/svn/trunk/"
 GRAPHICS_DIR="$HOME/bin/scripts/graphics/"
 DEV_TOOLS_DIR="$HOME/bin/scripts/sidux"
 DEV_TOOLS_SVN_DIR="$SVN_DIR/dev-tools"
@@ -42,6 +43,7 @@ SM_VERSIONS=$ALT_DIR'sm-versions'
 # scripts/libs
 SCRIPT_LIST_ALT='svmi'
 SCRIPT_LIST_GRAPHICS="sgfxi"
+SCRIPT_LIST_INXI='inxi'
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 
 ########################################################################
@@ -83,7 +85,7 @@ start_up_tests()
 	fi
 	
 	# make sure the paths you made are right and exist
-	for startDir in $MAIN_DIR $GRAPHICS_DIR $ALT_DIR $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR $DEV_TOOLS_SVN_DIR $DEV_TOOLS_DIR $STUB_SVN_DIR
+	for startDir in $MAIN_DIR $GRAPHICS_DIR $INXI_DIR $ALT_DIR $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR $DEV_TOOLS_SVN_DIR $DEV_TOOLS_DIR $STUB_SVN_DIR
 	do
 		if [ ! -d "$startDir" ]
 		then
@@ -145,6 +147,7 @@ main_updater()
 	update_sm_data "$SCRIPT_LIST_MAIN" "$MAIN_DIR"
 	update_sm_data "$SCRIPT_LIST_GRAPHICS" "$GRAPHICS_DIR"
 	update_sm_data "$SCRIPT_LIST_ALT" "$ALT_DIR"
+	update_sm_data "$SCRIPT_LIST_INXI" "$INXI_DIR"
 	update_kernel_installers
 	update_other_components
 	finalize_sm_versions
