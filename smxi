@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.17
-####  Date: October 20 2008
+####  version: 8.4.18
+####  Date: October 29 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under 
@@ -203,6 +203,7 @@ LIB_2007_FIXES='sm-lib-2007-fixes'
 LIB_2008_FIXES_STATIC='sm-lib-2008-fixes'
 LIB_2008_FIXES=''
 # script modules
+MOD_INXI='inxi'
 MOD_GFX='sgfxi'
 MOD_VM='svmi'
 # optional user set scripts
@@ -802,6 +803,10 @@ run_script_import()
 			fi
 			;;
 		$MOD_GFX)
+			runIt='true'
+			runScript=$1
+			;;
+		$MOD_INXI)
 			runIt='true'
 			runScript=$1
 			;;
