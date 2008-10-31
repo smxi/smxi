@@ -479,7 +479,7 @@ utilities_installer()
 	
 	
 	echo "${C}3${S} - ${C}system-utilities${S} All the basics (plus related packages), and a few nice tools:"
-	echo "    alsa gpm dbus dbus-X11 hal lm-sensors net-tools pmount powersaved udev"
+	echo "    alsa gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
 	
 	echo "${C}4${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
 	echo "    for optimal performance. Will show your installed cpu so you can make the right choice."
