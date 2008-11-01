@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.10.5
+####  version: 3.10.6
 ####  Date: November 1 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -267,6 +267,19 @@ driver_support_tests()
 					then
 						print_information_continue 'standard' "Your system appears to be Debian Testing based.\nThe $DEBIAN_NVIDIA driver cannot build on Debian Testing because of a missing package.\nIf your system is Sid based, continue, otherwise exit now."
 					else
+						## test for >= xorg 1.5 support
+						case $X_VERSION in
+							1.[5-9]|2.[0-9]|7.[6-9])
+								case $DRIVER_DEFAULT in
+									177.80|96.43.09|71.86.07)
+										: ## support should be working, see feedback
+										;;
+									*)
+										error_handler 226
+										;;
+								esac
+								;;
+						esac
 						# set alternate download location if required, nvidia is using this
 						# now for all beta driver releases. Stable drivers are using http
 						case $DRIVER_DEFAULT in
@@ -661,6 +674,9 @@ error_handler()
 			;;
 		227)
 			errorData="The newest $CARD drivers ( >= 177.167 ) no longer support your $CARD GeForce 5xxx card.\nYou must use the $NV_LEGACY_3 driver or lower.\nThat is the default driver when you run this script."
+			;;
+		226)
+			errorData="The driver you selected: $DRIVER_DEFAULT does not support your current Xorg version: $X_VERSION\nIf this is wrong, please let the script maintainer know."
 			;;
 		# specific install issues
 		200) 
