@@ -3,7 +3,7 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.10.4
+####  version: 3.10.5
 ####  Date: October 27 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -115,7 +115,7 @@ NV_LEGACY_2=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
 NV_LEGACY_3=$( echo $NV_VERSIONS | cut -d ':' -f 2 )
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
 NV_QUAD=$NV_DEFAULT # no more individual quad drivers
-NV_TESTING='177.78:177.70' 
+NV_TESTING='96.43.09:71.86.07' 
 NV_OTHERS='173.14.09:173.14.05:173.08:171.06:169.12:100.14.23:100.14.19:96.43.05:71.86.04'
 
 # debian sid legacies:
@@ -212,6 +212,264 @@ fi
 ########################################################################
 #### FUNCTIONS
 ########################################################################
+
+########################################################################
+#### driver+kernel support tests, and patch handlers: 
+#### -------------------------------------------------------------------
+
+## these are first to make it easy to update each new driver release support data
+
+# args: $1- test type
+driver_support_tests()
+{
+	eval $LOGUS
+	# test for binary only tests here
+	case $1 in
+		supported-driver)
+			case $CARD in
+				$FGLRX)
+					case $KERNEL_THIRD in
+						# handle no sidux kernel support first
+						25|26|27)
+							# for testing/debugging set this re:
+							# http://techpatterns.com/docs/sgfxi-set-test-data.htm
+							if [ -n "$IS_SIDUX_KERNEL" ]
+							then
+								error_handler 229
+							#fglrx is working on Debian kernels, so users who want up to date
+							#system will need to use debian kernels + fglrx
+							else
+								case $KERNEL_THIRD in
+									26)
+										case $DRIVER_DEFAULT in
+											8-4|8-5)
+												error_handler 234 26
+												;;
+										esac
+										;;
+									27)
+										case $DRIVER_DEFAULT in
+											8-4|8-5|8-6|8-7|8-8|8-9)
+												error_handler 234 27
+												;;
+											*)
+												: # not yet, let's see: error_handler 234 27
+												;;
+										esac
+										;;
+								esac
+							fi
+							;;
+					esac
+					;;
+				$NVIDIA)
+					if [ "$DRIVER_DEFAULT" == "$DEBIAN_NVIDIA" -a "$SYSTEM_BASE" == 'testing' ]
+					then
+						print_information_continue 'standard' "Your system appears to be Debian Testing based.\nThe $DEBIAN_NVIDIA driver cannot build on Debian Testing because of a missing package.\nIf your system is Sid based, continue, otherwise exit now."
+					else
+						# set alternate download location if required, nvidia is using this
+						# now for all beta driver releases. Stable drivers are using http
+						case $DRIVER_DEFAULT in
+							96.43.09|71.86.07)
+								NVIDIA_DOWNLOAD_SITE='ftp://download.nvidia.com'
+								;;
+						esac
+						# handle change to legacy 5xxx level cards
+						case $DRIVER_DEFAULT in
+							177.80)
+								if [ "$LEGACY_LEVEL" -eq 3 ]
+								then
+									error_handler 227
+								fi
+								;;
+						esac
+						# basic version handling and support tests, unless otherwise reported,
+						# $DEBIAN_NVIDIA will be supported by default
+						case $KERNEL_THIRD in
+							24) # going to try just 2.6.24 links, see if any issues appear
+								# this doesn't work on debian kernels
+								if [ -n "$IS_SIDUX_KERNEL" ]
+								then
+									misc_fixes nvidia-24-link # this might always be needed, all cases?
+								fi
+								;;
+							26)
+								case $DRIVER_DEFAULT in
+									177.80|177.78|177.70|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
+										: # do nothing
+										;;
+									*)
+										error_handler 234 26
+										;;
+								esac
+								;;
+							27)
+								case $DRIVER_DEFAULT in
+									177.80|173.14.12|100.14.19|100.14.23|96.43.09|96.43.07|71.86.07|71.86.06|$DEBIAN_NVIDIA)
+										: # do nothing
+										;;
+									*)
+										if [ "$TESTING" != 'true' ]
+										then
+											error_handler 234 27
+										fi
+										;;
+								esac
+								;;
+						esac
+					fi
+					;;
+			esac
+			;;
+		nvidia-supported-driver)
+			:
+			;;
+		ati-supported-driver)
+			:
+			;;
+	esac
+	eval $LOGUE
+}
+
+# these patch calls used to be in lib files but this is cleaner/simpler long term
+run_patches()
+{
+	eval $LOGPS
+	local patchFile=''
+	
+	case $CARD in
+		$NVIDIA)
+			case $KERNEL_THIRD in 
+				25)
+					apply_module_patch pre
+					case $DRIVER_DEFAULT in
+						171.06|169.12)
+							patchFile='NVIDIA_kernel-169.12-2286310.diff'
+							apply_patch_file $patchFile
+							;;
+						# patch url: http://www.nvnews.net/vbulletin/showthread.php?t=112452
+						100.14.19|100.14.23)
+							# patch source url:
+							# http://www.nvnews.net/vbulletin/showthread.php?t=112452&highlight=2.6.26
+							# patch author: NiLuJe
+							if [ "$BITS" == '32' ]
+							then
+								patchFile='NVIDIA-x86-100.14.19-kernel-2.6.25-compat.diff'
+							else
+								patchFile='NVIDIA-x86_64-100.14.19-kernel-2.6.25-compat.diff'
+							fi
+							apply_patch_file $patchFile
+							;;
+						96.43.05)
+							patchFile='NVIDIA_kernel-96.43.05-2290218.diff'
+							apply_patch_file $patchFile
+							;;
+						71.86.04)
+							patchFile='NVIDIA_kernel-71.86.04-2305230.diff'
+							apply_patch_file $patchFile
+							;;
+					esac
+					;;
+				26)
+					apply_module_patch pre
+					
+					case $DRIVER_DEFAULT in
+						173.14.05)
+							patchFile='NVIDIA_kernel-173.14.05-2419292.diff'
+							apply_patch_file $patchFile
+							;;
+						100.14.19)
+							# patch source url:
+							# http://www.nvnews.net/vbulletin/showthread.php?t=112452&highlight=2.6.26
+							# patch author: NiLuJe, MamiyaOtaru, zander (from nvidia)
+							# patchFile='NVIDIA-100.14.19-kernel-2.6.25+26-compat.diff'
+							patchFile='NVIDIA-100.14.19-for-2.6.26.patch'
+							apply_patch_file $patchFile
+							;;
+					esac
+					;;
+				27)
+					apply_module_patch pre
+					case $DRIVER_DEFAULT in
+						177.13)
+							# patch author: zander, nvidia; patch src: 
+							# http://www.nvnews.net/vbulletin/showthread.php?t=117209
+							# patch url:
+							# http://www.nvnews.net/vbulletin/attachment.php?attachmentid=32559&d=1218212371
+							patchFile='NVIDIA_kernel-177.13-2627763.diff'
+							apply_patch_file $patchFile
+							;;
+						173.14.12|96.43.07)
+							# patch file source:
+							# http://www.nvnews.net/vbulletin/showthread.php?t=120884
+							patchFile='NVIDIA-173.14.12-2.6.27.patch'
+							apply_patch_file $patchFile
+							;;
+						71.86.06)
+							# patch file source:
+							# http://www.nvnews.net/vbulletin/showthread.php?t=120971
+							patchFile='NVIDIA-71.86.06-2.6.27.patch'
+							apply_patch_file $patchFile
+							;;
+						# patch url: http://www.nvnews.net/vbulletin/showthread.php?t=112452
+						100.14.19|100.14.23)
+							patchFile='NVIDIA-100.14.19-kernel-2.6.27-compat.patch'
+							apply_patch_file $patchFile
+							;;
+					esac
+					;;
+			esac
+			;;
+		$FGLRX)
+			case $KERNEL_THIRD in 
+				25|26)
+					case $DRIVER_DEFAULT in
+# 						8-4|8-5)
+# 							# debian kernls work normally, no patch required
+# 							# note: due to concerns raised, this patch is not going to be used
+# 							if [ -n "$IS_SIDUX_KERNEL" ] 
+# 							then
+# 								# pre patch link required, just to keep the information for future reference:
+# 								ln -s arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1.0 arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1
+# 								ln -s arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1.0 arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1
+# 								patchFile=''
+# 								#apply_patch_file $patchFile
+# 							fi
+# 							;;
+						8-6)
+							patchFile='0001-catalyst-8.6-linux-2.6.26.patch'
+							apply_patch_file $patchFile
+							patchFile='0002-catalyst-8.6-linux-2.6.26.patch'
+							apply_patch_file $patchFile
+							patchFile='0003-catalyst-8.6-linux-2.6.26.patch'
+							apply_patch_file $patchFile
+							;;
+						8-7)
+							# patch url: http://bugs.gentoo.org/attachment.cgi?id=161335
+							# found at: http://bugs.gentoo.org/show_bug.cgi?id=232609
+							patchFile='FGLRX-8.7-2.6.26.patch'
+							# this one is crap, bad hunks
+							#patchFile='FGLRX-0004-Linux-2.6.26.x-kernels-support.patch'
+							apply_patch_file $patchFile
+							;;
+					esac
+					;;
+			esac
+			;;
+	esac
+	
+	# this is for dev testing of patches or fixes
+	if [ "$TESTING" == 'true' ]
+	then
+		: # doing nothing for now
+	fi
+	eval $LOGPE
+}
+
+########################################################################
+#### primary startup - colors, test data, 
+#### -------------------------------------------------------------------
+
 # set global color variables
 # options: 0 - turns off all colors; 1 - defaults
 set_script_colors()
@@ -1646,6 +1904,8 @@ set_cpu_data()
 	eval $LOGUE
 }
 
+## test if the driver to be installed is in the list of supported drivers
+## advanced tests occur in driver_support_tests, patches set in run_patches
 check_supported_driver()
 {
 	eval $LOGUS
@@ -1731,117 +1991,6 @@ set_version()
 	eval $LOGPE
 	# test for support
 	driver_support_tests supported-driver
-}
-
-# args: $1- test type
-driver_support_tests()
-{
-	eval $LOGUS
-	# test for binary only tests here
-	case $1 in
-		supported-driver)
-			case $CARD in
-				$FGLRX)
-					case $KERNEL_THIRD in
-						# handle no sidux kernel support first
-						25|26|27)
-							# for testing/debugging set this re:
-							# http://techpatterns.com/docs/sgfxi-set-test-data.htm
-							if [ -n "$IS_SIDUX_KERNEL" ]
-							then
-								error_handler 229
-							#fglrx is working on Debian kernels, so users who want up to date
-							#system will need to use debian kernels + fglrx
-							else
-								case $KERNEL_THIRD in
-									26)
-										case $DRIVER_DEFAULT in
-											8-4|8-5)
-												error_handler 234 26
-												;;
-										esac
-										;;
-									27)
-										case $DRIVER_DEFAULT in
-											8-4|8-5|8-6|8-7|8-8|8-9)
-												error_handler 234 27
-												;;
-											*)
-												: # not yet, let's see: error_handler 234 27
-												;;
-										esac
-										;;
-								esac
-							fi
-							;;
-					esac
-					;;
-				$NVIDIA)
-					if [ "$DRIVER_DEFAULT" == "$DEBIAN_NVIDIA" -a "$SYSTEM_BASE" == 'testing' ]
-					then
-						print_information_continue 'standard' "Your system appears to be Debian Testing based.\nThe $DEBIAN_NVIDIA driver cannot build on Debian Testing because of a missing package.\nIf your system is Sid based, continue, otherwise exit now."
-					else
-						# set alternate download location if required
-						case $DRIVER_DEFAULT in
-							177.78|177.70)
-								NVIDIA_DOWNLOAD_SITE='ftp://download.nvidia.com'
-								;;
-						esac
-						# handle change to legacy 5xxx level cards
-						case $DRIVER_DEFAULT in
-							177.80|177.78|177.70)
-								if [ "$LEGACY_LEVEL" -eq 3 ]
-								then
-									error_handler 227
-								fi
-								;;
-						esac
-						# basic version handling and support tests, unless otherwise reported,
-						# $DEBIAN_NVIDIA will be supported by default
-						case $KERNEL_THIRD in
-							24) # going to try just 2.6.24 links, see if any issues appear
-								# this doesn't work on debian kernels
-								if [ -n "$IS_SIDUX_KERNEL" ]
-								then
-									misc_fixes nvidia-24-link # this might always be needed, all cases?
-								fi
-								;;
-							26)
-								case $DRIVER_DEFAULT in
-									177.80|177.78|177.70|173.14.12|173.14.09|100.14.19|96.43.07|71.86.06|$DEBIAN_NVIDIA)
-										: # do nothing
-										;;
-									*)
-										error_handler 234 26
-										;;
-								esac
-								;;
-							27)
-								case $DRIVER_DEFAULT in
-									177.80|177.78|177.70|173.14.12|100.14.19|100.14.23|96.43.07|71.86.06|$DEBIAN_NVIDIA)
-										: # do nothing
-										;;
-									*)
-										if [ "$TESTING" != 'true' ]
-										then
-											error_handler 234 27
-										fi
-										;;
-								esac
-								;;
-						esac
-					fi
-					;;
-			esac
-			;;
-		nvidia-supported-driver)
-			:
-			;;
-		ati-supported-driver)
-			:
-			;;
-	esac
-	eval $LOGUE
 }
 
 # args: $1 - which fix. Holds miscellaneous highly specific fixes, created as needed
@@ -2081,141 +2230,6 @@ preinstall_cleanup()
 	do 
 		dpkg-divert --package $package --remove $GL  1>> $LOG_FILE 2>> $LOG_FILE
 	done
-	eval $LOGPE
-}
-
-# these patch calls used to be in lib files but this is cleaner/simpler long term
-run_patches()
-{
-	eval $LOGPS
-	local patchFile=''
-	
-	case $CARD in
-		$NVIDIA)
-			case $KERNEL_THIRD in 
-				25)
-					apply_module_patch pre
-					case $DRIVER_DEFAULT in
-						171.06|169.12)
-							patchFile='NVIDIA_kernel-169.12-2286310.diff'
-							apply_patch_file $patchFile
-							;;
-						# patch url: http://www.nvnews.net/vbulletin/showthread.php?t=112452
-						100.14.19|100.14.23)
-							# patch source url:
-							# http://www.nvnews.net/vbulletin/showthread.php?t=112452&highlight=2.6.26
-							# patch author: NiLuJe
-							if [ "$BITS" == '32' ]
-							then
-								patchFile='NVIDIA-x86-100.14.19-kernel-2.6.25-compat.diff'
-							else
-								patchFile='NVIDIA-x86_64-100.14.19-kernel-2.6.25-compat.diff'
-							fi
-							apply_patch_file $patchFile
-							;;
-						96.43.05)
-							patchFile='NVIDIA_kernel-96.43.05-2290218.diff'
-							apply_patch_file $patchFile
-							;;
-						71.86.04)
-							patchFile='NVIDIA_kernel-71.86.04-2305230.diff'
-							apply_patch_file $patchFile
-							;;
-					esac
-					;;
-				26)
-					apply_module_patch pre
-					
-					case $DRIVER_DEFAULT in
-						173.14.05)
-							patchFile='NVIDIA_kernel-173.14.05-2419292.diff'
-							apply_patch_file $patchFile
-							;;
-						100.14.19)
-							# patch source url:
-							# http://www.nvnews.net/vbulletin/showthread.php?t=112452&highlight=2.6.26
-							# patch author: NiLuJe, MamiyaOtaru, zander (from nvidia)
-							# patchFile='NVIDIA-100.14.19-kernel-2.6.25+26-compat.diff'
-							patchFile='NVIDIA-100.14.19-for-2.6.26.patch'
-							apply_patch_file $patchFile
-							;;
-					esac
-					;;
-				27)
-					apply_module_patch pre
-					case $DRIVER_DEFAULT in
-						177.13)
-							# patch author: zander, nvidia; patch src: 
-							# http://www.nvnews.net/vbulletin/showthread.php?t=117209
-							# patch url:
-							# http://www.nvnews.net/vbulletin/attachment.php?attachmentid=32559&d=1218212371
-							patchFile='NVIDIA_kernel-177.13-2627763.diff'
-							apply_patch_file $patchFile
-							;;
-						173.14.12|96.43.07)
-							# patch file source:
-							# http://www.nvnews.net/vbulletin/showthread.php?t=120884
-							patchFile='NVIDIA-173.14.12-2.6.27.patch'
-							apply_patch_file $patchFile
-							;;
-						71.86.06)
-							# patch file source:
-							# http://www.nvnews.net/vbulletin/showthread.php?t=120971
-							patchFile='NVIDIA-71.86.06-2.6.27.patch'
-							apply_patch_file $patchFile
-							;;
-						# patch url: http://www.nvnews.net/vbulletin/showthread.php?t=112452
-						100.14.19|100.14.23)
-							patchFile='NVIDIA-100.14.19-kernel-2.6.27-compat.patch'
-							apply_patch_file $patchFile
-							;;
-					esac
-					;;
-			esac
-			;;
-		$FGLRX)
-			case $KERNEL_THIRD in 
-				25|26)
-					case $DRIVER_DEFAULT in
-# 						8-4|8-5)
-# 							# debian kernls work normally, no patch required
-# 							# note: due to concerns raised, this patch is not going to be used
-# 							if [ -n "$IS_SIDUX_KERNEL" ] 
-# 							then
-# 								# pre patch link required, just to keep the information for future reference:
-# 								ln -s arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1.0 arch/x86/usr/X11R6/lib/libfglrx_gamma.so.1
-# 								ln -s arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1.0 arch/x86_64/usr/X11R6/lib64/libfglrx_gamma.so.1
-# 								patchFile=''
-# 								#apply_patch_file $patchFile
-# 							fi
-# 							;;
-						8-6)
-							patchFile='0001-catalyst-8.6-linux-2.6.26.patch'
-							apply_patch_file $patchFile
-							patchFile='0002-catalyst-8.6-linux-2.6.26.patch'
-							apply_patch_file $patchFile
-							patchFile='0003-catalyst-8.6-linux-2.6.26.patch'
-							apply_patch_file $patchFile
-							;;
-						8-7)
-							# patch url: http://bugs.gentoo.org/attachment.cgi?id=161335
-							# found at: http://bugs.gentoo.org/show_bug.cgi?id=232609
-							patchFile='FGLRX-8.7-2.6.26.patch'
-							# this one is crap, bad hunks
-							#patchFile='FGLRX-0004-Linux-2.6.26.x-kernels-support.patch'
-							apply_patch_file $patchFile
-							;;
-					esac
-					;;
-			esac
-			;;
-	esac
-	
-	# this is for dev testing of patches or fixes
-	if [ "$TESTING" == 'true' ]
-	then
-		: # doing nothing for now
-	fi
 	eval $LOGPE
 }
 
