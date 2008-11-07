@@ -1340,7 +1340,7 @@ cleanup_extra_files()
 	fi
 	if [ -f smxi.zip ]
 	then
-		rm -f smxi.zip
+		rm -f smxi*.zip # cleans up also extra stuff
 	fi
 	if [ -f /usr/sbin/smxi-stub.zip ]
 	then
