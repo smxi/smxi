@@ -1,22 +1,22 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.13
-####  Date: October 31 2008
+####  version: 2.10.14
+####  Date: November 8 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-####  Script Author: Harald Hope 
+####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
 ####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-package-install
@@ -26,7 +26,7 @@
 DEFAULT_DM=''
 
 ########################################################################
-####  FUNCTIONS 
+####  FUNCTIONS
 ########################################################################
 
 ###---------------------------------------------------------------------
@@ -38,12 +38,12 @@ DEFAULT_DM=''
 package_group_installer()
 {
 	eval $LOGUS
-	local itemName=$2 packageName='' 
-	# select: default system/user set/wdm as default if nothing else, if kde, use kdm 
+	local itemName=$2 packageName=''
+	# select: default system/user set/wdm as default if nothing else, if kde, use kdm
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
 	local pdfLight='epdfview' mlocate='mlocate'
-	
+
 	# note: these packages are not in every Debian level
 	if [ -z "$( check_package_status 'epdfview' )" ]
 	then
@@ -53,7 +53,7 @@ package_group_installer()
 	then
 		mlocate=''
 	fi
-	
+
 	# package groups, console stuff first so it's included in following
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local consoleTools="bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
@@ -67,13 +67,13 @@ package_group_installer()
 	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
- 
+
 	local mozillaGroup='icedove iceweasel'
 	local streamTuner='streamtuner streamripper'
 	local systemUtils='alsa-base alsa-utils anacron dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev'
 	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
-	
+
 	echo $LINE
 	echo "${S}Installing ${C}$itemName${S}...${N}"
 	# transfer meta packages to package installer variable
@@ -146,7 +146,7 @@ package_group_installer()
 			packageName=$itemName
 			;;
 	esac
-	
+
 	if [ -n "$3" ]
 	then
 		eval $3 # this removes stuff, or does other operations, first
@@ -169,8 +169,8 @@ update_sources()
 	local swiftSources='deb http://getswiftfox.com/builds/debian unstable non-free'
 	local swiftApt="$EAS.d/swiftfox.list"
 	local extraFunctions='' grepSearch='' sourceFile='' sourcesData='' searchIdentifier=''
-	
-	case $1 in 
+
+	case $1 in
 		opera)
 			# opera keyrings
 			extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
@@ -198,7 +198,7 @@ update_sources()
 			fi
 			;;
 	esac
-	
+
 	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData" "$searchIdentifier"
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
@@ -242,11 +242,11 @@ select_install_type()
 	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
 	echo
 	echo "${C}5${S} - ${C}back-to-main-menu${S}"
-	
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	options="office non-free utilities display-manager back-to-main-menu"
 	select opt in $options
 	do
@@ -307,11 +307,11 @@ office_installer()
 	echo "${C}5${S} - ${C}light-office${S} gtk based lightweight office tools: abiword, gnumeric, extras"
 	echo
 	echo "${C}6${S} - ${C}back-to-install-menu${S}"
-	
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	options="openoffice.org openoffice-hold-install koffice kde-pim light-office back-to-install-menu"
 	select opt in $options
 	do
@@ -386,11 +386,11 @@ non_free_installer()
 	echo -e "${C}6${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
 	echo
 	echo "${C}7${S} - ${C}back-to-install-menu${S}"
-	
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	options="opera flash-plugin java-plugin msttcore-fonts skype google-earth back-to-install-menu"
 	select opt in $options
 	do
@@ -406,7 +406,7 @@ non_free_installer()
 				# then test for sid version of flash
 				if [ -n "$( check_package_status 'flashplugin-nonfree' )" ]
 				then
-					package_group_installer 'plain' 'flashplugin-nonfree' 
+					package_group_installer 'plain' 'flashplugin-nonfree'
 				elif [ -n "$( check_package_status 'flashplayer-mozilla' )" ]
 				then
 					package_group_installer 'plain' 'flashplayer-mozilla'
@@ -476,22 +476,22 @@ utilities_installer()
 	echo "    Check it out, these are small, fast, and really pleasant. See how the non-gui side."
 	echo "    Installs: ${C}lynx links elinks links2 w3m${S} (links2 is my favorite)"
 	echo "    Hey, everyone has their favorite! See if you find one you like..."
-	
-	
+
+
 	echo "${C}3${S} - ${C}system-utilities${S} All the basics (plus related packages), and a few nice tools:"
 	echo "    alsa gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
-	
+
 	echo "${C}4${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
 	echo "    for optimal performance. Will show your installed cpu so you can make the right choice."
-	
+
 	echo "${C}5${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
 	echo "    These are convient tools to listen to audio streams, and record them."
-	echo 
+	echo
 	echo "${C}6${S} - ${C}captive-to-ntfs-3g${S} Replaces ${C}Captive${S} with ${C}ntfs-3g${S} for ntfs read/write on linux."
 	echo "    Highly recommended if you dual boot with ntfs partitions and want to write to them."
-	
+
 	echo "${C}7${S} - ${C}yakuake${S} Quake style terminal emulator for ${C}kde${S}."
-	
+
 # 	echo "${C}6${S} - ${C}kpowersave${S} Install ${C}kpowersave / powersaved${S}."
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 	echo "${C}8${S} - ${C}h2-favorites${S} This will setup a machine with all the apps I like to use."
@@ -499,18 +499,20 @@ utilities_installer()
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
 	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a good command line tool to setup wired and wireless networking."
-	echo "${C}10${S} - ${C}infobash${S} Install ${C}infobash${S}, a nice command line tool to show system data."
+	echo "${C}10${S} - ${C}infobash${S} Install ${C}infobash${S}, command line tool to show system data ${M}(deprecated in favor of inxi)${S}."
+	echo "${C}11${S} - ${C}inxi${S} Install ${C}inxi${S}, a new fork of ${C}infobash${S}. Bigger, better, more features!"
+	echo "    Runs once with full (${C}-F${S}) options when you install it. See ${C}inxi -h${S} for all options."
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
-	
+
 	echo
-	echo "${C}11${S} - ${C}back-to-install-menu${S}"
-	
+	echo "${C}12${S} - ${C}back-to-install-menu${S}"
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
-	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni infobash back-to-install-menu"
+
+	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni infobash inxi back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -538,6 +540,10 @@ utilities_installer()
 				;;
 			infobash)
 				check_install_package 'infobash'
+				repeat='true'
+				;;
+			inxi)
+				run_script_import $MOD_INXI
 				repeat='true'
 				;;
 			kpowersave)
@@ -584,7 +590,7 @@ display_manager_installer()
 	local displayManager=$( get_default_display_manager )
 	local repeat='' options='' opt=''
 	local xorgPackages=''
-	
+
 	if [ -z "$displayManager" ]
 	then
 		displayManager='none detected'
@@ -609,7 +615,7 @@ display_manager_installer()
 	else
 		echo "${S}You have chosen to use this display manager: ${C}$DEFAULT_DM${S}"
 	fi
-	
+
 	echo $LINE
 	echo "${C}1${S} - ${C}select-display-manager${S} Select an alternate display manager to use"
 	echo "${C}2${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
@@ -626,11 +632,11 @@ display_manager_installer()
 	echo "${C}13${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
 	echo "${C}14${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies + display manager."
 	echo "${C}15${S} - ${C}back-to-install-menu${S}"
-	
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	options="select-display-manager system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fluxbox fluxbox-full fvwm-crystal fvwm-crystal-full back-to-install-menu"
 	select opt in $options
 	do
@@ -713,14 +719,14 @@ select_display_manager()
 	eval $LOGPS
 	local displayManager=$( get_default_display_manager )
 	local repeat='' options='kdm gdm xdm wdm slim back-to-desktop-install' opt=''
-	
+
 	echo $MLINE
 	echo "${M}Display Manager Selector"
 	echo $MLINE
 	if [ -z "$displayManager" ]
 	then
 		displayManager='none detected'
-	
+
 		echo "Please select from the following list. Note that xdm, wdm, and slim, sometimes"
 		echo "require extra configurations to allow user shutdown from desktop."
 		echo "Your current default is: ${C}$displayManager${S}"
@@ -735,7 +741,7 @@ select_display_manager()
 		echo $LINE
 		echo -e $SLE
 		echo $LINE
-	
+
 		select opt in $options
 		do
 			case $opt in
@@ -781,7 +787,7 @@ assign_display_manager()
 	eval $LOGUS
 	local displayManager=$( get_default_display_manager )
 	local itemName=$1
-	
+
 	if [ -z "$displayManager" ]
 	then
 		# assign the user set one
@@ -813,7 +819,7 @@ assign_display_manager()
 install_openoffice()
 {
 	eval $LOGPS
-	# data is this order: 
+	# data is this order:
 	# note: no entry for en-us language pack since that's part of common
 	# oooLanguagePack:oooHyphenation:oooHelp:oooThesaurus:myspell:<Language Name>
 	local oooData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
@@ -821,13 +827,13 @@ install_openoffice()
 	local oooLanguages='' l='' ll='' language=''
 	local oooLang='' oooHyph='' oooHelp='' oooThes='' oooDict='' oooDesk=''
 	local doptions='' dopt='' complete='' options=''  opt='' found='' skip=''
-	
+
 	for l in $oooData
 	do
 		ll=$( echo $l | cut -d ':' -f 6 )
 		oooLanguages=$oooLanguages$ll' '
 	done
-	
+
 	echo $MLINE
 	echo "${M}OpenOffice.org Installer"
 	echo $MLINE
@@ -840,11 +846,11 @@ install_openoffice()
 	echo "Also installs appropriate desktop integration package for either gnome or kde."
 	echo
 	echo "Select the number for ${C}no-change${S} if you want to return to main script."
-	
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	options=$oooLanguages
 
 	select opt in $options
@@ -891,7 +897,7 @@ install_openoffice()
 		done
 		break
 	done
-	
+
 	if [ "$found" == 'true' ]
 	then
 		echo $LINE
@@ -905,9 +911,9 @@ install_openoffice()
 			echo $LINE
 			echo -e $SLE
 			echo $LINE
-			
+
 			doptions='kde gnome other'
-			
+
 			select dopt in $doptions
 			do
 				case $dopt in
@@ -932,7 +938,7 @@ install_openoffice()
 					break
 				fi
 			done
-			
+
 			echo $LINE
 			echo "${S}Installing your selected language [${C}$opt${S}] components and openoffice.org.${N}"
 			package_installer "openoffice.org openoffice.org-base openoffice.org-calc openoffice.org-common openoffice.org-core openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
@@ -960,14 +966,14 @@ reinstall_skype()
 	local SkypeFileName=''
 	# note: the skype url is a 302 to the current latest version of skype
 	# local skypeDebUrl='http://www.skype.com/go/getskype-linux-beta-deb'
-	
+
 	# dependencies: libasound2 (>> 1.0.8), libc6 (>= 2.3.2.ds1-4), libgcc1 (>= 1:3.4.1-3), libqt3-mt | libqt3c102-mt (>= 3:3.3.3.2), libstdc++5 (>= 1:3.3.4-1), libx11-6 | xlibs (>> 4.1.0), libxext6 | xlibs (>> 4.1.0)
-	# libasound2 libc6 libgcc1 libstdc++5 
+	# libasound2 libc6 libgcc1 libstdc++5
 	local skypeDebUrl='http://www.skype.com/go/getskype-linux-deb'
 	echo $LINE
 	wget -T$TIME_OUT -t2 -Nc $skypeDebUrl
 	SkypeFileName=$(ls -f | grep 'skype')
-	
+
 	if [ -f $SkypeFileName ]
 	then
 		echo $LINE
@@ -1009,7 +1015,7 @@ install_google_earth()
 	echo "${S}Completed install of ${C}$goog${S}.${N}"
 	echo $LINE
 	echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
-	
+
 	print_hec
 	eval $LOGPE
 }
@@ -1098,7 +1104,7 @@ h2_package_group_remover()
 {
 	eval $LOGUS
 	local response='' removeItems=$1 package=''
-	
+
 	for package in $removeItems
 	do
 		if [ -n "$( package_tester $package )" ]
@@ -1126,7 +1132,7 @@ h2_package_group_installer()
 {
 	eval $LOGUS
 	local response=''
-	
+
 	echo
 	echo "${S}Installing ${C}$1${S}... "
 	echo "${M}Type ${C}y + <enter>${M} to continue, or ${C}n + <enter>${M} to skip these now.${N}"
@@ -1165,7 +1171,7 @@ install_kpowersave()
 {
 	eval $LOGPS
 	local response=''
-	
+
 	echo $LINE
 	echo "${S}Installing kpowersave and related components now."
 	echo "This uses ${C}unfreeze-rc.d${S} and ${C}freeze-rc.d${S} to update the services.${N}"
@@ -1174,7 +1180,7 @@ install_kpowersave()
 	package_remover 'apmd powernowd' 'purge'
 	package_installer 'kpowersave' 'install-user'
 	freeze-rc.d
-	
+
 	echo $LINE
 	echo "${S}Please remember, you will need to add your username to the ${C}powerdev${S} group"
 	echo "before this will take affect."
@@ -1184,7 +1190,7 @@ install_kpowersave()
 	echo -e "${Q}Would you like to reboot now?$YNE"
 	echo $LINE
 	read response
-	
+
 	case $response in
 		y)
 			echo $LINE
@@ -1221,7 +1227,7 @@ swiftfox_installer()
 	swiftfox-prescott:(Intel-Core-duo/solo)
 	return-to-menu
 	"
-	
+
 	# no point in offering 32 bit package here for 64 bit users, and vica versa
 	if [ "$BITS" == '64' ]
 	then
@@ -1234,7 +1240,7 @@ swiftfox_installer()
 
 	local rtmmNu=$( wc -w <<< $swiftfoxChoices )
 	local swiftNu=$(( $rtmmNu -1 ))
-	
+
 	echo $MLINE
 	echo "${M}Swiftfox Installer"
 	echo $MLINE
@@ -1250,11 +1256,11 @@ swiftfox_installer()
 	echo "${C}1-$swiftNu - ${S}Select which swiftfox version you want to install."
 	echo
 	echo "${C}$rtmmNu - return-to-menu${S} Return to utility installer."
-	
+
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	options=$swiftfoxChoices
 
 	select opt in $options
@@ -1277,7 +1283,7 @@ swiftfox_installer()
 		done
 		break
 	done
-	
+
 	if [ "$found" == 'true' ]
 	then
 		if [ "$skip" != 'true' ]

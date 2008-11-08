@@ -1,23 +1,23 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.18
-####  Date: October 29 2008
+####  version: 8.4.19
+####  Date: November 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 ####
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 ####
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 ########################################################################
-####  Script Author: Harald Hope 
-####  Many fixes/code snippets by sidux team. 
+####  Script Author: Harald Hope
+####  Many fixes/code snippets by sidux team.
 ####  Some fixes on this script come from the sidux irc factoids originally
 ####
 ####  Script URL: http://techpatterns.com/downloads/distro/smxi
@@ -51,7 +51,7 @@
 ########################################################################
 #### DEFINE:
 ####
-#### TRUE=0;FALSE>0 - with the exception where script uses arithmetic 
+#### TRUE=0;FALSE>0 - with the exception where script uses arithmetic
 ####                  values to test, like 0 occurances of test grep string
 ####                  would trigger condition, could be true or false.
 #### FUNCTION RETURN VALUES - TRUE=0;FALSE>0
@@ -103,7 +103,7 @@ then
 	then
 		IS_LIVE='true'
 	fi
-fi 
+fi
 
 # kernel info
 CURRENT_KERNEL=$(uname -r)
@@ -310,11 +310,11 @@ then
 fi
 
 ########################################################################
-####  FUNCTIONS 
+####  FUNCTIONS
 ########################################################################
 
 ########################################################################
-### core utilities, script updating tool (mini-apt), xorg utilities, 
+### core utilities, script updating tool (mini-apt), xorg utilities,
 ### package/file tests, sticky prefs, script values/triggers
 ###---------------------------------------------------------------------
 
@@ -367,7 +367,7 @@ set_script_colors()
 			N="[0;39m" # default system console color: Normal :: make last in colors
 			;;
 	esac
-	
+
 	# script layout stuff
 	BA='=================================================================='
 	LI='------------------------------------------------------------------'
@@ -380,7 +380,7 @@ set_script_colors()
 	MLINE=${M}$LI${N}
 	WLINE=${W}$LI${N}
 	SPACER='  '
-	
+
 	# repeated text
 	YNE="\n${S}[ type lower case ${C}y${S} or ${C}n${S} and hit ${C}enter${S} ]${N}"
 	SLE="${Q}Please type the appropriate number and hit ${C}enter${N}"
@@ -410,12 +410,12 @@ error_handler()
 	local errorId=$1 # id string calling, I want this to be readable
 	local errorFunction=$2
 	local errorExtra=$3 # this is secondary info, like failed package name
-	local errorCode=0 # exit/internal error number 
+	local errorCode=0 # exit/internal error number
 	local errorLevel='' # fatal/serious/internal
 	local errorMessage='' errorLogMessage='' errorPrintMessage=''
 	local errorColor=${E}
 	local errorLine=''
-	
+
 	# error handling on the error handler ;-)
 	if [ -z "$1" -o -z "$2" ]
 	then
@@ -431,7 +431,7 @@ error_handler()
 		fi
 	fi
 	case $errorId in
-		# general system checks - 2-100: fatal - exit 
+		# general system checks - 2-100: fatal - exit
 		# note: I'm leaving 1 as a default script wide as I move to this error handler
 		force-update-failed)
 			errorCode=4
@@ -515,7 +515,7 @@ error_handler()
 			errorCode=102
 			errorMessage="Missing Warning Section file: $errorExtra "
 			;;
-		
+
 		# internal script errors/failures in system: 151-254: normal
 		null-kernel-file-data)
 			errorCode=251
@@ -535,7 +535,7 @@ error_handler()
 			errorFunction=$FUNCNAME
 			;;
 	esac
-	
+
 	if [ "$errorCode" -le 254 -a "$errorCode" -gt 150 ]
 	then
 		errorLevel='internal'
@@ -556,14 +556,14 @@ error_handler()
 	then
 		errorPrintMessage=$( echo "$errorPrintMessage" | sed "s/$LOG_INDENT//g" )
 	fi
-	
+
 	echo -e "$errorPrintMessage"
 
 	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ]
 	then
 		log_function_data "$LI\n${LOG_INDENT}$errorLogMessage\n${LOG_INDENT}$LI"
 	fi
-	
+
 	if [ "$errorLevel" == 'fatal' -a "$LOGGING_STARTED" == 'true' ]
 	then
 		echo
@@ -587,7 +587,7 @@ log_function_data()
 	local utilClose=''
 	# master are not set by another function. primary are set by a master
 	# utilities are used by all functions. This should result in nested logs
-	local funcInfo='' 
+	local funcInfo=''
 	case $1 in
 		ms)
 			funcInfo="Function: $2 - MASTER: Start"
@@ -617,19 +617,19 @@ log_function_data()
 			utilClose='true'
 			;;
 	esac
-	
+
 	if [ -n "$funcInfo" ]
 	then
 		log_writer "$funcInfo"
 	else
 		log_writer "$1"
 	fi
-	
+
 	if [ -n "$3" -a "$3" != "$SCRIPT_HOME/$SCRIPT_NAME" ]
 	then
 		log_writer "Args: $3"
 	fi
-	
+
 	if [ "$utilClose" == 'true' ]
 	then
 		adjust_log_indent 'remove'
@@ -662,7 +662,7 @@ log_writer()
 	fi
 }
 
-create_log() 
+create_log()
 {
 	local scriptVersion=$( grep 'version:' $SCRIPT_NAME | grep -o "[0-9]*\.[0-9]*\.[0-9]*" )
 	if [ ! -f $SCRIPT_ROTATE ]
@@ -688,7 +688,7 @@ create_log()
 	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
-	
+
 	LOGGING_STARTED='true'
 }
 
@@ -698,14 +698,14 @@ create_log()
 ###---------------------------------------------------------------------
 
 # we're only going to bring in the module one time for anything where user
-# might have repeated run throughs of certain modules, 
+# might have repeated run throughs of certain modules,
 # arguments: $1 which lib/module file; $2 and $3 are options for run module
 run_script_import()
 {
 	eval $LOGUS
 	local loadIt='' runIt='' options='' noTestDownloadOnly='' runCommand='test_version_info'
 	local runScript=''
-	
+
 	case $1 in
 		$LIB_APT_TOOLS)
 			if [ "$SET_APT_TOOLS" != 'true' ]
@@ -807,6 +807,7 @@ run_script_import()
 			runScript=$1
 			;;
 		$MOD_INXI)
+			options="-V"
 			runIt='true'
 			runScript=$1
 			;;
@@ -827,7 +828,7 @@ run_script_import()
 			fi
 			;;
 	esac
-	
+
 	# test version against current, download/run/include
 	if [ "$loadIt" == 'true' ]
 	then
@@ -881,7 +882,7 @@ test_version_info()
 
 	# keep in mind, return values for compare: 0 -> >; 1 -> ==; 2 -> <
 	updateLocal=$( compare_numbers $remoteVersion $LocalVersion )
-	
+
 	eval $LOGUE
 	# updates as needed, if updated, return 0, if not, return 1
 	if [ "$updateLocal" -ne 1 ]
@@ -899,7 +900,7 @@ update_scripts()
 {
 	eval $LOGUS
 	local success=""
- 	
+
 	# for devs only, this switches off/on updates, so you can work
 	# on a local test version without overwrites happening
 	if [ "$DEV_FLAG" != 'true' ]
@@ -919,9 +920,9 @@ download_test_file()
 {
 	eval $LOGUS
 	local fileName=$1 fileNameTemp=''
-	local isGood='' wgetError=0 update='' 
+	local isGood='' wgetError=0 update=''
 	local downloadLocation=$TECH_PATTERNS_DISTRO downloadFile=$1 downloadUrl=''
-	
+
 	if [ -f "$fileNameTemp" ]
 	then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
@@ -964,7 +965,7 @@ download_test_file()
 		else
 			# dump the bad file
 			rm -f $fileNameTemp
-			
+
 			if [ "$3" != 'repeat' ]
 			then
 				# let's try this once again to make sure it wasn't just a temp problem
@@ -977,7 +978,7 @@ download_test_file()
 			fi
 		fi
 	fi
-	
+
 	eval $LOGUE
 }
 # args: $1 - file name; $2 - error type
@@ -985,7 +986,7 @@ file_download_error()
 {
 	eval $LOGPS
 	local response='' repeat='' downloadError1='' downloadError2=''
-	
+
 	if [ "$2" == 'file-corrupt' ]
 	then
 		downloadError1='is incomplete or corrupted.'
@@ -1010,7 +1011,7 @@ file_download_error()
 	echo $LINE
 	echo -e "${Q}Do you want to exit now ${C}y${Q} or continue without the new version of the file ${C}n${Q}?$YNE"
 	read response
-	
+
 	case $response in
 		y)	print_quit
 			;;
@@ -1043,7 +1044,7 @@ compare_numbers()
 	# first we need to determine what the base system is using for decimal indicator
 	local returnValue=''
 	local decimalType=$( echo 1 | awk '{total = $1 / 2; print total}' | egrep -o '(\.|,)' )
-	
+
 	# next we'll get the raw data and transate it if required
 	local numOne=$( echo $1 | cut -d '.' -f 1-2 | tr '.' $decimalType )
 	local subOne=$( echo $1 | cut -d '.' -f 3 )
@@ -1079,7 +1080,7 @@ compare_numbers()
 	else
 		returnValue=2
 	fi
-	
+
 	echo $returnValue
 	log_function_data "returnValue: $returnValue"
 	eval $LOGUE
@@ -1088,7 +1089,7 @@ compare_numbers()
 # compare_numbers   100.12.2 100.4.3  ;echo result: $?;exit
 
 # generic test and launch function
-# args: $1 - which function 
+# args: $1 - which function
 launch_function_trigger()
 {
 	eval $LOGPS
@@ -1140,7 +1141,7 @@ launch_function_trigger()
 		fi
 		eval $scriptFunction
 	fi
-	# the user MUST set kernel mirror always, that function will set the complex 
+	# the user MUST set kernel mirror always, that function will set the complex
 	# stored mirror value
 	if [ "$smPref" -eq 0 -a "$setPrefs" == 'true' ]
 	then
@@ -1154,7 +1155,7 @@ metapackage_launcher()
 {
 	eval $LOGPS
 	local metaExists=$( package_tester '2.6-sidux-' 'wild-full' )
-	
+
 	# special case here, only run if metapackages are present, or if user initiates
 	# note: user initiates either by starting from kernel advanced, or -N
 	# the smPref is checked in launch_function_trigger and set in kernel_meta_package_handler
@@ -1190,13 +1191,13 @@ set_distro_data()
 	local isLennyStable=$( grep -is '^5.' $EDV )
 	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
 	local isSqueezeTesting=$( grep -is '^squeeze/sid' $EDV )
-	
+
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(testing)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
-	
+
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ] 
+	if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ]
 	then
 		if [ -n "$isEtch" ]
 		then
@@ -1204,7 +1205,7 @@ set_distro_data()
 		else
 			SYSTEM_BASE='stable'
 		fi
-		DU_UPGRADE='upgrade' 
+		DU_UPGRADE='upgrade'
 		WARNING_BODY='warning_message_s'
 		ALERT_BODY='alert_message_s'
 		CONFIGS_BODY='configs_s'
@@ -1258,7 +1259,7 @@ set_distro_data()
 		DEFAULT_KERNEL='sidux'
 	fi
 	DISTRO_F="$DISTRO-$SYSTEM_BASE-$BITS"
-	
+
 	## override defaults by user preference
 	# user set default kernel
 	case "$defaultKernel" in
@@ -1307,12 +1308,12 @@ cleanup_extra_files()
 {
 	eval $LOGPS
 	local script_names="sgfxi sm smxi du-fixes-h2.sh svmi" i="" all_files=""
-	
+
 	for i in $script_names
 	do
 		# Note: if  * is in "" the wildcard does not work
 		# /dev/null handles case where no temp or original file exists
-		all_files=$( ls "${i}."* 2> /dev/null ) 
+		all_files=$( ls "${i}."* 2> /dev/null )
 		# make sure stuff exists, then rm files
 		# factoid: if you put $all_files in "" it will not work with rm -f
 		if [ -n "$all_files" ]
@@ -1321,7 +1322,7 @@ cleanup_extra_files()
 		fi
 	done
 	# handle any legacy stuff too
-	all_files=$( ls "du-fixes"* 2> /dev/null ) 
+	all_files=$( ls "du-fixes"* 2> /dev/null )
 	if [ -n "$all_files" ]
 	then
 		rm -f $all_files
@@ -1363,7 +1364,7 @@ cleanup_extra_files()
 	# this fixes the bad permissions and lets people run the stuff as user again, or view it
 	chmod 604 sm-lib-* &>/dev/null
 	chmod 705 sgfxi svmi smxi &>/dev/null
-	
+
 	if [ -f $LIB_WARNING ]
 	then
 		sed -i 's/continue-no-dist-upgrade|continue-no-upgrade)/continue-no-dist-upgrade|continue-no-upgrade|continue-no-safe-upgrade)/' $LIB_WARNING
@@ -1376,7 +1377,7 @@ create_script_files()
 {
 	eval $LOGPS
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
-	
+
 	# make config file / log dir if required
 	check_sm_pref_file
 	# move old xorg clean up log if present
@@ -1405,7 +1406,7 @@ update_kernel_directories()
 	local smPref=$( sm_pref_tester $prefId )
 
 	local kernelDirs='' kernelDir='' normalizedDir=''
-	
+
 	if [ -d $KERNEL_DIRECTORY -a "$smPref" -eq 0 ]
 	then
 		kernelDirs=$( ls $KERNEL_DIRECTORY )
@@ -1427,7 +1428,7 @@ update_kernel_directories()
 				fi
 			done
 		fi
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 	eval $LOGUE
 }
@@ -1461,7 +1462,7 @@ normalize_kernel_string()
 		processSlh='true'
 		slhSlicePoint=1
 	fi
-	
+
 	if [ "$oldSlh" == 'true' -o "$processSlh" == 'true' ]
 	then
 		if [ "$processSlh" == 'true' ]
@@ -1502,7 +1503,7 @@ test_kernel_strings()
 	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 	local normalizedPackageId=$( normalize_kernel_string $1 )
 	local value=''
-	
+
 	if [ "$normalizedCurrentKernel" == "$normalizedPackageId" ]
 	then
 		value='true'
@@ -1530,7 +1531,7 @@ sticky_prefs()
 	eval $LOGUS
 	local prefId='RememberResponses'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $MLINE
@@ -1547,13 +1548,13 @@ sticky_prefs()
 	eval $LOGUE
 }
 
-# args: $1, s/d, set the du data, or standard, set the sticky string in /etc/smxi.conf 
+# args: $1, s/d, set the du data, or standard, set the sticky string in /etc/smxi.conf
 set_sticky_prefs()
 {
 	eval $LOGUS
 	check_sm_pref_file
 	local currentDate=$( date +%Y-%m-%d-%H:%M )
-	
+
 	case $1 in
 		s)	set_sm_pref_values "script-last-used" "$currentDate"
 			;;
@@ -1569,7 +1570,7 @@ set_sticky_prefs()
 sort_sticky_prefs()
 {
 	local tempFile='/etc/ljsdflsjf5848sljf4'
-	
+
 	# sort the file, test/clean for unique entries, then mv to smxi.conf
 	# note; you cannot write the file to itself in a one liner, it becomes null
 	sort -f -b $SM_CONFIG_FILE | uniq > $tempFile
@@ -1609,7 +1610,7 @@ sm_pref_tester()
 	eval $LOGUS
 	check_sm_pref_file
 	local smPref='' testType='standard'
-	
+
 	if [ -n "$2" ]
 	then
 		testType=$2
@@ -1628,7 +1629,7 @@ sm_pref_tester()
 				error_handler 'value-bad' $FUNCNAME "$testType"
 				;;
 		esac
-		
+
 		echo $smPref
 		log_function_data "smPref: $smPref"
 	else
@@ -1647,7 +1648,7 @@ start_windows_manager()
 {
 	eval $LOGPS
 	local options='' opt=''
-	
+
 	echo $LINE
 	echo "${C}1${S} - Starts your desktop, X (window manager)."
 	echo "${C}2${S} - Exits the script without starting your window manager."
@@ -1670,12 +1671,12 @@ start_windows_manager()
 				;;
 			*)
 				print_error opt
-				start_windows_manager 
+				start_windows_manager
 				;;
 		esac
 		break
 	done
-	
+
 }
 
 # arg: $1 - start/stop; $2 - stop/start
@@ -1685,10 +1686,10 @@ start_stop_default_dm()
 	local displayManager=$( get_default_display_manager )
 	local success=''
 	local dmList='entrance gdm kdm slim wdm xdm' dm=''
-	
+
 	case $1 in
 		full)
-			if [ -z "$displayManager" ] 
+			if [ -z "$displayManager" ]
 			then
 				for dm in $dmList
 				do
@@ -1731,7 +1732,7 @@ start_stop_default_dm()
 			fi
 			;;
 	esac
-	# only kill on dm start. Leaving init stuff for users who are using the init 3 -> 5 
+	# only kill on dm start. Leaving init stuff for users who are using the init 3 -> 5
 	# method, so they end up in their default runlevel as expected
 	if [ "$success" == 'true' -a "$2" == 'start' ]
 	then
@@ -1751,7 +1752,7 @@ do_display_manager_pid_test()
 {
 	eval $LOGUS
 	local dmIdList='entrance/entranced.pid gdm.pid kdm.pid slim.lock wdm.pid xdm.pid' dmId='' found=''
-	
+
 	for dmId in $dmIdList
 	do
 		if [ -e /var/run/$dmId ]
@@ -1759,7 +1760,7 @@ do_display_manager_pid_test()
 			found='true'
 		fi
 	done
-	
+
 	if [ "$( x_is_running )" -eq 0 ]
 	then
 		found='true'
@@ -1782,7 +1783,7 @@ x_is_running()
 	# we'll do one final X is running test here, note, handling a bunch of
 	# different possible X detections in etch, lenny, and sid, then filtering out the grep
 	local xIsRunning=$( ps aux | grep '/usr.*/X' | egrep -ivc '(grep|/Xprt)' )
-	
+
 	if [ "$xIsRunning" -gt 0 ]
 	then
 		returnVal='0'
@@ -1793,7 +1794,7 @@ x_is_running()
 	log_function_data "returnVal: $returnVal"
 	eval $LOGUE
 }
-# keep the lists here synced, do dm pid, and below: 
+# keep the lists here synced, do dm pid, and below:
 get_display_manager_runlevels()
 {
 	eval $LOGUS
@@ -1815,14 +1816,14 @@ get_default_display_manager()
 {
 	eval $LOGUS
 	local displayManager=$( cat /etc/X11/default-display-manager 2>/dev/null )
-	
-	displayManager=$( basename $displayManager 2>/dev/null ) 
-	
+
+	displayManager=$( basename $displayManager 2>/dev/null )
+
 	if [ "$displayManager" == 'entranced' ]
 	then
 		displayManager='entrance'
 	fi
-	
+
 	echo $displayManager
 	log_function_data "displayManager: $displayManager"
 	eval $LOGUE
@@ -1834,7 +1835,7 @@ test_xorg_version()
 {
 	eval $LOGUS
 	local XorgIs='' xVersions='' xVersion1='' xVersion2=''
-	
+
 	if [ -f /var/lib/dpkg/status ]
 	then
 		# slice out the version numbers for these two, that way we can see if xorg
@@ -1869,7 +1870,7 @@ launch_from_X()
 		if [ "$( tty | grep pts )" ]
 		then
 			TERM=linux
-			exec openvt -s bash -c "smxi $@; bash" 
+			exec openvt -s bash -c "smxi $@; bash"
 		fi
 	fi
 }
@@ -1901,11 +1902,11 @@ start_up_tests()
 	then
 		error_handler 'unidentified-distro' $FUNCNAME ''
 	fi
-		
+
 }
 
 # this script must run out of x, and gives option to go into default runlevel on x start
-check_display_and_x() 
+check_display_and_x()
 {
 	eval $LOGPS
 	# this fixes cases where the runlevel might give a 2 or 3 item result
@@ -1941,7 +1942,7 @@ check_display_and_x()
 		read response
 		eval $LOGPE
 		case $response in
-			y)	
+			y)
 				echo "${S}Shutting down ${C}X/Desktop${S} now...${N}"
 				start_stop_default_dm full stop
 # 				if [ "$TESTING" == 'true' ]
@@ -1958,7 +1959,7 @@ check_display_and_x()
 					start_stop_default_dm full stop
 				fi
 				;;
-			n)	
+			n)
 				echo $LINE
 				echo "${S}Exiting the script. Please run the script out of ${C}X/Desktop (kde/gnome/xfce etc..)${S}"
 				echo
@@ -1991,13 +1992,13 @@ check_script_path()
 	eval $LOGUS
 	local dufDir=$( dirname $0 )
 	c2=( 'a' 'b' 'e' 'f' 'i' 'k' 'l' 'm' 'r' 't' 'u' 'y' )
-	
+
 	# protection against users who absolutely insist on not following the directions
 	# on where to install smxi, move to /usr/local/bin no matter where they put it
 	if [ "$dufDir" != $SCRIPT_HOME ]
 	then
 		# 2 cases: first, user is starting with ./ not in /usr/local/bin
-		# 2: smxi is not in /usr/local/bin 
+		# 2: smxi is not in /usr/local/bin
 		if [ "$dufDir" == '.' -a "$(pwd)" != $SCRIPT_HOME ] || [ "$dufDir" != '.' ]
 		then
 			echo $WLINE
@@ -2104,7 +2105,7 @@ check_age()
 	local CurrentYear=$( date +%Y )
 	local NextYear=$(( $ScriptYear + 1 ))
 	local TooOld='' Diff=''
-	
+
 	if [ $ScriptYear -eq $CurrentYear ]
 	then
 		Diff=$(( $CurrentDay - $ScriptDay ))
@@ -2122,7 +2123,7 @@ check_age()
 	else
 		TooOld='true'
 	fi
-	
+
 	if [ "$TooOld" == "true" ]
 	then
 		error_handler smxi-version-too-old $FUNCNAME
@@ -2134,7 +2135,7 @@ check_age()
 check_connection()
 {
 	eval $LOGPS
-	local repeat='' connection='' options='' opt='' 
+	local repeat='' connection='' options='' opt=''
 	local UserAgent='Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1'
 
 	if [ "$SKIP_CONNECTION_RETRY" != 'true' ]
@@ -2144,7 +2145,7 @@ check_connection()
 		# ping is a problem when there is no connection, takes too long to time out
 		#ping -c 1 -W 2 google.com &>/dev/null && connection=1 || connection=0
 		wget -T 7 -t 1 -q --spider http://www.google.com/ && connection=1 || connection=0
-		
+
 		# some US ISPs block ping, so do backup tests if that's the case
 		if [ "$connection" -eq 0 ]
 		then
@@ -2188,7 +2189,7 @@ check_connection()
 			echo $LINE
 			echo $SLE
 			echo $LINE
-			
+
 			options="continue-no-connection install-wireless-modules quit"
 			select opt in $options
 			do
@@ -2225,7 +2226,7 @@ check_connection()
 		echo "${S}Internet connection is present and working.${N}"
 		eval $LOGPE
 	fi
-	
+
 	if [ "$repeat" == 'true' ]
 	then
 		check_connection
@@ -2236,7 +2237,7 @@ restart_networking()
 {
 	eval $LOGUS
 	local RestartNetworking='/etc/init.d/networking restart' response=''
-	
+
 	echo $WLINE
 	echo "${W}Connection failed, sorry."
 	echo $WLINE
@@ -2244,11 +2245,11 @@ restart_networking()
 	echo "problem? If you just installed a new kernel and you use wifi you probably need"
 	echo "to reinstall your wifi modules, but this step won't hurt, though it takes"
 	echo "a while to complete the full restart tests if no connection is working."
-	
+
 	echo -e "${Q}Would you like to run ${C}$RestartNetworking${Q}?$YNE"
 	echo $LINE
 	read response
-	
+
 	case $response in
 		y)	echo "${C}$RestartNetworking${S} is being run to make sure your connection just didn't drop.${N}"
 			/etc/init.d/networking restart
@@ -2297,7 +2298,7 @@ check_version()
 	eval $LOGPS
 	local response='' existsNewer=''
 	local LocalVersion=$( grep -m 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $SCRIPT_HOME/$SCRIPT_NAME | grep -o -G "[0-9].[0-9]*.[0-9]*" )
-	
+
 	# if the remote version is greater/less, then this returns 0, 1 for equal
 	# 0 means get latest, 1 means don't
 	test_version_info $SCRIPT_NAME chm
@@ -2308,7 +2309,7 @@ $LINE
 ${S}Script Last Modified: ${C}$REMOTE_DATE${N}
 ${S}Local Version: ${C}$LocalVersion
 ${S}Remote Version: ${C}$REMOTE_VERSION"
-	
+
 	if [ "$REMOTE_VERSION" == "$LocalVersion" -a "$FORCE_DOWNLOAD" != 'true' ]
 	then
 		CHECK_VERSION_TEXT="$CHECK_VERSION_TEXT
@@ -2326,7 +2327,7 @@ ${S}You are using the latest version of this script.${N}"
 		fi
 		echo "${S}The script will now install the remote version"
 		echo "and restart this script using the new version${N}"
-		
+
 		# run the script again, using the newly downloaded script
 		echo "${S}Restarting Now.........${N}"
 		# restart with full args, append all start options except f and r to -r
@@ -2342,7 +2343,7 @@ check_dpkg_update()
 {
 	eval $LOGUS
 	local dpkguf='/var/cache/apt/pkgcache.bin'
-	
+
 	if [ -f $dpkguf ]
 	then
 		DPKG_UPDATE=$( ls -l --time-style=+%Y-%m-%d-%H:%M $dpkguf | egrep -o "20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}" )
@@ -2361,7 +2362,7 @@ nonfree_driver_reinstall()
 	local isNvidia=$( egrep -sio 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
 	local isFglrx=$( egrep -sio 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
 	local driverIs='' xorgMessage='' kernelMessage='' reinstallMessage='' message=''
-	
+
 	if [ -n "$isNvidia" ]
 	then
 		driverIs='nVidia'
@@ -2370,9 +2371,9 @@ nonfree_driver_reinstall()
 	then
 		driverIs='ATI/fglrx'
 	fi
-	
+
 	log_function_data "Non-Free driver data: $driverIs"
-	
+
 	if [ -n "$driverIs" ]
 	then
 		reinstallMessage="${M}You will need to reinstall your ${C}$driverIs${M} driver in Graphics Install.\n$MLINE"
@@ -2461,7 +2462,7 @@ print_lib_info()
 	local scriptText='' printIt=''
 	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$1 | cut -d ' ' -f 2 )
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$1 | cut -d ' ' -f 2-4 )
-	
+
 	case $1 in
 		$LIB_CLEAN_UP)
 			scriptText='CLEAN UP OPTIONS'
@@ -2520,7 +2521,7 @@ print_lib_info()
 print_version()
 {
 	eval $LOGUS
-	local distroThanks='crust devil dutchy kelmo latino locsmif paleoflatus piper slh trash80 x-un-i webera zulu9' 
+	local distroThanks='crust devil dutchy kelmo latino locsmif paleoflatus piper slh trash80 x-un-i webera zulu9'
 	local extraMessage="...and welcome Debian users, hope you enjoy $SCRIPT_NAME..."
 	local item=''
 	# only for -v option printout
@@ -2528,7 +2529,7 @@ print_version()
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
 	local systemBase=$( perl -wp -e '$_ = ucfirst' <<< $SYSTEM_BASE )
 	local distroId=$( print_distro_id )
-	
+
 	case $DISTRO in
 		sidux)
 			distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
@@ -2575,7 +2576,7 @@ print_install_information()
 {
 	eval $LOGPS
 	local AdvancedOptions=''
-	local dpkgUpdate='' dpkgInstall='' 
+	local dpkgUpdate='' dpkgInstall=''
 	local rootHomeData="$( df -h -T | egrep '(/|/boot|/var|/home)$'  | S=${S} C=${C} awk '{print $7, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $2, ENVIRON["S"]"Size:"ENVIRON["C"], $3, ENVIRON["S"]"Used:"ENVIRON["C"], $4, ENVIRON["S"]"("ENVIRON["C"], $6, ENVIRON["S"]")", "Free:"ENVIRON["C"], $5}' )"
 	local latestKernel='NO KERNEL DATA'
 	if [ -n "$CURRENT_APT_KERNEL" ]
@@ -2594,7 +2595,7 @@ print_install_information()
 	then
 		ScriptLastDu='Last script d-u not yet set'
 	fi
-	
+
 	if [ -f $dpkgif ]
 	then
 		dpkgInstall=$( ls -l --time-style=+%Y-%m-%d-%H:%M $dpkgif | egrep -o "20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}" )
@@ -2608,7 +2609,7 @@ print_install_information()
 		echo "$CHECK_VERSION_TEXT"
 	fi
 	print_version
-	
+
 	echo "${S}Operating system: ${C}$BITS bit${S}"
 	echo "${S}Your CPU is: ${C}$CPU_NAME"
 	echo "${S}File System Information:"
@@ -2678,7 +2679,7 @@ print_hec()
 			fi
 		fi
 		printHec="${Q}Please hit ${C}$key${Q} to continue${N}"
-		
+
 		echo $LINE
 		# halt the script so people can read the advice
 		echo $printHec
@@ -2697,9 +2698,9 @@ print_distro_id()
 {
 	eval $LOGUS
 	# Note: $EDV is the default if all else fails
-	local knownDistroIds="$ESV $EAX $EDI $SMDV $EDV" 
+	local knownDistroIds="$ESV $EAX $EDI $SMDV $EDV"
 	local distroFile='' distroId=''
-	
+
 	for distroFile in $knownDistroIds
 	do
 		if [ -f $distroFile ]
@@ -2714,7 +2715,7 @@ print_distro_id()
 	then
 		distroId='Unknown Distro'
 	fi
-	
+
 	echo $distroId
 	log_function_data "distroId: $distroId"
 	eval $LOGUE
@@ -2724,13 +2725,13 @@ print_distro_id()
 # args: $1 - which view mode: c = configs; w = warnings; cw = both
 print_update_warning_configs()
 {
-	local startArgs='print' 
+	local startArgs='print'
 	local updateRootMessage="Remember, to update this live, use ${C}-W${S} option as root."
-	
+
 	# need to set the correct config files for user system here
 	set_distro_data
 	cd $SCRIPT_HOME
-	
+
 	echo $MLINE
 	echo "${M}$SCRIPT_NAME Warning/Config Data"
 	echo $MLINE
@@ -2745,7 +2746,7 @@ print_update_warning_configs()
 		echo "${S}Since you are not logged in as root, the last available warning data will be used.${N}"
 		echo $LINE
 	fi
-	
+
 	# this will allow user to use current version of warnings if not root
 	run_script_import $LIB_WARNING
 	if [ ! -f $LIB_WARNING ]
@@ -2770,7 +2771,7 @@ print_update_warning_configs()
 				get_configs $startArgs
 				;;
 		esac
-		
+
 		echo "${S}End of warning/config data. $updateRootMessage"
 		echo $LINE
 	fi
@@ -2781,7 +2782,7 @@ print_update_warning_configs()
 print_completed()
 {
 	eval $LOGUS
-	echo 
+	echo
 	echo $MBAR
 	echo "${M}==== Ok, you are done with the system upgrade. Hope it works. ===="
 	echo $MBAR
@@ -2831,13 +2832,13 @@ pre_du_tasks()
 	eval $LOGMS
 	# begin update tasks
 	apt_update_handler 'pre-du'
-	
+
 	echo $LINE
 	echo "${S}Running assorted tasks to prepare for the system $DU_UPGRADE...${N}"
 	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ]
 	then
 		set_hold_install hold
-		
+
 		# RUN FIRST CRITICAL FIXES. Must run before other fixes to avoid errors in apt
 		# generally, these are fixes for kernels, core libs etc, that a new kernel might
 		# make needed, like libncurses, libc6, and so on.
@@ -2860,7 +2861,7 @@ pre_du_tasks()
 		run_script_import $LIB_2008_FIXES
 		run_2008_fixes 'pre'
 	fi
-		
+
 	echo $LINE
 	echo "${S}Finished with the pre-upgrade tasks.${N}"
 
@@ -2879,7 +2880,7 @@ install_dist_upgrade()
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f $DU_UPGRADE-again check-services continue "
-	
+
 	# set the trap here
 	trap 'du_trap_handler $FUNCNAME' INT TERM
 
@@ -2894,7 +2895,7 @@ install_dist_upgrade()
 			ConnectionDropped='echo -e "${W}After your $DU_UPGRADE you may lose your network connection.${S}\nIf this happens some parts of the script will not work. To fix this,\nsimply restart the script, and it will restart your connection for you\nif there is no connection present.\n$LINE"'
 		fi
 	fi
-	
+
 	# only do this part the first time the function runs
 	if [ "$1" == "first" ]
 	then
@@ -2914,7 +2915,7 @@ install_dist_upgrade()
 		echo "${C}2${S} - for doing ${C}$DU_UPGRADE${S} again. Try the ${C}2${S} option first."
 		echo "${C}1${S} - for ${C}$APT_TYPE install -f${S}. Only select ${C}1${S} if ${C}2${S} returns errors"
 		echo "That will force apt to install the parts that returned errors."
-		
+
 		# small cosmetic, to avoid printing double line with print-hec
 		if [ "$SKIP_ENTER" == 'true' ]
 		then
@@ -2940,7 +2941,7 @@ install_dist_upgrade()
 		echo $EBAR
 		echo "${S}Please make sure to do the following to correct the errors reported:"
 		echo "${C}$APT_TYPE install -f ${S}[option ${C}1${S}] - Use this first if you got errors!"
-		
+
 		echo
 		echo "Run the ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] to make sure the $DU_UPGRADE completes."
 		echo "If errors do not get resolved, you'll need to get help from sidux irc or the forums."
@@ -2950,7 +2951,7 @@ install_dist_upgrade()
 		echo
 		echo "Once you are sure the upgrade is done, you can continue, check services, or exit."
 	fi
-	
+
 	# if current kernel was not in grub prior to du, and is in grub post du
 	# metapackage users need this alert because otherwise they might not even
 	# realize a new kernel installed. Regular kernel users of course don't need
@@ -2968,7 +2969,7 @@ install_dist_upgrade()
 	log_function_data "CURRENT_APT_KERNEL_GRUB: $CURRENT_APT_KERNEL_GRUB"
 	log_function_data "metaExists: $metaExists"
 	log_function_data "KERNEL_INSTALL_TO: $KERNEL_INSTALL_TO"
-	
+
 	echo $MLINE
 	nonfree_driver_reinstall 'kernel-xorg'
 	eval "$rebootTopText"
@@ -2980,14 +2981,14 @@ install_dist_upgrade()
 	echo
 	echo "${C}4 - continue${S} Continue on with script, do this when $DU_UPGRADE is successful."
 	eval "$rebootText"
-	
+
 	echo "${C}$exitNo - quit${S} If you need to fix error, you can exit here. In general, please"
 	echo "    do not exit unless you need to. The script often runs post $DU_UPGRADE fixes"
 	echo "    when you use ${C}continue${S}, and if you exit here, they will not run."
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	select opt in $options
 	do
 		eval $LOGME
@@ -3007,7 +3008,7 @@ install_dist_upgrade()
 				;;
 			check-services)
 				check_services
-				repeat='true' 
+				repeat='true'
 				;;
 			continue)
 				# set some prefs for successful du
@@ -3038,7 +3039,7 @@ install_dist_upgrade()
 	trap - INT TERM
 	# run du cleanup etc tasks once user decides to continue, note that
 	# script uses the error numbers to determine which message to display on repeat
-	
+
 	if [ "$repeat" == 'true' ]
 	then
 		install_dist_upgrade repeat $exitStatus
@@ -3052,7 +3053,7 @@ check_services()
 {
 	eval $LOGUS
 	local rcconfFeature=0
-	
+
 	if [ -z "$( package_tester 'rcconf' )" ]
 	then
 		install_missing_apps 'rcconf' 'feature'
@@ -3088,7 +3089,7 @@ post_du_tasks()
 	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ]
 	then
 		trap 'du_trap_handler $FUNCNAME' INT TERM
-		
+
 		# this is all just debian conversion stuff
 		if [ "$CON_DEB" == 'true' ]
 		then
@@ -3097,7 +3098,7 @@ post_du_tasks()
 			install_sidux_components # test to make sure all sidux stuff is installed
 			sidux_graphics grub1
 		fi
-		
+
 		# load the 2007 fixes
 		if [ "$DISTRO_LEVEL" -lt 10 ]
 		then
@@ -3134,7 +3135,7 @@ libc6_fix_1()
 	then
 		kernelMessage=" before you $DU_UPGRADE"
 	fi
-	
+
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ]
  	then
 		echo $LINE
@@ -3143,7 +3144,7 @@ libc6_fix_1()
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
 		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
-		package_installer 'libc6 libc6-dev tzdata locales util-linux' 'force-always' 
+		package_installer 'libc6 libc6-dev tzdata locales util-linux' 'force-always'
 		# let's only set this if needed
  		if [ "$smPref" -eq 0 ]
  		then
@@ -3160,13 +3161,13 @@ busybox_fix_1()
 	eval $LOGUS
 	local prefId='busybox-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $LINE
 		echo "${S}Running ${C}busybox${S} fix to fix a major bug...${N}"
 		package_installer 'busybox' 'install-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 	eval $LOGUE
 }
@@ -3179,7 +3180,7 @@ nvidia_sse_alert()
 	# local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2  )
 	# I'm going to test for nvidia alone in the lspci output in case they are running nv
 	 local isNvidia=$( lspci | grep 'VGA' | grep -i 'nvidia' )
-	
+
 	if [ -z "$isSse" -a -n "$isNvidia" ]
 	then
 		echo $MLINE
@@ -3224,9 +3225,9 @@ post_du_options()
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
 	local  advanced1Option='' advanced2Option='' initX=''
 	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
-	
+
 	local tempCount=$( echo $options | wc -w )
-	
+
 	if [ "$KERNEL_POST_DU_FLAG" == 'true' ] # this is always on I believe, except for livecd
 	then
 		tempCount=$(( $tempCount + 1 ))
@@ -3245,13 +3246,13 @@ post_du_options()
 		tempCount=''
 	fi
 	options="$options $advanced2Option continue-to-graphics start-desktop quit"
-	
+
 	tempCount=$( echo $options | wc -w )
-	
+
 	cont=$(( $tempCount - 2 ))
 	initX=$(( $tempCount - 1 ))
 	qui=$tempCount
-	
+
 	echo $MBAR
 	echo "${M}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES"
 	echo $MLINE
@@ -3262,30 +3263,30 @@ post_du_options()
 # 	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}$DU_UPGRADE${S} if the upgrade "
 # 	echo "    was really big, or if you haven't run it recently. This can fix some kde display issues."
 # 	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
-	
+
 	echo "${C}1${S} - ${C}package-install${S} are options of packages to install."
 	echo "    Has for main categories - 1: office suites, like openoffice.org, with language pack selections;"
 	echo "    2: non-free: flash, msttcorefonts, opera, google earth; 3: Utilities, swiftfox, other good stuff;"
 	echo "    4: Desktop/window managers. These sections will grow over time, basic now."
-	
+
 	echo "${C}2${S} - ${C}package-removal${S} is a way to totally remove packages/programs you don't want."
 	echo "    Check it out to see if any of the packages listed are things you don't need."
 	echo "    One option is to remove all the german language packages from your system."
-	
+
 	echo "${C}3${S} - ${C}clean-up-stuff${S} This feature has a variety of clean up options:"
 	echo "    1: $APT_TYPE clean; 2: $APT_TYPE autoclean, clean up only non-current deb files;"
 	echo "    3: kernel removal options, remove all non-current kernels; 4: kernel module remover;"
 	echo "    5: backup file cleanup; 6: clean kanotix conversion packages; 7: clean unused xorg modules"
-	
+
 	echo "${C}4${S} - ${C}miscellaneous-tweaks${S} Current options are: mozilla-tweaks,"
 	echo "    which gets rid of gtk filehandlers and other annoyances in Mozilla products;"
 	echo "    sidux-artwork - add sidux graphics - kmenu, icon, grub; and misc system config tweaks."
 	echo "    A legacy tweaks section has older, deprecated tweaks like alsaconf and some cleanup stuff."
 	echo "    ${M}New!${S} ${C}openoffice.org hold/install/update${S} feature. Lets you hold or remove hold easily."
-	
+
 	echo "${C}5${S} - ${C}virtual-machine-installer${S} Installs vbox (OSE or non-ose), vbox modules, sets up users."
 	echo "    Also has any-any script install, and basic vmware install."
-	
+
 	eval $advanced1
 	eval $advanced2
 	echo
@@ -3296,7 +3297,7 @@ post_du_options()
 	echo -e $SLE
 	echo $LINE
 
-	select opt in $options 
+	select opt in $options
 	do
 		eval $LOGME
 		case $opt in
@@ -3356,14 +3357,14 @@ post_du_options()
 		esac
 		break
 	done
-	
+
 	if [ "$repeat" == 'true' ]
 	then
 		post_du_options
 	fi
 }
 ## DEBUGGER
-#script_debugger post_du_options '' 'EXTRA_OPTIONS="true"' 
+#script_debugger post_du_options '' 'EXTRA_OPTIONS="true"'
 
 ########################################################################
 ### graphics stuff: sm-lib-graphics
@@ -3380,7 +3381,7 @@ print_usage()
 {
 	set_distro_data
 	local ErrorMessage=''
-	
+
 	if [ "$1" == 'err' ]
 	then
 		ErrorMessage='echo -e "${E}An option you selected is not a supported option.\n$LINE"'
@@ -3395,7 +3396,7 @@ print_usage()
 	echo "Each option, or group of options, must begin with a ${C}-${S}"
 	echo "Example: ${C}$SCRIPT_NAME -ikw${S} skips the system info, kernel install, and warning."
 	echo $LINE
-	
+
 	echo "${S}The following allow you skip parts of the du script:"
 	echo "${C}-d${S} Skips $DU_UPGRADE if you also select the ${C}w${S} option."
 	echo "${C}-e${S} Skips some of the 'Please hit ${C}e${S}nter to continue' questions."
@@ -3412,14 +3413,14 @@ print_usage()
 	echo "${C}-t${S} Skips the Post dist-uprade/upgrade op${C}t${S}ions section."
 	echo "${C}-w${S} Skips the du ${C}w${S}arnings section. Starts the pre-upgrade fixes and"
 	echo "   $DU_UPGRADE sections automatically if used without ${C}-d${S}. Be careful!"
-	echo 
+	echo
 	echo "The following are advanced script options:"
 	echo "${C}-j${S} Alternate text/output script colors. Requires this syntax: -j 0 (sets to monochrome )"
 	echo "   -j 1 (script default); -j 2 (alternate color scheme); -j 3 (nice earthy scheme)"
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
 	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
-	
+
 	echo "${C}-p${S} Runs $APT_TYPE update without using ${C}p${S}diffs. Good for fast connections."
 	echo "${C}-P${S} Run script with ${C}P${S}roxy settings for connection, requires this syntax:"
 	echo "   ${C}-P http://[<username><:password>@]<server><:port>${S} Argument is required."
@@ -3428,7 +3429,7 @@ print_usage()
 	echo "${C}-X${S} Download and run a custom user script. Syntax: ${C}-X userscript-name#userscript-url"
 	echo "    ${S}Example: ${C}-X my-cleanup-script#somewebsite.com/my-cleanup-script${S}"
 	echo "    The script will show as an additional option in the Post upgrade section."
-	
+
 	echo
 	echo "${S}The following can be run in X/kde:"
 	echo "${C}-h${S} Prints this ${C}h${S}elp menu."
@@ -3445,7 +3446,7 @@ print_usage()
 }
 
 # this must be set before anything else runs in script, -j will reset to no colors
-set_script_colors 
+set_script_colors
 ## this is not in a function because these variables need to be set on startup
 while getopts :dDeEhgiI:j:kKlmMNpP:sStTvwW:frRuUxX:Z: opt
 do
@@ -3547,7 +3548,7 @@ do
 			else
 				print_update_warning_configs $OPTARG
 			fi
-			
+
 			exit 0
 			;;
 		x)	EXTRA_OPTIONS='true'
@@ -3570,7 +3571,7 @@ do
 		?)	print_usage err;;
 	esac
 done
-# reset optarg values if required for restart; init defaults to 5 
+# reset optarg values if required for restart; init defaults to 5
 if [ -n "$http_proxy" ]
 then
 	START_OPTIONS="$START_OPTIONS -P $http_proxy"
@@ -3603,18 +3604,18 @@ run_script_components()
 	create_script_files
 	# clean up old and temp files if required
 	cleanup_extra_files
-	
+
 	# this is mainly for wifi new kernel isntalls where the new kernel wifi module
 	# requires fresh install. Triggers install_wireless_modules if user wants
 	if [ "$SKIP_CONNECTIONS" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECTION_TEST" != 'true' ]
 	then
 		check_connection
 	fi
-	
+
 	# there's a minor problem here, if first run, there will be no kernel lib file, so if
 	# user continues, there will be an error.
 	update_scripts $VERSION_INFO # get the version info data file
-	
+
 	# check for latest version of script.
 	if [ "$SKIP_RESTART" != "true" -a "$SKIP_CONNECTIONS" != 'true' ]
 	then
@@ -3625,7 +3626,7 @@ run_script_components()
 	# check date to make sure the script is not out of date after being updated
 	# if the script is older than $MAX_AGE it will not run to protect against not having updated in too  long
 	check_age
-	
+
 	# set user sticky prefs
 	sticky_prefs
 	# load the apt tools now, if no connection, use local version
@@ -3643,14 +3644,14 @@ run_script_components()
 	# checks for first run or -m option to run change_debian_mirrors
 	launch_function_trigger 'debian-mirrors'
 	# launch_function_trigger tester
-	
+
 	## checks for first run or -M option to run change_kernel_mirrors
 	## no reason to run this on livecd since users can't install kernels anyway
 	if [  "$IS_LIVE" != 'true' -a "$SIDUX_SOURCES" == 'true' ]
 	then
 		launch_function_trigger 'kernel-mirrors'
  	fi
-	
+
 	if [ "$SKIP_CONNECTIONS" != 'true' ]
 	then
 		get_current_apt_kernel $DEFAULT_KERNEL
@@ -3659,7 +3660,7 @@ run_script_components()
 	# script_debugger "launch_function_trigger kernel-metapackage" 'print_hec;exit' ''
 	launch_function_trigger 'kernel-metapackage'
 	launch_function_trigger 'nvidia-sse'
-	
+
 	#script_debugger 'install_dist_upgrade repeat 1'
 	# prints out various instructions and information about install, kernel version etc
 	# first hold point in script, to let user read instructions
@@ -3667,7 +3668,7 @@ run_script_components()
 	then
 		print_install_information
 	fi
-	
+
 	# this will set the last used date-time of the script
 	set_sticky_prefs 's'
 
@@ -3699,13 +3700,13 @@ run_script_components()
 		fi
 	fi
 	test_xorg_version 'post' # this is used by graphics and tweaks
-	
+
 	# runs all post du options except graphic install
 	if [ "$SKIP_TWEAKS" != 'true' ]
 	then
 		post_du_options
 	fi
-	
+
 	# check if user wants to install graphics drivers and start window manager
 	if [ "$SKIP_GRAPHICS" != 'true' -a "$SKIP_CONNECTIONS" != 'true' ]
 	then
