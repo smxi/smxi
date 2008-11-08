@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.18.3
-####  Date: November 6 2008
+####  version: 1.18.4
+####  Date: November 7 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -24,7 +24,7 @@
 ########################################################################
 
 # one global here just for convenience
-CHECK_HOLD_PACKAGES='amule:amule-common elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common'
+CHECK_HOLD_PACKAGES='amule:amule-common elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common'
 #egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
