@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.19
+####  version: 8.4.20
 ####  Date: November 8 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -807,7 +807,7 @@ run_script_import()
 			runScript=$1
 			;;
 		$MOD_INXI)
-			options="-V"
+			options="-F"
 			runIt='true'
 			runScript=$1
 			;;
