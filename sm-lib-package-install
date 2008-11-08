@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.14
+####  version: 2.10.15
 ####  Date: November 8 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -237,7 +237,7 @@ select_install_type()
 	echo
 	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, msttcorefonts, Opera, Skype, Google Earth."
 	echo
-	echo "${C}3${S} - ${C}utilities${S} console-tools, console browsers, networking tools (ceni), swiftfox, and more."
+	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, and more."
 	echo
 	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
 	echo
