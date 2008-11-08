@@ -543,6 +543,8 @@ utilities_installer()
 				repeat='true'
 				;;
 			inxi)
+				echo "${S}Installing and running ${C}inxi -F${S} now...${N}"
+				echo $LINE
 				run_script_import $MOD_INXI
 				print_hec
 				repeat='true'
