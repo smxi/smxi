@@ -312,7 +312,7 @@ driver_support_tests()
 										: # do nothing
 										;;
 									*)
-										error_handler 234 26
+										error_handler 234 $KERNEL_THIRD
 										;;
 								esac
 								;;
@@ -324,11 +324,25 @@ driver_support_tests()
 									*)
 										if [ "$TESTING" != 'true' ]
 										then
-											error_handler 234 27
+											error_handler 234 $KERNEL_THIRD
 										fi
 										;;
 								esac
 								;;
+							28)
+								case $DRIVER_DEFAULT in
+									177.80)
+										: # do nothing
+										;;
+									*)
+										if [ "$TESTING" != 'true' ]
+										then
+											error_handler 234 $KERNEL_THIRD
+										fi
+										;;
+								esac
+								;;
+
 						esac
 					fi
 					;;
