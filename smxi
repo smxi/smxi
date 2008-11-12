@@ -992,7 +992,8 @@ file_download_error()
 	case $response in
 		y)	print_quit
 			;;
-		n)	echo "${S}Ok, continuing with the script without downloading the new ${C}$1${N}"
+		n)	echo "${S}Ok, continuing with the script without downloading: ${C}$1${N}"
+			unset ALT_DOWNLOAD_URL
 			return 1
 			;;
 		*)	print_error yn
