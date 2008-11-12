@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.20
-####  Date: November 8 2008
+####  version: 8.4.21
+####  Date: November 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -206,7 +206,8 @@ LIB_2008_FIXES=''
 MOD_INXI='inxi'
 MOD_GFX='sgfxi'
 MOD_VM='svmi'
-# optional user set scripts
+# optional user set scripts/download locations
+ALT_DOWNLOAD_URL=''
 USER_SCRIPT=''
 USER_SCRIPT_URL=''
 
@@ -708,43 +709,37 @@ run_script_import()
 
 	case $1 in
 		$LIB_APT_TOOLS)
-			if [ "$SET_APT_TOOLS" != 'true' ]
-			then
+			if [ "$SET_APT_TOOLS" != 'true' ];then
 				loadIt='true'
 				SET_APT_TOOLS='true'
 			fi
 			;;
 		$LIB_CLEAN_UP)
-			if [ "$SET_CLEAN_UP" != 'true' ]
-			then
+			if [ "$SET_CLEAN_UP" != 'true' ];then
 				loadIt='true'
 				SET_CLEAN_UP='true'
 			fi
 			;;
 		$LIB_DISTRO_CONVERSION)
-			if [ "$SET_SIDUX_CONV" != 'true' ]
-			then
+			if [ "$SET_SIDUX_CONV" != 'true' ];then
 				loadIt='true'
 				SET_SIDUX_CONV='true'
 			fi
 			;;
 		$LIB_GRAPHICS)
-			if [ "$SET_GRAPHICS" != 'true' ]
-			then
+			if [ "$SET_GRAPHICS" != 'true' ];then
 				loadIt='true'
 				SET_GRAPHICS='true'
 			fi
 			;;
 		$LIB_KERNEL)
-			if [ "$SET_KERNEL" != 'true' ]
-			then
+			if [ "$SET_KERNEL" != 'true' ];then
 				loadIt='true'
 				SET_KERNEL='true'
 			fi
 			;;
 		$LIB_KERNEL_INSTALL)
-			if [ "$SET_KERNEL_INSTALL" != 'true' ]
-			then
+			if [ "$SET_KERNEL_INSTALL" != 'true' ];then
 				loadIt='true'
 				SET_KERNEL_INSTALL='true'
 			fi
@@ -754,50 +749,43 @@ run_script_import()
 # 			noTestDownloadOnly='true'
 # 			;;
 		$LIB_MISC_TWEAKS)
-			if [ "$SET_MISC_TWEAKS" != 'true' ]
-			then
+			if [ "$SET_MISC_TWEAKS" != 'true' ];then
 				loadIt='true'
 				SET_MISC_TWEAKS='true'
 			fi
 			;;
 		$LIB_PACKAGE_INSTALL)
-			if [ "$SET_PACKAGE_INSTALL" != 'true' ]
-			then
+			if [ "$SET_PACKAGE_INSTALL" != 'true' ];then
 				loadIt='true'
 				SET_PACKAGE_INSTALL='true'
 			fi
 			;;
 		$LIB_PACKAGE_REMOVAL)
-			if [ "$SET_PACKAGE_REMOVAL" != 'true' ]
-			then
+			if [ "$SET_PACKAGE_REMOVAL" != 'true' ];then
 				loadIt='true'
 				SET_PACKAGE_REMOVAL='true'
 			fi
 			;;
 		$LIB_WARNING)
-			if [ "$SET_WARNING" != 'true' ]
-			then
+			if [ "$SET_WARNING" != 'true' ];then
 				loadIt='true'
 				SET_WARNING='true'
 			fi
 			;;
 		$LIB_2006_FIXES)
-			if [ "$SET_2006_FIXES" != 'true' ]
-			then
+			if [ "$SET_2006_FIXES" != 'true' ];then
 				loadIt='true'
 				SET_2006_FIXES='true'
 			fi
 			;;
 		$LIB_2007_FIXES)
-			if [ "$SET_2007_FIXES" != 'true' ]
-			then
+			if [ "$SET_2007_FIXES" != 'true' ];then
 				loadIt='true'
 				SET_2007_FIXES='true'
 			fi
 			;;
 		$LIB_2008_FIXES)
-			if [ "$SET_2008_FIXES" != 'true' ]
-			then
+			if [ "$SET_2008_FIXES" != 'true' ];then
 				loadIt='true'
 				SET_2008_FIXES='true'
 			fi
@@ -810,6 +798,7 @@ run_script_import()
 			options="-F"
 			runIt='true'
 			runScript=$1
+			ALT_DOWNLOAD_URL='http://inxi.googlecode.com/svn/trunk/'
 			;;
 		$MOD_VM)
 			# note: -j x will override the D color setting, so D needs to be last
@@ -818,8 +807,7 @@ run_script_import()
 			runScript=$1
 			;;
 		*)
-			if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ]
-			then
+			if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ];then
 				runIt='true'
 				runCommand='update_scripts'
 				runScript=$USER_SCRIPT
@@ -830,28 +818,22 @@ run_script_import()
 	esac
 
 	# test version against current, download/run/include
-	if [ "$loadIt" == 'true' ]
-	then
+	if [ "$loadIt" == 'true' ];then
 		# this is needed for a special case where users might want to run feature in user mode
-		if [ "$( whoami )" == 'root' ]
-		then
-			if [ "$2" != 'no-download' -a "$noTestDownloadOnly" != 'true' ]
-			then
+		if [ "$( whoami )" == 'root' ];then
+			if [ "$2" != 'no-download' -a "$noTestDownloadOnly" != 'true' ];then
 				test_version_info $1
 			fi
-			if [ "$noTestDownloadOnly" == 'true' ]
-			then
+			if [ "$noTestDownloadOnly" == 'true' ];then
 				update_scripts $1
 			fi
 		fi
-		if [ -f $1 ] # if the file is already present, do this
-		then
+		if [ -f $1 ];then # if the file is already present, do this
 			source ./$1 # load include file
 		else
 			error_handler 'missing-lib' $FUNCNAME $1
 		fi
-	elif [ "$runIt" == 'true' ]
-	then
+	elif [ "$runIt" == 'true' ];then
 		$runCommand $1 'chm'
 		DISPLAY= ./$runScript $options # run module
 	fi
@@ -866,8 +848,7 @@ test_version_info()
 	local LocalVersion='' remoteVersion='' remoteDate='' updateLocal=''
 
 	# first to test that it exists, download if not
-	if [ ! -f $SCRIPT_HOME/$1 ]
-	then
+	if [ ! -f $SCRIPT_HOME/$1 ];then
 		update_scripts $1 $2
 	fi
 	# test local against remote versions
@@ -885,8 +866,7 @@ test_version_info()
 
 	eval $LOGUE
 	# updates as needed, if updated, return 0, if not, return 1
-	if [ "$updateLocal" -ne 1 ]
-	then
+	if [ "$updateLocal" -ne 1 ];then
 		update_scripts $1 $2
 		return 0
 	else
@@ -903,8 +883,7 @@ update_scripts()
 
 	# for devs only, this switches off/on updates, so you can work
 	# on a local test version without overwrites happening
-	if [ "$DEV_FLAG" != 'true' ]
-	then
+	if [ "$DEV_FLAG" != 'true' ];then
 		download_test_file "$1" "$2"
 		success="$?"
 	else
@@ -923,39 +902,38 @@ download_test_file()
 	local isGood='' wgetError=0 update=''
 	local downloadLocation=$TECH_PATTERNS_DISTRO downloadFile=$1 downloadUrl=''
 
-	if [ -f "$fileNameTemp" ]
-	then
+	if [ -f "$fileNameTemp" ];then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
 	fi
-	if [ "$downloadFile" == "$LIB_WARNING" ]
-	then
+	if [ "$downloadFile" == "$LIB_WARNING" ];then
 		update="?$DISTRO_F"
 	fi
-	if [ "$downloadFile" == "$USER_SCRIPT_URL" ]
-	then
+	if [ "$downloadFile" == "$USER_SCRIPT_URL" ];then
 		downloadLocation=$USER_SCRIPT_URL
 		downloadFile=''
 		fileName=$USER_SCRIPT
+	fi
+	# this set dynamically when the request is made to install non TP hosted modules
+	if [ -n "$ALT_DOWNLOAD_URL" ];then
+		downloadLocation=$ALT_DOWNLOAD_URL
 	fi
 	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
 	downloadUrl="$downloadLocation$downloadFile$update"
 	log_function_data "download url: $downloadUrl"
 	# always using -O here because -Nc is really buggy over time lines and fast file changes
 	wget -T$TIME_OUT -t 2 -q -O$fileNameTemp $downloadUrl &>/dev/null || wgetError="$?"
-	if [ "$wgetError" -gt 0 ]
- 	then
+	if [ "$wgetError" -gt 0 ];then
  		file_download_error "$fileName" 'server-problem' "$wgetTest"
 	else
 		# all smxi files have this string as last line, so if it's there, the file should usually
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
 		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
-		if [ -n "$isGood" -o "$1" == "$USER_SCRIPT_URL" ]
-		then
+		if [ -n "$isGood" -o "$1" == "$USER_SCRIPT_URL" ];then
+			unset ALT_DOWNLOAD_URL # clear this for reuse if needed
 			mv -f $fileNameTemp $fileName
 			# I'm not sure why this changed, but I've been seeing some 700 and 704 here
 			# so this is going to be done explicitly now instead.
-			if [ "$2" == 'chm' ]
-			then
+			if [ "$2" == 'chm' ];then
 				chmod 705 $fileName
 			else
 				chmod 604 $fileName
@@ -966,8 +944,7 @@ download_test_file()
 			# dump the bad file
 			rm -f $fileNameTemp
 
-			if [ "$3" != 'repeat' ]
-			then
+			if [ "$3" != 'repeat' ];then
 				# let's try this once again to make sure it wasn't just a temp problem
 				echo "${E}The file ${C}$fileName${E} did not download correctly, retrying download now...${N}"
 				download_test_file "$1" "$2" 'repeat'
