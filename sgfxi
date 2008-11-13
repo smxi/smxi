@@ -3,8 +3,8 @@
 ####  Script Name: system graphics installer: sgfxi
 ####  Use for Debian Sid, Testing, and sidux graphic driver install.
 ####  Only supports true Debian based distros.
-####  version: 3.10.8
-####  Date: November 9 2008
+####  version: 3.10.9
+####  Date: November 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  Code contributions copyright: Latino 2008
@@ -105,8 +105,8 @@ DISPLAY_MANAGER=$( basename $DISPLAY_MANAGER 2>/dev/null )
 VERSIONS=''
 OTHER_VERSIONS=''
 # other stuff: nothing now
-NV_VERSIONS='177.80:173.14.12:96.43.07:71.86.06'
-NV_DEFAULT='177.80'
+NV_VERSIONS='177.82:173.14.12:96.43.07:71.86.06'
+NV_DEFAULT='177.82'
 NV_LEGACY_1=$( echo $NV_VERSIONS | cut -d ':' -f 4 )
 NV_LEGACY_2=$( echo $NV_VERSIONS | cut -d ':' -f 3 )
 # until 177.xx goes stable, then change to cut -d 2. This will change how smxi
@@ -116,7 +116,7 @@ NV_LEGACY_3=$( echo $NV_VERSIONS | cut -d ':' -f 2 )
 # latest quad: http://www.nvidia.com/object/linux_display_archive.html
 NV_QUAD=$NV_DEFAULT # no more individual quad drivers
 NV_TESTING='173.14.15:96.43.09:71.86.07'
-NV_OTHERS='173.14.09:173.14.05:173.08:171.06:169.12:100.14.23:100.14.19:96.43.05:71.86.04'
+NV_OTHERS='177.80:169.12:100.14.19:96.43.05:71.86.04'
 
 # debian sid legacies:
 NV_DEBIAN_LEGACY_1='71xx'
@@ -271,7 +271,7 @@ driver_support_tests()
 						case $X_VERSION in
 							1.[5-9]|2.[0-9]|7.[6-9])
 								case $DRIVER_DEFAULT in
-									177.80|173.14.15|96.43.09|71.86.07)
+									177.82|177.80|173.14.15|96.43.09|71.86.07)
 										: ## support should be working, see feedback
 										;;
 									*)
@@ -289,7 +289,7 @@ driver_support_tests()
 						esac
 						# handle change to legacy 5xxx level cards
 						case $DRIVER_DEFAULT in
-							177.80)
+							177.82|177.80)
 								if [ "$LEGACY_LEVEL" -eq 3 ]
 								then
 									error_handler 227
@@ -308,7 +308,7 @@ driver_support_tests()
 								;;
 							26)
 								case $DRIVER_DEFAULT in
-									177.80|173.14.15|173.14.12|173.14.09|100.14.19|96.43.07|71.86.07|71.86.06|$DEBIAN_NVIDIA)
+									177.82|177.80|173.14.15|173.14.12|100.14.19|96.43.09|96.43.07|71.86.07|71.86.06|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -318,7 +318,7 @@ driver_support_tests()
 								;;
 							27)
 								case $DRIVER_DEFAULT in
-									177.80|173.14.15|173.14.12|100.14.19|100.14.23|96.43.09|96.43.07|71.86.07|71.86.06|$DEBIAN_NVIDIA)
+									177.82|177.80|173.14.15|173.14.12|100.14.19|96.43.09|96.43.07|71.86.07|71.86.06|$DEBIAN_NVIDIA)
 										: # do nothing
 										;;
 									*)
@@ -331,7 +331,7 @@ driver_support_tests()
 								;;
 							28)
 								case $DRIVER_DEFAULT in
-									177.80)
+									177.82|177.80)
 										: # do nothing
 										;;
 									*)
@@ -447,7 +447,7 @@ run_patches()
 					;;
 				28)
 					case $DRIVER_DEFAULT in
-						177.80)
+						177.82|177.80)
 							patchFile='NVIDIA_2.6.28-177.80-2990799.diff'
 							apply_patch_file $patchFile
 							;;
