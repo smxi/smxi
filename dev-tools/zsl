@@ -2,16 +2,16 @@
 ########################################################################
 ####  Script Name: zsl
 ####  Description: smxi zip installer creation tool
-####  version: 1.0.1
-####  Date: July 8 2008
+####  version: 1.0.2
+####  Date: November 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2008
-####  
-####  This program is free software; you can redistribute it and/or modify it under 
+####
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 3 of the License, or (at your option) any later version.
 ####
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 ####
@@ -27,10 +27,10 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # make sure this user name is correct for your file system, or just replace with hard coded
 USER_NAME=$( getent passwd 1000 | cut -d ':' -f1 )
-SGFXI_PATH="/home/$USER_NAME/bin/scripts/graphics/sgfxi"
+SGFXI_PATH="/home/$USER_NAME/bin/scripts/sgfxi/svn/trunk/sgfxi"
 SMXI_PATH="/usr/local/bin/smxi"
 SVMI_PATH="/home/$USER_NAME/bin/scripts/sidux/svmi"
-ZIP_DIR="/home/$USER_NAME/bin/scripts/sidux/svn/trunk/zips"
+ZIP_DIR="/home/$USER_NAME/bin/scripts/smxi/svn/trunk/zips"
 
 ########################################################################
 #### FUNCTIONS
@@ -39,7 +39,7 @@ ZIP_DIR="/home/$USER_NAME/bin/scripts/sidux/svn/trunk/zips"
 error_handler()
 {
 	local message=''
-	
+
 	case $1 in
 		1)
 			message='You need to be root to run this script.'
@@ -72,7 +72,7 @@ error_handler()
 start_up_tests()
 {
 	local startFile=''
-	
+
 	echo $LINE
 	echo "Running initial startup tests..."
 	# user must be root for this script so they can chown to root
@@ -80,7 +80,7 @@ start_up_tests()
 	then
 		error_handler 1
 	fi
-	
+
 	# make sure the paths you made are right and exist
 	for startFile in $SGFXI_PATH $SMXI_PATH $SVMI_PATH
 	do
@@ -117,7 +117,7 @@ set_file_permissions()
 create_zip_file()
 {
 	local contents='' fileName='smxi.zip'
-	
+
 	echo $LINE
 	echo "Zipping up files into $fileName..."
 	cd $ZIP_DIR
