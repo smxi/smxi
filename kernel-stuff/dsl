@@ -2,16 +2,16 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.1.3
-####  Date: October 1 2008
+####  version: 2.1.4
+####  Date: November 13 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
-####  
-####  This program is free software; you can redistribute it and/or modify it under 
+####
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 3 of the License, or (at your option) any later version.
 ####
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 ####
@@ -37,7 +37,13 @@ KERNEL_64_INSTALLER_DIR="$KERNEL_DIR/64-installer"
 # data for kernels
 ALT_PATH=''
 KERNEL_BASE=$1
-KERNEL_SUB=$2
+if [ -n "$( grep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
+	KERNEL_SUB=$( gawk '{
+		slhSub=gensub( /^(.+)\.slh\.(.+)$/, "\\2", 1, $0 )
+		print slhSub
+	}' <<< $1 )
+fi
+echo $KERNEL_SUB;exit
 KERNEL_TYPE=$3
 
 if [ "$KERNEL_TYPE" == 'a' ]
@@ -58,7 +64,7 @@ MIRROR_EXTRA="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-kbuild-2.6/"
 error_handler()
 {
 	local message=''
-	
+
 	case $1 in
 		1)
 			message='You should not be root to run this script'
@@ -98,16 +104,16 @@ error_handler()
 start_up_tests()
 {
 	local startDir=''
-	
+
 	echo $LINE
 	echo "Running initial startup tests..."
-	
+
 	# don't want to use root for this script
 	if [ "$(whoami)" == 'root' ]
 	then
 		error_handler 1
 	fi
-	
+
 	# make sure the args are right
 	if [ -z "$KERNEL_BASE" ]
 	then
@@ -119,18 +125,18 @@ start_up_tests()
 	fi
 	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s|redo|nozip)$' <<< "$KERNEL_TYPE" )" ]
 	then
-		error_handler 8 
+		error_handler 8
 	fi
-	
+
 	# make sure the paths you made are right and exist
-	for startDir in $KERNEL_DIR $KERNEL_32_INSTALLER_DIR $KERNEL_64_INSTALLER_DIR $SVN_DIR 
+	for startDir in $KERNEL_DIR $KERNEL_32_INSTALLER_DIR $KERNEL_64_INSTALLER_DIR $SVN_DIR
 	do
 		if [ ! -d "$startDir" ]
 		then
 			error_handler 2 $startDir
 		fi
 	done
-	
+
 	if [ ! -f $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh ]
 	then
 		error_handler 6 $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh
@@ -139,7 +145,7 @@ start_up_tests()
 	then
 		error_handler 6 $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh
 	fi
-	
+
 	echo "Start up tests: passed"
 }
 
@@ -148,7 +154,7 @@ create_kernel_directory()
 	echo $LINE
 	echo "Starting kernel zip builder..."
 	echo "Creating new $NEW_KERNEL_DIRECTORY directory..."
-	
+
 	if [ ! -d $NEW_KERNEL_DIRECTORY ]
 	then
 		mkdir $NEW_KERNEL_DIRECTORY
@@ -165,7 +171,7 @@ check_kernel_exists()
 	echo $LINE
 	echo "Confirming that kernel $kernelName exists on server..."
 	wget -O $fileName -q -e robots=off $MIRROR_MAIN
-	
+
 	kernelExists=$( grep -i "$kernelId" $fileName )
 	rm -f $fileName
 	if [ -z "$kernelExists" ]
@@ -186,7 +192,7 @@ download_kernel_files()
 	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-tar.gz
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
 	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
-	
+
 	if [ "$KERNEL_TYPE" == 'a' ]
 	then
 		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
@@ -195,9 +201,9 @@ download_kernel_files()
 
 create_sub_directories()
 {
-	local directories='32 32-meta 64 64-meta kernel-installer-files kernel-full-zips' 
+	local directories='32 32-meta 64 64-meta kernel-installer-files kernel-full-zips'
 	local directory=''
-	
+
 	echo $LINE
 	echo "Generating 32/64 bit and meta directories..."
 	for directory in $directories
@@ -226,12 +232,12 @@ move_files_to_directories()
 add_update_installer_files()
 {
 	local fullKernelString="$KERNEL_BASE.slh.$KERNEL_SUB-sidux"
-	
+
 	echo $LINE
 	echo "Adding installer files and updating files..."
 	cp $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh 32/install-kernel-sidux.sh
 	cp $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh 64/install-kernel-sidux.sh
-	
+
 	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString'-686\"/' 32/install-kernel-sidux.sh
 	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString'-amd64\"/' 64/install-kernel-sidux.sh
 }
@@ -240,7 +246,7 @@ make_zip_files()
 {
 	local zipKernelId=$( echo $KERNEL_BASE | tr '-' '.' )
 	local contents='' filename=''
-	
+
 	echo $LINE
 	echo 'Making 32 bit zip file now...'
 	cd 32
@@ -251,7 +257,7 @@ make_zip_files()
 	unzip -t $fileName || error_handler 7 $fileName
 	echo "32 bit kernel zip corruption test: passed"
 	mv $fileName ../kernel-full-zips/
-	
+
 	echo 'Making 64 bit zip file now...'
 	cd ../64
 	contents=$(ls)
