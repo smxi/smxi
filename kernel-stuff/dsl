@@ -43,7 +43,7 @@ if [ -n "$( grep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
 		print slhSub
 	}' <<< $1 )
 fi
-echo $KERNEL_SUB;exit
+
 KERNEL_TYPE=$3
 
 if [ "$KERNEL_TYPE" == 'a' ]
