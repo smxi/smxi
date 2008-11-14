@@ -36,13 +36,16 @@ KERNEL_64_INSTALLER_DIR="$KERNEL_DIR/64-installer"
 
 # data for kernels
 ALT_PATH=''
-KERNEL_BASE=$1
+KERNEL_WORKING=$1
 if [ -n "$( grep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
-	KERNEL_SUB=$( gawk '{
-		slhSub=gensub( /^(.+)\.slh\.(.+)$/, "\\2", 1, $0 )
-		print slhSub
+	KERNEL_WORKING=$( gawk '{
+		mainNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\1", 1, $0 )
+		subNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\2", 1, $0 )
+		print mainNumber":"subNumber
 	}' <<< $1 )
 fi
+KERNEL_BASE=$( cut -d ':' -f 1 <<< $KERNEL_WORKING )
+KERNEL_SUB=$( cut -d ':' -f 2 <<< $KERNEL_WORKING )
 
 KERNEL_TYPE=$3
 
