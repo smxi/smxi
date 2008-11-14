@@ -28,7 +28,7 @@
 LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # paths, change these to suite your needs
-SVN_DIR="$HOME/bin/scripts/sidux/svn/trunk"
+SVN_DIR="$HOME/bin/scripts/smxi/svn/trunk"
 KERNEL_DIR="$HOME/large/sidux-kernels"
 KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
 KERNEL_32_INSTALLER_DIR="$KERNEL_DIR/32-installer"
@@ -43,9 +43,13 @@ if [ -n "$( grep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
 		subNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\2", 1, $0 )
 		print mainNumber":"subNumber
 	}' <<< $1 )
+	KERNEL_BASE=$( cut -d ':' -f 1 <<< $KERNEL_WORKING )
+	KERNEL_SUB=$( cut -d ':' -f 2 <<< $KERNEL_WORKING )
+else
+	KERNEL_BASE=$1
+	KERNEL_SUB=''
 fi
-KERNEL_BASE=$( cut -d ':' -f 1 <<< $KERNEL_WORKING )
-KERNEL_SUB=$( cut -d ':' -f 2 <<< $KERNEL_WORKING )
+
 
 KERNEL_TYPE=$3
 

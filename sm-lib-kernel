@@ -1,22 +1,22 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.3
-####  Date: October 20 2008
+####  version: 2.5.4
+####  Date: November 14 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-####  Script Author: Harald Hope 
+####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
 ####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-kernel
@@ -26,7 +26,7 @@
 ########################################################################
 ####  VARIABLES
 ########################################################################
-#  
+#
 KERNEL_LIST_32='2.6.26.6-slh-smp-4 2.6.26.5-slh-smp-12 2.6.26.3-slh-smp-4 2.6.25.14-slh-smp-2 2.6.24.5-slh-smp-2  2.6.23.16-slh-smp-1 2.6.22.10-rc1-slh-smp-1 2.6.21.6-slh-smp-1 2.6.20.11-slh-smp-1 2.6.19.3-rc1-slh-smp-1 2.6.18.6-slh-smp-1'
 KERNEL_ADVANCED_LIST_32=''
 # 2.6.26.6-slh64-smp-4
@@ -40,12 +40,12 @@ KERNEL_ADVANCED_LIST_64=''
 check_kernel()
 {
 	eval $LOGMS
-	local opt='' options='continue advanced-kernel-install' 
-	local advancedKernel='' kernelFile='' 
-	
+	local opt='' options='continue advanced-kernel-install'
+	local advancedKernel='' kernelFile=''
+
 	local prefId='meta-package-selection'
 	local smPref=$( sm_pref_tester $prefId 'equal' )
-	
+
 	# two cases, one it's not set, the other standard default
 	if [ -z "$smPref" -o "$smPref" == 'manual' ]
 	then
@@ -58,7 +58,7 @@ check_kernel()
 			set_kernel_data
 			SET_KERNEL_DATA='true'
 		fi
-		
+
 		# test for advanced kernels too for the comparison, no need to test for null strings
 		# first need to normalize data for comparison
 		if [ -n "$KERNEL_ADVANCED_LIST" ]
@@ -74,28 +74,28 @@ check_kernel()
 		fi
 		# sets KERNEL_EQUAL_INSTALL
 		test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
-		
+
 		# this is for comparing say 23/25 (2.6.23/2.6.25) with arithmetic, sometimes
 		# need to force du prior to kernel install to avoid errors
 		local kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 )
 		local kernelMajorCurrent=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -o -G "2.6.[0-9]*" | cut -d '.' -f 3 )
 		local kernelCompare=$(( $kernelMajorCurrent - $kernelMajorInstalled ))
-		
+
 		# set this data if required for debian type kernels
 		check_debian_kernel_version
-	
+
 		# test to see if same kernel or newer is available
 		if [ "$KERNEL_EQUAL_INSTALL" == 'true' ]
 		then
 			if [ -n "$advancedKernel" ]
-			then 
+			then
 				kernelFile=$advancedKernel
 			elif [ "$CURRENT_APT_KERNEL" == "$CURRENT_KERNEL" ]
 			then
 				kernelFile=$CURRENT_APT_KERNEL
 			fi
 		fi
-	
+
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 		# check for too old kernel version
@@ -105,8 +105,8 @@ check_kernel()
 			# go to dist-upgrade first, and kernel install will come after. Only run first time
 			# the first condition handles cases where the latest install kernel requires a du first
 			# the first case will now never happen, needs to be dumped
-			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$KERNEL_EQUAL_INSTALL" != 'true' ] 
-			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' ] 
+			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$KERNEL_EQUAL_INSTALL" != 'true' ]
+			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' ]
 			then
 				echo "${M}Your kernel version ${C}$KERNEL_VERSION${M} requires that you first run"
 				echo "a ${C}$DU_UPGRADE${M} before you install a new kernel. The option to install"
@@ -138,7 +138,7 @@ check_kernel()
 check_debian_kernel_version()
 {
 	eval $LOGUS
-	
+
 	local debKernCandidate='' debKernInstalled=''
 	# only getting subversions if debian and appears the same
 	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$KERNEL_EQUAL_INSTALL" == 'true' ]
@@ -178,7 +178,7 @@ kernel_question()
 	then
 		duText='Continue. Return to main menu'
 	fi
-	
+
 	if [ "$DEFAULT_KERNEL" == 'no-kernel' ]
 	then
 		kernelsNotEqual='echo -e "${M}There are no apt kernels available to install for your system.\n$MLINE"'
@@ -294,7 +294,7 @@ kernel_question()
 		esac
 		break
 	done
-	
+
 	if [ "$repeat" == 'true' ]
 	then
 		eval $LOGPE
@@ -315,10 +315,10 @@ kernel_module_installer()
 	# clean out -modules- from list
 	local availableModules="$( sed 's/-modules-//g' <<< $( print_module_list ) )"
 	local skip='' opt='' options='' module='' found=''
-	local kernelType='' fullModule='' metaText='' 
+	local kernelType='' fullModule='' metaText=''
 	local options="$availableModules continue"
 	local contCount=$( wc -w <<< $options )
-	local moduleCount=$(( $contCount - 1 )) 
+	local moduleCount=$(( $contCount - 1 ))
 	local isMeta=$( package_tester "linux-image-2.6-(sidux-|)(486|686|amd64)" '' )
 
 	if [ -n "$isMeta" ]
@@ -332,11 +332,11 @@ kernel_module_installer()
 	echo $MLINE
 	echo "${M}Kernel Module Installer${N}"
 	echo $MLINE
-	
+
 	echo "${S}Select from the following to install a kernel module."
 	echo "Not all modules are available all the time, or for each platform (64/32 bit)"
 	echo "If the module is not currently in apt, the script will let you know."
-	echo 
+	echo
 	echo "${M}Module installs to your current kernel: ${C}$CURRENT_KERNEL${S}"
 	eval $metaText
 	echo $LINE
@@ -346,7 +346,7 @@ kernel_module_installer()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	
+
 	select opt in $options
 	do
 		for module in $options
@@ -385,7 +385,7 @@ kernel_module_installer()
 		print_error opt
 		kernel_module_installer
 	fi
-	
+
 }
 
 remove_kernel_modules()
@@ -404,16 +404,17 @@ remove_kernel_modules()
 		store2=$store
 	done
 	installedModules="$moduleStoreTemp continue"
-	
+
 	local moduleCount="$(( $( wc -w <<< $installedModules ) - 1 ))"
 	local opt='' options='' module='' skip='' found=''
 	local options=$installedModules
 	local contCount="$( wc -w <<< $options )"
-	
+
 	echo $MLINE
 	echo "${M}Kernel Module Remover"
 	echo $MLINE
-	echo "${S}Select from the following to remove an installed kernel module:"
+	echo "${S}Select from the following to remove an installed kernel module."
+	echo "* ${C}squashfs${S} is useful for browsing iso files"
 	echo $LINE
 	echo "${C}1-$moduleCount${S} - Remove modules one by one until completed."
 	echo "       ${W}WARNING: The selected module for ALL installed kernels will be removed."
@@ -465,10 +466,10 @@ install_wireless_modules()
 {
 	eval $LOGPS
 	local repeat='' RebootFlag='' opt='' ReturnValue=''
-	local xOption='' advanced='' cont='' quit='' 
+	local xOption='' advanced='' cont='' quit=''
 	local options="at76c503a ipw3945 linux-wlan-ng madwifi ndiswrapper rt2400 rt2500 rt61"
 	local tempCount=$( echo $options | wc -w )
-	
+
 	if [ "$CORE_COUNT" -eq 1 ] # currently only new up kernels have this.
 	then
 		tempCount=$(( $tempCount + 1 ))
@@ -478,10 +479,10 @@ install_wireless_modules()
 	fi
 	options="$options $xOption continue-no-wifi quit"
 	tempCount=$( echo $options | wc -w )
-	
+
 	cont=$(( $tempCount - 1 ))
 	quit=$(( $tempCount ))
-	
+
 	echo $MBAR
 	echo "${M} WIFI MODULE INSTALLER"
 	echo $MBAR
@@ -501,7 +502,7 @@ install_wireless_modules()
 	echo "${C}$cont${S} - Continues script without installing wireless modules."
 	echo "${C}$quit${S} - Exit the script now."
 	echo $LINE
-	echo $SLE 
+	echo $SLE
 	echo $LINE
 
 	select opt in $options
@@ -529,7 +530,7 @@ install_wireless_modules()
 		esac
 		break
 	done
-	
+
 	if [ "$RebootFlag" == 'true' ]
 	then
 		echo $LINE
@@ -540,7 +541,7 @@ install_wireless_modules()
 		echo -e "${Q}Would you like to reboot now?$YNE"
 		echo $LINE
 		read response
-		
+
 		case $response in
 			y)	echo "${S}Rebooting now.${N}"
 				reboot
@@ -553,7 +554,7 @@ install_wireless_modules()
 				repeat='true'
 				;;
 		esac
-		
+
 	fi
 	eval $LOGPE
 	if [ "$repeat" == 'true' ]
@@ -569,7 +570,7 @@ install_the_module()
 	# $1 is module
 	local WifiModule=$KERNEL_DIRECTORY/$normalizedCurrentKernel/$1'*.deb'
 	# WifiModule='/var/local/kernel-current/'$1'*.deb'
-	
+
 	if [ -f $WifiModule -o "$1" == 'madwifi' ]
 	then
 		echo $LINE
@@ -598,9 +599,9 @@ set_kernel_data()
 {
 	eval $LOGUS
 	local isUpSmp=''
-	
+
 	# run_script_import $LIB_KERNELS
-	
+
 	if [ "$BITS" == "64" ]
 	then
 		KERNEL_LIST=$KERNEL_LIST_64 # with -K, this includes advanced list
@@ -612,7 +613,7 @@ set_kernel_data()
 	# this will be used for kernel mirror selection, only standard/testing default will be
 	# attempted via mirror install
 	KERNEL_BASE_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
-	
+
 	# add advanced kernels if any to llst
 	if [ "$ADVANCED_KERNEL" == 'true' ]
 	then
@@ -622,7 +623,7 @@ set_kernel_data()
 	# pull out first kernel from the 64/32 list
 	KERNEL_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
 	isSmpUp=$( echo $KERNEL_FILE | grep '\-up\-' )
-	
+
 	# take 32 bit second position kernel if first kernel is up in list. Legacy now almost
 	if [ "$BITS" == '32' -a -n "$isSmpUp" ]
 	then
@@ -631,7 +632,7 @@ set_kernel_data()
 	fi
 	# this will fix a small looping bug in the advanced install options
 	KERNEL_FILE_RESET=$KERNEL_FILE
-	
+
 	log_function_data "KERNEL_FILE: $KERNEL_FILE"
 	log_function_data "KERNEL_FILE_RESET: $KERNEL_FILE_RESET"
 	eval $LOGUE
