@@ -336,6 +336,7 @@ kernel_module_installer()
 	echo "${S}Select from the following to install a kernel module."
 	echo "Not all modules are available all the time, or for each platform (64/32 bit)"
 	echo "If the module is not currently in apt, the script will let you know."
+	echo "* ${C}squashfs${S} is useful for browsing iso files"
 	echo
 	echo "${M}Module installs to your current kernel: ${C}$CURRENT_KERNEL${S}"
 	eval $metaText
