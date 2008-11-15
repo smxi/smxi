@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.23
+####  version: 8.4.24
 ####  Date: November 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -225,6 +225,8 @@ SET_2008_FIXES=''
 
 # defaults for prefs, options, etc
 ADVANCED_KERNEL=''
+B_TESTING_1=''
+B_TESTING_2=''
 CHANGE_KERNEL_MIRROR=''
 CHANGE_MIRRORS=''
 DEBUGGING=''
@@ -249,7 +251,6 @@ SKIP_KERNEL=''
 SKIP_RESTART=''
 SKIP_TWEAKS=''
 SKIP_WARNING=''
-TESTING=''
 Z_SET=''
 
 # set function variables that will retain values: check hold is actually loaded top of
@@ -1181,7 +1182,7 @@ set_distro_data()
 	if [ -f $EAX ];then
 		DEFAULT_KERNEL='no-kernel'
 		# this will help to debug debian kernel issues
-		if [ "$TESTING" != 'true' ];then
+		if [ "$B_TESTING_1" != 'true' ];then
 			USE_DEBIAN_KERNEL='false'
 		else
 			USE_DEBIAN_KERNEL='true'
@@ -1759,7 +1760,7 @@ test_xorg_version()
 # for smxi launch in X
 launch_from_X()
 {
-	if [ "$TESTING" == 'true' ];then
+	if [ "$B_TESTING_1" == 'true' ];then
 		if [ "$( tty | grep pts )" ];then
 			TERM=linux
 			exec openvt -s bash -c "smxi $@; bash"
@@ -1831,7 +1832,7 @@ check_display_and_x()
 			y)
 				echo "${S}Shutting down ${C}X/Desktop${S} now...${N}"
 				start_stop_default_dm full stop
-# 				if [ "$TESTING" == 'true' ]
+# 				if [ "$B_TESTING_1" == 'true' ]
 # 				then
 # 					# needs lots of debugging before can be tried with testers...
 # 					launch_from_X
@@ -3281,7 +3282,7 @@ do
 		t)	SKIP_TWEAKS='true'
 			START_OPTIONS=$START_OPTIONS't'
 			;;
-		T)	TESTING='true'
+		T)	B_TESTING_1='true'
 			START_OPTIONS=$START_OPTIONS'T'
 			;;
 		w)	SKIP_WARNING='true'
@@ -3463,7 +3464,7 @@ run_script_components()
 		if [ "$SKIP_KERNEL" != 'true' -a "$DEFAULT_KERNEL" != 'no-kernel' ];then
 			run_script_import $LIB_KERNEL
  			check_kernel
- 			if [ "$TESTING" == 'true' ];then
+ 			if [ "$B_TESTING_1" == 'true' ];then
  				:
  			fi
 		fi
