@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.1.0
-####  Date: November 13 2008
+####  version: 2.1.1
+####  Date: November 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####
@@ -54,6 +54,7 @@ SCRIPT_LIST_INXI='inxi'
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 
 B_SKIP_SVN='false'
+UPDATE_TYPE='s' # set for default, smxi, or g/i/v
 
 ########################################################################
 #### FUNCTIONS
@@ -91,15 +92,18 @@ get_options()
 		case $opt in
 			g)
 				WORKING_SVN_DIR=$SGFXI_SVN
+				UPDATE_TYPE='g'
 				;;
 			i)
 				WORKING_SVN_DIR=$INXI_SVN
+				UPDATE_TYPE='i'
 				;;
 			u)
 				B_SKIP_SVN='true'
 				;;
-			i)
+			v)
 				WORKING_SVN_DIR=$SVMI_SVN
+				UPDATE_TYPE='g'
 				;;
 			h)
 				echo "Useage:
