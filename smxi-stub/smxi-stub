@@ -3,16 +3,16 @@
 ####  Script Name: smxi-stub
 ####  stub installer for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.3
-####  Date: 13 June 2008
+####  version: 2.4
+####  Date: 14 November 2008
 ########################################################################
 ####  Copyright (C) Harald Hope, sidux team members 2007-2008
-####  
-####  This program is free software; you can redistribute it and/or modify it under 
+####
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 ####
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 ####
@@ -25,9 +25,9 @@
 # simple stub with the cleanup stuff. Now it just cleans up after itself each time.
 
 # To get the full power and user friendliness for this stub installer
-# rename it to: smxi 
+# rename it to: smxi
 # place it in /usr/sbin, that is, as /usr/sbin/smxi, make it executable: chmod +x /usr/sbin/smxi
-# add the following symbolic links in /usr/sbin pointing to /usr/sbin/smxi: 
+# add the following symbolic links in /usr/sbin pointing to /usr/sbin/smxi:
 # ln -s /usr/sbin/smxi /usr/sbin/sgfxi
 # ln -s /usr/sbin/smxi /usr/sbin/svmi
 # because of how default $PATH works, /usr/sbin will always be checked first for the
@@ -66,8 +66,7 @@ error_handler()
 		7)
 			message="${PREFIX}${SCRIPT} exec command failed with errors! Deleting problem file. Please try again."
 			# this will handle, I think, partial, incomplete, downloads, that are not null
-			if [ -f "${PREFIX}${SCRIPT}" ]
-			then
+			if [ -f "${PREFIX}${SCRIPT}" ];then
 				rm -f "${PREFIX}${SCRIPT}"
 			fi
 			;;
@@ -77,8 +76,7 @@ error_handler()
 	esac
 	echo "ERROR: $message - Error No: $1"
 	# cleanup the temp file if error
-	if [ -f "$FILE_TEMP_NAME" ]
-	then
+	if [ -f "$FILE_TEMP_NAME" ];then
 		rm -f "$FILE_TEMP_NAME"
 	fi
 	exit $1
@@ -97,8 +95,7 @@ esac
 # this handles that annoying null file thing. Because -s is ambiguous, I added a -f check
 # as well. Delete all existing null files. This test must be first. This won't handle incomplete
 # downloads, but it will help a bit. This also avoids a file does not exist error
-if [ -f "${PREFIX}${SCRIPT}" ] && [ ! -s "${PREFIX}${SCRIPT}" ]
-then
+if [ -f "${PREFIX}${SCRIPT}" ] && [ ! -s "${PREFIX}${SCRIPT}" ];then
 	rm -f "${PREFIX}${SCRIPT}"
 fi
 
@@ -106,56 +103,51 @@ fi
 # relying on -x as a test, null files can have the exec bit set... that's bash for you...
 # if $SCRIPT exists, it will handle the root tests. Root tests cannot
 # be run first because they kill the -h help function
-if [ -x "${PREFIX}${SCRIPT}" ]
-then
+if [ -x "${PREFIX}${SCRIPT}" ];then
 	# I'm just going to put a test for basically everything that can go wrong
 	# If we're lucky, this will handle partial or incomplete downloads that are not null
 	exec "${PREFIX}${SCRIPT}" "$@" || error_handler 7
 else
 	# only in case of requirement to download script do root test, and just exit
 	# if not root, anything else is counterintuitive I think for users.
-	[ "$(id -u)" -ne 0 ] && error_handler 1
-	
+	if [ "$(id -u)" -ne 0 ];then
+		error_handler 1
+	fi
+
 	# if and only if file does not exist and user is root do we make the temp file
 	FILE_TEMP_NAME="$(mktemp -p $PREFIX $CALLER.XXXXXXXXXX)"
 	# now we'll use a simple -f test since the null case is already handled. We are not
 	# downloading to overwrite existing file, but to temp file, which we then test for null
 	# -O is risky here too because failed downloads create a null file automatically.
-	if [ ! -f "${PREFIX}${SCRIPT}" ]
-	then
+	if [ ! -f "${PREFIX}${SCRIPT}" ];then
 		wget -q -O "${FILE_TEMP_NAME}" "${UPSTREAM}${SCRIPT}" || error_handler 4
 	fi
-	
+
 	#  -s is prefered over -f because sometimes downloads fail and leave null size file
 	# we're taking the temp file, testing it for null, then mv to correct file. Please do
 	# not mess with these tests at all unless you can make them even more robust. No -f
 	# is required because if wget exits with error then script exits. And if no error,
 	# file will be null or existent and not null. I am adding another -f test here because
 	# wget is so buggy I simply cannot predict its failure behaviors at all.
-	if [ ! -e "${FILE_TEMP_NAME}" ]
-	then
+	if [ ! -e "${FILE_TEMP_NAME}" ];then
 		error_handler 6
 	# if exists and not null
-	elif [ ! -s "${FILE_TEMP_NAME}" ]
-	then
+	elif [ ! -s "${FILE_TEMP_NAME}" ];then
 		error_handler 2
 	# I'm being extra careful here, there have been too many problems with this simple
 	# stuff... wget needs to be fixed to handle failed downloads better... what is  missing
 	# is a null file test, as opposed to exists AND null.
-	elif [ -s "${FILE_TEMP_NAME}" ]
-	then
+	elif [ -s "${FILE_TEMP_NAME}" ];then
 		# now that the file exists and is not null
 		mv -f "${FILE_TEMP_NAME}" "${PREFIX}${SCRIPT}"
-		
+
 		# make executable if not
-		if [ ! -x "${PREFIX}${SCRIPT}" ]
-		then
+		if [ ! -x "${PREFIX}${SCRIPT}" ];then
 			chmod +x "${PREFIX}${SCRIPT}"
 		fi
-		
+
 		# then run it with an error handler for unknown weirdness which I'm sure will appear.
-		if [ -x "${PREFIX}${SCRIPT}" ]
-		then
+		if [ -x "${PREFIX}${SCRIPT}" ];then
 			# I'm just going to put a test for basically everything that can go wrong
 			# If we're lucky, this will handle partial or incomplete downloads that are not null
 			exec "${PREFIX}${SCRIPT}" "$@" || error_handler 7
