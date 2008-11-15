@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: zsl
 ####  Description: smxi zip installer creation tool
-####  version: 1.0.2
-####  Date: November 13 2008
+####  version: 1.0.3
+####  Date: November 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2008
 ####
@@ -27,9 +27,11 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # make sure this user name is correct for your file system, or just replace with hard coded
 USER_NAME=$( getent passwd 1000 | cut -d ':' -f1 )
+# not going to use inxi for now because some distros might have it preinstalled
+# INXI_PATH="home/$USER_NAME/bin/scripts/inxi/svn/trunk/inxi"
 SGFXI_PATH="/home/$USER_NAME/bin/scripts/sgfxi/svn/trunk/sgfxi"
 SMXI_PATH="/usr/local/bin/smxi"
-SVMI_PATH="/home/$USER_NAME/bin/scripts/sidux/svmi"
+SVMI_PATH="/home/$USER_NAME/bin/scripts/svmi/svn/trunk/svmi"
 ZIP_DIR="/home/$USER_NAME/bin/scripts/smxi/svn/trunk/zips"
 
 ########################################################################
