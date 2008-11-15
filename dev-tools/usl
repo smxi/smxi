@@ -38,7 +38,7 @@ SGFXI_SVN="$HOME/bin/scripts/sgfxi/svn/trunk/"
 STUB_SVN="${SMXI_SVN}smxi-stub/"
 SVMI_SVN="$HOME/bin/scripts/svmi/svn/trunk/"
 
-# then set the default svn, no args given
+# then set the default svn, no usl startup args given
 WORKING_SVN_DIR=$SMXI_SVN
 
 # then set the other stuff
@@ -112,6 +112,10 @@ get_options()
 -g Update and commit sgfxi svn
 -i Update and commit inxi svn
 -u Update only, skip svn commit
+-s (or null, no args) Update and commit smxi svn.
+   Will get inxi, sgfxi, and svmi version numbers as well,
+   and add those files to the main smxi svn directory for easy
+   uploading and handling.
 -v Update and commit svmi svn
 "
 				exit 0
