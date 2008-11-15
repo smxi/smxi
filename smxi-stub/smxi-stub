@@ -28,6 +28,7 @@
 # rename it to: smxi
 # place it in /usr/sbin, that is, as /usr/sbin/smxi, make it executable: chmod +x /usr/sbin/smxi
 # add the following symbolic links in /usr/sbin pointing to /usr/sbin/smxi:
+# ln -s /usr/sbin/smxi /usr/sbin/inxi
 # ln -s /usr/sbin/smxi /usr/sbin/sgfxi
 # ln -s /usr/sbin/smxi /usr/sbin/svmi
 # because of how default $PATH works, /usr/sbin will always be checked first for the
