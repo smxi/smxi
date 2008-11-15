@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.1.1
+####  version: 2.2.0
 ####  Date: November 15 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
@@ -28,30 +28,29 @@
 LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # paths, change these to suite your needs
-ALT_DIR="$HOME/bin/scripts/sidux/"
-SVN_DIR="$HOME/bin/scripts/smxi/svn/trunk/"
-WORKING_SVN_DIR=$SVN_DIR
-INXI_DIR="$HOME/bin/scripts/inxi/svn/trunk/"
+# first set the master svn, the main target for all others
+SMXI_SVN="$HOME/bin/scripts/smxi/svn/trunk/"
+# then set the rest
+DEV_TOOLS_SVN="${SMXI_SVN}dev-tools/"
 INXI_SVN="$HOME/bin/scripts/inxi/svn/trunk/"
-GRAPHICS_DIR="$HOME/bin/scripts/sgfxi/svn/trunk/"
+KERNEL_SVN="${SMXI_SVN}kernel-stuff/"
 SGFXI_SVN="$HOME/bin/scripts/sgfxi/svn/trunk/"
+STUB_SVN="${SMXI_SVN}smxi-stub/"
 SVMI_SVN="$HOME/bin/scripts/svmi/svn/trunk/"
-DEV_TOOLS_DIR="$HOME/bin/scripts/sidux/"
-DEV_TOOLS_SVN_DIR="$SVN_DIR/dev-tools/"
-STUB_SVN_DIR="$SVN_DIR/smxi-stub/"
+
+# then set the default svn, no args given
+WORKING_SVN_DIR=$SMXI_SVN
+
+# then set the other stuff
 KERNEL_DIR="$HOME/large/sidux-kernels/"
-KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
 MAIN_DIR='/usr/local/bin/'
-SM_VERSIONS=${SVN_DIR}'sm-versions'
-
-## svn trunk directories for each project
-
 
 # scripts/libs
-SCRIPT_LIST_ALT='svmi'
-SCRIPT_LIST_GRAPHICS="sgfxi"
+SCRIPT_LIST_SVMI='svmi'
+SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_INXI='inxi'
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
+SM_VERSIONS="${SMXI_SVN}sm-versions"
 
 B_SKIP_SVN='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
@@ -87,7 +86,7 @@ get_options()
 {
 	local opt=''
 
-	while getopts ghiuv opt
+	while getopts ghisuv opt
 	do
 		case $opt in
 			g)
@@ -104,6 +103,9 @@ get_options()
 			v)
 				WORKING_SVN_DIR=$SVMI_SVN
 				UPDATE_TYPE='g'
+				;;
+			''|s)
+				UPDATE_TYPE='s'
 				;;
 			h)
 				echo "Useage:
@@ -131,7 +133,7 @@ start_up_tests()
 	fi
 
 	# make sure the paths you made are right and exist
-	for startDir in $MAIN_DIR $GRAPHICS_DIR $INXI_DIR $ALT_DIR $SVN_DIR $KERNEL_SVN_DIR $KERNEL_DIR $DEV_TOOLS_SVN_DIR $DEV_TOOLS_DIR $STUB_SVN_DIR
+	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $MAIN_DIR $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_SVN
 	do
 		if [ ! -d "$startDir" ]
 		then
@@ -158,7 +160,7 @@ clean_dev_flags()
 	local isDev=''
 
 	echo "Cleaning dev flags up now..."
-	cd $SVN_DIR
+	cd $SMXI_SVN
 	for script in $scripts
 	do
 		isRestart=$( grep -i "^SKIP_RESTART='true'" $script )
@@ -168,7 +170,7 @@ clean_dev_flags()
 		if [ -n "$isRestart" -o -n "$isDev" ]
 		then
 			# important! only reset where line begins with variable name
-			sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SVN_DIR$script || error_handler 3 $script
+			sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SMXI_SVN$script || error_handler 3 $script
 		fi
 	done
 }
@@ -176,7 +178,7 @@ clean_dev_flags()
 # this is for those times I forget to clean the -T flag data
 clean_gfx_test_data()
 {
-	local svnGfx="${SVN_DIR}sgfxi"
+	local svnGfx="${SMXI_SVN}sgfxi"
 	local setTestDataStart=$( grep -n '^set_test_data()' $svnGfx | cut -d ':' -f 1 )
 	# start 5 lines below
 	setTestDataStart=$(( $setTestDataStart + 6 ))
@@ -191,9 +193,9 @@ main_updater()
 {
 	echo $LINE
 	update_sm_data "$SCRIPT_LIST_MAIN" "$MAIN_DIR"
-	update_sm_data "$SCRIPT_LIST_GRAPHICS" "$GRAPHICS_DIR"
-	update_sm_data "$SCRIPT_LIST_ALT" "$ALT_DIR"
-	update_sm_data "$SCRIPT_LIST_INXI" "$INXI_DIR"
+	update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_SVN"
+	update_sm_data "$SCRIPT_LIST_SVMI" "$SVMI_SVN"
+	update_sm_data "$SCRIPT_LIST_INXI" "$INXI_SVN"
 	update_kernel_installers
 	update_other_components
 	finalize_sm_versions
@@ -214,9 +216,9 @@ update_sm_data()
 		LocalDate=$( grep -m 1 -o -G "Date:\ [A-Za-z0-9\ ]*" $2$script | cut -f 2-4 -d ' ' )
 		echo $script'='$LocalVersion':'$LocalDate >> $SM_VERSIONS
 
-		# echo "copy $script to ${SVN_DIR}$script"
+		# echo "copy $script to ${SMXI_SVN}$script"
 		# echo "$script'='$LocalVersion':'$LocalDate"
-		cp -f --preserve=timestamps $2$script $SVN_DIR$script
+		cp -f --preserve=timestamps $2$script $SMXI_SVN$script
 	done
 }
 
@@ -227,7 +229,7 @@ finalize_sm_versions()
 	echo  >> $SM_VERSIONS
 	echo '###**EOF**###' >> $SM_VERSIONS
 	# add the versions file to the svn too
-	# cp -f --preserve=timestamps $SM_VERSIONS $SVN_DIR
+	# cp -f --preserve=timestamps $SM_VERSIONS $SMXI_SVN
 }
 
 # extra scripts used in smxi, kernel installers for zipped sidux kernels
@@ -237,17 +239,18 @@ update_kernel_installers()
 	local sidux64='install-kernel-sidux-64.sh'
 
 	# update kernel installers if needed
-	cp -f ${KERNEL_DIR}64-installer/$sidux64 $KERNEL_SVN_DIR$sidux64
-	cp -f ${KERNEL_DIR}32-installer/$sidux32 $KERNEL_SVN_DIR$sidux32
+	cp -f ${KERNEL_DIR}64-installer/$sidux64 $KERNEL_SVN$sidux64
+	cp -f ${KERNEL_DIR}32-installer/$sidux32 $KERNEL_SVN$sidux32
 }
 
 # developer scripts for creating smxi
 update_other_components()
 {
-	cp -f ${DEV_TOOLS_DIR}dsl ${KERNEL_SVN_DIR}dsl
-	# cp -f ${DEV_TOOLS_DIR}smxi-stub ${STUB_SVN_DIR}smxi-stub
-	cp -f ${DEV_TOOLS_DIR}usl ${DEV_TOOLS_SVN_DIR}usl
-	cp -f ${DEV_TOOLS_DIR}zsl ${DEV_TOOLS_SVN_DIR}zsl
+	#cp -f ${DEV_TOOLS_DIR}dsl ${KERNEL_SVN}dsl
+	# cp -f ${DEV_TOOLS_DIR}smxi-stub ${STUB_SVN}smxi-stub
+	#cp -f ${DEV_TOOLS_DIR}usl ${DEV_TOOLS_SVN}usl
+	#cp -f ${DEV_TOOLS_DIR}zsl ${DEV_TOOLS_SVN}zsl
+	:
 }
 
 
