@@ -245,7 +245,7 @@ update_kernel_installers()
 update_other_components()
 {
 	cp -f ${DEV_TOOLS_DIR}dsl ${KERNEL_SVN_DIR}dsl
-	cp -f ${DEV_TOOLS_DIR}smxi-stub ${STUB_SVN_DIR}smxi-stub
+	# cp -f ${DEV_TOOLS_DIR}smxi-stub ${STUB_SVN_DIR}smxi-stub
 	cp -f ${DEV_TOOLS_DIR}usl ${DEV_TOOLS_SVN_DIR}usl
 	cp -f ${DEV_TOOLS_DIR}zsl ${DEV_TOOLS_SVN_DIR}zsl
 }
