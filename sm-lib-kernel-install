@@ -21,7 +21,8 @@
 ####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
-####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-kernel-install
+####  Script URL: http://smxi.org/sm/sm-lib-kernel-install
+####  Script SVN: http://code.google.com/p/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ####  FEATURES:
 ####  Script will install any number of kernels contained in a list of kernels

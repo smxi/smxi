@@ -5,21 +5,22 @@
 ####  Date: October 16 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-####  Script Author: Harald Hope 
+####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
-####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-2007-fixes
+####  Script URL: http://smxi.org/sm/sm-lib-2007-fixes
+####  Script SVN: http://code.google.com/p/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 #### $DISTRO_VERSION numbers / distro name:
@@ -44,7 +45,7 @@ run_2007_fixes()
 		then
 			remove_zd1211rw
 		fi
-		
+
 		if [ "$DISTRO_LEVEL" -lt 7 ]
 		then
 			hal_dbus_fix_1
@@ -79,7 +80,7 @@ run_2007_fixes()
 			remove_sidux_legacy_1
 			#kdebase_fix_1
 		fi
-	
+
 	elif [ "$1" == 'post' ]
 	then
 		if [ "$DISTRO_LEVEL" -lt 7 ]
@@ -97,12 +98,12 @@ kde_sdk_fix_1()
 	local prefId='kdesdk-scripts-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'kdesdk-scripts' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		package_remover 'kdesdk-scripts' 'purge'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -111,12 +112,12 @@ sysv_freeze_fix_1()
 	local prefId='sysv-freeze-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'sysv-freeze' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		package_remover 'sysv-freeze' 'purge'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -125,12 +126,12 @@ libntfs_3g4_fix_1()
 	local prefId='libntfs-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'libntfs-3g4' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		package_remover 'libntfs-3g4' 'purge'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -139,12 +140,12 @@ acpid_fix_1()
 {
 	local prefId='acpid-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $LINE
-		package_installer 'acpid' 'force-present' 
-		set_sticky_prefs $prefId 
+		package_installer 'acpid' 'force-present'
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -152,12 +153,12 @@ apt_conf_sidux_fix_1()
 {
 	local prefId='apt-conf-sidux-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $LINE
-		package_installer 'apt-conf-sidux' 'force-present' 
-		set_sticky_prefs $prefId 
+		package_installer 'apt-conf-sidux' 'force-present'
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -165,12 +166,12 @@ libnurses_fix_1()
 {
 	local prefId='libncurses5-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $LINE
-		package_installer 'libncurses5' 'force-present' 
-		set_sticky_prefs $prefId 
+		package_installer 'libncurses5' 'force-present'
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -184,7 +185,7 @@ kdebase_fix_1()
 	then
 		echo $LINE
 		package_installer 'kdebase-bin-kde3' 'install-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 remove_sidux_legacy_1()
@@ -192,14 +193,14 @@ remove_sidux_legacy_1()
 	local prefId='k3b-fix-4' package='' packagesInstalled='' isInstalled=''
 	local smPref=$( sm_pref_tester $prefId )
 	local legacyPackages='configure-networkcard networkconfig-sidux configure-screenres rootshell sidux-menu sidux-xdg'
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		for package in $legacyPackages
 		do
 			packagesInstalled=$packagesInstalled$( package_tester $package )
 		done
-		
+
 		if [ -n "$packagesInstalled" ]
 		then
 			echo $LINE
@@ -224,7 +225,7 @@ k3b_fix_4()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'k3b' ii )
 	local packageExists=$( package_tester 'k3b-i18n' ii )
-	
+
 	if [ -n "$isInstalled" -a "$smPref" -eq 0 ]
 	then
 		echo $LINE
@@ -247,7 +248,7 @@ sidux_kioslave_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local sksInstalled=$( package_tester 'sidux-kioslave' )
 	local sccInstalled=$( package_tester 'siduxcc' )
-	
+
 	if [ -n "$sksInstalled" -a -n "$sccInstalled" -a "$smPref" -eq 0 ]
 	then
 		echo $LINE
@@ -265,12 +266,12 @@ mlocate_locate_update()
 	local findUtils=$( package_tester  'findutils' )
 	local mlocate=$( package_tester  'mlocate' )
 	local response='' repeat=''
-	
+
 	if [ -n "$findUtils" -a -z "$mlocate" -a "$smPref" -eq 0 ]
 	then
 		echo $LINE
 		echo "${S}The ${C}locate${S} function has been moved to a new package: ${C}mlocate${S}"
-		echo 
+		echo
 		echo "${C}mlocate${S} has significantly improved ${C}locate${S} and ${C}updatedb${S} performance, and"
 		echo "is replacing the old versions that were in ${C}findutils${S}. "
 		echo
@@ -308,7 +309,7 @@ hal_dbus_fix_1()
 {
 	local prefId='hal-dbus-1'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $LINE
@@ -350,7 +351,7 @@ bcm_fix_1()
 	local b43='b43-fwcutter' bcm43='bcm43xx-fwcutter'
 	local isBcm43=$( package_tester  $bcm43 )
 	local isB43=$( package_tester  $b43 )
-	
+
 	if [ "$smPref" -eq 0 ] && [ -n "$isBcm43" -a -z "$isB43" ]
 	then
 		echo $LINE
@@ -364,7 +365,7 @@ wine_fix_1()
 	local prefId='wine-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isWine=$( package_tester 'libwine' ii-wild )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isWine" ]
 	then
 		echo $LINE
@@ -380,7 +381,7 @@ ooo_fix_2()
 	local prefId='ooo-fix-3'
 	local smPref=$( sm_pref_tester $prefId )
 	local isOOo=$( package_tester 'openoffice.org-common' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isOOo" ]
 	then
 		echo $LINE
@@ -396,7 +397,7 @@ libxine_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isLibxine=$( package_tester 'libxine1' )
 	lxfm='libxine1-ffmpeg'
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		if [ -n "$isLibxine" ]
@@ -414,11 +415,11 @@ icedove_fix_1()
 	local prefId='icedove-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local response='' repeat='' icedoveExists='' icedoveLocale=''
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		icedoveExists=$( package_tester 'icedove' )
-		
+
 		if [ -n "$icedoveExists" ]
 		then
 			# this will reinstall any locales the user had
@@ -454,8 +455,8 @@ icedove_fix_1()
 				y)	icedove_backup
 					echo $LINE
 					echo "${S}Running fix now.${N}"
-					
-					package_remover 'icedove' 'purge -y --force-yes' 
+
+					package_remover 'icedove' 'purge -y --force-yes'
 					package_installer 'icedove' 'install-always'
 					echo "${S}Fix is completed. I hope it works for you.${N}"
 					set_sticky_prefs $prefId
@@ -479,16 +480,16 @@ icedove_fix_1()
 
 icedove_backup()
 {
-	local homeDir='/home/' 
+	local homeDir='/home/'
 	local userHomes=$( ls $homeDir ) icedoveDir='.mozilla-thunderbird'
 	local response='' d='' tbirdHomeIs='' icedoveBu=''
-	
+
 	echo $LINE
 	echo "${S}I like to be very careful with emails, so here's an option to backup all your"
 	echo "user ${C}$icedoveDir${S} directories before proceeding with the rest of the fix."
 	echo
 	echo "${M}Important: Do not do this if you do not have enough room in your home directory!!"
-	
+
 	echo -e "${Q}Would you like to backup your profile home directory first?$YNE"
 	echo $LINE
 	read response
@@ -568,7 +569,7 @@ k3b_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local k3b2=$( package_tester 'libk3b2' )
 	local k3bLang=$(package_tester 'k3b-i18n' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$k3b2" ]
 	then
 		if [ -n "$k3bLang" ]
@@ -589,7 +590,7 @@ remove_zd1211rw()
 	local smPref=$( sm_pref_tester $prefId )
 	local zd12='zd1211rw-firmware'
 	local zd1211=$( package_tester $zd12 )
-	 
+
 	if [ "$smPref" -eq 0 -a -n "$zd1211" ]
 	then
 		echo $LINE
@@ -605,16 +606,16 @@ ipw3945-4965-fix-1()
 	local smPref=$( sm_pref_tester $prefId )
 	local ipw3945='iwlwifi-3945-ucode' ipw4965='iwlwifi-4965-ucode' iwlwifi='iwlwifi-ucode'
 	local ipw3945_3='ipw3945-ucode-1.13'
-	
+
 	local newWifi='firmware-iwlwifi' userDriver=''
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		local is3945=$( package_tester $ipw3945 )
 		local is3945_3=$( package_tester $ipw3945_3 )
 		local is4965=$( package_tester $ipw4965 )
 		local isWifi=$( package_tester $iwlwifi )
-		
+
 		if [ -n "$is3945" ]
 		then
 			userDriver=$ipw3945
@@ -631,7 +632,7 @@ ipw3945-4965-fix-1()
 		then
 			userDriver=$ipw4965
 		fi
-		
+
 		if [ -n "$is3945" -o -n "$isWifi" -o -n "$is4965" -o -n "$is3945_3" ]
 		then
 			echo $LINE

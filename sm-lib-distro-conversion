@@ -5,21 +5,22 @@
 ####  Date: September 19 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-####  Script Author: Harald Hope 
+####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
-####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-sidux-conversion
+####  Script URL: http://smxi.org/sm/sm-lib-sidux-conversion
+####  Script SVN: http://code.google.com/p/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 
@@ -44,7 +45,7 @@ check_debian()
 	local opt='' options='' repeat='' optionSet='debian'
 	local conversionOptions='sidux-sources sidux-conversion'
 	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
-	
+
 	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'etch' ]
 	then
 		conversionOptions=''
@@ -59,7 +60,7 @@ check_debian()
 	fi
 	options="continue-no-change $conversionOptions quit"
 	quitNu=$( wc -w <<< $options )
-	
+
 	print_lib_info $LIB_DISTRO_CONVERSION
 	echo $MBAR
 	echo "${M}You appear to be using Debian or a Debian derived distro based on ${C}Debian $SYSTEM_BASE${S}."
@@ -70,7 +71,7 @@ check_debian()
 	echo $LINE
 	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
 	echo "    Only ${C}$SCRIPT_NAME${S} fixes will run, and you can use the other script options too."
-	
+
 	case "$optionSet" in
 		debian)
 			echo "${C}2${S} - ${C}sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
@@ -91,7 +92,7 @@ check_debian()
 	echo $LINE
 	echo $SLE
 	echo $LINE
-	
+
 	options="continue-no-change $conversionOptions quit"
 	select opt in $options
 	do
@@ -196,9 +197,9 @@ install_sidux_components()
 	local prefId='install-sidux-packages-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local siduxPackages='configure-cups configure-dsl configure-gprs configure-isdn configure-ndiswrapper ceni deborphan distro-defaults etcskel-sidux gfxboot-theme-sidux gpm infobash sidux-irc sidux-kernelhacking sidux-keyrings sidux-scripts udev-config-sidux wodim'
-	# grub-gfxboot 
+	# grub-gfxboot
 	local i='' installedPackage=''
-	
+
 	if [ "$smPref" -eq 0 ]
 	then
 		echo $MBAR
@@ -206,15 +207,15 @@ install_sidux_components()
 		echo $LINE
 		echo "${S}This will double check your system to make sure you have all the"
 		echo "${C}sidux${S} packages that you need for a complete install."
-		echo 
+		echo
 		echo "Please read each item and tell ${C}apt${S} if you want it or not by"
 		echo "answering ${C}y${S} or ${C}n${S} to $APT_TYPE install questions. For example, "
 		echo "if you don't have ${C}isdn${S} or ${C}xawtv${S}, answer ${C}n${S} to the isdn or xawtv stuff.${N}"
-		
+
 		print_hec
 		echo "${S}Checking for and installing missing ${C}sidux${S} packages now...${N}"
 		for i in $siduxPackages
-		do 
+		do
 			package_installer "$1" 'install-missing'
 		done
 		echo "${S}Finished installing ${C}sidux${S} packages.${N}"
@@ -234,7 +235,7 @@ sidux_graphics_legacy()
 	local smPref=$( sm_pref_tester $prefId ) #$GRUB_PATH
 	local OldGrub=$( awk -F= '/^# groot/{print $2}' /boot/grub/menu.lst | sed -r 's/\((.*)\)/\1/' )
 	local bm='/boot/message'
-	
+
 	if [ "$1" == 'grub1' -a "$smPref" -eq 0 ]
 	then
 		echo $LINE
@@ -276,7 +277,7 @@ update_smxi_data()
 	eval $LOGPS
 	run_script_import $LIB_MISC_TWEAKS
 	# this tests for presence of aptitude, and only offers itself if user has aptitude installed
-	set_apt_type 'conversion' 
+	set_apt_type 'conversion'
 	set_upgrade_type 'conversion'
 	distro_number_calculator
 	set_distro_version # just in case user exits, we'll still have the level set
@@ -287,14 +288,14 @@ set_distro_version()
 {
 	eval $LOGPS
 	local repeat='' opt=''
-	
+
 	local distros='
 	debian-stable
 	debian-testing
-	debian-sid	
+	debian-sid
 	debian-other
 	'
-	
+
 	if [ ! -f $SMDV -a ! -f $EAX ]
 	then
 		echo $MLINE
@@ -325,7 +326,7 @@ set_distro_version()
 					;;
 			esac
 			break
-		done	
+		done
 		eval $LOGPE
 		if [ "$repeat" == 'true' ]
 		then
@@ -343,7 +344,7 @@ write_smdv_file()
 {
 	eval $LOGUS
 	local timeStamp=$( date +%Y%m%d ) fullIdString=''
-	
+
 	fullIdString="$1:sc:$timeStamp"
 	echo $fullIdString > $SMDV
 	DISTRO_VERSION=$fullIdString
@@ -361,23 +362,23 @@ distro_number_calculator()
 	local distroYear='' distroMonth='' distroLevel='' item='' assembled=''
 	# assume system is reasonably up to date for fixes
 	local distroLevels='
-	2008:09:12 
-	2008:12:13 
-	2009:03:14 
-	2009:06:15 
-	2009:09:16 
+	2008:09:12
+	2008:12:13
+	2009:03:14
+	2009:06:15
+	2009:09:16
 	2009:12:17
 	2010:03:18
 	2010:06:19
 	2010:09:20
 	2010:12:21
 	'
-	
+
 	if [ ! -f $SMDL ]
 	then
 		echo $LINE
 		echo "${S}Setting distro level identification for internal script use now...${N}"
-		
+
 		case $month in
 			01|02|03)
 				month=03
@@ -392,10 +393,10 @@ distro_number_calculator()
 				month=12
 				;;
 		esac
-		
+
 		assembled="$year:$month"
 		distroLevel=$( egrep -o "$assembled:[0-9]{1,2}" <<< $distroLevels | cut -d ':' -f 3 )
-		
+
 		# set the distro level id number now
 		echo $distroLevel > $SMDL
 		DISTRO_LEVEL=$distroLevel
@@ -414,7 +415,7 @@ update_to_new_sources()
 	local sourcesData=''
 	local whichUpdate=''
 	local doUpdate=''
-	
+
 	case $1 in
 		sidux)
 			grepSearch='sidux.*[[:space:]](sid|unstable)'
@@ -453,7 +454,7 @@ tweak_antix_vb_source()
 {
 	eval $LOGUS
 	local fixVB=$( egrep '^deb[[:space:]].*virtualbox.*' $EAS )
-	
+
 	if [ -n "$fixVB" ]
 	then
 		echo "${S}Commenting out broken virtualbox repo ...${N}"
@@ -468,7 +469,7 @@ tweak_antix_sources()
 	local fixDM=$( egrep '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
 	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
 	local doUpdate=''
-	
+
 	if [ -n "$fixDM" ]
 	then
 		echo "${S}Removing uncommented unstable source...${N}"
@@ -482,7 +483,7 @@ tweak_antix_sources()
 		doUpdate='true'
 	fi
 	tweak_antix_vb_source
-	
+
 	update_completion_handler "$doUpdate" 'anti-X unstable'
 	eval $LOGUE
 }
@@ -492,7 +493,7 @@ update_completion_handler()
 {
 	eval $LOGUS
 	local doUpdate=$1 whichUpdate=$2
-	
+
 	if [ "$doUpdate" == 'true' ]
 	then
 		UPDATED=''
