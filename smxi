@@ -773,6 +773,7 @@ run_script_import()
 		$MOD_GFX)
 			runIt='true'
 			runScript=$1
+			ALT_DOWNLOAD_URL='http://smxi.org/sg/'
 			;;
 		$MOD_INXI)
 			options="-F"
