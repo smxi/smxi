@@ -1,24 +1,24 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.9.11
-####  Date: October 20 2008
+####  version: 2.9.12
+####  Date: November 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
 ####  extra_module_installer update_kernel_links install_the_apt_kernel_module install_apt_kernel_modules
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-####  Script Author: Harald Hope 
+####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
 ####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-kernel-install
@@ -39,23 +39,24 @@ advanced_kernel_install()
 {
 	eval $LOGPS
 	local kernel='' options='' opt='' userSelection=''
-	local text_1='' text_2=''  rcMessage='' 
+	local text_1='' text_2=''  rcMessage=''
 	local optionList='' listCount='' kernelCount=''
 	local altKernOpt1='' altKernelOption1='' altKernelText1=''
 	local altKernOpt2='' altKernelOption2='' altKernelText2=''
 	local altKernOpt3='' altKernelOption3='' altKernelText3=''
 	local altKernOpt4='' altKernelOption4='' altKernelText4=''
 	local altKernOpt5='' altKernelOption5='' altKernelText5=''
-	
+
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
-	
+
 	if [ "$SET_KERNEL_DATA" != 'true' ]
 	then
 		set_kernel_data
 		SET_KERNEL_DATA='true'
 	fi
 	# add the list closer items
+	KERNEL_LIST=''
 	kernelCount=$( wc -w <<< $KERNEL_LIST )
 	optionList="$KERNEL_LIST "
 	if [ "$USE_DEBIAN_KERNEL" == 'true' ]
@@ -66,10 +67,10 @@ advanced_kernel_install()
 		then
 			if [ -z "$( grep '2.6.*-486$' <<< $CURRENT_KERNEL )" ]
 			then
-				altKernelOption4='install-debian-486-kernel' 
+				altKernelOption4='install-debian-486-kernel'
 				altKernelText4='Debian-486'
 			else
-				altKernelOption5='install-debian-686-kernel' 
+				altKernelOption5='install-debian-686-kernel'
 				altKernelText5='Debian-686'
 			fi
 		fi
@@ -96,17 +97,17 @@ advanced_kernel_install()
 	optionList="$optionList $altKernelOption3"
 	altKernOpt3=$( wc -w <<< $optionList )
 	optionList="$optionList kernel-metapackage-options back-to-main-menu"
-	
+
 	listCount=$( wc -w <<< $optionList )
 
-	local kmOption=$(( $listCount - 1 )) 
-	local bmmOption=$listCount 
+	local kmOption=$(( $listCount - 1 ))
+	local bmmOption=$listCount
 
 	print_lib_info $LIB_KERNEL_INSTALL
 	echo $MLINE
 	echo "${M}NOTE: The listed kernels are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
 	echo "For current, standard, sidux apt kernel install, RETURN TO MAIN MENU!!"
-	echo
+	echo "${M}SIDUX KERNELS OFFLINE FOR ONE HOUR FOR SITE MOVE TO SMXI.ORG"
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
 	echo "       (${C}slh${S} marked kernels are sidux kernels)"
 	echo
@@ -122,7 +123,7 @@ advanced_kernel_install()
 	echo
 	echo "${Q}Please enter in the correct number for the kernel or option you want."
 	echo $LINE
-	
+
 	# this was set to correct 64/32 list in set_64_32 function
 	options=$optionList
 
@@ -152,7 +153,7 @@ advanced_kernel_install()
 				break
 			fi
 		done
-		
+
 		break
 	done
 	eval $LOGPE
@@ -222,32 +223,32 @@ double_check_kernel()
 {
 	eval $LOGPS
 	local repeat='' options='' opt='' kernelFile='' extraText=''
-	
+
 	check_debian_kernel_version
 	case $1 in
 		# handles default system cases
 		apt)
-			kernelFile="$CURRENT_APT_KERNEL" 
+			kernelFile="$CURRENT_APT_KERNEL"
 			extraText=$DEFAULT_KERNEL
 			;;
 		apt-debian)
-			kernelFile="$CURRENT_DEBIAN_KERNEL" 
+			kernelFile="$CURRENT_DEBIAN_KERNEL"
 			extraText='Debian'
 			;;
 		apt-debian-486)
-			kernelFile="$CURRENT_DEBIAN_KERNEL" 
+			kernelFile="$CURRENT_DEBIAN_KERNEL"
 			extraText='Debian-486'
 			;;
 		apt-debian-686)
-			kernelFile="$CURRENT_DEBIAN_KERNEL" 
+			kernelFile="$CURRENT_DEBIAN_KERNEL"
 			extraText='Debian-686'
 			;;
 		apt-mepis)
-			kernelFile="$CURRENT_MEPIS_KERNEL" 
+			kernelFile="$CURRENT_MEPIS_KERNEL"
 			extraText='Mepis'
 			;;
 		apt-sidux)
-			kernelFile="$CURRENT_SIDUX_KERNEL" 
+			kernelFile="$CURRENT_SIDUX_KERNEL"
 			extraText='sidux'
 			;;
 		advanced)
@@ -255,9 +256,9 @@ double_check_kernel()
 			extraText='sidux archived'
 			;;
 	esac
-	
+
 	log_function_data "Kernel Install Selection: $extraText $kernelFile"
-	
+
 	if [ -n "$kernelFile" ]
 	then
 		echo $LINE
@@ -270,16 +271,16 @@ double_check_kernel()
 		echo $LINE
 		echo $SLE
 		echo $LINE
-		
+
 		options="yes-install-kernel no-return-to-menu continue-no-kernel"
-	
+
 		select opt in $options
 		do
 			case $opt in
 				yes-install-kernel)
 					echo "${S}OK, now the script will install kernel ${C}$kernelFile${S} for you.${N}"
 					eval $LOGPE
-					case $1 in 
+					case $1 in
 						apt)
 							install_apt_kernel $DEFAULT_KERNEL
 							;;
@@ -321,7 +322,7 @@ double_check_kernel()
 		fi
 	else
 		eval $LOGPE
-		error_handler 'null-kernel-file-data' "$FUNCNAME" "$1" 
+		error_handler 'null-kernel-file-data' "$FUNCNAME" "$1"
 		print_hec
 		kernel_return_location $1
 	fi
@@ -329,7 +330,7 @@ double_check_kernel()
 # args: $1 - the arg for kernel confirm question
 kernel_return_location()
 {
-	case $1 in 
+	case $1 in
 		advanced|apt-debian|apt-debian-686|apt-debian-486|apt-sidux)
 			advanced_kernel_install
 			;;
@@ -361,23 +362,23 @@ kernel_meta_package_handler()
 		then
 			kernelArch='amd64'
 		fi
-		# not using this one yet: install-kernel-metapackages-full 
-		
-		local linuxImage="linux-image-2.6-sidux-$kernelArch" 
+		# not using this one yet: install-kernel-metapackages-full
+
+		local linuxImage="linux-image-2.6-sidux-$kernelArch"
 		local linuxHeaders="linux-headers-2.6-sidux-$kernelArch"
 		local continueOption='continue-manual' kiAction='show'
 		local defaultAction='manual' kiState='on'
-		
+
 		if [ -n "$metaExists" ]
 		then
-			continueOption='continue-automatic' 
+			continueOption='continue-automatic'
 			kiAction='skip'
 			defaultAction='automatic'
 			kiState='off'
 		fi
-		
+
 		local opt='' options="remove-kernel-metapackages install-kernel-metapackages-custom  install-current-apt-kernel $continueOption"
-		
+
 		echo $MLINE
 		echo "${M}Kernel Meta-Package Options${N}"
 		echo $MLINE
@@ -387,7 +388,7 @@ kernel_meta_package_handler()
 			echo "If you are seeing it, it means you have ${C}sidux kernel metapackages${M} installed."
 			echo $MLINE
 		fi
-		
+
 		echo "${M}sidux now uses ${C}apt${M} as the default method to install kernels. You have two main"
 		echo "choices, with possible postive / negative outcomes. Pick the one you prefer for your style."
 		echo $MLINE
@@ -404,7 +405,7 @@ kernel_meta_package_handler()
 		echo "${S}To change your selections here later, either start ${C}$SCRIPT_NAME${S} with ${C}-N${S} option, or"
 		echo "access this option page using ${C}kernel-install -> advanced-kernel-options${S}"
 		echo "using the ${C}post $DU_UPGRADE options${S} of ${C}$SCRIPT_NAME${S}"
-		echo 
+		echo
 		echo "Choices ${C}1${S} or ${C}3${S} convert your system to use user run kernel install (${C}manual${S})."
 		echo "Choice ${C}2${S} converts your system to use metapackages (${C}automatic${S})."
 		echo "The ${C}automatic${S} option turns off the pre $DU_UPGRADE kernel install section."
@@ -424,7 +425,7 @@ kernel_meta_package_handler()
 		echo $LINE
 		echo $SLE
 		echo $LINE
-		
+
 		select opt in $options
 		do
 			case $opt in
@@ -489,7 +490,7 @@ remove_kernel_metapackages()
 {
 	eval $LOGUS
 	local metaPackageList=$( package_tester '2.6-sidux-' 'wild-full' )
-	
+
 	if [ -n "$metaPackageList" ]
 	then
 		package_remover "$metaPackageList" 'purge -y'
@@ -504,7 +505,7 @@ remove_kernel_metapackages()
 set_metapackage_prefs()
 {
 	eval $LOGUS
-	local prefId='kernel-metapackage-1' 
+	local prefId='kernel-metapackage-1'
 	local smPref=$( sm_pref_tester $prefId )
 
 	if [ "$smPref" -eq 0 ]
@@ -523,7 +524,7 @@ set_metapackage_selections()
 }
 
 ###---------------------------------------------------------------------
-### kernel install using apt 
+### kernel install using apt
 ###---------------------------------------------------------------------
 
 # master apt kernel installer function
@@ -532,7 +533,7 @@ install_apt_kernel()
 {
 	eval $LOGPS
 	local currentAptKernel=''
-	
+
 	case "$1" in
 		debian)
 			currentAptKernel=$CURRENT_DEBIAN_KERNEL
@@ -573,7 +574,7 @@ install_the_apt_kernel()
 	eval $LOGUS
 	local kernelImage="linux-image-$1"
 	local kernelHeaders="linux-headers-$1"
-	
+
 	echo $LINE
 	echo "${S}Installing your new ${C}$1${S} kernel now...${N}"
 	package_installer "$kernelHeaders $kernelImage" 'install-always'
@@ -593,7 +594,7 @@ install_apt_kernel_modules()
 	then
 		kernelArch='amd64'
 	fi
-	
+
 	case $1 in
 		standard)
 			moduleType=$2
@@ -610,14 +611,14 @@ install_apt_kernel_modules()
 			error_handler 'value-bad' $FUNCNAME "$1"
 			;;
 	esac
-	
+
 	echo $LINE
 	echo "${S}Checking for ${C}$moduleType$extraModuleText${S} kernel modules in apt now....${N}"
 	# try to install external dfsg-free module packages
 	for module in $supportedModules
 	do
 		modulePath="$(/sbin/modinfo -k $(uname -r) -F filename "${module}" 2>/dev/null)"
-		
+
 		if [ -n "${modulePath}" ]
 		then
 			log_function_data "module: $module"
@@ -646,7 +647,7 @@ install_the_apt_kernel_module()
 	local modulePackage=$1 noModuleText=''
 	local moduleExists=$( grep-aptavail -PX "$modulePackage" )
 	local moduleOutputName=$( egrep -o '.*-modules' <<< $modulePackage )
-	
+
 	case $2 in
 		manual)
 			noModuleText='The module you are attempting to install'
@@ -655,7 +656,7 @@ install_the_apt_kernel_module()
 			noModuleText='Your previously installed module'
 			;;
 	esac
-	
+
 	# if grep-aptavail -PX "$modulePackage" >/dev/null 2>&1
 	if [ -n "$moduleExists" ]
 	then
@@ -665,7 +666,7 @@ install_the_apt_kernel_module()
 		then
 			$APT_TYPE -f install
 		else
-			# ignore error cases for now, apt will do the "right" thing to get 
+			# ignore error cases for now, apt will do the "right" thing to get
 			# into a consistent state and worst that could happen is some external
 			# module not getting installed
 			:
@@ -686,10 +687,10 @@ download_remaining_module_debs()
 	# not current: acx100- redhat-cluster-modules- loop-aes-modules-
 	local module='' missingModules='' missingModule=''
 	local availableModules="$( print_module_list )"
-		
+
 	echo $LINE
 	echo "${S}Downloading missing modules from sidux repos to kernel install directory (can take a few seconds)...${N}"
-	
+
 	for module in $availableModules
 	do
 		echo -n "${SPACER}${S}Checking for ${C}$module$1${S} now...${N}"
@@ -727,7 +728,7 @@ copy_debs_to_install_directory()
 	# this handles both 2.6.24-2.6.24-3 and 2.6.25-3 syntax
 	local kernelBase=$( echo $1 | cut -d '-' -f 1-2 )
 	local installDirectory="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY"
-	
+
 	echo $LINE
 	echo "${S}Transfering kernel/module debs to kernel install directory: ${C}$installDirectory${N}"
 	cp /var/cache/apt/archives/*${kernelBase}*.deb $installDirectory
@@ -743,8 +744,8 @@ update_kernel()
 {
 	eval $LOGPS
 	local FullFileName='' skipWget='' proceedNormally=0 # default: true
-	local installSidux='install-kernel-sidux.sh' kernelFailed='' download3Failed='' 
-	
+	local installSidux='install-kernel-sidux.sh' kernelFailed='' download3Failed=''
+
 	# the kernel file string is normalized in the directory function
 	create_kernel_install_directory $KERNEL_FILE
 	proceedNormally="$?" # 0 for mv/rm, 1 for use, 2 for use no unzip
@@ -752,10 +753,10 @@ update_kernel()
 	then
 		skipWget='true'
 	fi
-	
+
 	# build the name of the kernel file to download and test for
 	FullFileName=$KERNEL_PREFIX$KERNEL_FILE$KZ
-	
+
 	if [ "$skipWget" != 'true' ]
 	then
 		# download the kernel, and see if any error occured as well
@@ -768,11 +769,11 @@ update_kernel()
 			download3Failed='true'
 		fi
 	fi
-	
+
 	if [ ! -f $FullFileName ]
 	then
 		error_handler 'kernel-download-failed' $FUNCNAME
-	else 
+	else
 		# careful with the logic here, it's only in the case where the final download failed
 		# flag is not set that we will count the download as a success
 		# run a cyclic redundancy check on the zip file first
@@ -787,10 +788,10 @@ update_kernel()
 		then
 			unzip -q $FullFileName
 		fi
-		
+
 		if [ -f $installSidux ]
 		then
-			
+
 			# kernels in 2.6.24 are dependent on this
 			if [ -n "$( echo $KERNEL_FILE | grep '2\.6\.24' )" ]
 			then
@@ -824,7 +825,7 @@ download_kernel()
 {
 	eval $LOGUS
 	local FullFileName=$1 kernelDownloadPath=''
-	local downloadFailed='' download2Failed='' download3Failed='' 
+	local downloadFailed='' download2Failed='' download3Failed=''
 	local isAlt='' altString='heanet.ie' isTech='' isTechString='techpatterns.com'
 	# slice out the firsts advanced kernel
 	local experimental=''
@@ -856,7 +857,7 @@ post_kernel_install_steps()
 {
 	eval $LOGPS
 	local realKernelVersion=$( get_real_kernel_version )
-	
+
 	echo $LINE
 	echo "${S}Your kernel installation appears to have been successful!"
 	echo "Running some post install steps now for you...${N}"
@@ -884,7 +885,7 @@ get_real_kernel_version()
 	# we don't always know when the VER has "" in it
 	local kTest3=$( grep 'VER=' $installFile | cut -d '=' -f 2 | cut -d '"' -f 2 | grep '2.6' )
 	local kTestError='' kernelString=''
-	
+
 	if [ -n "$kTest1" -a -n "$kTest2" ]
 	then
 		kernelString="$kTest1-$kTest2"
@@ -910,7 +911,7 @@ sidux_devicemap_fix_1()
 	eval $LOGUS
 	local dMap='/boot/grub/device.map'
 	local isHdx=$( grep '/dev/hd' $dMap )
-	
+
 	if [ -n "$isHdx" ]
 	then
 		echo $LINE
@@ -926,7 +927,7 @@ update_kernel_links()
 {
 	eval $LOGUS
 	local uir='' installKernel=$1
-	
+
 	if [ -n "$1" ] # protect here to avoid major errors
 	then
 		echo $LINE
@@ -939,7 +940,7 @@ update_kernel_links()
 			echo "${S}Updating ${C}initrd.img${S} to make sure it's all fine...${N}"
 			update-initramfs -u -k "${installKernel}"
 		fi
-		
+
 		echo "${S}Updating kernel ${C}vmlinuz/initrd.img${S} links...${N}"
 		#echo "${S}Removing ${C}/boot${S} links...${N}"
 		if [ -L /boot/vmlinuz ]
@@ -954,8 +955,8 @@ update_kernel_links()
 		then
 			rm -f /boot/System.map
 		fi
-		
-		
+
+
 # 		if [ -L /boot/vmlinuz ]
 # 		then
 # 			ln -fs "vmlinuz-${installKernel}" /boot/vmlinuz
@@ -968,18 +969,18 @@ update_kernel_links()
 # 		then
 # 			ln -fs "System.map-${installKernel}" /boot/System.map
 # 		fi
-		
-		
+
+
 		if [ -L /vmlinuz ]
 		then
-			ln -fs "boot/vmlinuz-${installKernel}" /vmlinuz 
+			ln -fs "boot/vmlinuz-${installKernel}" /vmlinuz
 		fi
 		# set new kernel as default
 		if [ -L /initrd.img ]
 		then
 			ln -fs "boot/initrd.img-${installKernel}" /initrd.img
 		fi
-		
+
 		# set symlinks to the kernel headers
 		ln -fs "linux-headers-${installKernel}" /usr/src/linux >/dev/null 2>&1
 	else
@@ -1021,7 +1022,7 @@ post_install_messages()
 {
 	eval $LOGUS
 	local driverReinstall=$( nonfree_driver_reinstall 'kernel-install' )
-	# note: latino idea: m-a --text-mode --non-inter -l "${VER}" a-i fglrx 
+	# note: latino idea: m-a --text-mode --non-inter -l "${VER}" a-i fglrx
 	if [ -n "$driverReinstall" ]
 	then
 		echo $MLINE
@@ -1041,7 +1042,7 @@ reboot_now_question()
 	eval $LOGPS
 	local driverReinstall=$( nonfree_driver_reinstall 'kernel-install' )
 	local continueOpt='continue' nonfreeText='' altText2='' altText1=''
- 
+
 	if [ -n "$driverReinstall" ]
 	then
 		continueOpt='continue-reinstall-graphics-driver'
@@ -1051,18 +1052,18 @@ reboot_now_question()
 	else
 		altText2='echo -e "${S}If you continue, you can finish up the $DU_UPGRADE and other options before rebooting.\n${M}NEW: install nvidia/fglrx drivers before you reboot if required${S}\n"'
 	fi
-	
+
 	local repeat='' options="reboot-now $continueOpt quit"
-	
+
 	cd $SCRIPT_HOME # needed to make sure user is back in correct directory
 	# sets KERNEL_EQUAL_INSTALL
 	test_kernel_strings $1 'set-ke'
-	
+
 	echo $MLINE
 	echo "${M}KERNEL INSTALL COMPLETE"
 	echo $MLINE
 	log_function_data "KERNEL_EQUAL_INSTALL: $KERNEL_EQUAL_INSTALL"
-	
+
 	if [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
 	then
 		eval $altText2
@@ -1073,12 +1074,12 @@ reboot_now_question()
 		echo "    with your $DU_UPGRADE and system maintenance."
 		echo -e "${C}2 - $continueOpt${S} Proceed to $DU_UPGRADE$altText1 and other ${C}$SCRIPT_NAME${S} functions."
 		echo "${C}3 - quit${S} Exit script now."
-		
+
 		echo $LINE
 		echo -e $SLE
 		echo $LINE
-	
-		select opt in $options 
+
+		select opt in $options
 		do
 			case $opt in
 				reboot-now)
@@ -1125,11 +1126,11 @@ create_kernel_install_directory()
 {
 	eval $LOGUS
 	local directoryAction=0
-	
+
 	KERNEL_INSTALL_DIRECTORY=$( normalize_kernel_string $1 )
 	log_function_data "KERNEL_INSTALL_DIRECTORY: $KERNEL_INSTALL_DIRECTORY"
 	echo $LINE
-	echo "${S}Please note!! The kernel install directory will be located here:" 
+	echo "${S}Please note!! The kernel install directory will be located here:"
 	echo "${C}$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY${N}"
 	# create and move to the primary storage directory for kernel downloads
 	if [ ! -d $KERNEL_DIRECTORY ]
@@ -1171,12 +1172,12 @@ handle_preexisting_install_directory()
 	echo "    zip file in it already, but not yet unzipped."
 	echo "${C}4 - use-directory-no-unzip${S} - Uses this directory, and assumes the kernel"
 	echo "    downloaded kernel zip file has already been unzipped."
-	echo 
+	echo
 	echo "${C}5 - exit${S} - Quit now, I'll check this myself then start the script again."
 	echo $LINE
 	echo $SLE
 	echo $LINE
-	
+
 	select opt in $options
 	do
 		case $opt in
@@ -1260,7 +1261,7 @@ print_module_list()
 	virtualbox-ose-guest-modules-
 	virtualbox-ose-modules-
 	"
-	
+
 	echo "$availableModules"
 	eval $LOGUE
 }
@@ -1270,17 +1271,17 @@ extra_module_installer()
 	eval $LOGUS
 	local kernelVersion=$1 moduleName=$2 argMissing='' driverTest=''
 	local filename='' tarball='' module='' message='' extra='' buildFailed=0
-	
+
 	case $moduleName in
 		madwifi)
-			filename='ath_pci'	
+			filename='ath_pci'
 			tarball='madwifi.tar.bz2'
 			module='madwifi'
 			message="Atheros Wireless Network Adaptor will not work until\nthe non-free madwifi driver is reinstalled."
 			extra='Atheros '
 			;;
 		ndiswrapper)
-			filename='ndiswrapper'	
+			filename='ndiswrapper'
 			tarball='ndiswrapper.tar.bz2'
 			module='ndiswrapper'
 			message="Wireless Network Adaptor using ndiswrapper will not work\nuntil the ndiswrapper module is reinstalled."
