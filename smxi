@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.24
-####  Date: November 15 2008
+####  version: 8.4.25
+####  Date: November 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -43,7 +43,6 @@
 ####  sm-lib-misc-tweaks - all the misc tweaks, plus fix fonts stuff
 ####  sm-lib-package-install - various package install options
 ####  sm-lib-package-removal - options to remove packages
-
 ####  sm-lib-warning - warning section
 ####  sm-lib-2006-fixes- legacy fixes for distro version < 5
 ####  sm-lib-2007-fixes- fixes for distro version < 10
@@ -786,6 +785,7 @@ run_script_import()
 			options="-j $SCRIPT_COLORS -D -P $APT_TYPE"
 			runIt='true'
 			runScript=$1
+			ALT_DOWNLOAD_URL='http://smxi.org/sv/'
 			;;
 		*)
 			if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ];then
