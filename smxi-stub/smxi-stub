@@ -3,8 +3,8 @@
 ####  Script Name: smxi-stub
 ####  stub installer for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.5
-####  Date: 15 November 2008
+####  version: 2.6
+####  Date: 17 November 2008
 ########################################################################
 ####  Copyright (C) Harald Hope, sidux team members 2007-2008
 ####
@@ -40,7 +40,9 @@ CALLER="$( basename $0 )"
 PREFIX='/usr/local/bin/'
 DOWNLOAD_URL=''
 DOWNLOAD_URL_INXI='http://inxi.googlecode.com/svn/trunk/'
-DOWNLOAD_URL_SMXI='http://techpatterns.com/downloads/distro/'
+DOWNLOAD_URL_SGFXI='http://smxi.org/sg/'
+DOWNLOAD_URL_SMXI='http://smxi.org/sm/'
+DOWNLOAD_URL_SVMI='http://smxi.org/sv/'
 # Do  not create temp file here. It will create masses of temp files over time.
 FILE_TEMP_NAME='' # will handle failed downloads
 
@@ -81,9 +83,17 @@ error_handler()
 
 # set the SCRIPT/DOWNLOAD_URL values
 case $CALLER in
-	sgfxi|smxi|svmi)
+	sgfxi)
+		SCRIPT="$CALLER"
+		DOWNLOAD_URL=$DOWNLOAD_URL_SGFXI
+		;;
+	smxi)
 		SCRIPT="$CALLER"
 		DOWNLOAD_URL=$DOWNLOAD_URL_SMXI
+		;;
+	svmi)
+		SCRIPT="$CALLER"
+		DOWNLOAD_URL=$DOWNLOAD_URL_SVMI
 		;;
 	inxi)
 		SCRIPT="$CALLER"
