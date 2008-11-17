@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.2.0
-####  Date: November 15 2008
+####  version: 2.2.1
+####  Date: November 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####
@@ -43,7 +43,8 @@ WORKING_SVN_DIR=$SMXI_SVN
 
 # then set the other stuff
 KERNEL_DIR="$HOME/large/sidux-kernels/"
-MAIN_DIR='/usr/local/bin/'
+SGFXI_DEV="$HOME/bin/scripts/sgfxi/dev/"
+SMXI_DEV='/usr/local/bin/'
 
 # scripts/libs
 SCRIPT_LIST_SVMI='svmi'
@@ -137,7 +138,7 @@ start_up_tests()
 	fi
 
 	# make sure the paths you made are right and exist
-	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $MAIN_DIR $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_SVN
+	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_SVN
 	do
 		if [ ! -d "$startDir" ]
 		then
@@ -196,8 +197,8 @@ clean_gfx_test_data()
 main_updater()
 {
 	echo $LINE
-	update_sm_data "$SCRIPT_LIST_MAIN" "$MAIN_DIR"
-	update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_SVN"
+	update_sm_data "$SCRIPT_LIST_MAIN" "$SMXI_DEV"
+	update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_DEV"
 	update_sm_data "$SCRIPT_LIST_SVMI" "$SVMI_SVN"
 	update_sm_data "$SCRIPT_LIST_INXI" "$INXI_SVN"
 	update_kernel_installers
@@ -223,6 +224,13 @@ update_sm_data()
 		# echo "copy $script to ${SMXI_SVN}$script"
 		# echo "$script'='$LocalVersion':'$LocalDate"
 		cp -f --preserve=timestamps $2$script $SMXI_SVN$script
+		# working sgfxi will often have testing data, don't want to comment out
+		# that each update
+		case $2 in
+			$SGFXI_DEV)
+				cp -f --preserve=timestamps $2$script $SGFXI_SVN$script
+				;;
+		esac
 	done
 }
 
