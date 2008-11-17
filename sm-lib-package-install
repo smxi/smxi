@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.16
-####  Date: November 8 2008
+####  version: 2.10.17
+####  Date: November 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -500,20 +500,19 @@ utilities_installer()
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
 	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a good command line tool to setup wired and wireless networking."
-	echo "${C}10${S} - ${C}infobash${S} Install ${C}infobash${S}, command line tool to show system data ${M}(deprecated in favor of inxi)${S}."
-	echo "${C}11${S} - ${C}inxi${S} Install ${C}inxi${S}, a new fork of ${C}infobash${S}. Bigger, better, more features!"
+	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S}, a new fork of ${C}infobash${S}. Bigger, better, more features!"
 	echo "    Runs once with full (${C}-F${S}) options when you install it. See ${C}inxi -h${S} for all options."
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 
 	echo
-	echo "${C}12${S} - ${C}back-to-install-menu${S}"
+	echo "${C}11${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni infobash inxi back-to-install-menu"
+	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni inxi back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -537,10 +536,6 @@ utilities_installer()
 				;;
 			h2-favorites)
 				h2_faves
-				repeat='true'
-				;;
-			infobash)
-				check_install_package 'infobash'
 				repeat='true'
 				;;
 			inxi)
@@ -1091,7 +1086,6 @@ h2_faves()
 	h2_package_group_installer 'console-tools'
 	h2_package_group_installer 'console-browsers'
 	h2_package_group_installer 'system-utilities'
-	check_install_package 'infobash'
 	h2_package_group_installer 'rsync rdiff-backup'
 	echo "${S}mozilla-group is ${C}iceweasel${S} and ${C}icedove${S}...${N}"
 	h2_package_group_installer 'mozilla-group'
