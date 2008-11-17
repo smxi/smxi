@@ -1,25 +1,26 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes-s
-####  version: 1.0.0
-####  Date: September 19 2008
+####  version: 1.0.1
+####  Date: November 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
-####  This program is free software; you can redistribute it and/or modify it under 
+####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
 
-####  This program is distributed in the hope that it will be useful, but WITHOUT 
+####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-####  Script Author: Harald Hope 
+####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
-####  Script URL: http://techpatterns.com/downloads/distro/sm-lib-2008-fixes-s
+####  Script URL: http://smxi.org/sm/sm-lib-2008-fixes-s
+####  Script SVN: http://code.google.com/p/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 #### $DISTRO_VERSION numbers - in general, make distro level tests higher for
@@ -56,7 +57,7 @@ run_2008_fixes()
 # 			libpigment_fix_1
 			:
 		fi
-		
+
 	elif [ "$1" == 'post' ]
 	then
 		:
@@ -72,14 +73,14 @@ syslinux_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'syslinux'  )
 	local isAvailable=$( check_package_status 'syslinux-common' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ]
 	then
 		echo $LINE
 		echo "${S}Running ${C}syslinux${S} update fix now...${N}"
 		package_remover 'syslinux' 'purge -y'
 		package_installer 'syslinux' 'force-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -89,7 +90,7 @@ libpigment_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'libpigment0.3-4'  )
 	local isAvailable=$( check_package_status 'libpigment0.3-5' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ]
 	then
 		echo $LINE
@@ -97,7 +98,7 @@ libpigment_fix_1()
 		package_installer 'libpigment0.3-5' 'install-always'
 		dpkg --purge libpigment0.3-4
 		$APT_TYPE install -f
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -106,13 +107,13 @@ libdjvulibre15_fix_1()
 	local prefId='libdjvulibre15-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'libdjvulibre15'  )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		echo "${S}Running ${C}libdjvulibre15${S} update fix now...${N}"
 		package_remover 'libdjvulibre15' 'purge'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -121,13 +122,13 @@ gpm_fix_1()
 	local prefId='gpm-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'gpm'  )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		echo "${S}Running ${C}gpm${S} update fix now...${N}"
 		package_installer 'gpm' 'install-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -137,7 +138,7 @@ libavutil_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'libavutilcvs49'  )
 	local isInstalled2=$( package_tester 'libavcodeccvs51'  )
-	
+
 	if [ "$smPref" -eq 0 -a "$DISTRO" == 'antix' ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
 	then
 		echo $LINE
@@ -150,7 +151,7 @@ libavutil_fix_1()
 
 		#dpkg -i --force-overwrite /var/cache/apt/archives/libavutil49*.deb
 		#dpkg -i --force-overwrite /var/cache/apt/archives/libavcodec51*.deb
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 b43_fwcutter_fix_1()
@@ -158,7 +159,7 @@ b43_fwcutter_fix_1()
 	local prefId='b43-fwcutter-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'b43-fwcutter'  )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a "$KERNEL_THIRD" -ge 25 ]
 	then
 		echo $LINE
@@ -166,7 +167,7 @@ b43_fwcutter_fix_1()
 		package_remover 'b43-fwcutter' 'purge -y'
 		rm -rf /lib/firmware/b43 /lib/firmware/b43legacy
 		package_installer 'b43-fwcutter' 'install-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -175,13 +176,13 @@ console_tools_kbd_fix_1()
 	local prefId='console-tools-kbd-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'console-tools'  )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		# odd trick here, this will remove console-tools, only works with apt-get
 		package_installer 'kbd' 'install-always' '--purge'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -190,27 +191,27 @@ amsn_fix_1()
 	local prefId='amsn-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'amsn' 'ii' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		package_installer 'amsn' 'force-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
-	
+
 update_amarok_xine_1()
 {
 	local prefId='amarok-xine-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'amarok-xine' 'ii' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
 		echo "${S}Replacing ${C}amarok-xine${S} with new ${C}amarok-engine-xine${S} now...${N}"
 		package_installer 'amarok-engine-xine' 'install-always'
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 
@@ -218,9 +219,9 @@ libstlport4_fix_1()
 {
 	local prefId='libstlport4-fix-3'
 	local smPref=$( sm_pref_tester $prefId )
-	
+
 	local isInstalled=$( package_tester 'libstlport4.6c2' )
-	
+
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
 	then
 		echo $LINE
@@ -231,7 +232,7 @@ libstlport4_fix_1()
 		dpkg --purge  'libstlport4.6c2'
 		$APT_TYPE install -f
 		$APT_TYPE install -f
-		set_sticky_prefs $prefId 
+		set_sticky_prefs $prefId
 	fi
 }
 

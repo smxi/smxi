@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.13
-####  Date: October 16 2008
+####  version: 1.21.14
+####  Date: October 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -615,7 +615,7 @@ install_kmenu_sidebar()
 	eval $LOGPS
 	# well, "plain sidux text" "sidux logo" and "coffee theme match"
 	 # drb 1 - elegant style
-	local siduxUrl=$TECH_PATTERNS_DISTRO'artwork/'
+	local siduxUrl=$SCRIPT_DOWNLOAD'artwork/'
 	local siduxKmenuBarUrl1=$siduxUrl'kside_119.png'
 	 # drb 2 coffee style
 	local siduxKmenuBarUrl2=$siduxUrl'kside_213.png'
@@ -676,7 +676,7 @@ install_kmenu_icon()
 {
 	eval $LOGUS
 	local siduxMenuFile='kmenu.tar.gz'
-	local siduxKmenuUrl=$TECH_PATTERNS_DISTRO'artwork/'$siduxMenuFile
+	local siduxKmenuUrl=$SCRIPT_DOWNLOAD'artwork/'$siduxMenuFile
 
 	local ButtonDir='/usr/share/icons/default.kde' #Raider700's
 	local tempDir1='temp33444534' kp='kmenu.png'
@@ -802,7 +802,7 @@ grub_gfx_message_installer()
 	eval $LOGUS
 	local cbrd='message.'$1
 	local grubCbrd='/boot/'$cbrd
-	local bgmc=$TECH_PATTERNS_DISTRO'artwork/'$cbrd
+	local bgmc=$SCRIPT_DOWNLOAD'artwork/'$cbrd
 	# make sure not commented out etc
 	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.4.26
-####  Date: November 16 2008
+####  version: 8.5.0
+####  Date: November 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -20,7 +20,7 @@
 ####  Many fixes/code snippets by sidux team.
 ####  Some fixes on this script come from the sidux irc factoids originally
 ####
-####  Script URL: http://techpatterns.com/downloads/distro/smxi
+####  Script URL: http://smxi.org/sm/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 ####  FEATURES:
@@ -162,8 +162,9 @@ CONFIGS_BODY='configs'
 HOLD_INSTALL='holds'
 STATUS='danger' # set to danger level by default
 UPGRADE_DATA='upgrade-data/'
-TECH_PATTERNS_DISTRO='http://techpatterns.com/downloads/distro/'
-TECH_PATTERNS_KERNELS='http://techpatterns.com/downloads/distro/kernels/'
+# $SCRIPT_DOWNLOAD $SCRIPT_DOWNLOAD_KERNELS
+SCRIPT_DOWNLOAD='http://smxi.org/sm/'
+SCRIPT_DOWNLOAD_KERNELS='http://smxi.org/sm/kernels/'
 SM_CONFIG_FILE='/etc/smxi.conf'
 # user set global variable values, mostly for hard coding options
 SM_VALUES='/usr/local/bin/smxi-values'
@@ -448,7 +449,7 @@ error_handler()
 		# kernel section errors
 		kernel-download-failed)
 			errorCode=30
-			errorMessage="Kernel zip file failed to download or is absent. The techpatterns.com kernel server\n${LOG_INDENT}may be temporarily down. Please try again at a later time."
+			errorMessage="Kernel zip file failed to download or is absent. The smxi.org kernel server\n${LOG_INDENT}may be temporarily down. Please try again at a later time."
 			;;
 		kernel-zip-corrupted)
 			errorCode=33
@@ -882,7 +883,7 @@ download_test_file()
 	eval $LOGUS
 	local fileName=$1 fileNameTemp=''
 	local isGood='' wgetError=0 update=''
-	local downloadLocation=$TECH_PATTERNS_DISTRO downloadFile=$1 downloadUrl=''
+	local downloadLocation=$SCRIPT_DOWNLOAD downloadFile=$1 downloadUrl=''
 
 	if [ -f "$fileNameTemp" ];then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?

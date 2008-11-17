@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.17
+####  version: 2.10.18
 ####  Date: November 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1050,7 +1050,7 @@ check_install_package()
 {
 	eval $LOGUS
 	local packageDeb="$1.deb" success=0
-	local downloadUrl="$TECH_PATTERNS_DISTRO$packageDeb"
+	local downloadUrl="$SCRIPT_DOWNLOAD/packages/$packageDeb"
 	echo $LINE
 	if [ -n "$( check_package_status "$1" )" ]
 	then
