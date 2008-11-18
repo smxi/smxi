@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.5.1
+####  version: 8.5.2
 ####  Date: November 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -164,6 +164,9 @@ STATUS='danger' # set to danger level by default
 UPGRADE_DATA='upgrade-data/'
 # $SCRIPT_DOWNLOAD $SCRIPT_DOWNLOAD_KERNELS
 SCRIPT_DOWNLOAD='http://smxi.org/sm/'
+SCRIPT_DOWNLOAD_SG='http://smxi.org/sg/'
+SCRIPT_DOWNLOAD_SV='http://smxi.org/sv/'
+SCRIPT_DOWNLOAD_IN='http://inxi.googlecode.com/svn/trunk/'
 SCRIPT_DOWNLOAD_KERNELS='http://smxi.org/sm/kernels/'
 SM_CONFIG_FILE='/etc/smxi.conf'
 # user set global variable values, mostly for hard coding options
@@ -774,20 +777,20 @@ run_script_import()
 		$MOD_GFX)
 			runIt='true'
 			runScript=$1
-			ALT_DOWNLOAD_URL='http://smxi.org/sg/'
+			ALT_DOWNLOAD_URL=$SCRIPT_DOWNLOAD_SG
 			;;
 		$MOD_INXI)
 			options="-F"
 			runIt='true'
 			runScript=$1
-			ALT_DOWNLOAD_URL='http://inxi.googlecode.com/svn/trunk/'
+			ALT_DOWNLOAD_URL=$SCRIPT_DOWNLOAD_IN
 			;;
 		$MOD_VM)
 			# note: -j x will override the D color setting, so D needs to be last
 			options="-j $SCRIPT_COLORS -D -P $APT_TYPE"
 			runIt='true'
 			runScript=$1
-			ALT_DOWNLOAD_URL='http://smxi.org/sv/'
+			ALT_DOWNLOAD_URL=$SCRIPT_DOWNLOAD_SV
 			;;
 		*)
 			if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ];then
@@ -903,10 +906,13 @@ download_test_file()
 		# this handles the new urls:
 		case $1 in
 			$MOD_GFX)
-				downloadLocation='http://smxi.org/sg/'
+				downloadLocation=$SCRIPT_DOWNLOAD_SG
 				;;
 			$MOD_VM)
-				downloadLocation='http://smxi.org/sv/'
+				downloadLocation=$SCRIPT_DOWNLOAD_SV
+				;;
+			$MOD_INXI)
+				downloadLocation=$SCRIPT_DOWNLOAD_IN
 				;;
 		esac
 	fi
