@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.5.2
-####  Date: November 17 2008
+####  version: 8.5.3
+####  Date: November 18 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -206,7 +206,6 @@ MOD_INXI='inxi'
 MOD_GFX='sgfxi'
 MOD_VM='svmi'
 # optional user set scripts/download locations
-ALT_DOWNLOAD_URL=''
 USER_SCRIPT=''
 USER_SCRIPT_URL=''
 
@@ -774,23 +773,21 @@ run_script_import()
 				SET_2008_FIXES='true'
 			fi
 			;;
+		# the proper download urls for these are set in download_test_file case
 		$MOD_GFX)
 			runIt='true'
 			runScript=$1
-			ALT_DOWNLOAD_URL=$SCRIPT_DOWNLOAD_SG
 			;;
 		$MOD_INXI)
 			options="-F"
 			runIt='true'
 			runScript=$1
-			ALT_DOWNLOAD_URL=$SCRIPT_DOWNLOAD_IN
 			;;
 		$MOD_VM)
 			# note: -j x will override the D color setting, so D needs to be last
 			options="-j $SCRIPT_COLORS -D -P $APT_TYPE"
 			runIt='true'
 			runScript=$1
-			ALT_DOWNLOAD_URL=$SCRIPT_DOWNLOAD_SV
 			;;
 		*)
 			if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ];then
@@ -899,23 +896,20 @@ download_test_file()
 		downloadFile=''
 		fileName=$USER_SCRIPT
 	fi
-	# this set dynamically when the request is made to install non TP hosted modules
-	if [ -n "$ALT_DOWNLOAD_URL" ];then
-		downloadLocation=$ALT_DOWNLOAD_URL
-	else
-		# this handles the new urls:
-		case $1 in
-			$MOD_GFX)
-				downloadLocation=$SCRIPT_DOWNLOAD_SG
-				;;
-			$MOD_VM)
-				downloadLocation=$SCRIPT_DOWNLOAD_SV
-				;;
-			$MOD_INXI)
-				downloadLocation=$SCRIPT_DOWNLOAD_IN
-				;;
-		esac
-	fi
+
+	# this handles the new urls:
+	case $1 in
+		$MOD_GFX)
+			downloadLocation=$SCRIPT_DOWNLOAD_SG
+			;;
+		$MOD_VM)
+			downloadLocation=$SCRIPT_DOWNLOAD_SV
+			;;
+		$MOD_INXI)
+			downloadLocation=$SCRIPT_DOWNLOAD_IN
+			;;
+	esac
+
 	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
 	downloadUrl="$downloadLocation$downloadFile$update"
 	log_function_data "download url: $downloadUrl"
@@ -928,7 +922,6 @@ download_test_file()
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
 		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
 		if [ -n "$isGood" -o "$1" == "$USER_SCRIPT_URL" ];then
-			unset ALT_DOWNLOAD_URL # clear this for reuse if needed
 			mv -f $fileNameTemp $fileName
 			# I'm not sure why this changed, but I've been seeing some 700 and 704 here
 			# so this is going to be done explicitly now instead.
@@ -989,7 +982,6 @@ file_download_error()
 		y)	print_quit
 			;;
 		n)	echo "${S}Ok, continuing with the script without downloading: ${C}$1${N}"
-			unset ALT_DOWNLOAD_URL
 			return 1
 			;;
 		*)	print_error yn
