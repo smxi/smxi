@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes-t
-####  version: 1.0.1
-####  Date: November 17 2008
+####  version: 1.0.2
+####  Date: November 18 2008
 
 ####  Copyright (C) Harald Hope 2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -38,6 +38,7 @@ run_2008_fixes()
 	then
 		if [ "$DISTRO_LEVEL" -lt 11 ]
 		then
+			sidux_security_patch_1 # just for testing converted sidux systems
 			libdjvulibre15_fix_1
 			update_amarok_xine_1
 			busybox_fix_1 # this is also fired in libc6  fix
@@ -64,6 +65,22 @@ run_2008_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+# sidux security advisory, 2008-11-18
+sidux_security_patch_1()
+{
+	local prefId='sidux-security-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+
+	if [ "$smPref" -eq 0 -a -f $ESV ]
+	then
+		echo $LINE
+		echo "${S}Running ${C}sidux config file removal${S} security fix now...${N}"
+		find /root /home -maxdepth 2 -type f -name '.sidconf*' -delete
+		set_sticky_prefs $prefId
+	fi
+}
+
 syslinux_fix_1()
 {
 	local prefId='syslinux-fix-1'
