@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.5.0
+####  version: 8.5.1
 ####  Date: November 17 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -899,6 +899,16 @@ download_test_file()
 	# this set dynamically when the request is made to install non TP hosted modules
 	if [ -n "$ALT_DOWNLOAD_URL" ];then
 		downloadLocation=$ALT_DOWNLOAD_URL
+	else
+		# this handles the new urls:
+		case $1 in
+			$MOD_GFX)
+				downloadLocation='http://smxi.org/sg/'
+				;;
+			$MOD_VM)
+				downloadLocation='http://smxi.org/sv/'
+				;;
+		esac
 	fi
 	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
 	downloadUrl="$downloadLocation$downloadFile$update"
