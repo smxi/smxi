@@ -3426,7 +3426,7 @@ get_options()
 					# test for smxi itself, if that's not there, give up
 					wget_test "${altScriptUrl}$SCRIPT_NAME"
 					if [ "$?" -gt 0 ];then
-						error_handler 'bad-user-script-url' 'script_option_handler' "$OPTARG"
+						error_handler 'bad-user-script-url' 'script_option_handler' "$altScriptUrl"
 					else
 						SCRIPT_DOWNLOAD=$altScriptUrl
 					fi
