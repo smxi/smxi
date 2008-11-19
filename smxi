@@ -491,7 +491,7 @@ error_handler()
 			;;
 		unsupported-option)
 			errorCode=38
-			errorMessage="You entered an unsupported option, or an option that needs an argument: $errorExtra\nPlease see $SCRIPT_NAME -h for a list of supported options."
+			errorMessage="You entered an unsupported option\nor an option that needs an argument: $errorExtra\nPlease see $SCRIPT_NAME -h for a list of supported options."
 			;;
 		# failures in actions/functions not requiring script exit: 100-150: serious
 		bad-file-format)
