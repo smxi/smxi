@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.5.3
-####  Date: November 18 2008
+####  version: 8.6.0
+####  Date: November 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -171,6 +171,10 @@ SCRIPT_DOWNLOAD_KERNELS='http://smxi.org/sm/kernels/'
 SM_CONFIG_FILE='/etc/smxi.conf'
 # user set global variable values, mostly for hard coding options
 SM_VALUES='/usr/local/bin/smxi-values'
+# dev urls:
+SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/dev/'
+SCRIPT_DOWNLOAD_BRANCH_1='http://smxi.googlecode.com/svn/branches/one/'
+SCRIPT_DOWNLOAD_BRANCH_2='http://smxi.googlecode.com/svn/branches/two/'
 
 # xorg stuff
 X_VERSIONS_PRE=''
@@ -487,7 +491,7 @@ error_handler()
 			;;
 		unsupported-option)
 			errorCode=38
-			errorMessage="You entered an unsupported option: $errorExtra"
+			errorMessage="You entered an unsupported option, or an option that needs an argument: $errorExtra\nPlease see $SCRIPT_NAME -h for a list of supported options."
 			;;
 		# failures in actions/functions not requiring script exit: 100-150: serious
 		bad-file-format)
@@ -3188,13 +3192,14 @@ post_du_options()
 ###---------------------------------------------------------------------
 
 # must be before getopts
+# args: $1 - err/full; $2 - optional, full string of args used
 print_usage()
 {
 	set_distro_data
 	local ErrorMessage=''
 
 	if [ "$1" == 'err' ];then
-		ErrorMessage='echo -e "${E}An option you selected is not a supported option.\n$LINE"'
+		ErrorMessage='echo -e "${E}An option you selected is not a supported option.\nPlease make sure the options you used are supported: ${C}$2\n$LINE"'
 	fi
 	echo $MBAR
 	echo "${M}OPTION HELP MENU: $SCRIPT_NAME"
@@ -3249,154 +3254,199 @@ print_usage()
 	echo "   ${C}wc${S} (prints first warnings, then configs). Like this: ${C}smxi -W wc${S}"
 	echo "   Note: if you want to get the live, current configs/warnings, and not the ones left from"
 	echo "   your last $SCRIPT_NAME use, you must be root in terminal/console."
+	if [ "$1" == 'full' ];then
+		echo ''
+		echo "Developer and Testing Options (Advanced):"
+		echo "${C}-! 1${S} - Sets flag ${C}B_TESTING_1='true'${S} to trigger testing condition 1."
+		echo "${C}-! 2${S} - Sets flag ${C}B_TESTING_2='true'${S} to trigger testing condition 2."
+		echo "${C}-! 3${S} - Sets flags ${C}B_TESTING_1='true'${S} and ${C}B_TESTING_2='true'${S}."
+		echo "${C}-! 10${S} - Triggers an update from the primary dev download server."
+		echo "${C}-! 11${S} - Triggers an update from svn branch one - if present, of course."
+		echo "${C}-! 12${S} - Triggers an update from svn branch two - if present, of course."
+		echo "${C}-! <http://......>${S} - Triggers an update from whatever server you list."
+	fi
 	echo $LINE
 	echo "${S}Remember: to scroll up or down in terminal window, use: ${C}shift+pageup/pagedown${N}"
 	echo $LINE
 	exit 0
 }
 
-# this must be set before anything else runs in script, -j will reset to no colors
-set_script_colors
-## this is not in a function because these variables need to be set on startup
-while getopts :dDeEhgiI:j:kKlmMNpP:sStTvwW:frRuUxX:Z: opt
-do
-	case $opt in
-		h)	print_usage;;
-		# skip feature options
-		d)	SKIP_DIST_UPGRADE='true'
-			START_OPTIONS=$START_OPTIONS'd'
-			;;
-		D) DEBUGGING='true'
-			START_OPTIONS=$START_OPTIONS'D'
-			;;
-		e)	SKIP_ENTER='true'
-			START_OPTIONS=$START_OPTIONS'e'
-			;;
-		g)	SKIP_GRAPHICS='true'
-			START_OPTIONS=$START_OPTIONS'g'
-			;;
-		i)	SKIP_INFO='true'
-			START_OPTIONS=$START_OPTIONS'i'
-			;;
-		k)	SKIP_KERNEL='true'
-			START_OPTIONS=$START_OPTIONS'k'
-			;;
-		r|R)	SKIP_RESTART='true'
-			;;
-		s)	SKIP_CONNECTIONS='true'
-			START_OPTIONS=$START_OPTIONS's'
-			;;
-		S)	SKIP_CONNECTION_TEST='true'
-			START_OPTIONS=$START_OPTIONS'S'
-			;;
-		t)	SKIP_TWEAKS='true'
-			START_OPTIONS=$START_OPTIONS't'
-			;;
-		T)	B_TESTING_1='true'
-			START_OPTIONS=$START_OPTIONS'T'
-			;;
-		w)	SKIP_WARNING='true'
-			START_OPTIONS=$START_OPTIONS'w'
-			;;
-		# advanced options
-		E)	echo $MLINE
-			echo "${M}The ${C}-E${M} option has been deprecated in favor of ${C}-M${M} option to set script kernel mirrors.${N}"
-			print_hec
-			;;
-		I)	echo $MLINE
-			echo "${M}The ${C}-I${M} option has been deprecated."
-			echo "${C}$SCRIPT_NAME${M} now starts your init level based on your system defaults.${N}"
-			print_hec
-			;;
-		j)	if [ -n "$( egrep '^[0-3]$' <<< $OPTARG )" ];then
-				SCRIPT_COLORS=$OPTARG
-				set_script_colors
-			else
-				error_handler 'unsupported-option' 'option-handler' "$OPTARG"
-			fi
-			;;
-		K)	ADVANCED_KERNEL='true'
-			START_OPTIONS=$START_OPTIONS'K'
-			;;
-		f)	FORCE_DOWNLOAD='true'
-			;;
-		l)	echo $MLINE
-			echo "${M}The ${C}-l${M} option has been deprecated because full logging is now always on.${N}"
-			print_hec
-			;;
-		m)	CHANGE_MIRRORS='true'
-			START_OPTIONS=$START_OPTIONS'm'
-			;;
-		M)	CHANGE_KERNEL_MIRROR='true'
-			START_OPTIONS=$START_OPTIONS'M'
-			;;
-		N)	KERNEL_METAPACKAGE='true'
-			START_OPTIONS=$START_OPTIONS'N'
-			;;
-		p)	NO_PDIFFS=$NO_PDIFF_ARGS
-			START_OPTIONS=$START_OPTIONS'p'
-			;;
-		P)	export http_proxy="$OPTARG"
-			;;
-		u|U)	FORCE_UPDATE='true'
-			;;
-		v)	PRINT_VERSION='true'
-			set_distro_data # need some of the distro data here
-			check_dpkg_update # need to set the update data
-			print_install_information
-			exit 0
-			;;
-		W)	if [ -z "$( egrep "^(c|w|cw|wc)$" <<< $OPTARG )" ];then
-				echo "${E}The -W option supported the following options only:"
-				echo "${S}c - print config y/n data"
-				echo "w - print current alert/warning data"
-				echo "wc - print first alert/warning data, then config data"
-				echo "Like this: -W c${N}"
-				exit 1
-			else
-				print_update_warning_configs $OPTARG
-			fi
+# args: $1 - quoted "$@" of all script start args
+get_options()
+{
+	local altScriptUrl=''
 
-			exit 0
-			;;
-		x)	EXTRA_OPTIONS='true'
-			START_OPTIONS=$START_OPTIONS'x'
-			;;
-		X)	if [ -z "$( egrep "^.*#.*$" <<< $OPTARG )" ];then
-				echo "${E}The -X option requires the following syntax:"
-				echo "${C}$SCRIPT_NAME -X script-name#script-url${S} (script name + # + script web address/url"
-				echo "Example: ${C}$SCRIPT_NAME -X my-system-cleaner#http://somesite.com/my-system-cleaner.sh${N}"
-				exit 1
-			else
-				USER_SCRIPT=$( cut -d '#' -f 1 <<< $OPTARG )
-				USER_SCRIPT_URL=$( cut -d '#' -f 2 <<< $OPTARG )
-				wget_test $USER_SCRIPT_URL || error_handler 'bad-user-script-url' 'script_option_handler' "$USER_SCRIPT_URL"
-			fi
-			;;
-		Z)	Z_SET="$OPTARG"
-			;;
-		?)	print_usage err;;
-	esac
-done
-# reset optarg values if required for restart; init defaults to 5
-if [ -n "$http_proxy" ];then
-	START_OPTIONS="$START_OPTIONS -P $http_proxy"
-fi
-if [ -n "$Z_SET" ];then
-	START_OPTIONS="$START_OPTIONS -Z $Z_SET"
-fi
-if [ -n "$USER_SCRIPT_URL" -a -n "$USER_SCRIPT" ];then
-	START_OPTIONS="$START_OPTIONS -X $USER_SCRIPT#$USER_SCRIPT_URL"
-fi
-if [ "$SCRIPT_COLORS" != 1 ];then
-	START_OPTIONS=$START_OPTIONS" -j $SCRIPT_COLORS"
-fi
-
+	while getopts :dDehHgi:j:kKlmMNpP:sStvwW:frRuUxX:Z:!: opt
+	do
+		case $opt in
+			h)	print_usage
+				;;
+			H)	print_usage 'full'
+				;;
+			# skip feature options
+			d)	SKIP_DIST_UPGRADE='true'
+				START_OPTIONS=$START_OPTIONS' -d'
+				;;
+			D) DEBUGGING='true'
+				START_OPTIONS=$START_OPTIONS' -D'
+				;;
+			e)	SKIP_ENTER='true'
+				START_OPTIONS=$START_OPTIONS' -e'
+				;;
+			g)	SKIP_GRAPHICS='true'
+				START_OPTIONS=$START_OPTIONS' -g'
+				;;
+			i)	SKIP_INFO='true'
+				START_OPTIONS=$START_OPTIONS' -i'
+				;;
+			k)	SKIP_KERNEL='true'
+				START_OPTIONS=$START_OPTIONS' -k'
+				;;
+			r|R)	SKIP_RESTART='true'
+				;;
+			s)	SKIP_CONNECTIONS='true'
+				START_OPTIONS=$START_OPTIONS' -s'
+				;;
+			S)	SKIP_CONNECTION_TEST='true'
+				START_OPTIONS=$START_OPTIONS' -S'
+				;;
+			t)	SKIP_TWEAKS='true'
+				START_OPTIONS=$START_OPTIONS' -t'
+				;;
+			w)	SKIP_WARNING='true'
+				START_OPTIONS=$START_OPTIONS' -w'
+				;;
+			# advanced options
+			j)	if [ -n "$( egrep '^[0-3]$' <<< $OPTARG )" ];then
+					SCRIPT_COLORS=$OPTARG
+					set_script_colors
+					if [ "$SCRIPT_COLORS" != 1 ];then
+						START_OPTIONS=$START_OPTIONS" -j $SCRIPT_COLORS"
+					fi
+				else
+					error_handler 'unsupported-option' 'option-handler' "-$opt $OPTARG"
+				fi
+				;;
+			K)	ADVANCED_KERNEL='true'
+				START_OPTIONS=$START_OPTIONS' -K'
+				;;
+			f)	FORCE_DOWNLOAD='true'
+				;;
+			l)	echo $MLINE
+				echo "${M}The ${C}-l${M} option has been deprecated because full logging is now always on.${N}"
+				print_hec
+				;;
+			m)	CHANGE_MIRRORS='true'
+				START_OPTIONS=$START_OPTIONS' -m'
+				;;
+			M)	CHANGE_KERNEL_MIRROR='true'
+				START_OPTIONS=$START_OPTIONS' -M'
+				;;
+			N)	KERNEL_METAPACKAGE='true'
+				START_OPTIONS=$START_OPTIONS' -N'
+				;;
+			p)	NO_PDIFFS=$NO_PDIFF_ARGS
+				START_OPTIONS=$START_OPTIONS' -p'
+				;;
+			P)	export http_proxy="$OPTARG"
+				START_OPTIONS="$START_OPTIONS -P $http_proxy"
+				;;
+			u|U)	FORCE_UPDATE='true'
+				;;
+			v)	PRINT_VERSION='true'
+				set_distro_data # need some of the distro data here
+				check_dpkg_update # need to set the update data
+				print_install_information
+				exit 0
+				;;
+			W)	if [ -z "$( egrep "^(c|w|cw|wc)$" <<< $OPTARG )" ];then
+					echo "${E}The -W option supported the following options only:"
+					echo "${S}c - print config y/n data"
+					echo "w - print current alert/warning data"
+					echo "wc - print first alert/warning data, then config data"
+					echo "Like this: -W c${N}"
+					exit 1
+				else
+					print_update_warning_configs $OPTARG
+				fi
+				exit 0
+				;;
+			x)	EXTRA_OPTIONS='true'
+				START_OPTIONS=$START_OPTIONS' -x'
+				;;
+			X)	if [ -z "$( egrep "^.*#.*$" <<< $OPTARG )" ];then
+					echo "${E}The -X option requires the following syntax:"
+					echo "${C}$SCRIPT_NAME -X script-name#script-url${S} (script name + # + script web address/url"
+					echo "Example: ${C}$SCRIPT_NAME -X my-system-cleaner#http://somesite.com/my-system-cleaner.sh${N}"
+					exit 1
+				else
+					USER_SCRIPT=$( cut -d '#' -f 1 <<< $OPTARG )
+					USER_SCRIPT_URL=$( cut -d '#' -f 2 <<< $OPTARG )
+					wget_test $USER_SCRIPT_URL
+					if [ "$?" -gt 0 ];then
+						error_handler 'bad-user-script-url' 'script_option_handler' "$USER_SCRIPT_URL"
+						unset USER_SCRIPT
+						unset USER_SCRIPT_URL
+					else
+						START_OPTIONS="$START_OPTIONS -X $USER_SCRIPT#$USER_SCRIPT_URL"
+					fi
+				fi
+				;;
+			Z)	Z_SET="$OPTARG"
+				START_OPTIONS="$START_OPTIONS -Z $Z_SET"
+				;;
+			## debuggers and testing options
+			!)	# test for various supported methods
+				case $OPTARG in
+					1)	B_TESTING_1='true'
+						;;
+					2)	B_TESTING_2='true'
+						;;
+					3)	B_TESTING_1='true'
+						B_TESTING_2='true'
+						;;
+					# note: these simply set the overall script download global
+					# you must have a full set of smxi scripts in the branch/one|two / dev/ alt dev directories
+					10)
+						altScriptUrl=$SCRIPT_DOWNLOAD_DEV
+						;;
+					11)
+						altScriptUrl=$SCRIPT_DOWNLOAD_BRANCH_1
+						;;
+					12)
+						altScriptUrl=$SCRIPT_DOWNLOAD_BRANCH_2
+						;;
+					http*)
+						altScriptUrl=$OPTARG
+						;;
+					*)	error_handler 'unsupported-option' 'option-handler' "-$opt $OPTARG\nDevelopers: see $SCRIPT_NAME -H for advanced testing options."
+						;;
+				esac
+				if [ -n "$altScriptUrl" ];then
+					# test for smxi itself, if that's not there, give up
+					wget_test "${altScriptUrl}$SCRIPT_NAME"
+					if [ "$?" -gt 0 ];then
+						error_handler 'bad-user-script-url' 'script_option_handler' "$OPTARG"
+					else
+						SCRIPT_DOWNLOAD=$altScriptUrl
+					fi
+				fi
+				START_OPTIONS="$START_OPTIONS -! $OPTARG"
+				;;
+			*)	error_handler 'unsupported-option' 'script_option_handler' "$OPTARG."
+				;;
+		esac
+	done
+}
 
 ########################################################################
 ####  EXECUTE
 ########################################################################
 
+# this must be set before anything else runs in script, -j will reset to no colors
+set_script_colors
+# set all options, leave outside main trigger to keep things clean
+get_options "$@"
 # run all script checks etc
 # triggers main script features depending on options given
 run_script_components()
