@@ -3,7 +3,7 @@
 ####  Script Name: smxi-stub
 ####  stub installer for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.7
+####  version: 2.8
 ####  Date: 21 November 2008
 ########################################################################
 ####  Copyright (C) Harald Hope, sidux team members 2007-2008
@@ -131,8 +131,7 @@ else
 	# downloading to overwrite existing file, but to temp file, which we then test for null
 	# -O is risky here too because failed downloads create a null file automatically.
 	if [ ! -f "$PREFIX$SCRIPT" ];then
-		#wget -q -O "$FILE_TEMP_NAME" "$DOWNLOAD_URL$SCRIPT" || error_handler 4 "$?"
-		echo 'we made it!'
+		wget -q -O "$FILE_TEMP_NAME" "$DOWNLOAD_URL$SCRIPT" || error_handler 4 "$?"
 	fi
 
 	#  -s is prefered over -f because sometimes downloads fail and leave null size file
