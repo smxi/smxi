@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.0.0
+####  version: 3.0.1
 ####  Date: November 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -224,10 +224,10 @@ set_server_client()
 	local opt='' options='' repeat=''
 
 	if [ -z "$SERVER_CLIENT" ];then
-		echo $LINE
+		echo $MLINE
 		echo "${S}Please select which system type you are installing. Your choice will"
 		echo "determine some package group items in Package Install."
-		echo $LINE
+		echo $MLINE
 		echo "${C}1 - client${S} Default, everything included."
 		echo "${C}2 - server${S} Skips Alsa, Thunderbird if you install those groups."
 		echo $LINE
@@ -1124,7 +1124,7 @@ h2_faves()
 	h2_package_group_installer 'console-tools'
 	h2_package_group_installer 'console-browsers'
 	h2_package_group_installer 'system-utilities'
-	h2_package_group_installer 'inxi_installer'
+	h2_package_group_installer 'inxi'
 	h2_package_group_installer 'rsync rdiff-backup'
 	echo "${S}mozilla-group is $mozGroup...${N}"
 	h2_package_group_installer 'mozilla-group'
@@ -1189,21 +1189,19 @@ h2_package_group_installer()
 	local opt='' options='' repeat=''
 
 	echo $LINE
-	echo "${S}Installing ${C}$1${S} now... "
-	echo $LINE
-	echo "${C}1 - yes-install-this-group${S}"
-	echo "${C}2 - no-skip-this-group${S}"
+	echo "${C}1 - yes-install-$1${S}"
+	echo "${C}2 - no-skip-$1${S}"
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="yes-install-this-group no-skip-this-group"
+	options="yes-install-$1 no-skip-$1"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
 		case $opt in
-			yes-install-this-group)
+			yes-install-$1)
 				case $1 in
-					inxi_installer)
+					inxi)
 						inxi_installer
 						;;
 					*)
@@ -1211,7 +1209,7 @@ h2_package_group_installer()
 						;;
 				esac
 				;;
-			no-skip-this-group)
+			no-skip-$1)
 				echo "${S}Ok, skipping that group of packages...${N}"
 				;;
 			*)
