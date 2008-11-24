@@ -3259,6 +3259,7 @@ print_usage()
 	if [ "$1" == 'full' ];then
 		echo ''
 		echo "Developer and Testing Options (Advanced):"
+		echo "${C}-@${S} -  Triggers debugging tool. See ${C}script_debugger()${S} in script for directions."
 		echo "${C}-! 1${S} - Sets flag ${C}B_TESTING_1='true'${S} to trigger testing condition 1."
 		echo "${C}-! 2${S} - Sets flag ${C}B_TESTING_2='true'${S} to trigger testing condition 2."
 		echo "${C}-! 3${S} - Sets flags ${C}B_TESTING_1='true'${S} and ${C}B_TESTING_2='true'${S}."
