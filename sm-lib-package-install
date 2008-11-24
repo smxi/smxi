@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.0.2
+####  version: 3.0.3
 ####  Date: November 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1153,20 +1153,20 @@ h2_package_group_remover()
 			echo
 			echo "${S}Removing ${C}$package${S} now... "
 			echo $LINE
-			echo "${C}1 - yes-remove-this-package${S}"
-			echo "${C}2 - no-keep-this-package${S}"
+			echo "${C}1 - ${S} Remove ${C}$package${S}"
+			echo "${C}2 - ${S} Keep ${C}$package${S}"
 			echo $LINE
 			echo -e $SLE
 			echo $LINE
-			options="yes-remove-this-package no-keep-this-package"
+			options="yes-remove-$package keep-$package"
 			select opt in $options
 			do
 				log_function_data "opt selected: $opt"
 				case $opt in
-					yes-remove-this-package)
+					yes-remove-$package)
 						package_remover "$package" 'purge'
 						;;
-					no-keep-this-package)
+					keep-$package)
 						echo "${S}Ok, not removing $package...${N}"
 						;;
 					*)
@@ -1194,11 +1194,12 @@ h2_package_group_installer()
 	local opt='' options='' repeat=''
 
 	echo $LINE
-	echo "${C}1 - yes-install-$1${S} Install the group"
-	echo "${C}2 - no-skip-$1${S} Don't install this group"
 	echo -e $SLE
 	echo $LINE
-	options="yes-install-$1 no-skip-$1"
+	echo "${C}1${S} - Install ${C}$1"
+	echo "${C}2${S} - Don't install ${C}$1"
+	echo $LINE
+	options="yes-install-$1 skip-$1"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
@@ -1213,7 +1214,7 @@ h2_package_group_installer()
 						;;
 				esac
 				;;
-			no-skip-$1)
+			skip-$1)
 				echo "${S}Ok, skipping that group of packages...${N}"
 				;;
 			*)
