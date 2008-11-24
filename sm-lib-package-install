@@ -1194,9 +1194,8 @@ h2_package_group_installer()
 	local opt='' options='' repeat=''
 
 	echo $LINE
-	echo "${C}1 - yes-install-$1${S}"
-	echo "${C}2 - no-skip-$1${S}"
-	echo $LINE
+	echo "${C}1 - yes-install-$1${S} Install the group"
+	echo "${C}2 - no-skip-$1${S} Don't install this group"
 	echo -e $SLE
 	echo $LINE
 	options="yes-install-$1 no-skip-$1"
