@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.19
+####  version: 2.10.20
 ####  Date: November 23 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -1030,6 +1030,9 @@ inxi_installer()
 		echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
 		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviPath}inxi
 	fi
+	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options in sidux irc!!!"
+	echo "${S}Those are far to verbose. Please use only specific line triggers, or ${C}-d${S} or ${C}-v3${S}"
+	echo "See ${C}inxi -h${S} for the full list of supported output options, and please don't flood ${C}#sidux irc${S}!!!${N}"
 	print_hec
 }
 
