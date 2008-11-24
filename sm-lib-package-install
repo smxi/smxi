@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 2.10.20
-####  Date: November 23 2008
+####  version: 3.0.0
+####  Date: November 24 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -46,12 +46,10 @@ package_group_installer()
 	local pdfLight='epdfview' mlocate='mlocate'
 
 	# note: these packages are not in every Debian level
-	if [ -z "$( check_package_status 'epdfview' )" ]
-	then
+	if [ -z "$( check_package_status 'epdfview' )" ];then
 		pdfLight='xpdf'
 	fi
-	if [ -z "$( check_package_status "$mlocate" )" ]
-	then
+	if [ -z "$( check_package_status "$mlocate" )" ];then
 		mlocate=''
 	fi
 
@@ -74,6 +72,11 @@ package_group_installer()
 	local systemUtils='alsa-base alsa-utils anacron dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev'
 	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
+
+	if [ "$SERVER_CLIENT" == 'server' ];then
+		mozillaGroup='iceweasel'
+		systemUtils='anacron dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev'
+	fi
 
 	echo $LINE
 	echo "${S}Installing ${C}$itemName${S}...${N}"
@@ -148,8 +151,7 @@ package_group_installer()
 			;;
 	esac
 
-	if [ -n "$3" ]
-	then
+	if [ -n "$3" ];then
 		eval $3 # this removes stuff, or does other operations, first
 	fi
 	update_sources $1
@@ -193,8 +195,7 @@ update_sources()
 			sourcesData=$swiftSources
 			;;
 		plain)
-			if [ "$UPDATED" != 'true' ]
-			then
+			if [ "$UPDATED" != 'true' ];then
 				doUpdate='true'
 			fi
 			;;
@@ -204,18 +205,55 @@ update_sources()
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff
-	if [ "$?" -eq 0 ]
-	then
+	if [ "$?" -eq 0 ];then
 		eval $extraFunctions
 		doUpdate='true'
 		UPDATED=''
 	fi
 
-	if [ "$doUpdate" == 'true' ]
-	then
+	if [ "$doUpdate" == 'true' ];then
 		apt_update_handler 'package-install'
 	fi
 	eval $LOGUE
+}
+
+# args: $1 packages to be installed
+set_server_client()
+{
+	eval $LOGUS
+	local opt='' options='' repeat=''
+
+	if [ -z "$SERVER_CLIENT" ];then
+		echo $LINE
+		echo "${S}Please select which system type you are installing. Your choice will"
+		echo "determine some package group items in Package Install."
+		echo $LINE
+		echo "${C}1 - client${S} Default, everything included."
+		echo "${C}2 - server${S} Skips Alsa, Thunderbird if you install those groups."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="client server"
+		select opt in $options
+		do
+			log_function_data "opt selected: $opt"
+			case $opt in
+				client|server)
+					SERVER_CLIENT=$opt
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+
+		eval $LOGUE
+		if [ "$repeat" == 'true' ];then
+			set_server_client
+		fi
+	fi
 }
 
 ###---------------------------------------------------------------------
@@ -279,8 +317,7 @@ select_install_type()
 		break
 	done
 	eval $LOGME
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		select_install_type
 	fi
 }
@@ -350,8 +387,7 @@ office_installer()
 		break
 	done
 	eval $LOGPE
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		office_installer
 	fi
 }
@@ -361,8 +397,7 @@ non_free_installer()
 {
 	eval $LOGPS
 	local repeat='' options='' opt='' gge64=''
-	if [ "$BITS" == "64" ]
-	then
+	if [ "$BITS" == "64" ];then
 		# gge64="\n${C}googleearth${M} install is not currently supported for ${C}64 bit${M}, sorry."
 		:
 	fi
@@ -405,11 +440,9 @@ non_free_installer()
 				# first we  need to make sure that user system has non-free
 				update_to_nonfree_sources
 				# then test for sid version of flash
-				if [ -n "$( check_package_status 'flashplugin-nonfree' )" ]
-				then
+				if [ -n "$( check_package_status 'flashplugin-nonfree' )" ];then
 					package_group_installer 'plain' 'flashplugin-nonfree'
-				elif [ -n "$( check_package_status 'flashplayer-mozilla' )" ]
-				then
+				elif [ -n "$( check_package_status 'flashplayer-mozilla' )" ];then
 					package_group_installer 'plain' 'flashplayer-mozilla'
 				else
 					error_handler 'package-unavailable' $FUNCNAME 'flashplugin-nonfree/flashplayer-mozilla'
@@ -417,8 +450,7 @@ non_free_installer()
 				repeat='true'
 				;;
 			java-plugin)
-				if [ "$BITS" == 32 ]
-				then
+				if [ "$BITS" == 32 ];then
 					package_group_installer plain sun-java6-plugin 'update_to_nonfree_sources'
 				else
 					package_group_installer plain java-gcj-compat-plugin
@@ -451,8 +483,7 @@ non_free_installer()
 		break
 	done
 	eval $LOGPE
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		non_free_installer
 	fi
 }
@@ -464,6 +495,11 @@ utilities_installer()
 {
 	eval $LOGPS
 	local repeat='' options='' opt=''
+	local systemUtils="alsa gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
+
+	if [ "$SERVER_CLIENT" == 'server' ];then
+		systemUtils="gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
+	fi
 
 	echo $MLINE
 	echo "${M} Utilities Installer"
@@ -480,7 +516,7 @@ utilities_installer()
 
 
 	echo "${C}3${S} - ${C}system-utilities${S} All the basics (plus related packages), and a few nice tools:"
-	echo "    alsa gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
+	echo "    ${C}$systemUtils"
 
 	echo "${C}4${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
 	echo "    for optimal performance. Will show your installed cpu so you can make the right choice."
@@ -575,8 +611,7 @@ utilities_installer()
 		break
 	done
 	eval $LOGPE
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		utilities_installer
 	fi
 }
@@ -588,8 +623,7 @@ display_manager_installer()
 	local repeat='' options='' opt=''
 	local xorgPackages=''
 
-	if [ -z "$displayManager" ]
-	then
+	if [ -z "$displayManager" ];then
 		displayManager='none detected'
 	fi
 
@@ -600,8 +634,7 @@ display_manager_installer()
 	echo "${M}Recommendation:${S} if you are starting from no desktop installed, use the ${C}full${S} option."
 	echo "If you have ${C}xorg${S} already installed, then the standard is probably fine."
 	echo
-	if [ -z "$DEFAULT_DM" ]
-	then
+	if [ -z "$DEFAULT_DM" ];then
 		echo "Note: Use option ${C}1${S} first if you have a preference and have no display manager installed."
 		echo "If you do not run ${C}1${S} prior to creating your desktop, it will default to use ${C}wdm${S} if you"
 		echo "currently have no display manager. Your current default is: ${C}$displayManager${S}"
@@ -705,8 +738,7 @@ display_manager_installer()
 		break
 	done
 	eval $LOGPE
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		display_manager_installer
 	fi
 }
@@ -720,8 +752,7 @@ select_display_manager()
 	echo $MLINE
 	echo "${M}Display Manager Selector"
 	echo $MLINE
-	if [ -z "$displayManager" ]
-	then
+	if [ -z "$displayManager" ];then
 		displayManager='none detected'
 
 		echo "Please select from the following list. Note that xdm, wdm, and slim, sometimes"
@@ -744,8 +775,7 @@ select_display_manager()
 			case $opt in
 				kdm|gdm|xdm|wdm|slim)
 					# note: slim is not in every Debian level
-					if [ -z "$( check_package_status 'slim' )" -a "$opt" == 'slim' ]
-					then
+					if [ -z "$( check_package_status 'slim' )" -a "$opt" == 'slim' ];then
 						echo "${E}The display manager ${C}$opt${E} is not currently in Debian Stable. Please select another one.${N}"
 						repeat='true'
 					else
@@ -766,8 +796,7 @@ select_display_manager()
 			break
 		done
 		eval $LOGPE
-		if [ "$repeat" == 'true' ]
-		then
+		if [ "$repeat" == 'true' ];then
 			select_display_manager
 		fi
 	else
@@ -785,11 +814,9 @@ assign_display_manager()
 	local displayManager=$( get_default_display_manager )
 	local itemName=$1
 
-	if [ -z "$displayManager" ]
-	then
+	if [ -z "$displayManager" ];then
 		# assign the user set one
-		if [ -n "$DEFAULT_DM" ]
-		then
+		if [ -n "$DEFAULT_DM" ];then
 			displayManager=$DEFAULT_DM
 		else
 			case $itemName in
@@ -854,36 +881,29 @@ install_openoffice()
 	do
 		for language in $oooData
 		do
-			if [ "$opt" == "$( echo $language | cut -d ':' -f 6 )" ]
-			then
+			if [ "$opt" == "$( echo $language | cut -d ':' -f 6 )" ];then
 				found='true'
-				if [ "$language" == 'no-change' ]
-				then
+				if [ "$language" == 'no-change' ];then
 					skip='true'
 				else
 					oooLang=$( echo $language | cut -d ':' -f 1 )
-					if [ "$oooLang" != '' ]
-					then
+					if [ "$oooLang" != '' ];then
 						oooLang='openoffice.org-l10n-'$oooLang
 					fi
 					oooHyph=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
-					if [ "$oooHyph" != '' ]
-					then
+					if [ "$oooHyph" != '' ];then
 						oooHyph='openoffice.org-hyphenation-'$oooHyph
 					fi
 					oooHelp=$( echo $language | cut -d ':' -f 3 )
-					if [ "$oooHelp" != '' ]
-					then
+					if [ "$oooHelp" != '' ];then
 						oooHelp='openoffice.org-help-'$oooHelp
 					fi
 					oooThes=$( echo $language | cut -d ':' -f 4 )
-					if [ "$oooThes" != '' ]
-					then
+					if [ "$oooThes" != '' ];then
 						oooThes='openoffice.org-thesaurus-'$oooThes
 					fi
 					oooDict=$( echo $language | cut -d ':' -f 5 )
-					if [ "$oooDict" != '' ]
-					then
+					if [ "$oooDict" != '' ];then
 						oooDict='myspell-'$oooDict
 					fi
 				fi
@@ -895,11 +915,9 @@ install_openoffice()
 		break
 	done
 
-	if [ "$found" == 'true' ]
-	then
+	if [ "$found" == 'true' ];then
 		echo $LINE
-		if [ "$skip" != 'true' ]
-		then
+		if [ "$skip" != 'true' ];then
 			echo "${S}Please select your desktop manager. This will install the correct"
 			echo "OpenOffice.org desktop integration package for either kde or gnome."
 			echo "${C}1 - kde${S} Installs kde integration."
@@ -930,8 +948,7 @@ install_openoffice()
 						echo "${E}Invalid Selection${N}"
 						;;
 				esac
-				if [ "$complete" == 'true' ]
-				then
+				if [ "$complete" == 'true' ];then
 					break
 				fi
 			done
@@ -971,8 +988,7 @@ reinstall_skype()
 	wget -T$TIME_OUT -t2 -Nc $skypeDebUrl
 	SkypeFileName=$(ls -f | grep 'skype')
 
-	if [ -f $SkypeFileName ]
-	then
+	if [ -f $SkypeFileName ];then
 		echo $LINE
 		echo "${S}Skype deb download was successful. Beginning installation of new skype."
 		echo "Removing old skype version.${N}"
@@ -1002,8 +1018,7 @@ install_google_earth()
 	make-googleearth-package 2>>$LOG_FILE 2>&1
 	echo "${S}Installing ${C}$goog${S} deb...${N}"
 	dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
-	if [ "$APT_TYPE" == 'aptitude' ]
-	then
+	if [ "$APT_TYPE" == 'aptitude' ];then
 		$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
 	fi
 	cd $SCRIPT_HOME
@@ -1022,8 +1037,15 @@ install_google_earth()
 inxi_installer()
 {
 	local konviPath='/usr/share/apps/konversation/scripts/'
+	local netTools='net-tools' isAvailable=''
 
 	echo $LINE
+	# install ifconfig utility for full inxi functionality
+	if [ -z "$( which ifconfig )" -a -n "$( check_package_status $netTools )" ];then
+		package_installer $netTools 'install-missing'
+		echo $LINE
+	fi
+
 	echo "${S}Installing and running ${C}inxi -F${S} now...${N}"
 	run_script_import $MOD_INXI
 	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviPath ];then
@@ -1047,8 +1069,7 @@ install_ceni()
 	echo "Installing ${C}$appName${S} for you now to ${C}$SCRIPT_HOME${S}...${N}"
 
 	# clean up manual ceni install...
-	if [ -f $SCRIPT_HOME/ceni ]
-	then
+	if [ -f $SCRIPT_HOME/ceni ];then
 		echo "${S}Removing previous manual script install of ${C}$appName${N}"
 		rm -f $SCRIPT_HOME/ceni
 	fi
@@ -1067,20 +1088,17 @@ check_install_package()
 	local packageDeb="$1.deb" success=0
 	local downloadUrl="$SCRIPT_DOWNLOAD/packages/$packageDeb"
 	echo $LINE
-	if [ -n "$( check_package_status "$1" )" ]
-	then
+	if [ -n "$( check_package_status "$1" )" ];then
 		package_installer "$1" 'install-missing' || success=$?
 	else
 		echo "${S}Downloading and installing ${C}$1${S} deb now...${N}"
 		wget -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
-		if [ -f $packageDeb ]
-		then
+		if [ -f $packageDeb ];then
 			dpkg -i $packageDeb || success=$?
 		fi
 		rm -f $packageDeb
 	fi
-	if [ "$success" -gt 0 ]
-	then
+	if [ "$success" -gt 0 ];then
 		log_function_data "Error: $packageDeb download/install failed, error code: $success"
 		echo "${E}Install of ${C}$1${E} failed, sorry.${N}"
 	else
@@ -1093,7 +1111,12 @@ check_install_package()
 h2_faves()
 {
 	eval $LOGPS
-	local removeItems='splashy'
+	local removeItems='splashy' mozGroup="${C}iceweasel${S} and ${C}icedove${S}"
+
+	if [ "$SERVER_CLIENT" == 'server' ];then
+		mozGroup="${C}iceweasel${S}"
+	fi
+
 
 	echo $LINE
 	echo "${S}Starting the h2 favorites install process now...${N}"
@@ -1101,8 +1124,9 @@ h2_faves()
 	h2_package_group_installer 'console-tools'
 	h2_package_group_installer 'console-browsers'
 	h2_package_group_installer 'system-utilities'
+	h2_package_group_installer 'inxi_installer'
 	h2_package_group_installer 'rsync rdiff-backup'
-	echo "${S}mozilla-group is ${C}iceweasel${S} and ${C}icedove${S}...${N}"
+	echo "${S}mozilla-group is $mozGroup...${N}"
 	h2_package_group_installer 'mozilla-group'
 	h2_package_group_installer 'kde-extras'
 	echo
@@ -1116,27 +1140,45 @@ h2_faves()
 h2_package_group_remover()
 {
 	eval $LOGUS
-	local response='' removeItems=$1 package=''
+	local opt='' options='' repeat='' removeItems=$1 package=''
 
 	for package in $removeItems
 	do
-		if [ -n "$( package_tester $package )" ]
-		then
+		if [ -n "$( package_tester $package )" ];then
 			echo
-			echo "${S}Removing ${C}$package${S}..."
-			echo "${M}Type ${C}y + <enter>${M} to remove it, or ${C}n + <enter>${M} to keep it.${N}"
-			read response
-			case $response in
-				y|Y|yes)
-					package_remover "$package" 'purge'
-					;;
-				*)
-					echo "${S}Ok, not removing $package...${N}"
-					;;
-			esac
+			echo "${S}Removing ${C}$package${S} now... "
+			echo $LINE
+			echo "${C}1 - yes-remove-this-package${S}"
+			echo "${C}2 - no-keep-this-package${S}"
+			echo $LINE
+			echo -e $SLE
+			echo $LINE
+			options="yes-remove-this-package no-keep-this-package"
+			select opt in $options
+			do
+				log_function_data "opt selected: $opt"
+				case $opt in
+					yes-remove-this-package)
+						package_remover "$package" 'purge'
+						;;
+					no-keep-this-package)
+						echo "${S}Ok, not removing $package...${N}"
+						;;
+					*)
+						print_error opt
+						repeat='true'
+						;;
+				esac
+				break
+			done
+
+			eval $LOGUE
+			if [ "$repeat" == 'true' ];then
+				h2_package_group_remover "$1"
+			fi
 		fi
-		unset response
 	done
+
 	eval $LOGUE
 }
 
@@ -1144,22 +1186,46 @@ h2_package_group_remover()
 h2_package_group_installer()
 {
 	eval $LOGUS
-	local response=''
+	local opt='' options='' repeat=''
 
-	echo
-	echo "${S}Installing ${C}$1${S}... "
-	echo "${M}Type ${C}y + <enter>${M} to continue, or ${C}n + <enter>${M} to skip these now.${N}"
-	read response
-	case $response in
-		y|Y|yes)
-			package_group_installer 'plain' "$1"
-			;;
-		*)
-			echo "${S}Ok, skipping that group of packages...${N}"
-			;;
-	esac
-	unset response
+	echo $LINE
+	echo "${S}Installing ${C}$1${S} now... "
+	echo $LINE
+	echo "${C}1 - yes-install-this-group${S}"
+	echo "${C}2 - no-skip-this-group${S}"
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="yes-install-this-group no-skip-this-group"
+	select opt in $options
+	do
+		log_function_data "opt selected: $opt"
+		case $opt in
+			yes-install-this-group)
+				case $1 in
+					inxi_installer)
+						inxi_installer
+						;;
+					*)
+						package_group_installer 'plain' "$1"
+						;;
+				esac
+				;;
+			no-skip-this-group)
+				echo "${S}Ok, skipping that group of packages...${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+
 	eval $LOGUE
+	if [ "$repeat" == 'true' ];then
+		h2_package_group_installer "$1"
+	fi
 }
 
 # swap captive for ntfs-3g ntfs driver
@@ -1242,8 +1308,7 @@ swiftfox_installer()
 	"
 
 	# no point in offering 32 bit package here for 64 bit users, and vica versa
-	if [ "$BITS" == '64' ]
-	then
+	if [ "$BITS" == '64' ];then
 		swiftfoxChoices="
 		swiftfox-athlon64:(AMD-64-users-on-a-64bit-OS)
 		swiftfox-prescott:(Intel-Core-duo/solo)
@@ -1280,11 +1345,9 @@ swiftfox_installer()
 	do
 		for swiftOpt in $swiftfoxChoices
 		do
-			if [ "$opt" == "$swiftOpt" ]
-			then
+			if [ "$opt" == "$swiftOpt" ];then
 				found='true'
-				if [ "$swiftOpt" == 'return-to-menu' ]
-				then
+				if [ "$swiftOpt" == 'return-to-menu' ];then
 					skip='true'
 				else
 					swiftPackage="$( cut -d ':' -f 1 <<< $swiftOpt )"
@@ -1297,10 +1360,8 @@ swiftfox_installer()
 		break
 	done
 
-	if [ "$found" == 'true' ]
-	then
-		if [ "$skip" != 'true' ]
-		then
+	if [ "$found" == 'true' ];then
+		if [ "$skip" != 'true' ];then
 			update_sources swiftfox
 			package_installer "$swiftPackage libxp6" 'install-user' '--allow-unauthenticated'
 			# echo installing $swiftPackage now...
