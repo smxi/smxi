@@ -234,7 +234,7 @@ set_server_client()
 		echo "determine some package group items in Package Install."
 		echo $MLINE
 		echo "${C}1 - client${S} Default, everything included."
-		echo "${C}2 - server${S} Skips Alsa, Thunderbird if you install those groups."
+		echo "${C}2 - server${S} Skips Alsa, Thunderbird, rsync-backup if you install those groups."
 		echo $LINE
 		echo -e $SLE
 		echo $LINE
