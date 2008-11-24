@@ -1028,7 +1028,7 @@ inxi_installer()
 	run_script_import $MOD_INXI
 	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviPath ];then
 		echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
-		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviPath}inxi
+		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviPath}$MOD_INXI
 	fi
 	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options in sidux irc!!!"
 	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-d${S} or ${C}-v3${S}"
