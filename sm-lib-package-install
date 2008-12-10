@@ -295,7 +295,7 @@ select_install_type()
 	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
 	echo
 	echo "${C}5${S} - ${C}select-system-type${S} Set client/server system type flag. This will remove"
-	echo "    or add a few items from package groups depending on your selection. Most people do not"
+	echo "    or add a few items from package groups depending on your selection. Most people"
 	echo "    can skip this, but if you're setting up a server, you might want to set this flag."
 	echo
 	echo "${C}6${S} - ${C}back-to-main-menu${S}"
