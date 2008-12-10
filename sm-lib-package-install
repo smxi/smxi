@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.0.3
-####  Date: November 24 2008
+####  version: 3.0.4
+####  Date: December 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -226,38 +226,47 @@ update_sources()
 set_server_client()
 {
 	eval $LOGUS
-	local opt='' options='' repeat=''
+	local opt='' options='' repeat='' defaultString='default client setting'
 
-	if [ -z "$SERVER_CLIENT" ];then
-		echo $MLINE
-		echo "${S}Please select which system type you are installing. Your choice will"
-		echo "determine some package group items in Package Install."
-		echo $MLINE
-		echo "${C}1 - client${S} Default, everything included."
-		echo "${C}2 - server${S} Skips Alsa, Thunderbird, rsync-backup if you install those groups."
-		echo $LINE
-		echo -e $SLE
-		echo $LINE
-		options="client server"
-		select opt in $options
-		do
-			log_function_data "opt selected: $opt"
-			case $opt in
-				client|server)
-					SERVER_CLIENT=$opt
-					;;
-				*)
-					print_error opt
-					repeat='true'
-					;;
-			esac
-			break
-		done
+	if [ -n "$SERVER_CLIENT" ];then
+		defaultString="your current selection: ${C}$SERVER_CLIENT${S}"
+	fi
 
-		eval $LOGUE
-		if [ "$repeat" == 'true' ];then
-			set_server_client
-		fi
+	echo $MLINE
+	echo "${S}Please select which system type you are installing. Your choice will"
+	echo "determine some package group items in ${C}Package Install."
+	echo
+	echo "You can change this setting any time by just returning to the main package install"
+	echo "menu and picking this option again."
+	echo $MLINE
+	echo "${C}1 - client${S} Default, everything included."
+	echo "${C}2 - server${S} Skips Alsa, Thunderbird, rsync-backup if you install those groups."
+	echo "${C}3 - skip-return-to-menu${S} Leave things alone, use $defaultString."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="client server"
+	select opt in $options
+	do
+		log_function_data "opt selected: $opt"
+		case $opt in
+			client|server)
+				SERVER_CLIENT=$opt
+				;;
+			skip-return-to-menu)
+				echo "${S}Ok, using $defaultString - not changing anything.${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+
+	eval $LOGUE
+	if [ "$repeat" == 'true' ];then
+		set_server_client
 	fi
 }
 
@@ -285,13 +294,17 @@ select_install_type()
 	echo
 	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
 	echo
-	echo "${C}5${S} - ${C}back-to-main-menu${S}"
+	echo "${C}5${S} - ${C}select-system-type${S} Set client/server system type flag. This will remove"
+	echo "    or add a few items from package groups depending on your selection. Most people do not"
+	echo "    can skip this, but if you're setting up a server, you might want to set this flag."
+	echo
+	echo "${C}6${S} - ${C}back-to-main-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="office non-free utilities display-manager back-to-main-menu"
+	options="office non-free utilities display-manager select-system-type back-to-main-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -309,6 +322,10 @@ select_install_type()
 				;;
 			display-manager)
 				display_manager_installer
+				repeat='true'
+				;;
+			select-system-type)
+				set_server_client
 				repeat='true'
 				;;
 			back-to-main-menu)
