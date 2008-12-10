@@ -231,7 +231,8 @@ set_server_client()
 	if [ -n "$SERVER_CLIENT" ];then
 		defaultString="your current selection: ${C}$SERVER_CLIENT${S}"
 	fi
-
+	echo $MLINE
+	echo "${M}System Type Selector"
 	echo $MLINE
 	echo "${S}Please select which system type you are installing. Your choice will"
 	echo "determine some package group items in ${C}Package Install${S}."
