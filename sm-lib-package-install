@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.0.4
+####  version: 3.0.5
 ####  Date: December 10 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -284,6 +284,10 @@ select_install_type()
 	echo $MLINE
 	echo "${S}The following sections will be expanded over time, but these are your "
 	echo "current Package Install options (apt sources updated where needed):"
+	if [ -n "$SERVER_CLIENT" ];then
+		echo
+		echo "${M}You are using the following install type: ${C}$SERVER_CLIENT"
+	fi
 	echo $LINE
 	echo "${C}1${S} - ${C}office${S} Features OpenOffice.org installer. Language pack selector."
 	echo "    Now also offers OpenOffice hold/install/update option as well."
