@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.0.5
-####  Date: December 10 2008
+####  version: 3.0.6
+####  Date: December 11 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -246,12 +246,13 @@ set_server_client()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="client server"
+	options="client server skip-return-to-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
 		case $opt in
 			client|server)
+				echo "${S}Package install is now set to use: ${C}$opt${N}"
 				SERVER_CLIENT=$opt
 				;;
 			skip-return-to-menu)
