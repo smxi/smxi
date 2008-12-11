@@ -49,11 +49,10 @@ else
 	KERNEL_BASE=$1
 	KERNEL_SUB=''
 fi
-
-
+# parameters supported: ''|alt|nozip|redo
 KERNEL_TYPE=$2
 
-if [ "$KERNEL_TYPE" == 'a' ];then
+if [ "$KERNEL_TYPE" == 'alt' ];then
 	ALT_PATH='exp.'
 fi
 
@@ -79,7 +78,7 @@ error_handler()
 			message="The directory: $2 does not exist, please fix this."
 			;;
 		3)
-			message="dsl parameter: $2 is null, please fix this."
+			message="dsl parameter: $2 is unsupported, please fix this."
 			;;
 		4)
 			message="wget download error when downloading: $2"
@@ -97,7 +96,7 @@ error_handler()
 			rm -f $2
 			;;
 		8)
-			message="Unsupported Value for: \$3"
+			message="Unsupported Value for: \$2: $2"
 			;;
 	esac
 	echo $LINE
@@ -126,9 +125,16 @@ start_up_tests()
 	if [ -z "$KERNEL_SUB" ];then
 		error_handler 3 'KERNEL_SUB'
 	fi
-	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s|redo|nozip)$' <<< "$KERNEL_TYPE" )" ];then
-		error_handler 8
-	fi
+
+	# double check the parameters
+	case "$KERNEL_TYPE" in
+		''|alt|nozip|redo)
+			: # null or supported values for $2
+			;;
+		*)
+			error_handler 8 "$KERNEL_TYPE"
+			;;
+	esac
 
 	# make sure the paths you made are right and exist
 	for startDir in $KERNEL_DIR $KERNEL_32_INSTALLER_DIR $KERNEL_64_INSTALLER_DIR $SVN_DIR
@@ -190,7 +196,7 @@ download_kernel_files()
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
 	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
 
-	if [ "$KERNEL_TYPE" == 'a' ];then
+	if [ "$KERNEL_TYPE" == 'alt' ];then
 		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
 	fi
 }
