@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: sidux archive kernel zip file constructor
-####  version: 2.1.4
-####  Date: November 13 2008
+####  version: 2.1.5
+####  Date: December 11 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####
@@ -51,10 +51,9 @@ else
 fi
 
 
-KERNEL_TYPE=$3
+KERNEL_TYPE=$2
 
-if [ "$KERNEL_TYPE" == 'a' ]
-then
+if [ "$KERNEL_TYPE" == 'a' ];then
 	ALT_PATH='exp.'
 fi
 
@@ -116,40 +115,33 @@ start_up_tests()
 	echo "Running initial startup tests..."
 
 	# don't want to use root for this script
-	if [ "$(whoami)" == 'root' ]
-	then
+	if [ "$(whoami)" == 'root' ];then
 		error_handler 1
 	fi
 
 	# make sure the args are right
-	if [ -z "$KERNEL_BASE" ]
-	then
+	if [ -z "$KERNEL_BASE" ];then
 		error_handler 3 'KERNEL_BASE'
 	fi
-	if [ -z "$KERNEL_SUB" ]
-	then
+	if [ -z "$KERNEL_SUB" ];then
 		error_handler 3 'KERNEL_SUB'
 	fi
-	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s|redo|nozip)$' <<< "$KERNEL_TYPE" )" ]
-	then
+	if [ -n "$KERNEL_TYPE" -a -z "$( egrep '^(a|s|redo|nozip)$' <<< "$KERNEL_TYPE" )" ];then
 		error_handler 8
 	fi
 
 	# make sure the paths you made are right and exist
 	for startDir in $KERNEL_DIR $KERNEL_32_INSTALLER_DIR $KERNEL_64_INSTALLER_DIR $SVN_DIR
 	do
-		if [ ! -d "$startDir" ]
-		then
+		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
 		fi
 	done
 
-	if [ ! -f $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh ]
-	then
+	if [ ! -f $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh ];then
 		error_handler 6 $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh
 	fi
-	if [ ! -f $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh ]
-	then
+	if [ ! -f $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh ];then
 		error_handler 6 $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh
 	fi
 
@@ -162,8 +154,7 @@ create_kernel_directory()
 	echo "Starting kernel zip builder..."
 	echo "Creating new $NEW_KERNEL_DIRECTORY directory..."
 
-	if [ ! -d $NEW_KERNEL_DIRECTORY ]
-	then
+	if [ ! -d $NEW_KERNEL_DIRECTORY ];then
 		mkdir $NEW_KERNEL_DIRECTORY
 	fi
 	cd $NEW_KERNEL_DIRECTORY
@@ -181,8 +172,7 @@ check_kernel_exists()
 
 	kernelExists=$( grep -i "$kernelId" $fileName )
 	rm -f $fileName
-	if [ -z "$kernelExists" ]
-	then
+	if [ -z "$kernelExists" ];then
 		error_handler 5 $kernelName
 	else
 		echo "Kernel appears to exist on remote server, continuing..."
@@ -200,8 +190,7 @@ download_kernel_files()
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
 	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
 
-	if [ "$KERNEL_TYPE" == 'a' ]
-	then
+	if [ "$KERNEL_TYPE" == 'a' ];then
 		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
 	fi
 }
@@ -215,8 +204,7 @@ create_sub_directories()
 	echo "Generating 32/64 bit and meta directories..."
 	for directory in $directories
 	do
-		if [ ! -d $directory ]
-		then
+		if [ ! -d $directory ];then
 			mkdir $directory
 		fi
 	done
@@ -292,8 +280,7 @@ finish_it_up()
 #### EXECUTE
 ########################################################################
 
-if [ "$KERNEL_TYPE" == 'redo' ]
-then
+if [ "$KERNEL_TYPE" == 'redo' ];then
 	#start_up_tests
 	create_kernel_directory
 	#check_kernel_exists
@@ -304,8 +291,7 @@ then
 	make_zip_files
 	clean_up
 	finish_it_up
-elif [ "$KERNEL_TYPE" == 'nozip' ]
-then
+elif [ "$KERNEL_TYPE" == 'nozip' ];then
 	start_up_tests
 	create_kernel_directory
 	check_kernel_exists
