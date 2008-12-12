@@ -17,5 +17,38 @@ sm-lib-2008-fixes-t=1.0.2:November 18 2008
 sgfxi=4.2.3:December 7 2008
 svmi=2.1.3:December 7 2008
 inxi=0.8.5:December 4 2008
+sm-main-version=smOld 8.6.6
+smNew 8.6.6
+smOld 1.18.5
+smNew 1.18.5
+smOld 2.7.9
+smNew 2.7.9
+smOld 3.2.10
+smNew 3.2.10
+smOld 2.4.0
+smNew 2.4.0
+smOld 2.5.8
+smNew 2.5.8
+smOld 2.9.13
+smNew 2.9.13
+smOld 1.21.14
+smNew 1.21.14
+smOld 3.0.6
+smNew 3.0.6
+smOld 1.3.3
+smNew 1.3.3
+smOld 2.0.2
+smNew 2.0.2
+smOld 1.2.2
+smNew 1.2.2
+smOld 1.3.20
+smNew 1.3.20
+smOld 1.3.18
+smNew 1.3.18
+smOld 1.0.1
+smNew 1.0.1
+smOld 1.0.2
+smNew 1.0.2
+8.00.00:
 
 ###**EOF**###

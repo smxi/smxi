@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.2.2
-####  Date: November 22 2008
+####  version: 2.3.0
+####  Date: December 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####
@@ -53,6 +53,10 @@ SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_INXI='inxi'
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 SM_VERSIONS="${SMXI_SVN}sm-versions"
+SM_VERSIONS_PREVIOUS="${SMXI_SVN}sm-versions-previous"
+SM_VERSIONS_URL='http://smxi.googlecode.com/svn/trunk/sm-versions'
+
+SM_MAIN_FIRST='8'
 
 B_SKIP_SVN='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
@@ -74,6 +78,9 @@ error_handler()
 			;;
 		3)
 			message="sed failed for some reason while removing dev flags in file: $2"
+			;;
+		4)
+			message="wget failed to get the file: $2"
 			;;
 	esac
 	echo $LINE
@@ -133,16 +140,14 @@ start_up_tests()
 	echo $LINE
 	echo "Running initial startup tests..."
 	# don't want to use root for this script
-	if [ "$(whoami)" == 'root' ]
-	then
+	if [ "$(whoami)" == 'root' ];then
 		error_handler 1
 	fi
 
 	# make sure the paths you made are right and exist
 	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_DEV $SVMI_SVN
 	do
-		if [ ! -d "$startDir" ]
-		then
+		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
 		fi
 	done
@@ -151,10 +156,16 @@ start_up_tests()
 
 make_sm_versions()
 {
-	if [ -f $SM_VERSIONS ]
-	then
+	if [ -f $SM_VERSIONS ];then
 		rm -f $SM_VERSIONS
 	fi
+	# this ensures that we're working with the true last version, not an off version
+	# this is important to have in order to always be using the latest live versions file
+	wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL
+	if [ "$?" -gt 0 ];then
+		error_handler 4 $SM_VERSIONS_URL
+	fi
+	# create the master working file
 	touch $SM_VERSIONS
 }
 
@@ -173,8 +184,7 @@ clean_dev_flags()
 		isDev=$( grep -i "^DEV_FLAG='true'" $script )
 
 		# just a small fix to make the files not update unless they need to
-		if [ -n "$isRestart" -o -n "$isDev" ]
-		then
+		if [ -n "$isRestart" -o -n "$isDev" ];then
 			# important! only reset where line begins with variable name
 			sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SMXI_SVN$script || error_handler 3 $script
 		fi
@@ -238,11 +248,67 @@ update_sm_data()
 	done
 }
 
+# the basic idea here is simple: for every increment in any script component
+# 1st, 2nd, 3rd, increment the overall smxi equivalent number by 1
+construct_smxi_version_number()
+{
+	local script='' incrementSecond='' incrementThird=''
+	local smMainPrevious=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d ':' -f 1 | cut -d '=' -f 2 )
+	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d ':' -f 2 )
+	local smMainFirst=$SM_MAIN_FIRST
+	local smMainSecond=$( cut -d '.' -f 2 <<< $smMainPrevious )
+	local smMainThird=$( cut -d '.' -f 3 <<< $smMainPrevious )
+	local smOld='' smNew=''
+	local smOldOne='' smNewOne='' smOldTwo='' smNewTwo='' smOldThird='' smNewThird=''
+
+	for script in $SCRIPT_LIST_MAIN
+	do
+		# get the two values, old and new
+		smOld=$( grep "$script=" $SM_VERSIONS_PREVIOUS | cut -d ':' -f 1 |cut -d '=' -f 2 )
+		smNew=$( grep "$script=" $SM_VERSIONS | cut -d ':' -f 1 |cut -d '=' -f 2 )
+		echo smOld $smOld
+		echo smNew $smNew
+		smOldOne=$( cut -d '.' -f 1 <<< $smOld )
+		smOldTwo=$( cut -d '.' -f 2 <<< $smOld )
+		smOldThird=$( cut -d '.' -f 3 <<< $smOld )
+		smNewOne=$( cut -d '.' -f 1 <<< $smNew )
+		smNewTwo=$( cut -d '.' -f 2 <<< $smNew )
+		smNewThird=$( cut -d '.' -f 3 <<< $smNew )
+		# second number increments occur with change in primary first or second number
+		if [ "$smNewOne" -gt "$smOldOne" -o "$smNewTwo" -gt "$smOldTwo" ];then
+			incrementSecond='true'
+		fi
+		# and third number increments occur only with third number differences
+		if [ "$smNewThird" -gt "$smNewThird" ];then
+			incrementThird='true'
+		fi
+	done
+	# then update 2nd/3rd if needed
+	if [ "$incrementSecond" == 'true' ];then
+		smMainSecond=$(( $smMainSecond + 1 ))
+	fi
+	if [ "$incrementThird" == 'true' ];then
+		smMainThird=$(( $smMainThird + 1 ))
+	fi
+	if [ "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
+		smMainDate=$( date "+%B %d %Y" )
+	fi
+
+	# process the numbers to make them nice and neat again for output
+	local smMainSecond=$( printf %02d $smMainSecond )
+	local smMainThird=$( printf %02d $smMainThird )
+
+	echo "$SM_MAIN_FIRST.$smMainSecond.$smMainThird:$smMainDate"
+}
+
 # add closing steps for sm_versions file
 finalize_sm_versions()
 {
+	local smxiVersion=$( construct_smxi_version_number )
+
 	echo "Finalizing $SM_VERSIONS now..."
-	echo  >> $SM_VERSIONS
+	echo "sm-main-version=$smxiVersion" >> $SM_VERSIONS
+	echo >> $SM_VERSIONS
 	echo '###**EOF**###' >> $SM_VERSIONS
 	# add the versions file to the svn too
 	# cp -f --preserve=timestamps $SM_VERSIONS $SMXI_SVN
@@ -268,7 +334,6 @@ update_other_components()
 	#cp -f ${DEV_TOOLS_DIR}zsl ${DEV_TOOLS_SVN}zsl
 	:
 }
-
 
 # if you have write access to svn, this last step will update svn
 update_svn_data()
