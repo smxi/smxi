@@ -253,7 +253,7 @@ update_sm_data()
 construct_smxi_version_number()
 {
 	local script='' incrementSecond='' incrementThird=''
-	local smMainPrevious=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d ':' -f 1 | cut -d '=' -f 2 )
+	local smMainPrevious=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 1 )
 	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d ':' -f 2 )
 	local smMainFirst=$SM_MAIN_FIRST
 	local smMainSecond=$( cut -d '.' -f 2 <<< $smMainPrevious )
@@ -264,8 +264,8 @@ construct_smxi_version_number()
 	for script in $SCRIPT_LIST_MAIN
 	do
 		# get the two values, old and new
-		smOld=$( grep "$script=" $SM_VERSIONS_PREVIOUS | cut -d ':' -f 1 |cut -d '=' -f 2 )
-		smNew=$( grep "$script=" $SM_VERSIONS | cut -d ':' -f 1 |cut -d '=' -f 2 )
+		smOld=$( grep "$script=" $SM_VERSIONS_PREVIOUS |cut -d '=' -f 2 | cut -d ':' -f 1 )
+		smNew=$( grep "$script=" $SM_VERSIONS |cut -d '=' -f 2 | cut -d ':' -f 1 )
 		smOldOne=$( cut -d '.' -f 1 <<< $smOld )
 		smOldTwo=$( cut -d '.' -f 2 <<< $smOld )
 		smOldThird=$( cut -d '.' -f 3 <<< $smOld )
