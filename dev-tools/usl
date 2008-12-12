@@ -251,6 +251,7 @@ update_sm_data()
 
 # the basic idea here is simple: for every increment in any script component
 # 1st, 2nd, 3rd, increment the overall smxi equivalent number by 1
+# for manual primary 1st update, just set 2/3 to 0 and set new date
 construct_smxi_version_number()
 {
 	local script='' incrementFirst='' incrementSecond='' incrementThird=''
@@ -282,12 +283,13 @@ construct_smxi_version_number()
 			incrementThird='true'
 		fi
 	done
-	# then update 2nd/3rd if needed
+	# if manual primary version update, just reset 2/3 to 0
 	if [ "$SM_MAIN_FIRST" -gt "$smMainFirst" ];then
 		smMainFirst=$SM_MAIN_FIRST
 		smMainSecond=0
 		smMainThird=0
 		incrementFirst='true'
+	# then update 2nd/3rd if needed
 	elif [ "$incrementSecond" == 'true' ];then
 		smMainSecond=$(( $smMainSecond + 1 ))
 		smMainThird=0
@@ -300,8 +302,8 @@ construct_smxi_version_number()
 	fi
 
 	# process the numbers to make them nice and neat again for output
-	local smMainSecond=$( printf %02d $smMainSecond )
-	local smMainThird=$( printf %02d $smMainThird )
+	smMainSecond=$( printf %02d $smMainSecond )
+	smMainThird=$( printf %02d $smMainThird )
 
 	echo "$smMainFirst.$smMainSecond.$smMainThird:$smMainDate"
 }
