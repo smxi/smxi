@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.3.0
-####  Date: December 2008
+####  version: 2.3.1
+####  Date: December 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####
@@ -284,8 +284,8 @@ construct_smxi_version_number()
 	# then update 2nd/3rd if needed
 	if [ "$incrementSecond" == 'true' ];then
 		smMainSecond=$(( $smMainSecond + 1 ))
-	fi
-	if [ "$incrementThird" == 'true' ];then
+		smMainThird=0
+	elif [ "$incrementThird" == 'true' ];then
 		smMainThird=$(( $smMainThird + 1 ))
 	fi
 	# then, if changed, update main date as well

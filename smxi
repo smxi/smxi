@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.6.6
-####  Date: December 10 2008
+####  version: 8.7.0
+####  Date: December 12 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -2182,30 +2182,21 @@ check_version()
 	# 0 means get latest, 1 means don't
 	test_version_info $SCRIPT_NAME chm
 	existsNewer="$?"
-	CHECK_VERSION_TEXT="$BAR
-${S}Checking for the latest version of this script${N}
-$LINE
-${S}Script Last Modified: ${C}$REMOTE_DATE${N}
-${S}Local Version: ${C}$LocalVersion
-${S}Remote Version: ${C}$REMOTE_VERSION"
+	CHECK_VERSION_TEXT="$LINE
+${S}Checking for new script engine...${N}"
 
 	if [ "$REMOTE_VERSION" == "$LocalVersion" -a "$FORCE_DOWNLOAD" != 'true' ];then
 		CHECK_VERSION_TEXT="$CHECK_VERSION_TEXT
-$LINE
-${S}You are using the latest version of this script.${N}"
+${S}You are using the latest script engine.${N}"
 	elif [ "$existsNewer" -eq 0 -o "$FORCE_DOWNLOAD" == 'true' ];then
 		echo "$CHECK_VERSION_TEXT"
 		if [ "$FORCE_DOWNLOAD" == 'true' ];then
-			echo "${E}Forcing reinstall of local version.${N}"
+			echo "${M}Forcing reinstall of local script engine........${N}"
 			update_scripts $SCRIPT_NAME 'chm'
 		else
-			echo "${S}The versions are different.${N}"
+			echo "${S}Updating to latest script engine and restarting now.......${N}"
 		fi
-		echo "${S}The script will now install the remote version"
-		echo "and restart this script using the new version${N}"
-
 		# run the script again, using the newly downloaded script
-		echo "${S}Restarting Now.........${N}"
 		# restart with full args, append all start options except f and r to -r
 		./$SCRIPT_NAME -r$START_OPTIONS
 		exit 0
@@ -2328,6 +2319,7 @@ print_lib_info()
 	local scriptText='' printIt=''
 	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$1 | cut -d ' ' -f 2 )
 	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$1 | cut -d ' ' -f 2-4 )
+	local moduleText='Module Version'
 
 	case $1 in
 		$LIB_CLEAN_UP)
@@ -2370,6 +2362,13 @@ print_lib_info()
 # 			scriptText='WARNING SECTION'
 # 			printIt='true'
 # 			;;*)
+		$SCRIPT_NAME)
+			scriptText=$SCRIPT_NAME
+			moduleText='Version'
+			printIt='true'
+			scriptVersion=$( grep -e "sm-main-version=" $SCRIPT_HOME/$VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 1 )
+			scriptDate=$( grep -e "sm-main-version=" $SCRIPT_HOME/$VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 2 )
+			;;
 		*)
 			error_handler 'value-bad' $FUNCNAME "$1"
 			;;
@@ -2377,9 +2376,9 @@ print_lib_info()
 	# script information
 	if [ "$printIt" == 'true' ];then
 		echo $MBAR
-		echo "${M}$scriptText ${S}:: Module Version: ${C}$scriptVersion${S} :: Last Updated: ${C}$scriptDate${N}"
+		echo " ${M}$scriptText ${S}:: $moduleText: ${C}$scriptVersion${S} :: Last Updated: ${C}$scriptDate${N}"
 	fi
-	log_function_data "$scriptText :: Module Version: $scriptVersion :: Last Updated: $scriptDate"
+	log_function_data "$scriptText :: $moduleText: $scriptVersion :: Last Updated: $scriptDate"
 	eval $LOGUE
 }
 
@@ -2401,13 +2400,13 @@ print_version()
 			extraMessage='...and of course, RazberrieTart, the official sidux fan girl!'
 			;;
 		antix)
-			distroThanks='anticapitalista crust dutchy eriefisher kelmo latino masinick slh trash80 zulu9'
+			distroThanks='anticapitalista crust dutchy eriefisher masinick trash80'
 			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
 			;;
 	esac
-
+	print_lib_info $SCRIPT_NAME
 	if [ "$PRINT_VERSION" != 'true' ];then
-		echo $LINE
+		echo $MLINE
 		echo "${S}Special thanks to the people who have helped with this script, in one way or another:"
 		sleep 0.1
 		echo -n ${C}
@@ -2423,11 +2422,11 @@ print_version()
 			sleep 0.06
 		done
 		echo ${N}
+		echo $LINE
 	else
 		echo $MLINE
-		echo " ${M}$SCRIPT_NAME${S} :: version: ${C}$scriptVersion${S} :: last updated: ${C}$scriptDate"
 	fi
-	echo $LINE
+
 	echo "${S}Your installed version of ${C}Debian $systemBase${S} is: ${C}$distroId${N}"
 	log_function_data "Installed version of Debian $systemBase is: $distroId"
 	eval $LOGUE
