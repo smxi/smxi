@@ -253,11 +253,11 @@ update_sm_data()
 construct_smxi_version_number()
 {
 	local script='' incrementSecond='' incrementThird=''
-	local smMainPrevious=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 1 )
+	local smMainVersion=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 1 )
 	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 2 )
 	local smMainFirst=$SM_MAIN_FIRST
-	local smMainSecond=$( cut -d '.' -f 2 <<< $smMainPrevious )
-	local smMainThird=$( cut -d '.' -f 3 <<< $smMainPrevious )
+	local smMainSecond=$( cut -d '.' -f 2 <<< $smMainVersion )
+	local smMainThird=$( cut -d '.' -f 3 <<< $smMainVersion )
 	local smOld='' smNew=''
 	local smOldOne='' smNewOne='' smOldTwo='' smNewTwo='' smOldThird='' smNewThird=''
 
@@ -288,6 +288,7 @@ construct_smxi_version_number()
 	if [ "$incrementThird" == 'true' ];then
 		smMainThird=$(( $smMainThird + 1 ))
 	fi
+	# then, if changed, update main date as well
 	if [ "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
 		smMainDate=$( date "+%B %d %Y" )
 	fi
