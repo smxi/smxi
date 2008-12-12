@@ -254,7 +254,7 @@ construct_smxi_version_number()
 {
 	local script='' incrementSecond='' incrementThird=''
 	local smMainPrevious=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 1 )
-	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d ':' -f 2 )
+	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 2 )
 	local smMainFirst=$SM_MAIN_FIRST
 	local smMainSecond=$( cut -d '.' -f 2 <<< $smMainPrevious )
 	local smMainThird=$( cut -d '.' -f 3 <<< $smMainPrevious )
@@ -298,7 +298,7 @@ construct_smxi_version_number()
 
 	echo "$SM_MAIN_FIRST.$smMainSecond.$smMainThird:$smMainDate"
 }
-
+#construct_smxi_version_number;exit
 # add closing steps for sm_versions file
 finalize_sm_versions()
 {
