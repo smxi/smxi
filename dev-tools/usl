@@ -266,8 +266,6 @@ construct_smxi_version_number()
 		# get the two values, old and new
 		smOld=$( grep "$script=" $SM_VERSIONS_PREVIOUS | cut -d ':' -f 1 |cut -d '=' -f 2 )
 		smNew=$( grep "$script=" $SM_VERSIONS | cut -d ':' -f 1 |cut -d '=' -f 2 )
-		echo smOld $smOld
-		echo smNew $smNew
 		smOldOne=$( cut -d '.' -f 1 <<< $smOld )
 		smOldTwo=$( cut -d '.' -f 2 <<< $smOld )
 		smOldThird=$( cut -d '.' -f 3 <<< $smOld )
