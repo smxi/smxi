@@ -56,6 +56,7 @@ SM_VERSIONS="${SMXI_SVN}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_SVN}sm-versions-previous"
 SM_VERSIONS_URL='http://smxi.googlecode.com/svn/trunk/sm-versions'
 
+# the primary version number will be manually set.
 SM_MAIN_FIRST='8'
 
 B_SKIP_SVN='false'
@@ -252,10 +253,10 @@ update_sm_data()
 # 1st, 2nd, 3rd, increment the overall smxi equivalent number by 1
 construct_smxi_version_number()
 {
-	local script='' incrementSecond='' incrementThird=''
+	local script='' incrementFirst='' incrementSecond='' incrementThird=''
 	local smMainVersion=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 1 )
 	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 2 )
-	local smMainFirst=$SM_MAIN_FIRST
+	local smMainFirst=$( cut -d '.' -f 1 <<< $smMainVersion )
 	local smMainSecond=$( cut -d '.' -f 2 <<< $smMainVersion )
 	local smMainThird=$( cut -d '.' -f 3 <<< $smMainVersion )
 	local smOld='' smNew=''
@@ -282,14 +283,19 @@ construct_smxi_version_number()
 		fi
 	done
 	# then update 2nd/3rd if needed
-	if [ "$incrementSecond" == 'true' ];then
+	if [ "$SM_MAIN_FIRST" -gt "$smMainFirst" ];then
+		smMainFirst=$SM_MAIN_FIRST
+		smMainSecond=0
+		smMainThird=0
+		incrementFirst='true'
+	elif [ "$incrementSecond" == 'true' ];then
 		smMainSecond=$(( $smMainSecond + 1 ))
 		smMainThird=0
 	elif [ "$incrementThird" == 'true' ];then
 		smMainThird=$(( $smMainThird + 1 ))
 	fi
 	# then, if changed, update main date as well
-	if [ "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
+	if [ "$incrementFirst" == 'true' -o "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
 		smMainDate=$( date "+%B %d %Y" )
 	fi
 
@@ -297,7 +303,7 @@ construct_smxi_version_number()
 	local smMainSecond=$( printf %02d $smMainSecond )
 	local smMainThird=$( printf %02d $smMainThird )
 
-	echo "$SM_MAIN_FIRST.$smMainSecond.$smMainThird:$smMainDate"
+	echo "$smMainFirst.$smMainSecond.$smMainThird:$smMainDate"
 }
 #construct_smxi_version_number;exit
 # add closing steps for sm_versions file
