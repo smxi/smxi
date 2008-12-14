@@ -34,6 +34,7 @@ SMXI_SVN="$HOME/bin/scripts/smxi/svn/trunk/"
 DEV_TOOLS_SVN="${SMXI_SVN}dev-tools/"
 INXI_SVN="$HOME/bin/scripts/inxi/svn/trunk/"
 KERNEL_SVN="${SMXI_SVN}kernel-stuff/"
+RBXI_SVN="$HOME/bin/scripts/rbxi/svn/trunk/"
 SGFXI_SVN="$HOME/bin/scripts/sgfxi/svn/trunk/"
 STUB_SVN="${SMXI_SVN}smxi-stub/"
 SVMI_SVN="$HOME/bin/scripts/svmi/svn/trunk/"
@@ -51,6 +52,7 @@ SMXI_DEV='/usr/local/bin/'
 SCRIPT_LIST_SVMI='svmi'
 SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_INXI='inxi'
+SCRIPT_LIST_RBXI='rbxi'
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 SM_VERSIONS="${SMXI_SVN}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_SVN}sm-versions-previous"
@@ -107,6 +109,10 @@ get_options()
 				WORKING_SVN_DIR=$INXI_SVN
 				UPDATE_TYPE='i'
 				;;
+			r)
+				WORKING_SVN_DIR=$RBXI_SVN
+				UPDATE_TYPE='r'
+				;;
 			u)
 				B_SKIP_SVN='true'
 				;;
@@ -121,6 +127,7 @@ get_options()
 				echo "Useage:
 -g Update and commit sgfxi svn
 -i Update and commit inxi svn
+-r Update and commit rbxi svn
 -u Update only, skip svn commit
 -s (or null, no args) Update and commit smxi svn.
    Will get inxi, sgfxi, and svmi version numbers as well,
@@ -146,7 +153,7 @@ start_up_tests()
 	fi
 
 	# make sure the paths you made are right and exist
-	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_DEV $SVMI_SVN
+	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $RBXI_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_DEV $SVMI_SVN
 	do
 		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
