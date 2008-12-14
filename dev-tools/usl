@@ -380,8 +380,12 @@ update_svn_data()
 # args: $1 - message for commit
 commit_to_svn()
 {
-	cd $WORKING_SVN_DIR
-	svn commit
+	local svnWild=''
+
+	if [ "$UPDATE_TYPE" == 'r' ];then
+		svnWild='*'
+	fi
+	svn commit $WORKING_SVN_DIR$svnWild
 }
 
 finish_it_up()
