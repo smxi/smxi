@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.3.1
-####  Date: December 12 2008
+####  version: 2.3.2
+####  Date: December 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####
@@ -85,6 +85,9 @@ error_handler()
 		4)
 			message="wget failed to get the file: $2"
 			;;
+		5)
+			message="You used an option that does not exist: $2"
+			;;
 	esac
 	echo $LINE
 	echo $message
@@ -98,7 +101,7 @@ get_options()
 {
 	local opt=''
 
-	while getopts ghisuv opt
+	while getopts :ghirsuv opt
 	do
 		case $opt in
 			g)
@@ -136,6 +139,9 @@ get_options()
 -v Update and commit svmi svn
 "
 				exit 0
+				;;
+			*)
+				error_handler 5 "-$OPTARG"
 				;;
 		esac
 	done
@@ -380,11 +386,6 @@ update_svn_data()
 # args: $1 - message for commit
 commit_to_svn()
 {
-	local svnWild=''
-
-# 	if [ "$UPDATE_TYPE" == 'r' ];then
-# 		svnWild='*'
-# 	fi
 	svn commit $WORKING_SVN_DIR$svnWild
 }
 
