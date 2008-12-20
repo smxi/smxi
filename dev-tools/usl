@@ -244,6 +244,7 @@ main_updater()
 		update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_DEV"
 		update_sm_data "$SCRIPT_LIST_SVMI" "$SVMI_DEV"
 		update_sm_data "$SCRIPT_LIST_INXI" "$INXI_SVN"
+		update_sm_data "$SCRIPT_LIST_RBXI" "$RBXI_SVN"
 		update_kernel_installers
 		update_other_components
 		clean_dev_flags
