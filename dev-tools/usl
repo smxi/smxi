@@ -53,7 +53,7 @@ SVMI_DEV="$HOME/bin/scripts/svmi/dev/"
 SMXI_DEV='/usr/local/bin/'
 
 # scripts/libs
-RM_VERSION="${RMXI_SVN}rm-version"
+RB_VERSION="${RBXI_SVN}rb-version"
 SCRIPT_LIST_SVMI='svmi'
 SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_INXI='inxi'
@@ -176,11 +176,11 @@ start_up_tests()
 make_versions_file()
 {
 	if [ "$UPDATE_TYPE" == 'r' ];then
-		if [ -f $RM_VERSION ];then
-			rm -f $RM_VERSION
+		if [ -f $RB_VERSION ];then
+			rm -f $RB_VERSION
 		fi
 		# create the master working file
-		touch $RM_VERSION
+		touch $RB_VERSION
 	else
 		if [ -f $SM_VERSIONS ];then
 			rm -f $SM_VERSIONS
@@ -360,7 +360,7 @@ process_rbxi()
 	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9\ ]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
 
-	echo "rbxi=$localVersion:$localDate" >> $RM_VERSION
+	echo "rbxi=$localVersion:$localDate" >> $RB_VERSION
 
 	# all files are copied to rbxi/rbxi so tar it
 	echo "rbxi data is: $localVersion:$localDate"
