@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.0
+####  version: 2.4.1
 ####  Date: December 20 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -46,12 +46,14 @@ WORKING_SVN_DIR=$SMXI_SVN
 KERNEL_DIR="$HOME/large/sidux-kernels/"
 RBXI_BZIP="$HOME/bin/scripts/rbxi/rbxi/"
 RBXI_DEV="$HOME/bin/scripts/rbxi/dev/"
+RBXI_HOME="$HOME/bin/scripts/rbxi/"
+RBXI_ZIPS="$HOME/bin/scripts/rbxi/zips/"
 SGFXI_DEV="$HOME/bin/scripts/sgfxi/dev/"
 SVMI_DEV="$HOME/bin/scripts/svmi/dev/"
 SMXI_DEV='/usr/local/bin/'
 
 # scripts/libs
-RM_VERSION="${RMXI_BZIP}rm-version"
+RM_VERSION="${RMXI_SVN}rm-version"
 SCRIPT_LIST_SVMI='svmi'
 SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_INXI='inxi'
@@ -173,25 +175,25 @@ start_up_tests()
 
 make_versions_file()
 {
-	if [ -f $SM_VERSIONS ];then
-		rm -f $SM_VERSIONS
-	fi
-
-	# this ensures that we're working with the true last version, not an off version
-	# this is important to have in order to always be using the latest live versions file
-	wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL
-	if [ "$?" -gt 0 ];then
-		error_handler 4 $SM_VERSIONS_URL
-	fi
-
-	# create the master working file
-	touch $SM_VERSIONS
 	if [ "$UPDATE_TYPE" == 'r' ];then
 		if [ -f $RM_VERSION ];then
 			rm -f $RM_VERSION
 		fi
 		# create the master working file
 		touch $RM_VERSION
+	else
+		if [ -f $SM_VERSIONS ];then
+			rm -f $SM_VERSIONS
+		fi
+
+		# this ensures that we're working with the true last version, not an off version
+		# this is important to have in order to always be using the latest live versions file
+		wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL
+		if [ "$?" -gt 0 ];then
+			error_handler 4 $SM_VERSIONS_URL
+		fi
+		# create the master working file
+		touch $SM_VERSIONS
 	fi
 }
 
@@ -236,7 +238,7 @@ main_updater()
 	echo $LINE
 
 	if [ "$UPDATE_TYPE" == 'r' ];then
-		update_sm_data "$SCRIPT_LIST_RBXI" "$RBXI_DEV"
+		process_rbxi
 	else
 		update_sm_data "$SCRIPT_LIST_MAIN" "$SMXI_DEV"
 		update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_DEV"
@@ -246,30 +248,28 @@ main_updater()
 		update_other_components
 		clean_dev_flags
 		clean_gfx_test_data
+		finalize_sm_versions
 	fi
-	finalize_sm_versions
+
 }
 
 # args: $1 - which data set to update; $2 - data dir
 update_sm_data()
 {
-	local script=''
+	local script='' localVersion='' localDate=''
 
 	echo "Updating $2 group now"
 
 	for script in $1
 	do
-		LocalVersion=$( grep -m 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
-		LocalDate=$( grep -m 1 -o -G "Date:\ [A-Za-z0-9\ ]*" $2$script | cut -f 2-4 -d ' ' )
-		echo $script'='$LocalVersion':'$LocalDate >> $SM_VERSIONS
+		localVersion=$( grep -im 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+		localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9\ ]*" $2$script | cut -f 2-4 -d ' ' )
+		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
 
 		# echo "copy $script to ${SMXI_SVN}$script"
-		# echo "$script'='$LocalVersion':'$LocalDate"
-		if [ "$2" != "$RBXI_DEV" ];then
-			cp -f --preserve=timestamps $2$script $SMXI_SVN$script
-		else
-			echo $script'='$LocalVersion':'$LocalDate >> $RM_VERSION
-		fi
+		# echo "$script'='$localVersion':'$localDate"
+		cp -f --preserve=timestamps $2$script $SMXI_SVN$script
+
 		# working sgfxi/svmi will often have testing data, don't want to comment out
 		# that each update
 		case $2 in
@@ -278,14 +278,6 @@ update_sm_data()
 				;;
 			$SVMI_DEV)
 				cp -f --preserve=timestamps $2$script $SVMI_SVN$script
-				;;
-			$RBXI_DEV)
-				cp -f --preserve=timestamps $2$script $RBXI_SVN
-				cp -f --preserve=timestamps $2$script $RBXI_BZIP
-				# send excludes
-				cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/excludes* ${RBXI_BZIP}rbxi-data
-				# send values/readme
-				cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/*rbxi* ${RBXI_BZIP}rbxi-data
 				;;
 		esac
 	done
@@ -348,6 +340,36 @@ construct_smxi_version_number()
 	smMainThird=$( printf %02d $smMainThird )
 
 	echo "$smMainFirst.$smMainSecond.$smMainThird:$smMainDate"
+}
+
+process_rbxi()
+{
+	cd $RBXI_HOME
+
+	local localVersion='' localDate=''
+
+	echo "Copying rbxi files to bzip and svn"
+	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_SVN
+	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
+	# send excludes
+	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/excludes* ${RBXI_BZIP}rbxi-data
+	# send values/readme
+	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/*rbxi* ${RBXI_BZIP}rbxi-data
+
+	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9\ ]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
+
+	echo "rbxi=$localVersion:$localDate" >> $RM_VERSION
+
+	# all files are copied to rbxi/rbxi so tar it
+	echo "rbxi data is: $localVersion:$localDate"
+	echo "Tar/bzipping now..."
+	tar vcjf rbxi.tar.bz2 rbxi
+	echo "Moving to: $RBXI_ZIPS"
+	mv rbxi.tar.bz2 $RBXI_ZIPS
+	echo "Creating backup bzip file now..."
+	cp -f ${RBXI_ZIPS}rbxi.tar.bz2 ${RBXI_ZIPS}rbxi-$localVersion.tar.bz2
+	echo "Done with rbxi specific tasks now."
 }
 #construct_smxi_version_number;exit
 # add closing steps for sm_versions file
