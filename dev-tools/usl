@@ -61,7 +61,8 @@ SCRIPT_LIST_RBXI='rbxi'
 SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 SM_VERSIONS="${SMXI_SVN}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_SVN}sm-versions-previous"
-SM_VERSIONS_URL='http://smxi.googlecode.com/svn/trunk/sm-versions'
+# this has to the current live version on smxi.org
+SM_VERSIONS_URL='http://smxi.org/sm/sm-versions'
 
 # the primary version number will be manually set.
 SM_MAIN_FIRST='8'
@@ -309,12 +310,13 @@ construct_smxi_version_number()
 		smNewOne=$( cut -d '.' -f 1 <<< $smNew )
 		smNewTwo=$( cut -d '.' -f 2 <<< $smNew )
 		smNewThird=$( cut -d '.' -f 3 <<< $smNew )
+
 		# second number increments occur with change in primary first or second number
 		if [ "$smNewOne" -gt "$smOldOne" -o "$smNewTwo" -gt "$smOldTwo" ];then
 			incrementSecond='true'
 		fi
 		# and third number increments occur only with third number differences
-		if [ "$smNewThird" -gt "$smNewThird" ];then
+		if [ "$smNewThird" -gt "$smOldThird" ];then
 			incrementThird='true'
 		fi
 	done
