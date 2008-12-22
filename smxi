@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.7.0
-####  Date: December 12 2008
+####  version: 8.7.1
+####  Date: December 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -347,6 +347,7 @@ set_script_colors()
 			S="[1;32m" # green: Standard message
 			Q="[1;36m" # CYAN: Questions
 			M="[1;36m" # CYAN: Message
+			B="[1;34m" # BLUE: Message
 			C="[1;35m" # MAGENTA: Command or Path
 			N="[0;39m" # default system console color: Normal :: make last in colors
 			;;
@@ -1147,16 +1148,17 @@ set_distro_data()
 	# some people have mixed systems that cannot be dynamically tested for, this hard sets it
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
-	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
+	local nonDebianPattern='(sidux|opera|debian-multimedia|mepis|skype|swiftfox|virtualbox)'
 
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
+	local isLenny=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(lenny)' )
 	local isLennyStable=$( grep -is '^5.' $EDV )
 	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
 	local isSqueezeSid=$( egrep -is '^(squeeze/sid|6\.)' $EDV )
 
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
-	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing)' )
+	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 
 	# set antix ID file
