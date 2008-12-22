@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.7.1
+####  version: 8.7.2
 ####  Date: December 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2759,6 +2759,7 @@ install_dist_upgrade()
 			echo $LINE
 		fi
 		print_hec
+		upgrade_package_remove_warning
 		$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
