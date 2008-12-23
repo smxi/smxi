@@ -1610,12 +1610,14 @@ upgrade_package_remove_warning()
 	if [ "$APT_TYPE" == 'apt-get' -a "$B_TESTING_1" == 'true' ];then
 		# this runs apt-get dist-upgrade unseen on the terminal and answers "no"
 		# to "do you want to continue" and stores it's output
-		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( $APT_TYPE $WITHOUT_RECOMMENDS --trivial-only $DU_UPGRADE )"
+		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( $APT_TYPE $WITHOUT_RECOMMENDS --trivial-only $DU_UPGRADE 2> /dev/null )"
 		log_function_data "DU data:\n$duInfo\n"
 
 		# check that there are 0 or some no. of packages 'to remove'.
 		# This acts as a check to make sure there is > 0 to remove
 		removeCheck=$(echo "$duInfo" | grep -i '[0-9] to remove ' | grep -iv ' 0 to remove ' ) # checks for zero packages being removed.
+		echo "remove_check: $removeCheck"
+		echo "duInfo $duInfo";exit
 		if [ -n "$remove_check" -a -n "$duInfo" ];then
 # 			removeLineNu=( grep -in 'The following packages will be removed:' <<< "$duInfo" | cut -d ':' -f 1 )
 # 			if [ -n "$( grep -E '^([0-9]+)$' <<< "$removeData" )" ];then
