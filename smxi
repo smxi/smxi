@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.7.2
-####  Date: December 22 2008
+####  version: 8.7.3
+####  Date: December 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1152,10 +1152,8 @@ set_distro_data()
 
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
-	local isLenny=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(lenny)' )
-	local isLennyStable=$( grep -is '^5.' $EDV )
-	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
-	local isSqueezeSid=$( egrep -is '^(squeeze/sid|6\.)' $EDV )
+	local isLenny=$( grep -is '^5.' $EDV )
+	local isSqueeze=$( egrep -is '^(squeeze|6\.)' $EDV )
 
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing|lenny)' )
@@ -1183,7 +1181,7 @@ set_distro_data()
 		HOLD_INSTALL='holds_s'
 		WARNING_STATUS='status_s'
 		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC-s"
-	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLennyTesting" -o -n "$isSqueezeSid" -o "$isTesting" -gt 0 ];then
+	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLenny" -o -n "$isSqueeze" -o "$isTesting" -gt 0 ];then
 		SYSTEM_BASE='testing'
 		WARNING_BODY='warning_message_t'
 		ALERT_BODY='alert_message_t'
