@@ -1613,13 +1613,14 @@ upgrade_package_remove_warning()
 		echo "${S}Checking ${C}$DU_UPGRADE${S} for packages to be removed...${N}"
 		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( $APT_TYPE $WITHOUT_RECOMMENDS --trivial-only $DU_UPGRADE 2> /dev/null )"
 		log_function_data "DU data:\n$duInfo\n"
-		echo
+
 		# check that there are 0 or some no. of packages 'to remove'.
 		# This acts as a check to make sure there is > 0 to remove
 		removedPackages=$(echo "$duInfo" | sed -n '/be REMOVED/,/following NEW/ p' | grep -v 'following ' )
 		removedPackageCount=$( wc -w <<< $removedPackages )
 
 		if [ "$removedPackageCount" -gt 0 ];then
+				echo
 				echo "${SPACER}${M}The following ${C}$removedPackageCount${M} packages will be removed in your ${C}$DU_UPGRADE${M}:"
 				echo "${SPACER}${C}$removedPackages"
 				echo "${SPACER}${M}This is not necessarily a problem.${S} In ${C}Debian Sid${S}, packages are often"
