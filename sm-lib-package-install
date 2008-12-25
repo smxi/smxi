@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.0
-####  Date: December 24 2008
+####  version: 3.1.1
+####  Date: December 25 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -359,7 +359,7 @@ select_install_type()
 	echo "    or add a few items from package groups depending on your selection. Most people"
 	echo "    can skip this, but if you're setting up a server, you might want to set this flag."
 	echo
-	echo "${C}6${S} - ${C}back-to-main-menu${S}"
+	echo "${C}7${S} - ${C}back-to-main-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
