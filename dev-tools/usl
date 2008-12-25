@@ -189,7 +189,7 @@ make_versions_file()
 
 		# this ensures that we're working with the true last version, not an off version
 		# this is important to have in order to always be using the latest live versions file
-		wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL
+		wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL || error_handler 4 $SM_VERSIONS_PREVIOUS
 		if [ "$?" -gt 0 ];then
 			error_handler 4 $SM_VERSIONS_URL
 		fi
