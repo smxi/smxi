@@ -2404,10 +2404,12 @@ print_version()
 			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
 			;;
 	esac
+	distroThanks='I hope you all have happy holidays, and enjoy the winter solstice. Be sure to take care '
+	extraMessage='of yourself and others in the coming year, it will be a challenging one...'
 	print_lib_info $SCRIPT_NAME
 	if [ "$PRINT_VERSION" != 'true' ];then
 		echo $MLINE
-		echo "${S}Special thanks to the people who have helped with this script, in one way or another:"
+		echo "${S}Special thanks to the people who have helped with this script, in one way or another..."
 		sleep 0.1
 		echo -n ${C}
 		for item in $distroThanks
