@@ -343,7 +343,7 @@ construct_smxi_version_number()
 	# if it was a 0 to start with
 	# http://www.askdavetaylor.com/how_do_i_strip_leading_zeroes_for_math_in_a_shell_script.html
 	smMainSecond=$( sed 's/^0*//' <<< $smMainSecond | awk '{print $1 + 0}' )
-	smMainThird=$( sed 's/^0*//' <<< $smMainThird | awk '{print $1 + 0}')
+	smMainThird=$( sed 's/^0*//' <<< $smMainThird | awk '{print $1 + 0}' )
 	smMainSecond=$( printf %02d $smMainSecond )
 	smMainThird=$( printf %02d $smMainThird )
 	# then print it out to function
