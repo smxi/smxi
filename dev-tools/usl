@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.1
-####  Date: December 20 2008
+####  version: 2.4.2
+####  Date: December 24 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -320,6 +320,7 @@ construct_smxi_version_number()
 			incrementThird='true'
 		fi
 	done
+
 	# if manual primary version update, just reset 2/3 to 0
 	if [ "$SM_MAIN_FIRST" -gt "$smMainFirst" ];then
 		smMainFirst=$SM_MAIN_FIRST
@@ -337,11 +338,13 @@ construct_smxi_version_number()
 	if [ "$incrementFirst" == 'true' -o "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
 		smMainDate=$( date "+%B %d %Y" )
 	fi
-
 	# process the numbers to make them nice and neat again for output
+	# first strip off leading zeros to avoid printf error
+	smMainSecond=$( sed 's/^0*//' <<< $smMainSecond )
+	smMainThird=$(  sed 's/^0*//' <<< $smMainThird )
 	smMainSecond=$( printf %02d $smMainSecond )
 	smMainThird=$( printf %02d $smMainThird )
-
+	# then print it out to function
 	echo "$smMainFirst.$smMainSecond.$smMainThird:$smMainDate"
 }
 
@@ -379,6 +382,7 @@ process_rbxi()
 finalize_sm_versions()
 {
 	local smxiVersion=$( construct_smxi_version_number )
+	# construct_smxi_version_number
 
 	echo "Finalizing $SM_VERSIONS now..."
 	echo "sm-main-version=$smxiVersion" >> $SM_VERSIONS
