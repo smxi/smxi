@@ -163,7 +163,7 @@ upgrade_warning()
 		case $opt in
 			continue|c)
 				# start xorg install, update, dist-upgrade, xorg component install
-				install_dist_upgrade first
+				install_dist_upgrade 'first'
 				;;
 			continue-no-$DU_UPGRADE)
 				echo "${S}Skipping ${C}$DU_UPGRADE${S} for now. Continuing with script.${N}"

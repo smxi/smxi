@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.7.4
-####  Date: December 24 2008
+####  version: 8.8.0
+####  Date: December 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -36,6 +36,7 @@
 ####  sm-lib-apt-tools - all apt functions, package tests, etc
 ####  sm-lib-clean-up - cleanup functions for installs
 ####  sm-lib-distro-conversion - various smxi distro options for conversion, run
+####  sm-lib-du-fixes - du section, primary du section, plus static du-fixes and tools.
 ####  sm-lib-graphics - graphics installer question and functions
 ####  sm-lib-kernel - kernel installer question and utilities
 ####  -- sm-lib-kernel-install - submodule of sm-lib-kernel
@@ -193,6 +194,7 @@ INTEL=''
 LIB_APT_TOOLS='sm-lib-apt-tools'
 LIB_CLEAN_UP='sm-lib-clean-up'
 LIB_DISTRO_CONVERSION='sm-lib-distro-conversion'
+LIB_DU_FIXES='sm-lib-du-fixes'
 LIB_GRAPHICS='sm-lib-graphics'
 LIB_KERNEL='sm-lib-kernel'
 LIB_KERNEL_INSTALL='sm-lib-kernel-install'
@@ -216,6 +218,7 @@ USER_SCRIPT_URL=''
 # script import test values
 SET_APT_TOOLS=''
 SET_CLEAN_UP=''
+SET_DU_FIXES=''
 SET_GRAPHICS=''
 SET_KERNEL=''
 SET_KERNEL_INSTALL=''
@@ -713,6 +716,12 @@ run_script_import()
 			if [ "$SET_SIDUX_CONV" != 'true' ];then
 				loadIt='true'
 				SET_SIDUX_CONV='true'
+			fi
+			;;
+		$LIB_DU_FIXES)
+			if [ "$SET_DU_FIXES" != 'true' ];then
+				loadIt='true'
+				SET_DU_FIXES='true'
 			fi
 			;;
 		$LIB_GRAPHICS)
@@ -1814,6 +1823,7 @@ start_up_tests()
 check_display_and_x()
 {
 	eval $LOGPS
+	local opt='' options='' shutXOpt='' shutXText='' shutXText2='' shutXTest3='' repeat=''
 	# this fixes cases where the runlevel might give a 2 or 3 item result
 	# first get count of items, then use that count to extract the last item
 	local rlc=$( echo $( runlevel ) | wc -w ) response='' wmRunning='' facts=''
@@ -1838,51 +1848,97 @@ check_display_and_x()
 
 	# this should handle most cases, now supports Debian default start of gdm/kdm in init 2
 	if [ "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ];then
-		echo $WBAR
-		echo "${W}Your ${C}X/Desktop (kde/gnome/xfce etc..)${W} must be shutdown to run this script."
-		echo -e "${Q}Would you like to shutdown ${C}X/Desktop${Q} now?$YNE"
-		echo $LINE
-		read response
+		if [ -n "$DISPLAY" ];then
+			shutXOpt='shutdown-your-desktop'
+			shutXText="${S}Since you are currently in ${C}X${S}, you will need to run ${C}$SCRIPT_NAME${S} again after \n${C}X${S} has shutdown, and you have logged back in. You will lose any work\nyou have not saved on your running desktop."
+			shutXText2=". ${M}Remember, you will need to log back in, \n    and start ${C}$SCRIPT_NAME${M} again. "
+			shutXTest3=", don't shut down the current ${C}X${S} session or desktop. "
+		else
+			shutXOpt='shutdown-desktop-and-continue'
+			shutXText="${S}Since you are currently not in ${C}X${S}, selecting ${C}1${S} will simply shutdown all \ninstances of any detected ${C}desktop/X${S}, then proceed to the rest of ${C}$SCRIPT_NAME${S}. "
+			shutXText2=", then proceed with ${C}$SCRIPT_NAME${S}. "
+			shutXTest3=", don't shut down the running desktop. "
+		fi
+		# note, I don't know why, but bash isn't doing this right, it will only make
+		# a full black background after the second or third time smxi runs in the same
+		# terminal session, then it's all black. I think this is a bash bug.
+		trap 'trap_handler_x_kill' INT TERM EXIT
+		echo -e "\e[40m"
+		echo -e "${W}$LI"
+		echo -e "${W}Your ${C}X/Desktop (kde/gnome/xfce etc..)${W} must be shutdown to run this script. "
+		echo -e "${W}$LI"
+		echo -e "$shutXText"
+		echo -e "${S}$LI"
+		echo -e "${C}1 - $shutXOpt${S} Kill X now$shutXText2 "
+		echo -e "${C}2 - quit-script${S} Quit ${C}$SCRIPT_NAME${S}$shutXTest3 "
+		echo -e "${S}$LI "
+		echo -e "${Q}Would you like to shutdown your ${C}X/Desktop${Q} now? "
+		echo -e "${S}$LI "
+		echo -ne "[1;37;40m"
 		eval $LOGPE
-		case $response in
-			y)
-				echo "${S}Shutting down ${C}X/Desktop${S} now...${N}"
-				start_stop_default_dm full stop
-# 				if [ "$B_TESTING_1" == 'true' ]
-# 				then
-# 					# needs lots of debugging before can be tried with testers...
-# 					launch_from_X
-# 				fi
-				unset wmRunning # reset to null from first test results
-				do_display_manager_pid_test && wmRunning='true'
-
-				if [ "$wmRunning" == 'true' ];then
-					echo "${S}First shutdown attempt failed. Retrying display manager shutdown now...${N}"
+		options="$shutXOpt quit-script"
+		select opt in $options
+		do
+			log_function_data "opt selected: $opt"
+			case $opt in
+				$shutXOpt)
+					echo "${S}Shutting down ${C}X/Desktop${S} now..."
+					echo -n ${N}
 					start_stop_default_dm full stop
-				fi
-				;;
-			n)
-				echo $LINE
-				echo "${S}Exiting the script. Please run the script out of ${C}X/Desktop (kde/gnome/xfce etc..)${S}"
-				echo
-				echo "There are a few ways to start $SCRIPT_NAME out of X/Desktop:"
-				echo "${C}1${S} - Logout of your desktop (or do this before you login), hit ${C}ctrl+alt+F1${S}."
-				echo "    Then, in terminal/tty, login as root, and type: ${C}$SCRIPT_NAME${S}"
-				echo "${C}2${S} - Hit ${C}ctrl+alt+F1${S}, and in tty/terminal login as root, and type: ${C}$SCRIPT_NAME${S}"
-				echo "    ${S}This option makes you lose your current desktop session if you save your sessions."
-				if [ "$dmRunlevelsCount" -eq 1 -a "$dmRunlevels" == '5' ];then
-					echo "${C}3${S} - Boot your computer and just type ${C}3${S} when grub appears, and hit enter, then login as root."
-				fi
-				echo
-				echo $WBAR
-				exit 0
-				;;
-			*)
-				print_error yn
-				check_display_and_x
-				;;
-		esac
+	# 				if [ "$B_TESTING_1" == 'true' ]
+	# 				then
+	# 					# needs lots of debugging before can be tried with testers...
+	# 					launch_from_X
+	# 				fi
+					unset wmRunning # reset to null from first test results
+					do_display_manager_pid_test && wmRunning='true'
+
+					if [ "$wmRunning" == 'true' ];then
+						echo -e "\e[40m"
+						echo "${S}First shutdown attempt failed. Retrying display manager shutdown now..."
+						echo -n ${N}
+						start_stop_default_dm full stop
+					fi
+					trap - INT TERM EXIT
+					echo ${N} # clear out the background
+					;;
+				quit-script)
+					echo ${W}$LI
+					echo "${S}Exiting the script. Please run the script out of ${C}X/Desktop (kde/gnome/xfce etc..)${S}"
+					echo
+					echo "There are a few ways to start $SCRIPT_NAME out of X/Desktop:"
+					echo "${C}1${S} - Logout of your desktop (or do this before you login), hit ${C}ctrl+alt+F1${S}."
+					echo "    Then, in terminal/tty, login as root, and type: ${C}$SCRIPT_NAME${S}"
+					echo "${C}2${S} - Hit ${C}ctrl+alt+F1${S}, and in tty/terminal login as root, and type: ${C}$SCRIPT_NAME${S}"
+					echo "    ${S}This option makes you lose your current desktop session if you save your sessions."
+					if [ "$dmRunlevelsCount" -eq 1 -a "$dmRunlevels" == '5' ];then
+						echo "${C}3${S} - Boot your computer and just type ${C}3${S} when grub appears, and hit enter, then login as root."
+					fi
+					echo ${W}$LI
+					exit 0
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+
+		if [ "$repeat" == 'true' ];then
+			check_display_and_x
+		fi
 	fi
+}
+
+# set the backgrounds and defaults back to user defaults
+trap_handler_x_kill()
+{
+	echo
+	echo "${M}Setting your background color back to ${C}default${M} before exiting..."
+	echo "${N}"
+	trap - INT TERM EXIT
+	exit 0
 }
 ## DEBUGGER
 #script_debugger check_display_and_x
@@ -2287,28 +2343,30 @@ nonfree_driver_reinstall()
 print_error()
 {
 	eval $LOGUS
-	echo $EBAR
+	echo -ne "\E[40m"
+	echo -e "${E}$BA"
 	case $1 in
 		yn)
 			echo "${E}You must enter ${C}y${E} to run this option, or ${C}n${E} to reject it."
-			echo "Please make sure that you enter either ${C}y${E} or ${C}n${E}, lower case, thanks.${N}"
+			echo "Please make sure that you enter either ${C}y${E} or ${C}n${E}, lower case, thanks."
 			;;
 		yno)
 			echo "${E}You must enter ${C}y${E} to run this option, ${C}n${E} to reject it,"
 			echo "or ${C}$2${E} to execute the optional feature."
-			echo "Please make sure that you enter ${C}y${E}, ${C}$2${E}, or ${C}n${E}, lower case, thanks.${N}"
+			echo "Please make sure that you enter ${C}y${E}, ${C}$2${E}, or ${C}n${E}, lower case, thanks."
 			;;
 		opt)
-			echo "${E}======= Error: please enter one of the numbers in the list =======${N}"
+			echo "${E}======= Error: please enter one of the numbers in the list ======="
 			;;
 		user)
-			echo "${E}======= Error: please press the ${C}$2${E} to continue ===========${N}"
+			echo "${E}======= Error: please press the ${C}$2${E} to continue ==========="
 			;;
 		*)
 			error_handler 'value-bad' $FUNCNAME "$1"
 			;;
 	esac
-	echo $EBAR
+ 	echo -ne "\E[40m"
+	echo -e "${E}$BA${N}"
 	eval $LOGUE
 }
 
@@ -2673,369 +2731,14 @@ print_quit()
 ### Main Dist-Upgrade stuff, pre-du, du, and post-du
 ###---------------------------------------------------------------------
 
-pre_du_tasks()
-{
-	eval $LOGMS
-	# begin update tasks
-	apt_update_handler 'pre-du'
+# HANDLED BY EXTERNAL LIBARARY FILE sm-lib-du-fixes
 
-	echo $LINE
-	echo "${S}Running assorted tasks to prepare for the system $DU_UPGRADE...${N}"
-	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ];then
-		set_hold_install hold
-
-		# RUN FIRST CRITICAL FIXES. Must run before other fixes to avoid errors in apt
-		# generally, these are fixes for kernels, core libs etc, that a new kernel might
-		# make needed, like libncurses, libc6, and so on.
-		if [ "$DISTRO_LEVEL" -lt 14 ];then
-			libc6_fix_1 'pre-du' # ongoing fix, update as needed
-		fi
-		# load the 2007 fixes
-		if [ "$DISTRO_LEVEL" -lt 10 ];then
-			run_script_import $LIB_2007_FIXES
-			run_2007_fixes 'pre'
-		fi
-	fi
-	# set xorg version pre upgrade, either unset or like 6. or 7. etc
-	test_xorg_version pre
-	# load the 2008 fixes
-	if [ "$DISTRO_LEVEL" -lt 14 ];then
-		run_script_import $LIB_2008_FIXES
-		run_2008_fixes 'pre'
-	fi
-
-	echo $LINE
-	echo "${S}Finished with the pre-upgrade tasks.${N}"
-
-	eval $LOGME
-}
-
-# main dist-upgrade/ update etc function
+#args: $1 - first, optional
 install_dist_upgrade()
 {
-	eval $LOGMS
-	local prefId='du-connection-drop-1'
-	local smPref=$( sm_pref_tester $prefId )
-	local continue='' repeat='' options='' opt='' ConnectionDropped=''
-	local exitStatus=$2 # only for script re-runs, $2 not set first time
-	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
-	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
-	local exitNo='' rebootNo='' rebootText='' rebootTopText=''
-	local options="use-install-f $DU_UPGRADE-again check-services continue "
-
-	# set the trap here
-	trap 'du_trap_handler $FUNCNAME' INT TERM
-
-	options="$options exit"
-	exitNo=$( echo $options | wc -w )
-	# this prints one time, until the first full du is done, will be updated to be more useful.
-	# obsolete, but I'll keep it in case I need to flash some version specific du message.
-	if [ "$smPref" -eq 0 ];then
-		if [ "$DISTRO_LEVEL" -lt 2 ];then
-			ConnectionDropped='echo -e "${W}After your $DU_UPGRADE you may lose your network connection.${S}\nIf this happens some parts of the script will not work. To fix this,\nsimply restart the script, and it will restart your connection for you\nif there is no connection present.\n$LINE"'
-		fi
-	fi
-
-	# only do this part the first time the function runs
-	if [ "$1" == "first" ];then
-		# run an assortment of pre du stuff, update scripts, keyrings, fixes, etc
-		pre_du_tasks
-		echo $MBAR
-		echo "${M}BEGINNING DIST-UPGRADE"
-		echo $MLINE
-		eval $ConnectionDropped
-		# note: because the file may not be current or loaded, do not run this if if no warning
-		if [ "$SKIP_WARNING" != 'true' ];then
-			get_configs # print out any keep config stuff
-		fi
-		echo "${S}Make sure your $DU_UPGRADE goes all the way through"
-		echo "If it exits with errors select one of the following options:"
-		echo "${C}2${S} - for doing ${C}$DU_UPGRADE${S} again. Try the ${C}2${S} option first."
-		echo "${C}1${S} - for ${C}$APT_TYPE install -f${S}. Only select ${C}1${S} if ${C}2${S} returns errors"
-		echo "That will force apt to install the parts that returned errors."
-
-		# small cosmetic, to avoid printing double line with print-hec
-		if [ "$SKIP_ENTER" == 'true' ];then
-			echo $LINE
-		fi
-		print_hec
-		upgrade_package_remove_warning
-		$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
-		exitStatus=${PIPESTATUS[0]}
-		apt_error_handling du-1 $exitStatus
-	fi
-
-	if [ "$exitStatus" -eq 0 ];then
-		echo $MLINE
-		echo "${M}Your $DU_UPGRADE appears to have completed with no errors."
-		echo "${S}You can continue on safely to do the rest of the script now."
-		echo
-		echo "It does not hurt to run ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] once after a"
-		echo "successful $DU_UPGRADE just to make sure things are fine though."
-	else
-		echo $EBAR
-		echo "${E}Your $DU_UPGRADE is reporting errors!"
-		echo $EBAR
-		echo "${S}Please make sure to do the following to correct the errors reported:"
-		echo "${C}$APT_TYPE install -f ${S}[option ${C}1${S}] - Use this first if you got errors!"
-
-		echo
-		echo "Run the ${C}$DU_UPGRADE-again${S} [option ${C}2${S}] to make sure the $DU_UPGRADE completes."
-		echo "If errors do not get resolved, you'll need to get help from sidux irc or the forums."
-		echo
-		echo "${M}NOTE: Please run ${C}1${M} and ${C}2${M} as many times as necessary to get rid of the errors."
-		echo "${S}Make sure to write down the package error in the $DU_UPGRADE messages."
-		echo
-		echo "Once you are sure the upgrade is done, you can continue, check services, or exit."
-	fi
-
-	# if current kernel was not in grub prior to du, and is in grub post du
-	# metapackage users need this alert because otherwise they might not even
-	# realize a new kernel installed. Regular kernel users of course don't need
-	# to see this information since they know they installed one, and the post kernel
-	# install step gives them all the information they need.
-	if [ "$currentAptKernelGrub" != "$CURRENT_APT_KERNEL_GRUB" -a -n "$metaExists" -a -n "$currentAptKernelGrub" ];then
-		options="$options reboot"
-		rebootNo=$( echo $options | wc -w )
-		rebootTopText='echo -e "${M}You are using ${C}kernel metapackages${M} and your ${C}$DU_UPGRADE${M} installed a new kernel.\nYour new ${C}$CURRENT_APT_KERNEL${M} kernel will not become active until you reboot.\n$MLINE"'
-		rebootText='echo -e "${C}$rebootNo - reboot${M} Reboot into your new ${C}$CURRENT_APT_KERNEL${M} kernel."'
-		KERNEL_INSTALL_TO=$CURRENT_APT_KERNEL
-	fi
-	log_function_data "currentAptKernelGrub: $currentAptKernelGrub"
-	log_function_data "CURRENT_APT_KERNEL_GRUB: $CURRENT_APT_KERNEL_GRUB"
-	log_function_data "metaExists: $metaExists"
-	log_function_data "KERNEL_INSTALL_TO: $KERNEL_INSTALL_TO"
-
-	echo $MLINE
-	nonfree_driver_reinstall 'kernel-xorg'
-	eval "$rebootTopText"
-	echo "${C}1 - use-install-f${S} Use this to try to resolve error in $DU_UPGRADE."
-	echo "${C}2 - $DU_UPGRADE-again${S} Run this after correcting an error with ${C}1${S}."
-	echo
-	echo "${C}3 - check-services${S} Runs ${C}rcconf${S} to let you turn back off any services that might "
-	echo "    have been turned on during the ${C}$DU_UPGRADE${S} (more options in the future)."
-	echo
-	echo "${C}4 - continue${S} Continue on with script, do this when $DU_UPGRADE is successful."
-	eval "$rebootText"
-
-	echo "${C}$exitNo - quit${S} If you need to fix error, you can exit here. In general, please"
-	echo "    do not exit unless you need to. The script often runs post $DU_UPGRADE fixes"
-	echo "    when you use ${C}continue${S}, and if you exit here, they will not run."
-	echo $LINE
-	echo -e $SLE
-	echo $LINE
-
-	select opt in $options
-	do
-		eval $LOGME
-		case $opt in
-			use-install-f)
-				$APT_TYPE install $WITHOUT_RECOMMENDS -f 2>>$LOG_FILE 2>&1
-				exitStatus=${PIPESTATUS[0]}
-				apt_error_handling du-f $exitStatus
-				# we will repeat this over and over until it's definitely done
-				repeat='true'
-				;;
-			$DU_UPGRADE-again)
-				$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
-				exitStatus=${PIPESTATUS[0]}
-				apt_error_handling du-2 $exitStatus
-				repeat='true' # reset so no log if no error
-				;;
-			check-services)
-				check_services
-				repeat='true'
-				;;
-			continue)
-				# set some prefs for successful du
-				if [ "$smPref" -eq 0 ];then
-					set_sticky_prefs $prefId
-				fi
-				set_sticky_prefs d
-				echo "${S}Ok, you are ready to go on now.${N}"
-				continue='true'
-				;;
-			reboot)
-				set_hold_install install # in case of reboot, make sure to lift hold
-				run_script_import $LIB_KERNEL_INSTALL
-				reboot_now_question $CURRENT_APT_KERNEL
-				;;
-			exit)
-				set_hold_install install # in case of exit, make sure to lift hold
-				print_quit
-				;;
-			*)
-				print_error opt
-				repeat='true'
-				;;
-		esac
-		break
-	done
-	trap - INT TERM
-	# run du cleanup etc tasks once user decides to continue, note that
-	# script uses the error numbers to determine which message to display on repeat
-
-	if [ "$repeat" == 'true' ];then
-		install_dist_upgrade repeat $exitStatus
-	elif [ "$continue" == 'true' ];then
-		post_du_tasks
-	fi
+	run_script_import $LIB_DU_FIXES
+	main_upgrade_engine "$1"
 }
-
-check_services()
-{
-	eval $LOGUS
-	local rcconfFeature=0
-
-	if [ -z "$( package_tester 'rcconf' )" ];then
-		install_missing_apps 'rcconf' 'feature'
-		rcconfFeature=$?
-	fi
-	if [ "$rcconfFeature" -eq 0 ];then
-		rcconf
-	fi
-	eval $LOGUE
-}
-
-# arg: $1 - trap function name
-du_trap_handler()
-{
-	# first echo is to clear the top line
-	echo ''
-	echo $WLINE
-	echo "${W}You exited with ctrl+c or kill, removing holds if needed.${N}"
-	set_hold_install install
-	error_handler 'user-killed-du' "$1"
-}
-
-## DEBUGGER
-#script_debugger 'install_dist_upgrade repeat 1'
-
-# cleanup and set various tweaks post du
-# this will only run if user enters the 'continue' option to avoid looping errors
-post_du_tasks()
-{
-	eval $LOGMS
-	# set the trap here
-	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ];then
-		trap 'du_trap_handler $FUNCNAME' INT TERM
-
-		# this is all just debian conversion stuff
-		if [ "$CON_DEB" == 'true' ];then
-			run_script_import $LIB_DISTRO_CONVERSION
-			install_window_manager
-			install_sidux_components # test to make sure all sidux stuff is installed
-			sidux_graphics grub1
-		fi
-
-		# load the 2007 fixes
-		if [ "$DISTRO_LEVEL" -lt 10 ];then
-			run_2007_fixes 'post'
-		fi
-		# load the 2008 fixes
-		if [ "$DISTRO_LEVEL" -lt 14 ];then
-			run_2008_fixes 'post'
-		fi
-		trap - INT TERM
-		## take the package(s) off hold if they were set
-		set_hold_install install
-	fi
-	eval $LOGME
-}
-
-###---------------------------------------------------------------------
-### permanent du fixes
-###---------------------------------------------------------------------
-
-# this is a permanent fix, since the libc6 stuff mismatches so often
-# args: $1 - pre-du or kernel
-libc6_fix_1()
-{
-	eval $LOGUS
-	#local libc6Version=$( apt-cache policy libc6 | grep -m 2 ':' | egrep '2\.[0-4]' )
-	# for general users I'll update this if needed now and then, but mostly this is
-	# for kernel installs, to avoid the du failure after new kernel
-	local prefId='libc6-fix-4'
-	local smPref=$( sm_pref_tester $prefId )
-	local kernelMessage=' with your new kernel'
-	if [ "$1" == 'pre-du' ];then
-		kernelMessage=" before you $DU_UPGRADE"
-	fi
-
- 	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ];then
-		echo $LINE
-		echo "${S}Updating ${C}libc6${S} packages to make sure your system will work right$kernelMessage...${N}"
-		#echo
-		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
-		#echo "just select any city if this happens, then the script will let you reconfigure"
-		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
-		package_installer 'libc6 libc6-dev tzdata locales util-linux' 'force-always'
-		# let's only set this if needed
- 		if [ "$smPref" -eq 0 ];then
- 			set_sticky_prefs $prefId
- 		fi
- 	fi
- 	eval $LOGUE
- 	# I'm putting this in here to make sure it has fired at least once pre kernel install
- 	busybox_fix_1
-}
-
-busybox_fix_1()
-{
-	eval $LOGUS
-	local prefId='busybox-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-
-	if [ "$smPref" -eq 0 ];then
-		echo $LINE
-		echo "${S}Running ${C}busybox${S} fix to fix a major bug...${N}"
-		package_installer 'busybox' 'install-always'
-		set_sticky_prefs $prefId
-	fi
-	eval $LOGUE
-}
-
-nvidia_sse_alert()
-{
-	eval $LOGUS
-	local isSse=$( grep -io 'sse' /proc/cpuinfo )
-	# for some reason using \s* fails randomly for space test
-	# local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2  )
-	# I'm going to test for nvidia alone in the lspci output in case they are running nv
-	 local isNvidia=$( lspci | grep 'VGA' | grep -i 'nvidia' )
-
-	if [ -z "$isSse" -a -n "$isNvidia" ];then
-		echo $MLINE
-		echo "${M}ALERT: In the latest ${C}nVidia${M} ${C}169.xx${M} and greater drivers, "
-		echo "${C}OpenGL${M} requires ${C}CPUs with SSE${M} to run."
-		echo
-		echo "${W}Your${C}$CPU_NAME${W} does ${C}NOT${W} support ${C}SSE."
-		echo $MLINE
-		echo "${S}What does this mean? It means with new drivers you will not have 3d support."
-		echo "The 100 series drivers do work, but cannot be installed on 2.6.26 kernels."
-		echo
-		echo "${S}Only drivers of series ${C}169/96/71${S} or newer work on ${C}2.6.26${S} and later kernels."
-		echo "For now, this leaves you with only these choices:"
-		echo "${C}1 - ${S}Stay with the latest ${C}2.6.25${S} kernel and use the ${C}100.xx${S} drivers."
-		echo "    You must install these drivers directly with sgfxi, like this: ${C}sgfxi -co 100.14.19"
-		echo "${C}2 - ${S}Forget about 3d and just use the 2d part of the driver, or run the legacy ${C}7xxx${S} drivers."
-		echo "${C}3 - ${S}Use the ${C}xorg nv${S} drivers instead, which aren't very good."
-		echo "${C}4 - ${S}Get an old used ${C}ATI 7/8/9xxx${S} card that has fine working ${C}xorg drivers."
-		echo
-		echo "${S}Please check the ${C}sidux.com${S} forums, hardware section, for more information on this.${N}"
-		log_function_data "Is sse cpu and nvidia system."
-		print_hec
-	fi
-	eval $LOGUE
-}
-# nvidia_sse_alert
-###---------------------------------------------------------------------
-### various du fixes
-### NOTE: these fixes are contined in sm-lib-20xx-fixes files
-###---------------------------------------------------------------------
-
-# HANDLED BY EXTERNAL LIBRARY FILES sm-lib-20xx-fixes
-
 ########################################################################
 ### run various post du user options
 ###---------------------------------------------------------------------

@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.2
-####  Date: December 24 2008
+####  version: 2.4.4
+####  Date: December 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -58,7 +58,7 @@ SCRIPT_LIST_SVMI='svmi'
 SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_INXI='inxi'
 SCRIPT_LIST_RBXI='rbxi'
-SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
+SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-du-fixes sm-lib-graphics  sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t"
 SM_VERSIONS="${SMXI_SVN}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_SVN}sm-versions-previous"
 # this has to the current live version on smxi.org
