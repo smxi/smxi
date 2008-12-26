@@ -385,6 +385,8 @@ finalize_sm_versions()
 {
 	local smxiVersion=$( construct_smxi_version_number )
 	# construct_smxi_version_number
+	echo "smxi verison number is:"
+	construct_smxi_version_number
 
 	echo "Finalizing $SM_VERSIONS now..."
 	echo "sm-main-version=$smxiVersion" >> $SM_VERSIONS
