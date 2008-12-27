@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.4.0
+####  version: 1.4.1
 ####  Date: December 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -82,10 +82,10 @@ ipw2x00_fix_1()
 	then
 		echo $LINE
 		echo "${S}Running ${C}ipw2x00${S} update fix now...${N}"
-		if [-n "$isInstalled" ];then
+		if [ -n "$isInstalled" ];then
 			package_remover 'ipw2100-firmware' 'purge -y'
 		fi
-		if [-n "$isInstalled2" ];then
+		if [ -n "$isInstalled2" ];then
 			package_remover 'ipw2200-firmware' 'purge -y'
 		fi
 		package_installer 'firmware-ipw2x00' 'force-always'
