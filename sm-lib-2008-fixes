@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2008-fixes
-####  version: 1.4.1
+####  version: 1.4.2
 ####  Date: December 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -78,10 +78,13 @@ ipw2x00_fix_1()
 	local isInstalled2=$( package_tester 'ipw2200-firmware'  )
 	local isAvailable=$( check_package_status 'firmware-ipw2x00' )
 
-	if [ "$B_TESTING_1" == 'true' -a "$smPref" -eq 0 -a -n "$isAvailable" ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
+	if [ "$smPref" -eq 0 -a -n "$isAvailable" ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
 	then
 		echo $LINE
-		echo "${S}Running ${C}ipw2x00${S} update fix now...${N}"
+		echo "${S}Running ${C}ipw2x00${S} update fix now. This will replace the older firmware"
+		echo "with the new Debian package. You will be asked to agree to the firmware license,"
+		echo "you must do this to complete the installation.${N}"
+		print_hec
 		if [ -n "$isInstalled" ];then
 			package_remover 'ipw2100-firmware' 'purge -y'
 		fi
@@ -89,7 +92,7 @@ ipw2x00_fix_1()
 			package_remover 'ipw2200-firmware' 'purge -y'
 		fi
 		package_installer 'firmware-ipw2x00' 'force-always'
-		# set_sticky_prefs $prefId
+		set_sticky_prefs $prefId
 	fi
 }
 
