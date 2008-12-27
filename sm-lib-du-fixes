@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.0.1
+####  version: 1.0.2
 ####  Date: December 26 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -165,7 +165,9 @@ main_upgrade_engine()
 	if [ "$1" == "first" ];then
 		# run an assortment of pre du stuff, update scripts, keyrings, fixes, etc
 		pre_du_tasks
-		print_lib_info "$LIB_DU_FIXES"
+		echo $MBAR
+		echo "${M}MAIN $( tr '[a-z]' '[A-Z]' <<< $DU_UPGRADE) HANDLER"
+		# print_lib_info "$LIB_DU_FIXES"
 		echo $MLINE
 		eval $ConnectionDropped
 		# note: because the file may not be current or loaded, do not run this if if no warning
