@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.8.0
+####  version: 8.8.1
 ####  Date: December 26 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2008
@@ -2386,6 +2386,10 @@ print_lib_info()
 			;;
 		$LIB_DISTRO_CONVERSION)
 			scriptText="SMXI DISTRO OPTIONS"
+			printIt='true'
+			;;
+		$LIB_DU_FIXES)
+			scriptText="MAIN $( tr '[a-z]' '[A-Z]' <<< $DU_UPGRADE) HANDLER"
 			printIt='true'
 			;;
 		$LIB_GRAPHICS)
