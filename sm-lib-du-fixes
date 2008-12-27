@@ -166,6 +166,7 @@ main_upgrade_engine()
 		# run an assortment of pre du stuff, update scripts, keyrings, fixes, etc
 		pre_du_tasks
 		print_lib_info "$LIB_DU_FIXES"
+		echo $MLINE
 		eval $ConnectionDropped
 		# note: because the file may not be current or loaded, do not run this if if no warning
 		if [ "$SKIP_WARNING" != 'true' ];then
