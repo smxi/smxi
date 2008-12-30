@@ -460,8 +460,7 @@ commit_to_svn()
 zip_it_up()
 {
 	if [ "$UPDATE_TYPE" != 'r' -a "$UPDATE_TYPE" != 'i' ];then
-		su
-		${DEV_TOOLS_DIR}zsl
+		su && ${DEV_TOOLS_SVN}zsl
 	fi
 }
 
