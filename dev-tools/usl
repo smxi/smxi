@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.4
-####  Date: December 26 2008
+####  version: 2.4.5
+####  Date: December 30 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -457,6 +457,14 @@ commit_to_svn()
 	svn commit $WORKING_SVN_DIR$svnWild
 }
 
+zip_it_up()
+{
+	if [ "$UPDATE_TYPE" != 'r' -a "$UPDATE_TYPE" != 'i' ];then
+		su
+		${DEV_TOOLS_DIR}zsl
+	fi
+}
+
 finish_it_up()
 {
 	echo $LINE
@@ -475,5 +483,6 @@ if [ "$B_SKIP_SVN" == 'false' ];then
 	commit_to_svn
 	#update_svn_data
 fi
+zip_it_up
 finish_it_up
 exit 0
