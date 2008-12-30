@@ -31,6 +31,8 @@ USER_NAME=$( getent passwd 1000 | cut -d ':' -f1 )
 # INXI_PATH="home/$USER_NAME/bin/scripts/inxi/svn/trunk/inxi"
 SGFXI_PATH="/home/$USER_NAME/bin/scripts/sgfxi/svn/trunk/sgfxi"
 SMXI_PATH="/usr/local/bin/smxi"
+SMXI_APT_PATH="/usr/local/bin/sm-lib-apt-tools"
+SMXI_DU_PATH="/usr/local/bin/sm-lib-du-fixes"
 SVMI_PATH="/home/$USER_NAME/bin/scripts/svmi/svn/trunk/svmi"
 ZIP_DIR="/home/$USER_NAME/bin/scripts/smxi/svn/trunk/zips"
 
@@ -103,9 +105,11 @@ copy_files_to_target_directory()
 {
 	echo $LINE
 	echo 'Starting zip file creation now... copying files to target...'
-	cp -f $SGFXI_PATH $ZIP_DIR/sgfxi || error_handler 4 sgfxi
-	cp -f $SMXI_PATH $ZIP_DIR/smxi || error_handler 4 smxi
-	cp -f $SVMI_PATH $ZIP_DIR/svmi || error_handler 4 svmi
+	cp -f $SGFXI_PATH $ZIP_DIR || error_handler 4 sgfxi
+	cp -f $SMXI_PATH $ZIP_DIR || error_handler 4 smxi
+	cp -f $SMXI_APT_PATH $ZIP_DIR || error_handler 4 sm-lib-apt-tools
+	cp -f $SMXI_DU_PATH $ZIP_DIR || error_handler 4 sm-lib-du-fixes
+	cp -f $SVMI_PATH $ZIP_DIR || error_handler 4 svmi
 	echo "Files copied."
 }
 
