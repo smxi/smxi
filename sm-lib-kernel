@@ -48,28 +48,24 @@ check_kernel()
 	local smPref=$( sm_pref_tester $prefId 'equal' )
 
 	# two cases, one it's not set, the other standard default
-	if [ -z "$smPref" -o "$smPref" == 'manual' ]
-	then
+	if [ -z "$smPref" -o "$smPref" == 'manual' ];then
 		# set to use proper advanced kernel data 64 / 32 bit
 		# no need to load this data more than once per run through.
 		# only need this data in the single case of -K option startup
 		# otherwise it loads in advanced kernel install
-		if [ "$SET_KERNEL_DATA" != 'true' -a "$ADVANCED_KERNEL" == 'true' ]
-		then
+		if [ "$SET_KERNEL_DATA" != 'true' -a "$ADVANCED_KERNEL" == 'true' ];then
 			set_kernel_data
 			SET_KERNEL_DATA='true'
 		fi
 
 		# test for advanced kernels too for the comparison, no need to test for null strings
 		# first need to normalize data for comparison
-		if [ -n "$KERNEL_ADVANCED_LIST" ]
-		then
+		if [ -n "$KERNEL_ADVANCED_LIST" ];then
 			local kalNormal=$( echo "$KERNEL_ADVANCED_LIST" | cut -d ' ' -f 1  )
 			kalNormal=$( normalize_kernel_string $kalNormal )
 			local ckNormal=$( normalize_kernel_string $CURRENT_KERNEL )
 			advancedKernel=$( echo $kalNormal | grep -o $ckNormal )
-			if [ -n "$advancedKernel" ]
-			then
+			if [ -n "$advancedKernel" ];then
 				KERNEL_EQUAL_INSTALL='true'
 			fi
 		fi
@@ -86,13 +82,10 @@ check_kernel()
 		check_debian_kernel_version
 
 		# test to see if same kernel or newer is available
-		if [ "$KERNEL_EQUAL_INSTALL" == 'true' ]
-		then
-			if [ -n "$advancedKernel" ]
-			then
+		if [ "$KERNEL_EQUAL_INSTALL" == 'true' ];then
+			if [ -n "$advancedKernel" ];then
 				kernelFile=$advancedKernel
-			elif [ "$CURRENT_APT_KERNEL" == "$CURRENT_KERNEL" ]
-			then
+			elif [ "$CURRENT_APT_KERNEL" == "$CURRENT_KERNEL" ];then
 				kernelFile=$CURRENT_APT_KERNEL
 			fi
 		fi
@@ -100,15 +93,13 @@ check_kernel()
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 		# check for too old kernel version
-		if [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
-		then
+		if [ "$KERNEL_EQUAL_INSTALL" != 'true' ];then
 			# this is now a real, dynamic compare, if user kernel is > 2 major versions behind
 			# go to dist-upgrade first, and kernel install will come after. Only run first time
 			# the first condition handles cases where the latest install kernel requires a du first
 			# the first case will now never happen, needs to be dumped
 			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$KERNEL_EQUAL_INSTALL" != 'true' ]
-			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' ]
-			then
+			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' ];then
 				echo "${M}Your kernel version ${C}$KERNEL_VERSION${M} requires that you first run"
 				echo "a ${C}$DU_UPGRADE${M} before you install a new kernel. The option to install"
 				echo "the new kernels is in the ${C}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES${M} menu.${N}"
@@ -142,20 +133,16 @@ check_debian_kernel_version()
 
 	local debKernCandidate='' debKernInstalled=''
 	# only getting subversions if debian and appears the same
-	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$KERNEL_EQUAL_INSTALL" == 'true' ]
-	then
+	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$KERNEL_EQUAL_INSTALL" == 'true' ];then
 		debKernInstalled=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'installed' )
 		debKernCandidate=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'candidate' )
-		if [  -n "$debKernCandidate" ]
-		then
+		if [  -n "$debKernCandidate" ];then
 			DEBIAN_KERNEL_CANDIDATE="-$( cut -d '-' -f 2 <<< $debKernCandidate )"
 		fi
-		if [ -n "$debKernInstalled" ]
-		then
+		if [ -n "$debKernInstalled" ];then
 			DEBIAN_KERNEL_INSTALLED="-$( cut -d '-' -f 2 <<< $debKernInstalled )"
 		fi
-		if [ "$debKernInstalled" != "$debKernCandidate" ]
-		then
+		if [ "$debKernInstalled" != "$debKernCandidate" ];then
 			KERNEL_EQUAL_INSTALL='false'
 		fi
 	fi
@@ -175,16 +162,13 @@ kernel_question()
 	# set this data if required for debian type kernels
 	check_debian_kernel_version
 	# handle the switch of kernel install location text here
-	if [ "$KERNEL_POST_DU_INSTALL" == 'true' -o "$KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ]
-	then
+	if [ "$KERNEL_POST_DU_INSTALL" == 'true' -o "$KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ];then
 		duText='Continue. Return to main menu'
 	fi
 
-	if [ "$DEFAULT_KERNEL" == 'no-kernel' ]
-	then
+	if [ "$DEFAULT_KERNEL" == 'no-kernel' ];then
 		kernelsNotEqual='echo -e "${M}There are no apt kernels available to install for your system.\n$MLINE"'
-	elif [ "$KERNEL_EQUAL_INSTALL" != 'true' ]
-	then
+	elif [ "$KERNEL_EQUAL_INSTALL" != 'true' ];then
 		tempCount=$(( $tempCount + 1 ))
 		kernelsNotEqualOpt='install-apt-kernel'
 		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
@@ -198,13 +182,11 @@ kernel_question()
 	tempCount=$( echo $options | wc -w )
 	cont=$tempCount
 
-	if [ "$1" == 'post-du' ]
-	then
+	if [ "$1" == 'post-du' ];then
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 	fi
-	if [ -n "$SIDUX_SOURCES" -o -n "$MEPIS_SOURCES" -o "$USE_DEBIAN_KERNEL" == 'true' ]
-	then
+	if [ -n "$SIDUX_SOURCES" -o -n "$MEPIS_SOURCES" -o "$USE_DEBIAN_KERNEL" == 'true' ];then
 		altKernelOption='echo "    ${C}*${S} Any supported current apt kernel install(s) for your ${C}$DISTRO${S} system, with module installer automated."'
 	fi
 
@@ -218,8 +200,7 @@ kernel_question()
 	echo "you will need to reinstall those kernel drivers."
 	echo "${M}Graphics drivers can now be reinstalled without a reboot, right to the new kernel.${S}"
 	echo
-	if [ "$1" != 'post-du' ]
-	then
+	if [ "$1" != 'post-du' ];then
 		echo "${S}If you are going to use this script for the ${C}$DU_UPGRADE${S}, just install the kernel, "
 		echo "then, when kernel install is finished, select the ${C}continue${S} option, and"
 		echo "you can install nvidia/fglrx drivers if you want without rebooting."
@@ -273,8 +254,7 @@ kernel_question()
 				advanced_kernel_install
 				;;
 			continue)
-				if [ "$1" == "nogo" ]
-				then
+				if [ "$1" == "nogo" ];then
 					echo "${W}Ok, but you cannot do the $DU_UPGRADE with this kernel."
 					eval $LOGPE
 					print_quit
@@ -296,8 +276,7 @@ kernel_question()
 		break
 	done
 
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		eval $LOGPE
 		kernel_question $1
 	fi
@@ -322,8 +301,7 @@ kernel_module_installer()
 	local moduleCount=$(( $contCount - 1 ))
 	local isMeta=$( package_tester "linux-image-2.6-(sidux-|)(486|686|amd64)" '' )
 
-	if [ -n "$isMeta" ]
-	then
+	if [ -n "$isMeta" ];then
 		metaText='echo "Since you are using kernel metapackages, the script will install the module metapackage."'
 		kernelType=$( sed 's/linux-image-//g' <<< $isMeta )
 	else
@@ -353,11 +331,9 @@ kernel_module_installer()
 	do
 		for module in $options
 		do
-			if [ "$opt" == "$module" ]
-			then
+			if [ "$opt" == "$module" ];then
 				found='true'
-				if [ "$module" == 'continue' ]
-				then
+				if [ "$module" == 'continue' ];then
 					skip='true'
 				else
 					found='true'
@@ -372,10 +348,8 @@ kernel_module_installer()
 		break
 	done
 	eval $LOGPE
-	if [ "$found" == 'true' ]
-	then
-		if [ "$skip" == 'true' ]
-		then
+	if [ "$found" == 'true' ];then
+		if [ "$skip" == 'true' ];then
 			echo "${S}Returning to main menu now.${N}"
 		else
 			echo $LINE
@@ -399,8 +373,7 @@ remove_kernel_modules()
 	for store in $installedModules
 	do
 		store=$( egrep -o '.*-modules' <<< $store )
-		if [ "$store" != "$store2" ]
-		then
+		if [ "$store" != "$store2" ];then
 			moduleStoreTemp="$moduleStoreTemp $store"
 		fi
 		store2=$store
@@ -429,11 +402,9 @@ remove_kernel_modules()
 	do
 		for module in $installedModules
 		do
-			if [ "$opt" == "$module" ]
-			then
+			if [ "$opt" == "$module" ];then
 				found='true'
-				if [ "$module" == 'continue' ]
-				then
+				if [ "$module" == 'continue' ];then
 					skip='true'
 				else
 					found='true'
@@ -446,10 +417,8 @@ remove_kernel_modules()
 		break
 	done
 	eval $LOGPE
-	if [ "$found" == 'true' ]
-	then
-		if [ "$skip" == 'true' ]
-		then
+	if [ "$found" == 'true' ];then
+		if [ "$skip" == 'true' ];then
 			echo "${S}Returning to main script now.${N}"
 		else
 			#echo "${S}Removing ${C}$module${S} now....${N}"
@@ -472,8 +441,7 @@ install_wireless_modules()
 	local options="at76c503a ipw3945 linux-wlan-ng madwifi ndiswrapper rt2400 rt2500 rt61"
 	local tempCount=$( echo $options | wc -w )
 
-	if [ "$CORE_COUNT" -eq 1 ] # currently only new up kernels have this.
-	then
+	if [ "$CORE_COUNT" -eq 1 ];then # currently only new up kernels have this.
 		tempCount=$(( $tempCount + 1 ))
 		xOption='rt2570'
 		advanced='echo -e "${C}'$tempCount'${S} - Installs ${C}rt2570${S} module. (for ${C}up${S} CPUs only)."'
@@ -513,8 +481,7 @@ install_wireless_modules()
 			at76c503a|ipw3945|linux-wlan-ng|madwifi|ndiswrapper|rt2400|rt2500|rt2570|rt61)
 				install_the_module $opt
 				ReturnValue=$?
-				if [ "$ReturnValue" -eq 0 ]
-				then
+				if [ "$ReturnValue" -eq 0 ];then
 					RebootFlag='true'
 				fi
 				;;
@@ -533,8 +500,7 @@ install_wireless_modules()
 		break
 	done
 
-	if [ "$RebootFlag" == 'true' ]
-	then
+	if [ "$RebootFlag" == 'true' ];then
 		echo $LINE
 		echo "${S}The new wifi module you installed will not work until you reboot."
 		echo "If you get the same connection failure box then I guess the wifi module didn't"
@@ -559,8 +525,7 @@ install_wireless_modules()
 
 	fi
 	eval $LOGPE
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		install_wireless_modules
 	fi
 }
@@ -573,12 +538,10 @@ install_the_module()
 	local WifiModule=$KERNEL_DIRECTORY/$normalizedCurrentKernel/$1'*.deb'
 	# WifiModule='/var/local/kernel-current/'$1'*.deb'
 
-	if [ -f $WifiModule -o "$1" == 'madwifi' ]
-	then
+	if [ -f $WifiModule -o "$1" == 'madwifi' ];then
 		echo $LINE
 		echo "${S}The script will now install the ${C}$1${S} module for you.${N}"
-		if [ "$1" != 'madwifi' ]
-		then
+		if [ "$1" != 'madwifi' ];then
 			dpkg -i $WifiModule
 		else
 			m-a a-i madwifi
@@ -604,8 +567,7 @@ set_kernel_data()
 
 	# run_script_import $LIB_KERNELS
 
-	if [ "$BITS" == "64" ]
-	then
+	if [ "$BITS" == "64" ];then
 		KERNEL_LIST=$KERNEL_LIST_64 # with -K, this includes advanced list
 		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_64
 	else
@@ -617,8 +579,7 @@ set_kernel_data()
 	KERNEL_BASE_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
 
 	# add advanced kernels if any to llst
-	if [ "$ADVANCED_KERNEL" == 'true' ]
-	then
+	if [ "$ADVANCED_KERNEL" == 'true' ];then
 		KERNEL_LIST="$KERNEL_ADVANCED_LIST $KERNEL_LIST"
 	fi
 
@@ -627,8 +588,7 @@ set_kernel_data()
 	isSmpUp=$( echo $KERNEL_FILE | grep '\-up\-' )
 
 	# take 32 bit second position kernel if first kernel is up in list. Legacy now almost
-	if [ "$BITS" == '32' -a -n "$isSmpUp" ]
-	then
+	if [ "$BITS" == '32' -a -n "$isSmpUp" ];then
 		LATEST_UP_KERNEL=$KERNEL_FILE
 		KERNEL_FILE=$(echo $KERNEL_LIST | cut -d ' ' -f 2 )
 	fi
