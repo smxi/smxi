@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.10
-####  Date: December 26 2008
+####  version: 2.5.11
+####  Date: January 3 2009
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -187,7 +187,7 @@ kernel_question()
 	then
 		tempCount=$(( $tempCount + 1 ))
 		kernelsNotEqualOpt='install-apt-kernel'
-		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
+		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
 	else
 		kernelsNotEqual='echo -e "${M}Your current kernel: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED${M}\nis the same as the latest kernel:  ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE\n$MLINE"'
 	fi
