@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.0.2
-####  Date: December 26 2008
+####  version: 1.0.3
+####  Date: January 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -65,12 +65,17 @@ upgrade_package_remove_warning()
 	eval $LOGUS
 	local duInfo='' removedPackages='' removedPackageCount=''
 
-	if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'sid' ];then
+	# if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'sid' ];then
+	if [ "$SYSTEM_BASE" == 'sid' ];then
 		# this runs apt-get dist-upgrade unseen on the terminal and answers "no"
 		# to "do you want to continue" and stores it's output
 
 		echo "${S}Checking ${C}$DU_UPGRADE${S} for packages to be removed...${N}"
-		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( $APT_TYPE $WITHOUT_RECOMMENDS --trivial-only $DU_UPGRADE 2> /dev/null )"
+		if [ "$APT_TYPE" == 'apt-get' ];then
+			LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( $APT_TYPE $WITHOUT_RECOMMENDS --trivial-only $DU_UPGRADE 2> /dev/null )"
+		elif [ "$APT_TYPE" == 'aptitude' ];then
+			LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( echo 'n' | $APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2> /dev/null )"
+		fi
 		log_function_data "DU data:\n$duInfo\n"
 
 		# check that there are 0 or some no. of packages 'to remove'.
