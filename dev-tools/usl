@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.5
-####  Date: December 30 2008
+####  version: 2.4.6
+####  Date: January 2 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -68,6 +68,7 @@ SM_VERSIONS_URL='http://smxi.org/sm/sm-versions'
 SM_MAIN_FIRST='8'
 
 B_SKIP_SVN='false'
+B_SKIP_ZIP='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
 
 ########################################################################
@@ -107,7 +108,7 @@ get_options()
 {
 	local opt=''
 
-	while getopts :ghirsuv opt
+	while getopts :ghirsuvz opt
 	do
 		case $opt in
 			g)
@@ -132,6 +133,9 @@ get_options()
 			''|s)
 				UPDATE_TYPE='s'
 				;;
+			z)
+				B_SKIP_ZIP='true'
+				;;
 			h)
 				echo "Useage:
 -g Update and commit sgfxi svn
@@ -143,6 +147,7 @@ get_options()
    and add those files to the main smxi svn directory for easy
    uploading and handling.
 -v Update and commit svmi svn
+-z Skip the zip up part
 "
 				exit 0
 				;;
@@ -483,6 +488,8 @@ if [ "$B_SKIP_SVN" == 'false' ];then
 	commit_to_svn
 	#update_svn_data
 fi
-zip_it_up
+if [ "$B_SKIP_ZIP" == 'false' ];then
+	zip_it_up
+fi
 finish_it_up
 exit 0

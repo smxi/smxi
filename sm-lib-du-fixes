@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.0.5
+####  version: 1.0.6
 ####  Date: January 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -70,7 +70,7 @@ upgrade_package_remove_warning()
 		# this runs apt-get dist-upgrade unseen on the terminal and answers "no"
 		# to "do you want to continue" and stores it's output
 
-		echo "${S}Checking ${C}$DU_UPGRADE${S} for packages to be removed...${N}"
+		echo "${S}Checking ${C}$APT_TYPE $DU_UPGRADE${S} for packages to be removed...${N}"
 		if [ "$APT_TYPE" == 'apt-get' ];then
 			LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= duInfo="$( $APT_TYPE $WITHOUT_RECOMMENDS --trivial-only $DU_UPGRADE 2> /dev/null )"
 		elif [ "$APT_TYPE" == 'aptitude' ];then
@@ -99,7 +99,7 @@ upgrade_package_remove_warning()
 			echo "${SPACER}packages can cause other needed and/or wanted packages to be removed."
 			echo "${SPACER}This message simply alerts you that some packages will be removed.${N}"
 		else
-			echo "${S}No packages will be removed in your ${C}$APT_TYPE $DU_UPGRADE${S} today. Continuing...${N}"
+			echo "${S}No packages will be removed in your ${C}$DU_UPGRADE${S} today. Continuing...${N}"
 		fi
 		echo $LINE
 	fi
