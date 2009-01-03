@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.0.4
+####  version: 1.0.5
 ####  Date: January 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -82,8 +82,11 @@ upgrade_package_remove_warning()
 		# This acts as a check to make sure there is > 0 to remove
 		if [ "$APT_TYPE" == 'apt-get' ];then
 			removedPackages=$(echo "$duInfo" | sed -n '/be REMOVED/,/following NEW/ p' | grep -v 'following ' )
+		# aptitude has a different search string than apt-get, and I need to slice out
+		# the {a} extra data from the file name, otherwise people will search for non-existent
+		# package names.
 		elif [ "$APT_TYPE" == 'aptitude' ];then
-			removedPackages=$(echo "$duInfo" | sed -n '/be REMOVED:/,/following packages will be upgraded:/ p' | grep -v 'following ' )
+			removedPackages=$(echo "$duInfo" | sed -n '/be REMOVED:/,/following packages will be upgraded:/ p' | sed 's/{[a-z]}\{1,2\}//g' | grep -v 'following '  )
 		fi
 		removedPackageCount=$( wc -w <<< $removedPackages )
 
