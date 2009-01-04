@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.0.7
+####  version: 1.0.8
 ####  Date: January 4 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -80,28 +80,30 @@ upgrade_package_remove_warning()
 
 		# check that there are 0 or some no. of packages 'to remove'.
 		# This acts as a check to make sure there is > 0 to remove
-		if [ "$APT_TYPE" == 'apt-get' ];then
-			removedPackages=$(echo "$duInfo" | sed -n '/be REMOVED/,/following NEW/ p' | grep -v 'following ' )
-		# aptitude has a different search string than apt-get, and I need to slice out
-		# the {a} extra data from the file name, otherwise people will search for non-existent
-		# package names.
-		elif [ "$APT_TYPE" == 'aptitude' ];then
-			removedPackages=$(echo "$duInfo" | sed -n '/be REMOVED:/,/following packages will be upgraded:/ p' | sed 's/{[a-z]}\{1,2\}//g' | grep -v 'following '  )
-		fi
+		removedPackages=$(echo "$duInfo" | awk '
+		BEGIN { IGNORECASE=1 }
+		/.*REMOVED:/ {
+			# just to make sure no junk gets included, just the raw data
+			while ( getline && !/The following|upgraded|installed/ )
+			{
+				print $0
+			}
+		}
+		' )
+		# then count to see how many, if any
 		removedPackageCount=$( wc -w <<< $removedPackages )
 
-# 		if [ "$removedPackageCount" -gt 0 ];then
-# 			echo
-# 			echo "${SPACER}${M}The following ${C}$removedPackageCount${M} packages will be removed in your ${C}$DU_UPGRADE${M}:"
-# 			echo "${SPACER}${C}$removedPackages"
-# 			echo "${SPACER}${M}This is not necessarily a problem.${S} In ${C}Debian Sid${S}, packages are often"
-# 			echo "${SPACER}removed and replaced by other packages. But there are also times when updated"
-# 			echo "${SPACER}packages can cause other needed and/or wanted packages to be removed."
-# 			echo "${SPACER}This message simply alerts you that some packages will be removed.${N}"
-# 		else
-# 			echo "${S}No packages will be removed in your ${C}$DU_UPGRADE${S} today. Continuing...${N}"
-# 		fi
-		echo "${M}Testing output off for debugging error.. back in good working order soon!${N}"
+		if [ "$removedPackageCount" -gt 0 ];then
+			echo
+			echo "${SPACER}${M}The following ${C}$removedPackageCount${M} packages will be removed in your ${C}$DU_UPGRADE${M}:"
+			echo "${SPACER}${C}$removedPackages"
+			echo "${SPACER}${M}This is not necessarily a problem.${S} In ${C}Debian Sid${S}, packages are often"
+			echo "${SPACER}removed and replaced by other packages. But there are also times when updated"
+			echo "${SPACER}packages can cause other needed and/or wanted packages to be removed."
+			echo "${SPACER}This message simply alerts you that some packages will be removed.${N}"
+		else
+			echo "${S}No packages will be removed in your ${C}$DU_UPGRADE${S} today. Continuing...${N}"
+		fi
 		echo $LINE
 	fi
 	eval $LOGUE
