@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.18.9
-####  Date: December 26 2008
+####  version: 1.18.10
+####  Date: January 12 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -761,13 +761,13 @@ xpdf-reader
 			tempTwo=$tempOne
 			case $1 in
 				# full version strings for picky package groups
-				evolution|ooo|transmission)
+				amarok|evolution|ooo|transmission)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
 				# I'm adding in the + test to handle those beta versions and some other odd
 				# syntaxes: 2.8.4+2.8.4-1;
-				amarok|gimp|hplip|vegastrike|wesnoth|xpdf)
+				gimp|hplip|vegastrike|wesnoth|xpdf)
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 			esac
