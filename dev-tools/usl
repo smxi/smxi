@@ -370,6 +370,7 @@ process_rbxi()
 	echo "Copying rbxi files to bzip and svn"
 	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_SVN
 	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
+	cp -f --preserve=timestamps ${RBXI_DEV}rbxi-data/readme-rbxi.htm ${RBXI_SVN}rbxi-data
 	# send excludes
 	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/excludes* ${RBXI_BZIP}rbxi-data
 	# send values/readme
