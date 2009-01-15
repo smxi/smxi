@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.6
-####  Date: January 2 2008
+####  version: 2.4.7
+####  Date: January 15 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -373,7 +373,8 @@ process_rbxi()
 	# send excludes
 	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/excludes* ${RBXI_BZIP}rbxi-data
 	# send values/readme
-	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/*rbxi* ${RBXI_BZIP}rbxi-data
+	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/rbxi-values ${RBXI_BZIP}rbxi-data
+	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/readme-rbxi.htm ${RBXI_BZIP}rbxi-data
 
 	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9\ ]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
