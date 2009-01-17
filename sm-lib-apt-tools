@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.19.1
+####  version: 1.19.2
 ####  Date: January 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -79,23 +79,19 @@ package_tester()
 			;;
 	esac
 
-	if [ "$APT_TYPE" == 'aptitude' ]
-	then
-		if [ "$2" == 'hi' -o "$2" == 'ii' ]
-		then
+	if [ "$APT_TYPE" == 'aptitude' ];then
+		if [ "$2" == 'hi' -o "$2" == 'ii' ];then
 			packageStatus=$( package_tester_aptitude "$1" "$2" )
 		fi
 		# we're going to cascade down here, if it's never been set
 		# in aptitude, we'll check dpkg, this is a hack, but it's better
 		# than using aptitude search features
-		if [ -n "$packageStatus" ]
-		then
+		if [ -n "$packageStatus" ];then
 			runDefault='false'
 		fi
 	fi
 	# basically, only run this is if not aptitude or if aptitude tests are null
-	if [ "$runDefault" == 'true' ]
-	then
+	if [ "$runDefault" == 'true' ];then
 		# note that we need [ \t]+ so that only cases of whitespace after are counted
 		packageStatus=$( dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}' )
 	fi
@@ -129,8 +125,7 @@ package_tester_aptitude()
 	# state of 1 or 2
 	packageState=$( grep ": $packageName$" -A 2 $aptitudeStates | grep -i '^State:' | egrep -o "$packageHoldInstall" )
 
-	if [ -n "$packageState" ]
-	then
+	if [ -n "$packageState" ];then
 		echo $packageState
 	fi
 
@@ -146,8 +141,7 @@ check_package_status()
 	eval $LOGUS
 	local packageVersion='' statusType='Candidate:'
 
-	if [ "$2" == 'installed' ]
-	then
+	if [ "$2" == 'installed' ];then
 		statusType='Installed:'
 	fi
 
@@ -182,8 +176,7 @@ package_installer()
 	local testOption='ii' packagePlural1='' packagePlural2='is'
 
 	# set the plural text
-	if [ "$( wc -w <<< $1 )" -gt 1 ]
-	then
+	if [ "$( wc -w <<< $1 )" -gt 1 ];then
 		packagePlural1='s'
 		packagePlural2='are'
 	fi
@@ -223,31 +216,26 @@ package_installer()
 			;;
 	esac
 
-	if [ "$APT_TYPE" == 'aptitude' ]
-	then
-		if [ "$SYSTEM_BASE" == 'etch' ]
-		then
+	if [ "$APT_TYPE" == 'aptitude' ];then
+		if [ "$SYSTEM_BASE" == 'etch' ];then
 			# I can't find the etch aptitude command for this, so removing it for now
 			extraInstallArgs=$( sed -e 's/--allow-unauthenticated//' <<< $extraInstallArgs )
 		else
 			extraInstallArgs=$( sed -e 's/--allow-unauthenticated/--allow-untrusted/' <<< $extraInstallArgs )
 		fi
-		if [ -n "$( grep '\--reinstall' <<< $extraInstallArgs )" ]
-		then
+		if [ -n "$( grep '\--reinstall' <<< $extraInstallArgs )" ];then
 			extraInstallArgs=$( sed 's/--reinstall//' <<< $extraInstallArgs )
 			install='reinstall'
 		fi
 		doYes='' # because of how aptitude handles this stuff, no auto yes yet
 	fi
 	#  no point running these tests if they are not needed
-	if [ "$installAlways" != 'true' ]
-	then
+	if [ "$installAlways" != 'true' ];then
 		for package in $1
 		do
 			packageTemp=$( package_tester $package $testOption )
 			# here we handle cases where one of several is null, so we want to install all
-			if [ -z "$packageTemp" ]
-			then
+			if [ -z "$packageTemp" ];then
 				installIt='true'
 			fi
 			# don't add a space or the -n test will be true
@@ -257,40 +245,34 @@ package_installer()
 		packageExists=$( echo $packageExists | sed 's/\s//g' )
 	fi
 	# nullify the entire set if one member is null
-	if [ "$installIt" == 'true' ]
-	then
+	if [ "$installIt" == 'true' ];then
 		packageExists=''
 	fi
 
 	#  -o -n "$packageExists"
 	# cases: 1-always do it; 2-do if absent and to install misssing;
 	# 3-do if present required update
-	if [ "$installAlways" == 'true' ] || [ "$installAbsent" == 'true' -a -z "$packageExists" ] || [ "$installPresent" == 'true' -a -n "$packageExists" ]
-	then
+	if [ "$installAlways" == 'true' ] || [ "$installAbsent" == 'true' -a -z "$packageExists" ] || [ "$installPresent" == 'true' -a -n "$packageExists" ];then
 		echo # just for cosmetics here, for multiple packages separates
 		echo "${SPACER}${S}$altText1 ${C}$1${S}$altText2...${N}"
 
-		if [ "$forceIt" == 'true' ]
-		then
+		if [ "$forceIt" == 'true' ];then
 			log_function_data "install -f pre"
 			$APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes 2>>$LOG_FILE 2>&1
 		fi
 		$APT_TYPE $install $WITHOUT_RECOMMENDS $doYes $extraInstallArgs $1 2>>$LOG_FILE 2>&1 || installError=$?
-		if [ "$forceIt" == 'true' ]
-		then
+		if [ "$forceIt" == 'true' ];then
 			log_function_data "install -f post"
 			$APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes 2>>$LOG_FILE 2>&1 || forceError=$?
 		fi
 	# if user install and already installed...
-	elif [ "$installAbsent" == 'true' -a -n "$packageExists"  ]
-	then
+	elif [ "$installAbsent" == 'true' -a -n "$packageExists"  ];then
 		echo "${SPACER}${M}The package$packagePlural1: ${C}$1"
 		echo "${SPACER}${M}$packagePlural2 already installed on your system. Continuing...${N}"
 		echo
 	fi
 	# only do error handling if either install only, or force/install cases went bad
-	if [ "$forceError" -gt 0 ] || [ "$forceIt" != 'true' -a "$installError" -gt 1 ]
-	then
+	if [ "$forceError" -gt 0 ] || [ "$forceIt" != 'true' -a "$installError" -gt 1 ];then
 		echo "${SPACER}${E}There was a problem with install of: ${C}$1${N}"
 		echo
 		log_function_data "Error: $installError with install of $1"
@@ -310,40 +292,34 @@ package_remover()
 	local removeErrorPackage='' packageIsWild='' removePurge='remove'
 	local isPurge=$( grep 'purge' <<< $extraArgs )
 
-	if [ -n "$isPurge" ]
-	then
+	if [ -n "$isPurge" ];then
 		extraArgs=$( sed 's/purge//g' <<< $extraArgs  )
 		removePurge='purge'
 		# etch apt-get doesn't support apt-get purge, just apt-get remove --purge
-		if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'etch' ]
-		then
+		if [ "$APT_TYPE" == 'apt-get' -a "$SYSTEM_BASE" == 'etch' ];then
 			removePurge='remove --purge'
 		fi
 	fi
-	if [ "$APT_TYPE" == 'aptitude' ]
-	then
+	if [ "$APT_TYPE" == 'aptitude' ];then
 		extraArgs=$( sed 's/-y//' <<< $extraArgs ) # turn off auto yes until tested more
 	fi
 
 	# note: group is only used when the calling function has already gotten the
 	# installed packages using tests. Removing an entire group is easier in some
 	# cases where packages are dependent, like with kernels/modules and so on
-	if [ "$3" != 'group' ]
-	then
+	if [ "$3" != 'group' ];then
 		for item in $1
 		do
 			packageExists=$( package_tester $item )
 			# this is for a single case: eg: some-module*, only wild card ending
 			# we're only using this case when packages are already tested for by caller function
 			packageIsWild=$( egrep ".*\*" <<< $item )
-			if [ -n "$packageExists" -o -n "$packageIsWild" ]
-			then
+			if [ -n "$packageExists" -o -n "$packageIsWild" ];then
 				removeError=0 # reset to no error
 				echo
 				echo "${SPACER}${S}Removing package ${C}$item${S}...${N}"
 				$APT_TYPE $removePurge $extraArgs $item 2>>$LOG_FILE 2>&1 || removeError=$?
-				if [ "$removeError" -gt 0 ]
-				then
+				if [ "$removeError" -gt 0 ];then
 					echo "${SPACER}${E}Error ${C}$removeError${E} removing package: ${C}$item${N}"
 					removeErrorPackage="$removeErrorPackage $item"
 					echo
@@ -361,8 +337,7 @@ package_remover()
 	fi
 
 	eval $LOGUE
-	if [ -n "$removeErrorPackage" ]
-	then
+	if [ -n "$removeErrorPackage" ];then
 		return 1
 	else
 		return 0
@@ -399,17 +374,14 @@ apt_error_handling()
 
 	# mirror update happens pre keys so just ignore errors
 	# don't do for step 1 of keyrings too
-	if [ "$2" -gt 0 -a "$1" != 'up-du-key1' -a "$1" != 'up-mirror-1' ]
-	then
+	if [ "$2" -gt 0 -a "$1" != 'up-du-key1' -a "$1" != 'up-mirror-1' ];then
 		echo $ELINE
 		echo "${E}An error occured in ${C}$pText${E}. The Error number is: ${C}$2"
 		echo $ELINE
-		if  [ "$distUpgrade" == 'true' ]
-		then
+		if  [ "$distUpgrade" == 'true' ];then
 			echo "${S}Please run ${C}$fixText${S} again to try to resolve the problem."
 			print_hec
-		elif [ "$aptUpdate" == 'true' ]
-		then
+		elif [ "$aptUpdate" == 'true' ];then
 			echo "${S}You have 4 options to resolve this issues. If you select 1 or 2, the information will"
 			echo "be logged to ${C}$LOG_FILE${S}"
 			echo "${C}1 - $APT_TYPE update-no-pdiffs${S} ${M}Recommended${S} Runs update again without pdiffs."
@@ -461,8 +433,7 @@ apt_error_handling()
 				break
 			done
 
-			if [ "$repeat" == 'true' ]
-			then
+			if [ "$repeat" == 'true' ];then
 				apt_error_handling $1 $2
 			fi
 		fi
@@ -492,21 +463,18 @@ set_hold_install()
 	esac
 
 	# get the data, insert to global for rest of script run through
-	if [ "$status" == 'hold' ]
-	then
+	if [ "$status" == 'hold' ];then
 		# get user set hold/install packages first, slice change separator to space
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
 		log_function_data "User held packages: $userPackages"
 		wget -T$TIME_OUT -t2 -Ncq $SCRIPT_DOWNLOAD$UPGRADE_DATA$HOLD_INSTALL
 		HOLD_INSTALL_ITEMS="$( cat $HOLD_INSTALL ) $userPackages"
 		log_function_data "Backend hold packages: $( cat $HOLD_INSTALL )"
-		if [ -f "$HOLD_INSTALL" ]
-		then
+		if [ -f "$HOLD_INSTALL" ];then
 			rm -f $HOLD_INSTALL
 		fi
 		# in theory, only sid fails like this, we'll see how reality compares to theory now
-		if [ "$SYSTEM_BASE" == 'sid' ]
-		then
+		if [ "$SYSTEM_BASE" == 'sid' ];then
 			# now let's fire the auto hold/install function to protect against those
 			# pesky gimp/pidgin breaks. That function updates the global HOLD_INSTALL_ITEMS
 			broken_dependency_handler
@@ -548,11 +516,9 @@ set_hold_install()
 			packageInstalled=$( package_tester $packageName $hoIn )
 
 			#packageInstalled=$( package_tester $packageName )
-			if [ -n "$packageInstalled" ]
-			then
+			if [ -n "$packageInstalled" ];then
 				# append to list holder temp file
-				if [ "$1" == 'hold' ]
-				then
+				if [ "$1" == 'hold' ];then
 					dhiTemp="$dhiTemp $packageName"
 				fi
 				echo "${S}${SPACER}Changing ${C}$packageName${S} package status in ${C}$holdType${S} to: ${C}$statusD${N}"
@@ -572,8 +538,7 @@ set_hold_install()
 		# this step is key, it will avoid trying to put on install packages that are
 		# on hold in user system. Only use the packages that are a: not on hold already
 		# and b: are installed on user system
-		if [ "$1" == 'hold' ]
-		then
+		if [ "$1" == 'hold' ];then
 			HOLD_INSTALL_ITEMS="$dhiTemp"
 		fi
 	fi
@@ -605,8 +570,7 @@ broken_dependency_handler()
 		packageInstalled2=$( package_tester $package2 ii )
 
 		# check if it's installed, no point putting non installed stuff on hold/install
-		if [ -n "$packageInstalled1" -a  -n "$packageInstalled2" ]
-		then
+		if [ -n "$packageInstalled1" -a  -n "$packageInstalled2" ];then
 			# determine whether to do full or partial version number tests
 			# using cut -f 2-4 to handle cases of numbering like 1:2.5.6-3
 			case $package1 in
@@ -629,8 +593,7 @@ broken_dependency_handler()
 			esac
 
 			# the package gets held automatically if it and its -data version numbers do not match
-			if [ "$tempHolder1" != "$tempHolder2" ]
-			then
+			if [ "$tempHolder1" != "$tempHolder2" ];then
 				echo # needed to handle the -n of the dots....
  				echo "${M}${SPACER}Adding ${C}$package1${M} and ${C}$package2${M} to hold/install. Mismatched versions: ${C}$tempHolder1 $tempHolder2${N}"
 				HOLD_INSTALL_ITEMS="$HOLD_INSTALL_ITEMS $package1 $package2"
@@ -650,7 +613,7 @@ advanced_broken_dependency_handler()
 {
 	eval $LOGUS
 	local tempOne='' tempTwo='' package='' packages='' packageInstalled1=''
-	local holdList='' packageVersionMismatch=''
+	local holdList='' packageVersionMismatch='' groupMembers=''
 	local versionGroup=$1
 
 	# note: can't use wildcard searches because they might allow in packages with
@@ -726,8 +689,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 	do
 		# test for only installed, ii, to avoid adding user set holds here
 		packageInstalled1=$( package_tester "$package" 'ii' )
-		if [ -n "$packageInstalled1" ]
-		then
+		if [ -n "$packageInstalled1" ];then
 			# append to list to add to holds
 			holdList="$holdList $package"
 			# use the previous value, the first item in loop will be null
@@ -746,8 +708,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 			esac
 
 			# ignore first iteration of loop
-			if [ -n "$tempOne" -a -n "$tempTwo" ] && [ "$tempOne" != "$tempTwo" ]
-			then
+			if [ -n "$tempOne" -a -n "$tempTwo" ] && [ "$tempOne" != "$tempTwo" ];then
 				packageVersionMismatch='true'
 				echo "${SPACER}${M}The package ${C}$package${M} has a mismatched version number from ${C}$previousPackage${M}"
 				echo "${SPACER}${M}Version numbers: ${C}$tempOne $tempTwo${N}"
@@ -755,19 +716,20 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 			previousPackage=$package
 		fi
 	done
+	# get rid of line breaks and spaces the tests above add in so we can do true null test
+	groupMembers="$( sed 's/[[:space:]]//g' <<< $packages )"
 
-	if [ "$packageVersionMismatch" == 'true' ]
-	then
+	if [ "$packageVersionMismatch" == 'true' ];then
 		echo
 		echo "${SPACER}${M}Package version mismatches were detected in ${C}$packageGroup"
 		echo "${SPACER}${S}Adding ${C}$packageGroup${S} package group to hold/install list...${N}"
 		HOLD_INSTALL_ITEMS="$HOLD_INSTALL_ITEMS $holdList"
-	elif [ -n "$holdList" ]
-	then
+	elif [ -n "$holdList" ];then
 		echo "${SPACER}${M}No version mismatches detected in ${C}$packageGroup${M}. Continuing...${N}"
-	elif [ -z "$holdList" ]
-	then
-		echo "${SPACER}${M}You do not appear to have ${C}$packageGroup${M} installed, or it is on hold. Continuing...${N}"
+	elif [ -z "$groupMembers" ];then
+		echo "${SPACER}${M}You do not appear to have ${C}$packageGroup${M} installed. Continuing...${N}"
+	elif [ -z "$holdList" ];then
+		echo "${SPACER}${M}It appears that you have ${C}$packageGroup${M} on hold. Continuing...${N}"
 	fi
 	eval $LOGUE
 }
@@ -822,8 +784,7 @@ apt_update_handler()
 			;;
 	esac
 
-	if [ "$UPDATED" != 'true' -o "$forceUpdate" == 'true' ]
-	then
+	if [ "$UPDATED" != 'true' -o "$forceUpdate" == 'true' ];then
 		# give users the option to add non free sources to debian and sidux
 		update_to_nonfree_sources
 
@@ -853,8 +814,7 @@ install_keyrings()
 	local smPref=$( sm_pref_tester $prefId )
 
 	# this handles case where sources have now been updated to sidux only
-	if [ "$smPref" -eq 0 -a "$SIDUX_SOURCES" == 'true' ]
-	then
+	if [ "$smPref" -eq 0 -a "$SIDUX_SOURCES" == 'true' ];then
 		echo $LINE
 		# this handles first load cases, and also errors on first du
 		#update_gpg ## add gpg first to stop some errors.
@@ -872,8 +832,7 @@ update_gpg()
 	local prefId='keyrings-update-4'
 	local smPref=$( sm_pref_tester $prefId )
 
-	if [ "$smPref" -eq 0 ]
-	then
+	if [ "$smPref" -eq 0 ];then
 		echo $LINE
 		echo "${S}Installing Debian archive keys for gpg...${N}"
 		# debian keyrings &> /dev/null
@@ -940,14 +899,12 @@ change_debian_mirrors()
 	local updateSuccess='' exitStatus='' sourcesLocation=$EAS
 	local currentMirror=$( grep -o -m 1 'ftp[.a-z]*\.debian\.org' $EAS )
 	# test for new format
-	if [ -f "$EASDL" ]
-	then
+	if [ -f "$EASDL" ];then
 		currentMirror=$( grep -o -m 1 'ftp[.a-z]*\.debian\.org' $EASDL )
 		sourcesLocation=$EASDL
 	fi
 
-	if [ "$1" == 'prefs' ]
-	then
+	if [ "$1" == 'prefs' ];then
 		prefMess='echo -e "\nYou will only see this Mirror Selection option the first time you run\nthe script. To reset your source mirrors in the future, use the ${C}-m${S} option.\n"'
 	fi
 
@@ -955,8 +912,7 @@ change_debian_mirrors()
 	echo "${M} APT SOURCES DEBIAN MIRROR SELECTION"
 	echo $MLINE
 
-	if [ "$currentMirror" != '' ]
-	then
+	if [ "$currentMirror" != '' ];then
 		echo "${S}You can select a different mirror to use in ${C}apt sources${S}."
 		echo "Your current Debian mirror is ${C}$currentMirror${S}."
 		echo
@@ -977,11 +933,9 @@ change_debian_mirrors()
 		do
 			for mirror in $debianMirrors
 			do
-				if [ "$opt" == "$mirror" ]
-				then
+				if [ "$opt" == "$mirror" ];then
 					found='true'
-					if [ "$mirror" == 'no-change' ]
-					then
+					if [ "$mirror" == 'no-change' ];then
 						skip='true'
 					else
 						countryId=$( echo $mirror | cut -d ':' -f 1 )
@@ -995,20 +949,16 @@ change_debian_mirrors()
 			break
 		done
 
-		if [ "$found" == 'true' ]
-		then
+		if [ "$found" == 'true' ];then
 			echo $LINE
-			if [ "$skip" != 'true' ]
-			then
+			if [ "$skip" != 'true' ];then
 				for i in $EAS $EASDL $EASSL
 				do
-					if [ -e "$i" ]
-					then
+					if [ -e "$i" ];then
 						sed -i "s%ftp[.a-z]*\.debian\.org%ftp\.$countryId\.debian\.org%g" $i && updateSuccess='true'
 					fi
 				done
-				if [ "$updateSuccess" == 'true' ]
-				then
+				if [ "$updateSuccess" == 'true' ];then
 					echo "${S}Your ${C}apt sources${S} will now use mirrors from: ${C}$CountryName${N}"
 					apt_update_handler 'post-mirror'
 				else
@@ -1046,8 +996,7 @@ update_to_nonfree_sources()
 	# loop through possible files to update
 	for i in $EAS $EASDL $EASSL
 	do
-		if [ -f "$i" ]
-		then
+		if [ -f "$i" ];then
 			counter=$( egrep -c 'deb.*debian\.org.*(contrib|non-free)' $i )
 			isFree=$(( $counter + $isFree ))
 		fi
@@ -1055,8 +1004,7 @@ update_to_nonfree_sources()
 
 	#echo counter: $counter
 
-	if [ "$isFree" -eq 0 -a "$smPref" -eq 0 ]
-	then
+	if [ "$isFree" -eq 0 -a "$smPref" -eq 0 ];then
 		echo $LINE
 		echo "${S}It does not appear that you have the non-free/contrib options set up in your ${C}apt sources${S}"
 		echo "non-free / contrib let you install things like flash player, msttcorefonts, firmware, etc."
@@ -1072,8 +1020,7 @@ update_to_nonfree_sources()
 			y)
 				for i in $EAS $EASDL $EASSL
 				do
-					if [ -f "$i" ]
-					then
+					if [ -f "$i" ];then
 						# this is overkill, dumping the backup for now
 						# cp $i $i-bu-$(date +%y-%m-%d)
 						echo "${S}Updating your ${C}$i${S} now...${N}"
@@ -1118,18 +1065,15 @@ create_apt_source_item()
 
 	sourcePresent=$( egrep -ils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
 	log_function_data "sourcePresent: $sourcePresent"
-	if [ -z "$sourcePresent" ]
-	then
+	if [ -z "$sourcePresent" ];then
 		# handle cases where users prefer single sources.list
-		if [ -z "$( ls $EAS.d/*.list 2>/dev/null )" -a -f $EAS ]
-		then
+		if [ -z "$( ls $EAS.d/*.list 2>/dev/null )" -a -f $EAS ];then
 			sourceFile=$EAS
 		fi
 		log_function_data "sourceFile: $sourceFile"
 		echo $LINE
 		echo "${S}Adding ${C}$searchIdentifier${S} to sourcefile: ${C}$sourceFile${N}"
-		if [ ! -f "$sourceFile" ]
-		then
+		if [ ! -f "$sourceFile" ];then
 			echo "# $searchIdentifier sources added by $SCRIPT_NAME" > $sourceFile
 			echo -e "$sourcesData" >> $sourceFile
 			echo >> $sourceFile
@@ -1168,13 +1112,11 @@ check_add_remove_sources()
 
 	case "$2" in
 		add)
-			if [ -z "$sourcePresent" ]
-			then
+			if [ -z "$sourcePresent" ];then
 				echo "${S}Updating apt to use temporary ${C}$1${S} sources....${N}"
 				echo "$sourceData" > $sourceFile
 				# then update apt
 				apt_update_handler 'temp-repo'
-
 			fi
 			;;
 		remove)
@@ -1207,16 +1149,14 @@ force_kernel_mirror_change()
 	local isBorked=$( grep -ls "$borkedMirror" $EAS $EAS.d/*.list )
 	local reply=''
 
-	if [ -n "$isBorked" -a "$smPref" -eq 0 ]
-	then
+	if [ -n "$isBorked" -a "$smPref" -eq 0 ];then
 		echo $MLINE
 		echo "${M}SMXI sidux-apt Kernel / Sources Mirror Update"
 		echo $MLINE
 		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
 		echo "is not functioning. You will need to update your sidux mirrors to use another"
 		echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
-		if [ -n "$( grep 'ftp.spline.de' <<< $borkedMirror )" ]
-		then
+		if [ -n "$( grep 'ftp.spline.de' <<< $borkedMirror )" ];then
 			echo "${M}NOTE: http://ftp.spline.de is a ${C}CORE${M} mirror, so make sure to pick another ${C}core${M} when you replace it."
 		fi
 
@@ -1244,8 +1184,7 @@ force_kernel_mirror_change()
 change_kernel_mirrors()
 {
 	eval $LOGPS
-	if [ -n "$SIDUX_SOURCES" ]
-	then
+	if [ -n "$SIDUX_SOURCES" ];then
 		local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
 		#local currentMirror=$( sm_pref_tester $prefId 'equal' )
 		local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
@@ -1261,14 +1200,12 @@ change_kernel_mirrors()
 		# we'll set some singular/plural stuff, and some logic using count
 		local countMirrors=$( wc -w <<< $currentMirror )
 
-		if [ "$countMirrors" -gt 1 ]
-		then
+		if [ "$countMirrors" -gt 1 ];then
 			plural1='s'
 			plural2='are'
 		fi
 
-		if [ "$1" == 'prefs' ]
-		then
+		if [ "$1" == 'prefs' ];then
 			prefMess='echo -e "\n${M}You will only see this Kernel Mirror Selection option the first time you run\nthe script. To reset your kernel mirrors in the future, use the ${C}-M${M} option.${S}"'
 		fi
 
@@ -1295,8 +1232,7 @@ change_kernel_mirrors()
 		eval $prefMess
 		echo $LINE
 		echo "${C}1-$mirrorCount - Mirror List${S} Select which core/alternate mirror to add or update."
-		if [ -n "$currentMirror" ]
-		then
+		if [ -n "$currentMirror" ];then
 			echo
 			echo "${C}$cont - continue${S} If you want to leave your sidux mirror$plural1 alone, or if you are done."
 		fi
@@ -1311,11 +1247,9 @@ change_kernel_mirrors()
 		do
 			for mirror in $siduxMirrors
 			do
-				if [ "$opt" == "$mirror" ]
-				then
+				if [ "$opt" == "$mirror" ];then
 					found='true'
-					if [ "$mirror" == 'continue' ]
-					then
+					if [ "$mirror" == 'continue' ];then
 						skip='true'
 					else
 						countryId=$( echo $mirror | cut -d ':' -f 1 )
@@ -1329,13 +1263,10 @@ change_kernel_mirrors()
 			break
 		done
 
-		if [ "$found" == 'true' ]
-		then
+		if [ "$found" == 'true' ];then
 			echo $LINE
-			if [ "$skip" != 'true' ]
-			then
-				if [ "$currentMirror" != "$noMirrorString" ]
-				then
+			if [ "$skip" != 'true' ];then
+				if [ "$currentMirror" != "$noMirrorString" ];then
 					set_sidux_mirror "$mirrorUrl"
 					change_kernel_mirrors
 				else
@@ -1373,8 +1304,7 @@ get_sidux_mirrors()
 	local currentMirrors=''
 
 	# needed to avoid infinite loop from function calling itself
-	if [ "$1" != 'get-them' ]
-	then
+	if [ "$1" != 'get-them' ];then
 		currentMirrors="$( get_sidux_mirrors 'get-them' )"
 	fi
 
@@ -1387,8 +1317,7 @@ get_sidux_mirrors()
 		# echo mirrorTemp: $mirrorTemp
 		mirrorFiles="$( egrep -ls "^[[:space:]]*(deb|deb-src)[[:space:]]*$mirrorTemp" $EAS $EAS.d/*.list )"
 
-		if [ -n "$mirrorFiles" ]
-		then
+		if [ -n "$mirrorFiles" ];then
 			# case one we return a list of all found mirrors
 			case $1 in
 				all|get-them)
@@ -1399,8 +1328,7 @@ get_sidux_mirrors()
 					singleTest=$( egrep -v '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' <<< $mirrorTemp )
 					# echo singleTest: $singleTest
 					# if a core mirror is not found, or if there is only one sidux mirror
-					if [ -n "$singleTest" ] || [ "$countMirrors" -eq 1 ]
-					then
+					if [ -n "$singleTest" ] || [ "$countMirrors" -eq 1 ];then
 						mirrorsFound="$mirrorTemp"
 						# echo mirrorsFound: $mirrorsFound
 						break
@@ -1412,8 +1340,7 @@ get_sidux_mirrors()
 	done
 
 	# return the output
-	if [ -n "$mirrorsFound" ]
-	then
+	if [ -n "$mirrorsFound" ];then
 		echo "$mirrorsFound"
 	else
 		echo $noMirrorString
@@ -1442,8 +1369,7 @@ set_sidux_mirror()
 	# make sure the current mirror only is selected
 	# this step is critical, it is required to correctly set entryExists
 	# for case of multiple mirror entries AND correctly setting mirror
-	if [ -n "$isCoreSiduxRepo" ]
-	then
+	if [ -n "$isCoreSiduxRepo" ];then
 		# this handles a really weird case where sidux.list is commented out
 		# because we're checking multiple files, we need to slice out the file :
 		# separator before awk
@@ -1461,10 +1387,8 @@ set_sidux_mirror()
 
 	# note: we don't need any special regex because we already know
 	# we're in the right place, with a matching syntax, so things should be good
-	if [ -n "$entryExists" ]
-	then
-		if [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" ] || [ "$countMirrors" -eq 1 -a -n "$isCoreSiduxRepo" ]
-		then
+	if [ -n "$entryExists" ];then
+		if [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" ] || [ "$countMirrors" -eq 1 -a -n "$isCoreSiduxRepo" ];then
 			siduxSources=$( grep -ls "$entryExists" $EAS $EAS.d/*.list )
 			echo "${SPACER}${S}Updating ${C}$siduxSources${S} now...${N}"
 			sed -i -r "s%(#?[[:space:]]*(deb|deb-src)[[:space:]]*)$entryExists%\1$1%" $siduxSources
@@ -1473,8 +1397,7 @@ set_sidux_mirror()
 			echo "${SPACER}${C}$( get_sidux_mirrors 'all' )${N}"
 			updateIt='true'
 		# only when not a core mirror and sources are not yet upgraded to multi
-		elif [ "$countMirrors" -eq 1 -a -z "$isCoreSiduxRepo" ]
-		then
+		elif [ "$countMirrors" -eq 1 -a -z "$isCoreSiduxRepo" ];then
 			#note: we only want to prepend to sources NOT commented out
 			siduxSources=$( grep -ls "^[[:space:]]*deb.*$entryExists" $EAS $EAS.d/*.list )
 			# we need to loop it here because of possible multi source files
@@ -1500,8 +1423,7 @@ set_sidux_mirror()
 			echo "${SPACER}${C}$( get_sidux_mirrors 'all' )${N}"
 			updateIt='true'
 		# this case should never happen any more with above modifications
-		elif [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" -a -n "$isCoreSiduxRepo" ]
-		then
+		elif [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" -a -n "$isCoreSiduxRepo" ];then
 			echo "${E}You cannot overwrite your primary ${C}sidux.com${E} apt source:"
 			echo "${C}$isCoreSiduxRepo"
 			echo "${E}only your alternate mirror.${N}"
@@ -1511,8 +1433,7 @@ set_sidux_mirror()
 		fi
 	# either multi update or single core update
 	# only do this at the true end
-	elif [ -z "$entryExists" ]
-	then
+	elif [ -z "$entryExists" ];then
 		echo "${E}Unable to properly match your ${C}sidux.com${E} repo, sorry.${N}"
 		print_hec
 		log_function_data "Unable to match sidux repo"
@@ -1520,8 +1441,7 @@ set_sidux_mirror()
 		return 1
 	fi
 
-	if [ "$updateIt" == 'true' ]
-	then
+	if [ "$updateIt" == 'true' ];then
 		print_hec
 		eval $LOGUE
 		return 0
@@ -1587,14 +1507,11 @@ get_current_apt_kernel()
 	# we'll just respect the user initial preference and make them change manually if desired
 	local platform=$( egrep -o '\-(486|686|686-bigmem|xen-686)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2-4 )
 
-	if [ "$defaultKernel" != 'no-kernel' ]
-	then
-		if [ "$BITS" == '64' ]
-		then
+	if [ "$defaultKernel" != 'no-kernel' ];then
+		if [ "$BITS" == '64' ];then
 			platform='amd64'
 		# for odd 32 bit kernel names, yet known
-		elif [ "$BITS" == '32' -a -z "$platform" ]
-		then
+		elif [ "$BITS" == '32' -a -z "$platform" ];then
 			platform='686'
 		fi
 
@@ -1613,14 +1530,12 @@ get_current_apt_kernel()
 			sidux)
 				kernelStringExtra='-sidux'
 				distro='sidux'
-				if [ "$BITS" == '32' ]
-				then
+				if [ "$BITS" == '32' ];then
 					platform='686'
 				fi
 				;;
 			mepis)
-				if [ "$BITS" == '32' ]
-				then
+				if [ "$BITS" == '32' ];then
 					kernelStringExtra='-mepis'
 				else
 					kernelStringExtra='-mepis64'
@@ -1632,8 +1547,7 @@ get_current_apt_kernel()
 		log_function_data "Platform: $platform"
 
 		# little trick here to present just debian kernels if not distro
-		if [ "$SIDUX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ]
-		then
+		if [ "$SIDUX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
 			kernelStringExtra=''
 			distro='Debian'
 			defaultKernel='debian'
@@ -1655,8 +1569,7 @@ get_current_apt_kernel()
 			dpkg --compare-versions "$kernel1" ge "$kernel2"
 			kernel1Greater=$?
 			#now, if 1 is greater than 2, use it, otherwise use 2
-			if [ "$kernel1Greater" -eq 0 ]
-			then
+			if [ "$kernel1Greater" -eq 0 ];then
 				kernel2=$kernel1
 			fi
 		done
@@ -1665,8 +1578,7 @@ get_current_apt_kernel()
 
 		# test that the kernel actually exists, metapackages can be wrong, out of date
 		kernelPackageExists=$( check_package_status "linux-image-$currentKernel" )
-		if [ -z "$kernelPackageExists" ]
-		then
+		if [ -z "$kernelPackageExists" ];then
 			log_function_data "Error: the kernel package: linux-image-$currentKernel has no installation candidate.\Setting kernel version to null for this kernel type."
 			currentKernel=''
 		fi
@@ -1687,8 +1599,7 @@ get_current_apt_kernel()
 		esac
 
 		# only set this for cases where it's user defaults being set, not for alt kernels
-		if [ "$defaultKernel" == "$DEFAULT_KERNEL" ]
-		then
+		if [ "$defaultKernel" == "$DEFAULT_KERNEL" ];then
 			CURRENT_APT_KERNEL=$currentKernel
 			log_function_data "CURRENT_APT_KERNEL: $CURRENT_APT_KERNEL"
 			kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
@@ -1722,8 +1633,7 @@ test_required_startup_apps()
 	for r in $dpkgCheck
 	do
 		# see if it's in dpkg
-		if [ -z "$( package_tester $r )" ]
-		then
+		if [ -z "$( package_tester $r )" ];then
 			installApps="$installApps $r"
 			missing='true'
 		fi
@@ -1732,15 +1642,13 @@ test_required_startup_apps()
 	for p in $requiredApps
 	do
 		appPath=$( which $p )
-		if [ ! -e "$appPath" -o -z "$appPath" ]
-		then
+		if [ ! -e "$appPath" -o -z "$appPath" ];then
 			installApps="$installApps $p"
 			missing='true'
 		fi
 	done
 
-	if [ "$missing" == 'true' ]
-	then
+	if [ "$missing" == 'true' ];then
 		eval $LOGUE
 		install_missing_apps "$installApps" 'required'
 	else
@@ -1759,8 +1667,7 @@ install_missing_apps()
 	eval $LOGUS
 	local opt='' option='' repeat='' returnValue='' noOpt=''
 	local message1='' message2='' plural1=''
-	if [ "$( wc -w <<< $1 )" -gt 1 ]
-	then
+	if [ "$( wc -w <<< $1 )" -gt 1 ];then
 		plural1='s'
 	fi
 
@@ -1816,12 +1723,10 @@ install_missing_apps()
 	log_function_data "Return Value: $returnValue"
 	eval $LOGUE
 
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		install_missing_apps "$1" "$2"
 	else
-		if [ "$returnValue" -gt 0 ]
-		then
+		if [ "$returnValue" -gt 0 ];then
 			echo $MLINE
 			echo "${M}Cannot run the requested feature, skipping it and continuing with script.${N}"
 			print_hec
