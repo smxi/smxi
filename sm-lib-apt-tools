@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.19.0
+####  version: 1.19.1
 ####  Date: January 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -658,12 +658,7 @@ advanced_broken_dependency_handler()
 	case $versionGroup in
 				amarok)
 			packages="
-amarok
-amarok-common
-amarok-engine-xine
-amarok-engine-yauap
-amarok-engines
-amarok-konqsidebar
+$( package_tester '(amarok|amarok-common|amarok-engine-xine|amarok-engine-yauap|amarok-engines|amarok-konqsidebar)' )
 "
 			packageGroup='Amarok'
 			;;
@@ -671,29 +666,20 @@ amarok-konqsidebar
 		# libecal1.2-7 libedata-cal1
 		evolution)
 			packages="
-evolution
-evolution-data-server
-evolution-data-server-common
+$( package_tester '(evolution|evolution-data-server|evolution-data-server-common)' )
 "
 			packageGroup='Evolution'
 			;;
 		gimp)
 			packages="
-gimp
-gimp-data
-gimp-libcurl
-libgimp2.0
-gimp-python
+$( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
 "
 			packageGroup='Gimp'
 			;;
 
 		hplip)
 			packages="
-hpijs
-hpijs-ppds
-hplip
-hplip-data
+$( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data)' )
 "
 			packageGroup='hplip'
 			;;
@@ -708,32 +694,25 @@ $(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-fil
 			;;
 		vegastrike)
 			packages="
-$(package_tester 'vegastrike' 'wild-full')
+$( package_tester 'vegastrike' 'wild-full' )
 "
 			packageGroup='Vegastrike'
 			;;
 		wesnoth)
 			packages="
-$(package_tester 'wesnoth' 'wild-full')
+$( package_tester 'wesnoth' 'wild-full' )
 "
 			packageGroup='Wesnoth'
 			;;
 		transmission)
 			packages="
-transmission
-transmission-common
-transmission-cli
-transmission-daemon
-transmission-gtk
+$( package_tester '(transmission|transmission-common|transmission-cli|transmission-daemon|transmission-gtk)' )
 "
 			packageGroup='Transmission'
 			;;
 		xpdf)
 			packages="
-xpdf
-xpdf-common
-xpdf-reader
-xpdf-utils
+$( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 "
 			packageGroup='Xpdf'
 			;;
