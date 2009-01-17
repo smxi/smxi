@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.15
-####  Date: January 3 2009
+####  version: 1.21.16
+####  Date: January 17 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1297,24 +1297,31 @@ set_upgrade_type()
 	local upgradeType=$( sm_pref_tester $smPref 'equal' )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	local upgradeStyle='upgrade' # default, for apt-get / deprecated aptitude
+	local fullUpgrade='' fullUpgradeOpt=''
 	local upgradeTypeSetting=''
 	local tempTest=''
 	local repeat='' opt=''
 
 	if [ -n "$aptType" -a "$aptType" == 'aptitude' ];then
+		fullUpgradeOpt='full-upgrade'
 		upgradeStyle='safe-upgrade'
+		fullUpgrade='echo -e "${C}3 - $fullUpgradeOpt${S} Recommended method to do full upgrades (dist-upgrade is deprecated) in aptitude."'
 	fi
 	if [ "$SYSTEM_BASE" == 'etch' ];then
 		upgradeStyle='upgrade' # etch aptitude doesn't have safe-upgrade option
+		fullUpgrade=''
 	fi
-	local options="dist-upgrade $upgradeStyle continue exit"
+	local options="dist-upgrade $upgradeStyle $fullUpgradeOpt continue exit"
+	exitNu=$( wc -w <<< $options )
+	contNu=$(( $exitNu - 1 ))
 
 	echo $LINE
 	echo "${S}Set ${C}$SCRIPT_NAME${S} to use upgrade type ${C}dist-upgrade${S} or ${C}$upgradeStyle${S}."
 	echo $MLINE
 	echo "${M}Your system base appears to be: ${C}Debian $SYSTEM_BASE"
 	echo
-	echo "${S}In general, for ${C}Debian Sid${S}, ${C}dist-upgrade${S} is the better choice for maintaining your system."
+	echo "${S}In general, for ${C}Debian Sid${S}, ${C}dist-upgrade${S} is the better choice for maintaining your system"
+	echo "for ${C}apt-get, and ${C}full-upgrade${S} or ${C}safe-upgrade${S} for ${C}aptitude${S}."
 	echo "For ${C}Debian Testing${S}, ${C}dist-upgrade${S} should work fine, but some users prefer ${C}$upgradeStyle${S} because"
 	echo "it's more stable. If you choose ${C}$upgradeStyle${S} for either Sid or Testing systems, you must run"
 	echo "dist-upgrade manually now and then to fully update your system, or change it here,"
@@ -1328,9 +1335,10 @@ set_upgrade_type()
 	echo $LINE
 	echo "${C}1 - dist-upgrade${S} Full distribution upgrade to all current and latest packages and libraries."
 	echo "${C}2 - $upgradeStyle${S} Only upgrade packages that do not require upgrading your current libraries etc."
+	eval "$fullUpgrade"
 	echo
-	echo "${C}3 - continue${S} Don't change or set."
-	echo "${C}4 - exit${S} Don't want to decide now, I'll study up on this and try later."
+	echo "${C}$contNu - continue${S} Don't change or set."
+	echo "${C}$exitNu - exit${S} Don't want to decide now, I'll study up on this and try later."
 	echo $LINE
 	echo $SLE
 	echo $LINE
@@ -1338,7 +1346,7 @@ set_upgrade_type()
 	select opt in $options
 	do
 		case $opt in
-			upgrade|safe-upgrade|dist-upgrade)
+			upgrade|safe-upgrade|full-upgrade|dist-upgrade)
 				echo $LINE
 				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default upgrade type: ${C}$opt${N}"
 				set_sm_pref_values "$smPref" "$opt"

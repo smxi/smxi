@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.18.10
-####  Date: January 12 2009
+####  version: 1.19.0
+####  Date: January 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -479,8 +479,8 @@ apt_error_handling()
 set_hold_install()
 {
 	eval $LOGPS
-	local packageName='' userPackages='' statusD='' packageInstalled='' hoIn='ii'
-	local dhiTemp='' holdType=''
+	local packageName='' userPackages='' packageInstalled='' hoIn='ii'
+	local dhiTemp='' holdType='' statusA='' statusD='' status=$1
 
 	case $APT_TYPE in
 		apt-get)
@@ -492,7 +492,7 @@ set_hold_install()
 	esac
 
 	# get the data, insert to global for rest of script run through
-	if [ "$1" == 'hold' ]
+	if [ "$status" == 'hold' ]
 	then
 		# get user set hold/install packages first, slice change separator to space
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
@@ -523,25 +523,20 @@ set_hold_install()
 		fi
 	fi
 	log_function_data "Post test hold packages: $HOLD_INSTALL_ITEMS"
-	if [ -n "$HOLD_INSTALL_ITEMS" ]
-	then
+	if [ -n "$HOLD_INSTALL_ITEMS" ];then
 		echo $LINE
-		statusD=$1
-		if [ "$statusD" == 'hold-utility' ]
-		then
-			statusD='hold'
+		if [ "$status" == 'hold-utility' ];then
+			status='hold'
 		fi
 		# set search for either ii or hi
-		if [ "$statusD" == 'install' ]
-		then
-			if [ "$APT_TYPE" == 'aptitude' ]
-			then
-				statusD='unhold'
-			fi
+		if [ "$status" == 'install' ];then
 			hoIn='hi'
+			statusA='unhold'
+			statusD='install'
 		fi
-		if [ "$statusD" == 'hold' ]
-		then
+		if [ "$status" == 'hold' ];then
+			statusA='hold'
+			statusD='hold'
 			echo "${S}${SPACER}Testing hold/install list package status...${N}"
 		fi
 		for packageName in $HOLD_INSTALL_ITEMS
@@ -566,9 +561,11 @@ set_hold_install()
 						echo $packageName $statusD | dpkg --set-selections
 						;;
 					aptitude)
-						aptitude $statusD $packageName 2>> $LOG_FILE 1>/dev/null
+						aptitude $statusA $packageName 2>> $LOG_FILE 1>/dev/null
 						;;
 				esac
+				# going to try holding/unholding with dpgk as well
+# 				echo $packageName $statusD | dpkg --set-selections
 				log_function_data "Package $packageName set to: $statusD"
 			fi
 		done
@@ -654,19 +651,24 @@ advanced_broken_dependency_handler()
 	eval $LOGUS
 	local tempOne='' tempTwo='' package='' packages='' packageInstalled1=''
 	local holdList='' packageVersionMismatch=''
+	local versionGroup=$1
 
-	case $1 in
-		amarok)
+	# note: can't use wildcard searches because they might allow in packages with
+	# different group numbers, ie: openoffice.org-thesaurus etc
+	case $versionGroup in
+				amarok)
 			packages="
 amarok
 amarok-common
 amarok-engine-xine
 amarok-engine-yauap
 amarok-engines
+amarok-konqsidebar
 "
 			packageGroup='Amarok'
 			;;
-
+		# evolution works better with wildcards: evolution-data-server libebook1.2-9
+		# libecal1.2-7 libedata-cal1
 		evolution)
 			packages="
 evolution
@@ -695,34 +697,24 @@ hplip-data
 "
 			packageGroup='hplip'
 			;;
+		# note: can't use full wildcard because of thesaurus using different numbering
 		ooo)
 			packages="
-openoffice.org-base
-openoffice.org-base-core
-openoffice.org-common
-openoffice.org-java-common
-openoffice.org-core
-openoffice.org-calc
-openoffice.org-impress
-openoffice.org-kde
-openoffice.org-writer
-python-uno
+$( package_tester '(openoffice.org-base|openoffice.org-base-core|openoffice.org-common|openoffice.org-java-common|openoffice.org-core|python-uno)' )
+$(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-kde|openoffice.org-gnome|openoffice.org-writer|openoffice.org-math)' )
+$(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-filter-)' 'wild-full')
 "
 			packageGroup='OpenOffice.org'
 			;;
 		vegastrike)
 			packages="
-vegastrike
-vegastrike-data
-vegastrike-music
+$(package_tester 'vegastrike' 'wild-full')
 "
 			packageGroup='Vegastrike'
 			;;
 		wesnoth)
 			packages="
-wesnoth
-wesnoth-data
-wesnoth-all
+$(package_tester 'wesnoth' 'wild-full')
 "
 			packageGroup='Wesnoth'
 			;;
@@ -731,6 +723,7 @@ wesnoth-all
 transmission
 transmission-common
 transmission-cli
+transmission-daemon
 transmission-gtk
 "
 			packageGroup='Transmission'
@@ -740,6 +733,7 @@ transmission-gtk
 xpdf
 xpdf-common
 xpdf-reader
+xpdf-utils
 "
 			packageGroup='Xpdf'
 			;;
@@ -751,7 +745,7 @@ xpdf-reader
 	echo "${SPACER}${S}Running ${C}$packageGroup${S} package version mismatch tests now...${N}"
 	for package in $packages
 	do
-		# test for all cases hi/ii
+		# test for only installed, ii, to avoid adding user set holds here
 		packageInstalled1=$( package_tester "$package" 'ii' )
 		if [ -n "$packageInstalled1" ]
 		then
@@ -759,7 +753,7 @@ xpdf-reader
 			holdList="$holdList $package"
 			# use the previous value, the first item in loop will be null
 			tempTwo=$tempOne
-			case $1 in
+			case $versionGroup in
 				# full version strings for picky package groups
 				amarok|evolution|ooo|transmission)
 					tempOne=$( check_package_status "$package" )
