@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.11
-####  Date: January 3 2009
+####  version: 2.5.12
+####  Date: January 18 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -294,6 +294,8 @@ kernel_module_installer()
 	eval $LOGPS
 	# clean out -modules- from list
 	local availableModules="$( sed 's/-modules-//g' <<< $( print_module_list ) )"
+	# manual override of that lirc double modules thing
+	availableModules="$( sed 's/lircmodules-/lirc-modules/' <<< $availableModules )"
 	local skip='' opt='' options='' module='' found=''
 	local kernelType='' fullModule='' metaText=''
 	local options="$availableModules continue"
