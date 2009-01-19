@@ -962,7 +962,7 @@ update_all_scripts()
 
 		if [ "$continue" == 'true' ];then
 			echo -n "Verifying $script file integrity... "
-			verifyDownload=$( grep '#**EOF**#' $script )
+			verifyDownload=$( grep '##\*\*EOF\*\*##' $script )
 			if [ -n "$verifyDownload" ];then
 				echo "verified"
 				continue='true'
