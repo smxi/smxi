@@ -925,7 +925,7 @@ update_all_scripts()
 			svmi)
 				downloadUrl=$SCRIPT_DOWNLOAD_SV$script
 				;;
-			rb)
+			rbxi)
 				downloadUrl='http://smxi.org/rb'
 				completionMessage='Rbxi install'
 				;;
