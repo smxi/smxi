@@ -926,7 +926,7 @@ update_all_scripts()
 				downloadUrl=$SCRIPT_DOWNLOAD_SV$script
 				;;
 			rb)
-				downloadUrl='smxi.org/rb'
+				downloadUrl='http://smxi.org/rb'
 				completionMessage='Rbxi install'
 				;;
 			*)
@@ -935,7 +935,7 @@ update_all_scripts()
 		esac
 
 		echo -n "Downloading $script... "
-		wget -Nqc $downloadUrl
+		wget -Ncq $downloadUrl
 
 		if [ "$?" -eq 0 ];then
 			echo "downloaded"
