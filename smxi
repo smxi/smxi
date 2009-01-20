@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.9.1
-####  Date: January 19 2009
+####  version: 8.9.2
+####  Date: January 20 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -840,6 +840,7 @@ run_script_import()
 		fi
 	elif [ "$runIt" == 'true' ];then
 		$runCommand $1 'chm'
+		# this fixes an obscure ssh issue where smxi thinks display is there
 		DISPLAY= ./$runScript $options # run module
 	fi
 	eval $LOGUE
@@ -906,6 +907,13 @@ update_all_scripts()
 	local script='' downloadUrl='' verifyDownload='' errorOccurred=''
 	local fullUrl='' completionMessage='Full script component update'
 	local continue=''
+	# handle colors
+	local stan=${S} mess=${M} code=${C}
+	if [ -n "$DISPLAY" ];then
+		stan=''
+		mess=''
+		code=''
+	fi
 
 	cd $SCRIPT_HOME
 
@@ -934,11 +942,11 @@ update_all_scripts()
 				;;
 		esac
 
-		echo -n "Downloading $script... "
+		echo -n "${stan}Downloading ${code}$script${stan}... ${N}"
 		wget -Ncq $downloadUrl
 
 		if [ "$?" -eq 0 ];then
-			echo "downloaded"
+			echo "${mess}downloaded${N}"
 			continue='true'
 		else
 			echo "${W}download failed${N}"
@@ -949,22 +957,22 @@ update_all_scripts()
 
 		if [ "$continue" == 'true' ];then
 			if [ "$1" == 'rbxi' ];then
-				echo "Extracting rbxi data... "
+				echo "${stan}Extracting ${code}rbxi${stan} data... ${N}"
 				tar xjvf rbxi.tar.bz2
-				echo -n "Setting up rbxi... "
+				echo -n "${stan}Setting up ${code}rbxi${stan}... ${N}"
 				mv rbxi rb
 				mv rb/* ./
 				rm -f rbxi.tar.bz2
 				rm -fr rb
-				echo "completed"
+				echo "${code}rbxi${stan} setup completed${N}"
 			fi
 		fi
 
 		if [ "$continue" == 'true' ];then
-			echo -n "Verifying $script file integrity... "
+			echo -n "${stan}Verifying ${code}$script${stan} file integrity... ${N}"
 			verifyDownload=$( grep '##\*\*EOF\*\*##' $script )
 			if [ -n "$verifyDownload" ];then
-				echo "verified"
+				echo "${mess}verified${N}"
 				continue='true'
 			else
 				echo "${W}file is corrupted: test failed${N}"
@@ -976,10 +984,10 @@ update_all_scripts()
 		if [ "$continue" == 'true' ];then
 			case $script in
 				inxi|sgfxi|smxi|svmi|rbxi)
-					echo -n "Making $script executable... "
+					echo -n "${stan}Making ${code}$script${stan} executable... ${N}"
 					chmod +x $script
 					if [ "$?" -eq 0 ];then
-						echo "done"
+						echo "${mess}done${N}"
 					else
 						errorOccurred='true'
 						echo "${W}chmod +x failed${N}"
@@ -992,7 +1000,7 @@ update_all_scripts()
 	if [ "$errorOccurred" == 'true' ];then
 		echo "${W}Exiting because of unexpected error. Please make sure you have a good connection.${N}"
 	else
-		echo "$completionMessage completed."
+		echo "${stan}$completionMessage completed.${N}"
 	fi
 	exit 0
 }

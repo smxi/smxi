@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.1
-####  Date: December 25 2008
+####  version: 3.1.2
+####  Date: January 20 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -349,7 +349,7 @@ select_install_type()
 	echo
 	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, msttcorefonts, Opera, Skype, Google Earth."
 	echo
-	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, and more."
+	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, rbxi, and more."
 	echo
 	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
 	echo
@@ -626,17 +626,20 @@ utilities_installer()
 	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S}, a new fork of ${C}infobash${S}. Bigger, better, more features!"
 	echo "     If ${C}Konversation${S} is present, also creats link so you can run inxi directly: ${C}/inxi${S}"
 	echo "     Runs once with full (${C}-F${S}) options when you install it. See ${C}inxi -h${S} for all options."
+	echo "${C}11${S} - ${C}rbxi${S} Download/install ${C}rbxi package${S}, the new rysnc/rdiff-backup tool."
+	echo "     ${M}Note:${S} installs to: ${C}$SCRIPT_HOME${S}. Manual configuration required. For setup info, see:"
+	echo "     ${C}$SCRIPT_HOME/rbxi-data/rbxi-values${S} and ${C}$SCRIPT_HOME/rbxi-data/readme-rbxi.htm${S}"
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 
 	echo
-	echo "${C}11${S} - ${C}back-to-install-menu${S}"
+	echo "${C}12${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni inxi back-to-install-menu"
+	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni inxi rbxi back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -669,6 +672,10 @@ utilities_installer()
 			kpowersave)
 				update_sources 'plain'
 				install_kpowersave
+				repeat='true'
+				;;
+			rbxi)
+				update_all_scripts 'rbxi'
 				repeat='true'
 				;;
 			streamtuner)
