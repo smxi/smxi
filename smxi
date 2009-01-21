@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.9.2
+####  version: 8.9.3
 ####  Date: January 20 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
@@ -2585,8 +2585,8 @@ print_version()
 			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
 			;;
 	esac
-# 	distroThanks='I hope you all have happy holidays, and enjoy the winter solstice. Be sure to take care '
-# 	extraMessage='of yourself and others in the coming year, it will be a challenging one...'
+	distroThanks='...and to Mr. Blue, who contributed endless joy, song, curiousity, and orneriness to smxi...'
+	extraMessage='even though few saw your contributions, many appreciated them without knowing it... RIP'
 	print_lib_info $SCRIPT_NAME
 	if [ "$PRINT_VERSION" != 'true' ];then
 		echo $MLINE
