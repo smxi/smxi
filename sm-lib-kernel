@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.12
-####  Date: January 18 2009
+####  version: 2.5.13
+####  Date: January 23 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -190,24 +190,26 @@ kernel_question()
 		altKernelOption='echo "    ${C}*${S} Any supported current apt kernel install(s) for your ${C}$DISTRO${S} system, with module installer automated."'
 	fi
 
-	echo "${W}Kernels do not come with these modules for GPL reasons: ${C}isdn adsl${S}"
 	echo "${S}If you are using wifi, you may need to reinstall your wifi drivers to the new kernel."
-	echo
+	echo $LINE
 	echo "If you restart the script after you reboot and no network connection is found,"
 	echo "the script will offer you choices of wifi modules to reinstall automatically."
-	echo $MLINE
-	echo "${S}Remember, if you use ${C}Nvidia${S} or ${C}Fglrx${S} video drivers, or if you use vmware,"
-	echo "you will need to reinstall those kernel drivers."
-	echo "${M}Graphics drivers can now be reinstalled without a reboot, right to the new kernel.${S}"
-	echo
-	if [ "$1" != 'post-du' ];then
-		echo "${S}If you are going to use this script for the ${C}$DU_UPGRADE${S}, just install the kernel, "
-		echo "then, when kernel install is finished, select the ${C}continue${S} option, and"
-		echo "you can install nvidia/fglrx drivers if you want without rebooting."
-	else
-		echo "If you reboot, or restart the script, you can skip script parts using the following ${C}$SCRIPT_NAME${S} arguments:"
-		echo "${C}smxi -kwidt${S} (to skip directly to Graphics driver install)"
-		echo "${C}smxi -kwid${S} (to skip to the Post Dist-upgrade Fixes menu)"
+
+	if [ "$NVIDIA" == 'true' -o "$FGLRX" == 'true' ];then
+		echo $MLINE
+		echo "${M}If you use ${C}Nvidia${M} or ${C}Fglrx${M} video drivers, you must reinstall them after your kernel install."
+		echo "${M}Graphics drivers can now be reinstalled without a reboot, right to the new kernel.${S}"
+		echo
+
+		if [ "$1" != 'post-du' ];then
+			echo "${S}If you are going to use this script for the ${C}$DU_UPGRADE${S}, just install the kernel, "
+			echo "then, when kernel install is finished, select the ${C}continue${S} option, and"
+			echo "you can install your ${C}nvidia${S} or ${C}fglrx${S} drivers without rebooting."
+		else
+			echo "If you reboot, or restart the script, you can skip script parts using the following ${C}$SCRIPT_NAME${S} arguments:"
+			echo "${C}smxi -kwidt${S} (to skip directly to Graphics driver install)"
+			echo "${C}smxi -kwid${S} (to skip to the post ${C}$DU_UPGRADE${S} options menu)"
+		fi
 	fi
 	echo $MLINE
 	echo "${S}Please note, if you install a kernel, a backup copy of your grub configuration file"

@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.0
-####  Date: December 5 2008
+####  version: 2.4.1
+####  Date: January 23 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -24,52 +24,12 @@
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 
-set_graphics_data()
-{
-	eval $LOGUS
-	local cardData=$( lspci -n | grep 0300 | cut -d ':' -f 3-4  | cut -d ' ' -f2 )
-	local card='' cardBrand='' cardInfo=''
-
-	# this loop handles cases where users have two cards installed, like
-	# mobo graphics and pci type, and only one has driver support
-	for card in $cardData
-	do
-		cardBrand=$( echo $card | cut -d ':' -f1 )
-		case $cardBrand in
-			10de|12d2)
-				NVIDIA='true'
-				cardInfo='NVIDIA'
-				;;
-			1002)
-				ATI='true'
-				cardInfo='ATI'
-				;;
-			8086)
-				INTEL='true'
-				cardInfo='INTEL'
-				;;
-			*)
-				cardInfo='Not Supported'
-				;;
-		esac
-	done
-
-	if [ "$B_TESTING_1" == 'true' ];then
-		:
-# 		ATI='true'
-# 		INTEL=''
-# 		NVIDIA=''
-	fi
-	log_function_data "CARD: $cardInfo"
-	GFX_INSTALLER=$MOD_GFX # assign the now default engine script
-	eval $LOGUE
-}
 
 # main graphics card selector, calls final_graphics_install to do actual driver installs
 install_graphics()
 {
 	eval $LOGMS
-	local repeat='' options='' opt='' OptionText='' CurrentDriverText=''
+	local repeat='' options='' opt='' OptionText='' currentDriverText=''
 	local unsupportedNvFgCard='' sgfxiData='' otherError='' otherErrorMessage=''
 	local cardBrand='' error='' xorgNative='' installXorgDriver='install-xorg-driver'
 	# nvidia stuff
@@ -95,9 +55,6 @@ install_graphics()
 
 	# intel stuff
 	local optIntel=''
-
-	# this sets card id and script names
-	set_graphics_data
 
 	if [ "$NVIDIA" == 'true' ];then
 		cardBrand='nVidia'
@@ -157,7 +114,7 @@ install_graphics()
 		# set the driver data if it's available
 		log_function_data "NvCurrentDriver: $NvCurrentDriver"
 		if [ -n "$NvCurrentDriver" ];then
-			CurrentDriverText='echo -e "${M}Your currently Installed Nvidia Driver is: ${C}$NvCurrentDriver${S}\n"'
+			currentDriverText='echo -e "${M}Your currently Installed Nvidia Driver is: ${C}$NvCurrentDriver${S}"'
 		fi
 
 		NvDefault=$( echo $sgfxiData | cut -d ':' -f 1 )
@@ -199,7 +156,7 @@ install_graphics()
 				NvAdvancedText="${C}new-nvidia-c${S} - Newer series nVidia driver, with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvPrevious${S}\n${C}newest-nvidia-c${S} - ${M}Recommended for Newer cards${S} Newest nVidia driver, with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvLatest${S}\n"
 			fi
 			OptNv="$OptNv $nvDebId oldest-nvidia older-nvidia-c $OptNvLatest $nvBetaId"
-			NvOptionText='echo -e "${C}oldest-nvidia${S} - Use if you have problems with newer nVidia install.\n    ${M}Recommended for older, legacy nvidia cards, or if you want a lightweight driver.${S}\n    ${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia-c${S} ${M}Recommended for midrange cards${S} nVidia driver installed with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText$nvBetaText"'
+			NvOptionText='echo -e "$nvDebianText${C}oldest-nvidia${S} - Use if you have problems with newer nVidia install.\n    ${M}Recommended for older, legacy nvidia cards, or if you want a lightweight driver.${S}\n    ${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia-c${S} ${M}Recommended for midrange cards${S} nVidia driver installed with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText$nvBetaText"'
 		else
 			OptNv="$OptNv $nvDebId legacy-nvidia $nvBetaId"
 			NvOptionText='echo -e "$nvDebianText$nvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install this nVidia driver: ${C}$NvDefault${S}$nvBetaText"'
@@ -210,7 +167,7 @@ install_graphics()
 		# set the driver data if it's available
 		log_function_data "FgCurrentDriver: $FgCurrentDriver"
 		if [ -n "$FgCurrentDriver" ];then
-			CurrentDriverText='echo -e "${M}Your currently Installed Fglrx/Ati Driver is: ${C}$FgCurrentDriver${S}\n"'
+			currentDriverText='echo -e "${M}Your currently Installed Fglrx/Ati Driver is: ${C}$FgCurrentDriver${S}"'
 		fi
 
 		FgDebianSid=$( echo $sgfxiData | grep -o $FgDebId )
@@ -278,7 +235,12 @@ install_graphics()
 	if [ "$error" != 'true' ];then
 		nonfree_driver_reinstall 'kernel-xorg'
 	fi
-	eval "$CurrentDriverText"
+
+	eval "$currentDriverText"
+	print_video_data
+	if [ "$?" -eq 0 ];then
+		echo $LINE
+	fi
 	eval "$OptionText"
 	eval "$NvOptionText"
 	eval "$FgOptionText"

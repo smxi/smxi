@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.9.3
-####  Date: January 20 2009
+####  version: 8.10.0
+####  Date: January 23 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -163,6 +163,9 @@ CONFIGS_BODY='configs'
 HOLD_INSTALL='holds'
 STATUS='danger' # set to danger level by default
 UPGRADE_DATA='upgrade-data/'
+VIDEO_DATA=''
+VIDEO_DATA_FGLRX='video_support_fglrx'
+VIDEO_DATA_NVIDIA='video_support_nvidia'
 # $SCRIPT_DOWNLOAD $SCRIPT_DOWNLOAD_KERNELS
 SCRIPT_DOWNLOAD='http://smxi.org/sm/'
 SCRIPT_DOWNLOAD_SG='http://smxi.org/sg/'
@@ -312,6 +315,8 @@ SKIP_CONNECTION_RETRY=''
 SYSTEM_BASE=''
 UPDATED=''
 USE_DEBIAN_KERNEL=''
+VIDEO_SUPPORT_FGLRX=''
+VIDEO_SUPPORT_NVIDIA=''
 WITHOUT_RECOMMENDS=''
 
 # miscellaneous settings
@@ -1383,6 +1388,48 @@ set_distro_data()
 	log_function_data "DISTRO_F: $DISTRO_F"
 	log_function_data "SIDUX_SOURCES: $SIDUX_SOURCES"
 	eval $LOGPE
+}
+
+# this will be used for various purposes script wide
+set_graphics_data()
+{
+	eval $LOGUS
+	local cardData=$( lspci -n | grep 0300 | cut -d ':' -f 3-4  | cut -d ' ' -f2 )
+	local card='' cardBrand='' cardInfo=''
+
+	# this loop handles cases where users have two cards installed, like
+	# mobo graphics and pci type, and only one has driver support
+	for card in $cardData
+	do
+		cardBrand=$( echo $card | cut -d ':' -f1 )
+		case $cardBrand in
+			10de|12d2)
+				NVIDIA='true'
+				cardInfo='NVIDIA'
+				;;
+			1002)
+				ATI='true'
+				cardInfo='ATI'
+				;;
+			8086)
+				INTEL='true'
+				cardInfo='INTEL'
+				;;
+			*)
+				cardInfo='Not Supported'
+				;;
+		esac
+	done
+
+	if [ "$B_TESTING_1" == 'true' ];then
+		:
+# 		ATI='true'
+# 		INTEL=''
+# 		NVIDIA=''
+	fi
+	log_function_data "CARD: $cardInfo"
+	GFX_INSTALLER=$MOD_GFX # assign the now default engine script
+	eval $LOGUE
 }
 
 # cleans up legacy and stub files if present
@@ -2660,6 +2707,7 @@ print_install_information()
 	if [ "$PRINT_VERSION" != 'true' ];then
 		echo -e "${S}The latest kernel for your system is: ${C}$latestKernel${N}"
 	fi
+	print_video_data
 	echo $LINE
 	echo "${S}Last $APT_TYPE package database update: ${C}$DPKG_UPDATE${S}"
 	echo "${S}Last $APT_TYPE package install or upgrade: ${C}$dpkgInstall${S}"
@@ -2807,6 +2855,60 @@ print_update_warning_configs()
 # print_hec ;echo helloworld; echo yes indeed; exit
 # last step in smxi
 # args: $1: optional, noquit
+
+# prints out only for ati/nvidia card users the status reports
+# this is replacing using the warnings section, no error handling
+# is being used because this just isn't that important
+print_video_data()
+{
+	eval $LOGUS
+	local downloadUrl=$SCRIPT_DOWNLOAD$UPGRADE_DATA
+	local nData='' fData='' printed=''
+
+	if [ "$NVIDIA" == 'true' -a "$VIDEO_SUPPORT_NVIDIA" != 'unset' ];then
+		# only do this the first time, after we'll be reusing the same data
+		if [ -z "$VIDEO_SUPPORT_NVIDIA" ];then
+			downloadUrl=$downloadUrl$VIDEO_DATA_NVIDIA
+			VIDEO_SUPPORT_NVIDIA="$( wget -T3 -t 1 -qO - $downloadUrl )"
+		fi
+		# make sure no null file sent
+		nData="$( wc -w <<< $VIDEO_SUPPORT_NVIDIA )"
+		if [ "$nData" -gt 0 ];then
+			echo $LINE
+			echo "${C}nVidia${M} driver support status:${N}"
+			echo "$VIDEO_SUPPORT_NVIDIA"
+			printed='true'
+		else
+			VIDEO_SUPPORT_NVIDIA='unset'
+		fi
+		log_function_data "Nvidia Support Data:\n$VIDEO_SUPPORT_NVIDIA"
+	fi
+	if [ "$FGLRX" == 'true' -a "$VIDEO_SUPPORT_FGLRX" != 'unset' ];then
+		if [ -z "$VIDEO_SUPPORT_FGLRX" ];then
+			downloadUrl=$downloadUrl$VIDEO_DATA_FGLRX
+			VIDEO_SUPPORT_FGLRX="$( wget -T3 -t 1 -qO - $downloadUrl )"
+		fi
+		# make sure no null file sent
+		fData="$( wc -w <<< $VIDEO_SUPPORT_FGLRX )"
+		if [ "$fData" -gt 0 ];then
+			echo $LINE
+			echo "${C}AMD/ATI fglrx ${M}driver support status:${N}"
+			echo "$VIDEO_SUPPORT_FGLRX"
+			printed='true'
+		else
+			VIDEO_SUPPORT_FGLRX='unset'
+		fi
+		log_function_data "Fglrx Support Data:\n$VIDEO_SUPPORT_FGLRX"
+	fi
+	eval $LOGUE
+	# this will allow some custom output stuff if needed
+	if [ "$printed" == 'true' ];then
+		return 0
+	else
+		return 1
+	fi
+}
+
 print_completed()
 {
 	eval $LOGUS
@@ -3336,6 +3438,8 @@ run_script_components()
 	test_required_startup_apps
 	# must be set after check_distro_version to set SIDUX_SOURCES global
 	set_distro_data
+	# this sets card id
+	set_graphics_data
 	# checks for first run or -m option to run change_debian_mirrors
 	launch_function_trigger 'debian-mirrors'
 	# launch_function_trigger tester
