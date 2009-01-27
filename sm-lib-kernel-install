@@ -81,7 +81,7 @@ advanced_kernel_install()
 	altKernOpt4=$( wc -w <<< $optionList )
 	optionList="$optionList $altKernelOption5"
 	altKernOpt5=$( wc -w <<< $optionList )
-	echo SIDUX_SOURCES $SIDUX_SOURCES
+
 	if [ -n "$SIDUX_SOURCES" ]
 	then
 		altKernelOption2='install-sidux-kernel'
