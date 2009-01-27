@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.1
-####  Date: January 24 2009
+####  version: 8.10.2
+####  Date: January 27 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -244,6 +244,7 @@ SET_2008_FIXES=''
 
 # defaults for prefs, options, etc
 ADVANCED_KERNEL=''
+B_APT_PROX=''
 B_DEBUG=''
 B_TESTING_1=''
 B_TESTING_2=''
@@ -1268,14 +1269,16 @@ metapackage_launcher()
 set_distro_data()
 {
 	eval $LOGPS
-	local siduxSources=$( grep -sil '^[[:space:]]*deb.*sidux' $EAS $EAS.d/*.list )
-	local mepisSources=$( grep -sil '^[[:space:]]*deb.*mepis' $EAS $EAS.d/*.list )
+	local siduxSources=$( grep -Esil '^[[:space:]]*deb.*(deb-sdx|sidux)' $EAS $EAS.d/*.list )
+	local mepisSources=$( grep -Esil '^[[:space:]]*deb.*(deb-mep|mepis)' $EAS $EAS.d/*.list )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	# some people have mixed systems that cannot be dynamically tested for, this hard sets it
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
-	local nonDebianPattern='(sidux|opera|debian-multimedia|mepis|skype|swiftfox|virtualbox)'
+	# test for apt-proxy or approx
+	local aptProx=$( grep -Esil '^[[:space:]]*deb.*:9999/' $EAS $EAS.d/*.list )
+	local nonDebianPattern='(deb-sdx|sidux|deb-op|opera|deb-mm|debian-multimedia|deb-mep|mepis|deb-skp|skype|deb-swift|swiftfox|deb-vb|virtualbox)'
 
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
@@ -1374,6 +1377,9 @@ set_distro_data()
 	esac
 	if [ "$APT_TYPE" == 'aptitude' ];then
 		WITHOUT_RECOMMENDS='--without-recommends'
+	fi
+	if [ -n "$aptProx" ];then
+		B_APT_PROX='true'
 	fi
 	# it's important to log these in case there's some issue or bug in the values
 	if [ -f $SM_VALUES ];then

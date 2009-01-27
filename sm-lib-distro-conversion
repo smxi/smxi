@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.10
-####  Date: November 17 2008
+####  version: 3.2.11
+####  Date: January 27 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -418,7 +418,7 @@ update_to_new_sources()
 
 	case $1 in
 		sidux)
-			grepSearch='sidux.*[[:space:]](sid|unstable)'
+			grepSearch='(sidux.*[[:space:]](sid|unstable)|deb-sdx)'
 			searchIdentifier='sidux'
 			sourceFile='sidux.list'
 			sourcesData='deb http://sidux.com/debian/ sid main contrib non-free fix.main fix.contrib fix.non-free\n#deb-src http://sidux.com/debian/ sid main fix.main'

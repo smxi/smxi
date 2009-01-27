@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.19.2
-####  Date: January 17 2009
+####  version: 1.20.0
+####  Date: January 27 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -912,7 +912,15 @@ change_debian_mirrors()
 	echo "${M} APT SOURCES DEBIAN MIRROR SELECTION"
 	echo $MLINE
 
-	if [ "$currentMirror" != '' ];then
+	if [ "$B_APT_PROX" == 'true' ];then
+		echo $MLINE
+		echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian "
+		echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
+		echo "have to update your ${C}$EAS${M} sources manually.${N}"
+		log_function_data "Apt proxy :9999 format/syntax for Debian apt mirror sources"
+		print_hec
+		eval $LOGPE
+	elif [ "$currentMirror" != '' ];then
 		echo "${S}You can select a different mirror to use in ${C}apt sources${S}."
 		echo "Your current Debian mirror is ${C}$currentMirror${S}."
 		echo
@@ -1003,52 +1011,61 @@ update_to_nonfree_sources()
 	done
 
 	#echo counter: $counter
-
 	if [ "$isFree" -eq 0 -a "$smPref" -eq 0 ];then
-		echo $LINE
-		echo "${S}It does not appear that you have the non-free/contrib options set up in your ${C}apt sources${S}"
-		echo "non-free / contrib let you install things like flash player, msttcorefonts, firmware, etc."
-		echo
-		echo "If you answer ${C}y${S} a copy of your ${C}apt sources${S} will be made"
-		echo
-		echo $LINE
-		echo -e "${Q}Do you want to update your ${C}apt sources${Q} to add nonfree / contrib now?$YNE"
-		echo $LINE
-		read response
+		if [ "$B_APT_PROX" == 'true' ];then
+			echo $MLINE
+			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian "
+			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
+			echo "have to update your ${C}$EAS${M} sources to use non-free manually.${N}"
+			log_function_data "Apt proxy :9999 format/syntax for non-free Debian apt mirror sources"
+			print_hec
+			eval $LOGUE
+		else
+			echo $LINE
+			echo "${S}It does not appear that you have the non-free/contrib options set up in your ${C}apt sources${S}"
+			echo "non-free / contrib let you install things like flash player, msttcorefonts, firmware, etc."
+			echo
+			echo "If you answer ${C}y${S} a copy of your ${C}apt sources${S} will be made"
+			echo
+			echo $LINE
+			echo -e "${Q}Do you want to update your ${C}apt sources${Q} to add nonfree / contrib now?$YNE"
+			echo $LINE
+			read response
 
-		case $response in
-			y)
-				for i in $EAS $EASDL $EASSL
-				do
-					if [ -f "$i" ];then
-						# this is overkill, dumping the backup for now
-						# cp $i $i-bu-$(date +%y-%m-%d)
-						echo "${S}Updating your ${C}$i${S} now...${N}"
-						# these are both updated to handle sidux mirrors as well
-						sed -i -r 's%(#?deb.*(debian\.org|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
-						# the second test requires the results of the first to work
-						# note that spaces are required for this to work more reliably for most patterns
-						sed -i -r 's%(#?deb.*(sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|ftp-mirror\.internap\.com|ftp\.tw.debian\.org|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\snon-free)%\1 firmware fix.contrib fix.non-free %' $i
-					fi
-				done
-				echo "${C}apt sources${S} have been updated, please check them to make sure they are right.${N}"
-				set_sticky_prefs $prefId
-				print_hec
-				eval $LOGUE
-				;;
-			n)	echo "${S}Ok, continuing without updating them, you'll have to do that manually"
-				echo "if you change your mind later and decide you want to use non-free or contrib.${N}"
-				echo
-				set_sticky_prefs $prefId
-				eval $LOGUE
-				;;
-			*)	print_error yn
-				eval $LOGUE
-				update_to_nonfree_sources
-				;;
-		esac
-		echo $LINE
-		echo
+			case $response in
+				y)
+					for i in $EAS $EASDL $EASSL
+					do
+						if [ -f "$i" ];then
+							# this is overkill, dumping the backup for now
+							# cp $i $i-bu-$(date +%y-%m-%d)
+							echo "${S}Updating your ${C}$i${S} now...${N}"
+							# these are both updated to handle sidux mirrors as well
+							sed -i -r 's%(#?deb.*(debian\.org|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
+							# the second test requires the results of the first to work
+							# note that spaces are required for this to work more reliably for most patterns
+							sed -i -r 's%(#?deb.*(sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|ftp-mirror\.internap\.com|ftp\.tw.debian\.org|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\snon-free)%\1 firmware fix.contrib fix.non-free %' $i
+						fi
+					done
+					echo "${C}apt sources${S} have been updated, please check them to make sure they are right.${N}"
+					set_sticky_prefs $prefId
+					print_hec
+					eval $LOGUE
+					;;
+				n)	echo "${S}Ok, continuing without updating them, you'll have to do that manually"
+					echo "if you change your mind later and decide you want to use non-free or contrib.${N}"
+					echo
+					set_sticky_prefs $prefId
+					eval $LOGUE
+					;;
+				*)	print_error yn
+					eval $LOGUE
+					update_to_nonfree_sources
+					;;
+			esac
+			echo $LINE
+			echo
+		fi
 	fi
 }
 ## DEBUGGER
@@ -1149,33 +1166,41 @@ force_kernel_mirror_change()
 	local isBorked=$( grep -ls "$borkedMirror" $EAS $EAS.d/*.list )
 	local reply=''
 
+
 	if [ -n "$isBorked" -a "$smPref" -eq 0 ];then
 		echo $MLINE
 		echo "${M}SMXI sidux-apt Kernel / Sources Mirror Update"
 		echo $MLINE
-		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
-		echo "is not functioning. You will need to update your sidux mirrors to use another"
-		echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
-		if [ -n "$( grep 'ftp.spline.de' <<< $borkedMirror )" ];then
-			echo "${M}NOTE: http://ftp.spline.de is a ${C}CORE${M} mirror, so make sure to pick another ${C}core${M} when you replace it."
+		if [ "$B_APT_PROX" == 'true' ];then
+			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian/sidux "
+			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
+			echo "have to update your ${C}$EAS${M} sources manually.${N}"
+			log_function_data "Apt proxy :9999 format/syntax for kernel mirror forced Debian apt mirror sources"
+			print_hec
+		else
+			echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
+			echo "is not functioning. You will need to update your sidux mirrors to use another"
+			echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
+			if [ -n "$( grep 'ftp.spline.de' <<< $borkedMirror )" ];then
+				echo "${M}NOTE: http://ftp.spline.de is a ${C}CORE${M} mirror, so make sure to pick another ${C}core${M} when you replace it."
+			fi
+			echo
+			echo -e "${Q}Would you like to reset your mirror now?$YNE"
+			echo $LINE
+			read response
+
+			case $response in
+				y|Y|yes|YES|Yes)
+					echo "${S}Ok, you can now select a new kernel mirror...${N}"
+					#set_sticky_prefs $prefId
+					CHANGE_KERNEL_MIRROR='true'
+					;;
+				*)
+					echo "${S}Ok, but remember, to change your mirror, just start ${C}$SCRIPT_NAME${S} with ${C}-M${S} option.${N}"
+					#set_sticky_prefs $prefId
+					;;
+			esac
 		fi
-
-		echo
-		echo -e "${Q}Would you like to reset your mirror now?$YNE"
-		echo $LINE
-		read response
-
-		case $response in
-			y|Y|yes|YES|Yes)
-				echo "${S}Ok, you can now select a new kernel mirror...${N}"
-				#set_sticky_prefs $prefId
-				CHANGE_KERNEL_MIRROR='true'
-				;;
-			*)
-				echo "${S}Ok, but remember, to change your mirror, just start ${C}$SCRIPT_NAME${S} with ${C}-M${S} option.${N}"
-				#set_sticky_prefs $prefId
-				;;
-		esac
 	fi
 	eval $LOGUE
 }
@@ -1185,103 +1210,110 @@ change_kernel_mirrors()
 {
 	eval $LOGPS
 	if [ -n "$SIDUX_SOURCES" ];then
-		local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
-		#local currentMirror=$( sm_pref_tester $prefId 'equal' )
-		local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
-		local currentMirror="$( get_sidux_mirrors 'all' )"
-		local plural1='' plural2='is'
-		local noMirrorString='No mirrors were detected that fit the search pattern.'
-		local siduxMirrors="$( list_sidux_mirrors ) $noChange"
-		local cont=$( wc -w <<< $siduxMirrors )
-		local mirrorCount=$(( $cont - 1 ))
-
-		currentMirrorText="$currentMirror"
-
-		# we'll set some singular/plural stuff, and some logic using count
-		local countMirrors=$( wc -w <<< $currentMirror )
-
-		if [ "$countMirrors" -gt 1 ];then
-			plural1='s'
-			plural2='are'
-		fi
-
-		if [ "$1" == 'prefs' ];then
-			prefMess='echo -e "\n${M}You will only see this Kernel Mirror Selection option the first time you run\nthe script. To reset your kernel mirrors in the future, use the ${C}-M${M} option.${S}"'
-		fi
-
 		echo $MBAR
 		echo "${M} SMXI KERNEL MIRROR SELECTION"
 		echo $MLINE
-
-		echo "${S}Welcome to the sidux apt/kernel mirror selector. Please take a moment to read this"
-		echo "before proceeding. Your current sidux-apt/kernel mirror$plural1 $plural2:"
-		echo "${SPACER}${C}$currentMirrorText${S}"
-		echo
-		echo "There are two types of mirrors: ${C}core${S} (required), and ${C}alternate${S} (optional)."
-		echo "The following are the ${C}core${S} sidux mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
-		echo "${S}You will always use one of these. Picking a core will modify the core mirror always."
-		echo
-		echo "Alternate mirrors are localized, and often provide much faster downloads, but do not sync"
-		echo "as frequently as the core ones. If you pick an alternate, it will be prepended"
-		echo "to your current core mirror, or, if already with alternate, will modify the alternate."
-		echo "${M}Please install at least one alternate mirror, it will really help the sidux server load.${S}"
-		echo
-		echo "${S}When you select your mirror(s), sidux will use it/them as source for latest"
-		echo "kernels and sidux hot-fixes. You can start this script like this: ${C}$SCRIPT_NAME -M${S}"
-		echo "to reset your prefered mirror(s) any time you like."
-		eval $prefMess
-		echo $LINE
-		echo "${C}1-$mirrorCount - Mirror List${S} Select which core/alternate mirror to add or update."
-		if [ -n "$currentMirror" ];then
-			echo
-			echo "${C}$cont - continue${S} If you want to leave your sidux mirror$plural1 alone, or if you are done."
-		fi
-
-		echo $LINE
-		echo -e $SLE
-		echo $LINE
-
-		options=$siduxMirrors
-
-		select opt in $options
-		do
-			for mirror in $siduxMirrors
-			do
-				if [ "$opt" == "$mirror" ];then
-					found='true'
-					if [ "$mirror" == 'continue' ];then
-						skip='true'
-					else
-						countryId=$( echo $mirror | cut -d ':' -f 1 )
-						mirrorUrl=$( echo $mirror | cut -d ':' -f 2-3 ) # handles : in urls
-					fi
-					break
-				else
-					found='false'
-				fi
-			done
-			break
-		done
-
-		if [ "$found" == 'true' ];then
-			echo $LINE
-			if [ "$skip" != 'true' ];then
-				if [ "$currentMirror" != "$noMirrorString" ];then
-					set_sidux_mirror "$mirrorUrl"
-					change_kernel_mirrors
-				else
-					echo "${M}$noMirrorString${N}"
-				fi
-			else
-					echo "${S}Continuing on to main script. Remember, you can change your ${C}sidux apt mirrors${S}"
-					echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
-					apt_update_handler 'post-mirror'
-			fi
+		if [ "$B_APT_PROX" == 'true' ];then
+			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian/sidux "
+			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
+			echo "have to update your ${C}$EAS${M} sources manually.${N}"
+			log_function_data "Apt proxy :9999 format/syntax for kernel mirror Debian apt mirror sources"
+			print_hec
 			eval $LOGPE
 		else
-			print_error opt
-			eval $LOGPE
-			change_kernel_mirrors
+			local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
+			#local currentMirror=$( sm_pref_tester $prefId 'equal' )
+			local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
+			local currentMirror="$( get_sidux_mirrors 'all' )"
+			local plural1='' plural2='is'
+			local noMirrorString='No mirrors were detected that fit the search pattern.'
+			local siduxMirrors="$( list_sidux_mirrors ) $noChange"
+			local cont=$( wc -w <<< $siduxMirrors )
+			local mirrorCount=$(( $cont - 1 ))
+
+			currentMirrorText="$currentMirror"
+
+			# we'll set some singular/plural stuff, and some logic using count
+			local countMirrors=$( wc -w <<< $currentMirror )
+
+			if [ "$countMirrors" -gt 1 ];then
+				plural1='s'
+				plural2='are'
+			fi
+
+			if [ "$1" == 'prefs' ];then
+				prefMess='echo -e "\n${M}You will only see this Kernel Mirror Selection option the first time you run\nthe script. To reset your kernel mirrors in the future, use the ${C}-M${M} option.${S}"'
+			fi
+			echo "${S}Welcome to the sidux apt/kernel mirror selector. Please take a moment to read this"
+			echo "before proceeding. Your current sidux-apt/kernel mirror$plural1 $plural2:"
+			echo "${SPACER}${C}$currentMirrorText${S}"
+			echo
+			echo "There are two types of mirrors: ${C}core${S} (required), and ${C}alternate${S} (optional)."
+			echo "The following are the ${C}core${S} sidux mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
+			echo "${S}You will always use one of these. Picking a core will modify the core mirror always."
+			echo
+			echo "Alternate mirrors are localized, and often provide much faster downloads, but do not sync"
+			echo "as frequently as the core ones. If you pick an alternate, it will be prepended"
+			echo "to your current core mirror, or, if already with alternate, will modify the alternate."
+			echo "${M}Please install at least one alternate mirror, it will really help the sidux server load.${S}"
+			echo
+			echo "${S}When you select your mirror(s), sidux will use it/them as source for latest"
+			echo "kernels and sidux hot-fixes. You can start this script like this: ${C}$SCRIPT_NAME -M${S}"
+			echo "to reset your prefered mirror(s) any time you like."
+			eval $prefMess
+			echo $LINE
+			echo "${C}1-$mirrorCount - Mirror List${S} Select which core/alternate mirror to add or update."
+			if [ -n "$currentMirror" ];then
+				echo
+				echo "${C}$cont - continue${S} If you want to leave your sidux mirror$plural1 alone, or if you are done."
+			fi
+
+			echo $LINE
+			echo -e $SLE
+			echo $LINE
+
+			options=$siduxMirrors
+
+			select opt in $options
+			do
+				for mirror in $siduxMirrors
+				do
+					if [ "$opt" == "$mirror" ];then
+						found='true'
+						if [ "$mirror" == 'continue' ];then
+							skip='true'
+						else
+							countryId=$( echo $mirror | cut -d ':' -f 1 )
+							mirrorUrl=$( echo $mirror | cut -d ':' -f 2-3 ) # handles : in urls
+						fi
+						break
+					else
+						found='false'
+					fi
+				done
+				break
+			done
+
+			if [ "$found" == 'true' ];then
+				echo $LINE
+				if [ "$skip" != 'true' ];then
+					if [ "$currentMirror" != "$noMirrorString" ];then
+						set_sidux_mirror "$mirrorUrl"
+						change_kernel_mirrors
+					else
+						echo "${M}$noMirrorString${N}"
+					fi
+				else
+						echo "${S}Continuing on to main script. Remember, you can change your ${C}sidux apt mirrors${S}"
+						echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
+						apt_update_handler 'post-mirror'
+				fi
+				eval $LOGPE
+			else
+				print_error opt
+				eval $LOGPE
+				change_kernel_mirrors
+			fi
 		fi
 	else
 		echo $MLINE

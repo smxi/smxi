@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.3
-####  Date: January 23 2009
+####  version: 3.1.4
+####  Date: January 27 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -235,19 +235,19 @@ update_sources()
 		opera)
 			# opera keyrings
 			extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
-			grepSearch='deb.opera.com'
+			grepSearch='(deb.opera.com|deb-op)'
 			searchIdentifier='Opera'
 			sourceFile=$operaApt
 			sourcesData=$operaSources
 			;;
 		skype)
-			grepSearch='download.skype.com'
+			grepSearch='(download.skype.com|deb-skp)'
 			searchIdentifier='Skype'
 			sourceFile=$skypeApt
 			sourcesData=$skypeSources
 			;;
 		swiftfox)
-			grepSearch='getswiftfox.com'
+			grepSearch='(getswiftfox.com|deb-swift)'
 			searchIdentifier='Swiftfox'
 			sourceFile=$swiftApt
 			sourcesData=$swiftSources
