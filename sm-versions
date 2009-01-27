@@ -4,7 +4,7 @@ sm-lib-clean-up=2.7.9:November 17 2008
 sm-lib-distro-conversion=3.2.10:November 17 2008
 sm-lib-du-fixes=1.0.10:January 4 2008
 sm-lib-graphics=2.4.1:January 23 2009
-sm-lib-kernel=2.5.14:January 24 2009
+sm-lib-kernel=2.5.15:January 27 2009
 sm-lib-kernel-install=2.9.14:January 18 2009
 sm-lib-misc-tweaks=1.21.17:January 17 2009
 sm-lib-package-install=3.1.3:January 23 2009
@@ -19,6 +19,6 @@ sgfxi=4.3.5:January 26 2009
 svmi=2.1.8:January 22 2009
 inxi=0.9.7:26 January 2009
 rbxi=2.5.0:15 January 2009
-sm-main-version=8.12.01:January 24 2009
+sm-main-version=8.12.02:January 27 2009
 
 ###**EOF**###
