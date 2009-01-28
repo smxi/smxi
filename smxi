@@ -2792,7 +2792,7 @@ print_distro_id()
 		if [ -f $distroFile ];then
 			# print first line, for cases where > 1 line exist in file, and trim off that
 			# debian \r, \l gunk
-			distroId=$( sed -n '1p' $distroFile | sed 's/(\\[a-z]|[[:space:]]+$)//g' )
+			distroId=$( sed -n '1p' $distroFile | sed 's/\\[a-z]//g' )
 			break
 		fi
 	done
