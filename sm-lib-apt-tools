@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.20.0
-####  Date: January 27 2009
+####  version: 1.20.1
+####  Date: January 28 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1005,7 +1005,7 @@ update_to_nonfree_sources()
 	for i in $EAS $EASDL $EASSL
 	do
 		if [ -f "$i" ];then
-			counter=$( egrep -c 'deb.*debian\.org.*(contrib|non-free)' $i )
+			counter=$( egrep -c '^[[:space:]]*deb.*(debian\.org|deb-main|debian-main|:9999).*(contrib|non-free)' $i )
 			isFree=$(( $counter + $isFree ))
 		fi
 	done
@@ -1018,6 +1018,7 @@ update_to_nonfree_sources()
 			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
 			echo "have to update your ${C}$EAS${M} sources to use non-free manually.${N}"
 			log_function_data "Apt proxy :9999 format/syntax for non-free Debian apt mirror sources"
+			set_sticky_prefs $prefId
 			print_hec
 			eval $LOGUE
 		else
@@ -1171,16 +1172,17 @@ force_kernel_mirror_change()
 		echo $MLINE
 		echo "${M}SMXI sidux-apt Kernel / Sources Mirror Update"
 		echo $MLINE
+		echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
+		echo "is not functioning. You will need to update your sidux mirrors to use another"
+		echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
 		if [ "$B_APT_PROX" == 'true' ];then
+			echo $MLINE
 			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian/sidux "
 			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
 			echo "have to update your ${C}$EAS${M} sources manually.${N}"
 			log_function_data "Apt proxy :9999 format/syntax for kernel mirror forced Debian apt mirror sources"
 			print_hec
 		else
-			echo "${S}Your current sidux-apt/kernel mirror ${C}$borkedMirror${S}"
-			echo "is not functioning. You will need to update your sidux mirrors to use another"
-			echo "sidux (kernel) mirror. Please continue in order to change that bad mirror to a good one."
 			if [ -n "$( grep 'ftp.spline.de' <<< $borkedMirror )" ];then
 				echo "${M}NOTE: http://ftp.spline.de is a ${C}CORE${M} mirror, so make sure to pick another ${C}core${M} when you replace it."
 			fi
@@ -1499,6 +1501,8 @@ new-zealand-1:ftp://debian.co.nz/Sidux/debian/
 list_sidux_mirrors()
 {
 	eval $LOGUS
+	# new mirror: launch 2009--02-28 after proves solid
+	# alt-brazil-1:http://sidux.c3sl.ufpr.br/debian/
 	local siduxMirrors="
 core-eu-1:http://debian.tu-bs.de/project/sidux/debian/
 core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/
