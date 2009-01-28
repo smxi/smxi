@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.2
+####  version: 8.10.3
 ####  Date: January 27 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
@@ -2790,8 +2790,9 @@ print_distro_id()
 	for distroFile in $knownDistroIds
 	do
 		if [ -f $distroFile ];then
-			# print first line, for cases where > 1 line exist in file
-			distroId=$( sed -n '1p' $distroFile )
+			# print first line, for cases where > 1 line exist in file, and trim off that
+			# debian \r, \l gunk
+			distroId=$( sed -n '1p' $distroFile | sed 's/(\\[a-z]|[[:space:]]+$)//g' )
 			break
 		fi
 	done
