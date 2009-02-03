@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.0.10
-####  Date: January 4 2008
+####  version: 1.1.0
+####  Date: February 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -160,6 +160,10 @@ pre_du_tasks()
 	if [ "$DISTRO_LEVEL" -lt 14 ];then
 		run_script_import $LIB_2008_FIXES
 		run_2008_fixes 'pre'
+	fi
+	if [ "$DISTRO_LEVEL" -lt 18 ];then
+		run_script_import $LIB_2008_FIXES
+		run_2009_fixes 'pre'
 	fi
 
 	echo $LINE
@@ -366,6 +370,10 @@ post_du_tasks()
 		# load the 2008 fixes
 		if [ "$DISTRO_LEVEL" -lt 14 ];then
 			run_2008_fixes 'post'
+		fi
+		# load the 2009 fixes
+		if [ "$DISTRO_LEVEL" -lt 18 ];then
+			run_2009_fixes 'post'
 		fi
 		trap - INT TERM
 		## take the package(s) off hold if they were set
