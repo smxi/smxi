@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.1.0
+####  version: 1.1.1
 ####  Date: February 2 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
@@ -162,7 +162,7 @@ pre_du_tasks()
 		run_2008_fixes 'pre'
 	fi
 	if [ "$DISTRO_LEVEL" -lt 18 ];then
-		run_script_import $LIB_2008_FIXES
+		run_script_import $LIB_2009_FIXES
 		run_2009_fixes 'pre'
 	fi
 
