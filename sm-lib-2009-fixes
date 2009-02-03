@@ -36,14 +36,11 @@
 # args: $1 - pre / post
 run_2009_fixes()
 {
-	if [ "$1" == 'pre' ]
-	then
-		if [ "$DISTRO_LEVEL" -lt 15 ]
-		then
+	if [ "$1" == 'pre' ];then
+		if [ "$DISTRO_LEVEL" -lt 14 ];then
 			:
 		fi
-	elif [ "$1" == 'post' ]
-	then
+	elif [ "$1" == 'post' ];then
 		:
 	fi
 }
