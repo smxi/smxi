@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.6
-####  Date: February 2 2009
+####  version: 3.1.7
+####  Date: February 5 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -675,7 +675,7 @@ utilities_installer()
 				repeat='true'
 				;;
 			rbxi)
-				update_all_scripts 'rbxi'
+				update_all_scripts 'rbxi' 'internal'
 				repeat='true'
 				;;
 			streamtuner)

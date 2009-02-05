@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.4
-####  Date: February 2 2009
+####  version: 8.10.5
+####  Date: February 5 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -915,7 +915,7 @@ update_scripts()
 	return $success
 }
 
-# args $1 - rbxi ( for rbxi install and setup )
+# args $1 - rbxi ( for rbxi install and setup ); $2 - internal [optional]
 update_all_scripts()
 {
 	check_root
@@ -1017,7 +1017,9 @@ update_all_scripts()
 	else
 		echo "${stan}$completionMessage completed.${N}"
 	fi
-	exit 0
+	if [ "$2" != 'internal' ];then
+		exit 0
+	fi
 }
 
 # args: $1 - file to download; $2 -chm; $3 - repeat try, auto
@@ -2642,16 +2644,17 @@ print_version()
 
 	case $DISTRO in
 		sidux)
-			distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
-			extraMessage='...and of course, RazberrieTart, the official sidux fan girl!'
+			distroThanks='and to the warning crew: crust drb hubi latino piper zulu9'
+			#distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
+			extraMessage='...and of course, to RazberrieTart, the official sidux fan girl!'
 			;;
 		antix)
 			distroThanks='anticapitalista crust dutchy eriefisher masinick trash80'
 			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
 			;;
 	esac
-	distroThanks='...and to Mr. Blue, who contributed endless joy, song, curiousity, and orneriness to smxi...'
-	extraMessage='even though few saw your contributions, many appreciated them without knowing it... RIP'
+# 	distroThanks='...and to Mr. Blue, who contributed endless joy, song, curiousity, and orneriness to smxi...'
+# 	extraMessage='even though few saw your contributions, many appreciated them without knowing it... RIP'
 	print_lib_info $SCRIPT_NAME
 	if [ "$PRINT_VERSION" != 'true' ];then
 		echo $MLINE
