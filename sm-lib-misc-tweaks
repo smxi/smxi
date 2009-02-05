@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.17
-####  Date: January 17 2009
+####  version: 1.21.18
+####  Date: February 5 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -382,6 +382,7 @@ swiftfox_link_tweak()
 {
 	eval $LOGUS
 	local ulsp='/usr/lib/swiftfox/plugins' ulip='/usr/lib/iceweasel/plugins'
+	local ulmp='/usr/lib/iceweasel/plugins'
 	local uls='/usr/lib/swiftfox'
 
 	# remove swiftfox plugin directory if present
@@ -390,18 +391,18 @@ swiftfox_link_tweak()
 	fi
 
 	echo $LINE
-	if [ -d $ulip ];then
+	if [ -d $ulmp ];then
 		if [ -d $uls ];then
 			# remove any bad link swiftfox might try to make before creating the real one
-			log_function_data "ln -fs $ulip $ulsp"
-			ln -fs $ulip $ulsp
-			echo  "${S}Symbolic link from ${C}$ulip${S} to ${C}$ulsp${S} created.${N}"
+			log_function_data "ln -fs $ulmp $ulsp"
+			ln -fs $ulmp $ulsp
+			echo  "${S}Symbolic link from ${C}$ulmp${S} to ${C}$ulsp${S} created.${N}"
 		else
 			echo "${E}No ${C}$uls${E} directory found.${N}"
 			log_function_data "No $uls directory found."
 		fi
 	else
-		echo "${E}No ${C}$ulip${E} found to link to.${N}"
+		echo "${E}No ${C}$ulmp${E} found to link to.${N}"
 	fi
 	eval $LOGUE
 }
