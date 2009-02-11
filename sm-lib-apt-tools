@@ -25,7 +25,7 @@
 ########################################################################
 
 # one global here just for convenience
-CHECK_HOLD_PACKAGES='amule:amule-common elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common'
+CHECK_HOLD_PACKAGES='amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common'
 #egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
@@ -580,7 +580,7 @@ broken_dependency_handler()
 					tempHolder2=$( check_package_status "$package2" )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases
-				elinks|k3b)
+				audacity|elinks|k3b)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					tempHolder1=$( check_package_status "$package1" | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					tempHolder2=$( check_package_status "$package2" | cut -d '+' -f 1 | cut -d '~' -f 1 )
