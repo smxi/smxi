@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.5
-####  Date: February 5 2009
+####  version: 8.10.6
+####  Date: February 14 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1283,6 +1283,9 @@ set_distro_data()
 	local siduxSources=$( grep -Esil '^[[:space:]]*deb.*(deb-sdx|sidux)' $EAS $EAS.d/*.list )
 	local mepisSources=$( grep -Esil '^[[:space:]]*deb.*(deb-mep|mepis)' $EAS $EAS.d/*.list )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
+	# test to make sure it's safe for antix users and others to upgrade, this shows
+	# that kopt is using a safe UUID/LABEL method for root
+	local bgUuidLabel=$( grep -Eis '^#[[:space:]]+kopt=.*(UUID|LABEL)=' $GRUB_PATH )
 	local defaultKernel=$( sm_pref_tester 'distro-kernel' 'equal' )
 	# some people have mixed systems that cannot be dynamically tested for, this hard sets it
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
@@ -1342,7 +1345,7 @@ set_distro_data()
 	if [ -f $EAX ];then
 		DEFAULT_KERNEL='no-kernel'
 		# this will help to debug debian kernel issues
-		if [ "$B_TESTING_1" != 'true' ];then
+		if [ "$B_TESTING_1" != 'true' -a -z "$bgUuidLabel" ];then
 			USE_DEBIAN_KERNEL='false'
 		else
 			USE_DEBIAN_KERNEL='true'
@@ -1360,6 +1363,9 @@ set_distro_data()
 	if [ -n "$mepisSources" ];then
 		MEPIS_SOURCES='true'
 		DEFAULT_KERNEL='no-kernel'
+		if [ -n "$bgUuidLabel" ];then
+			USE_DEBIAN_KERNEL='true'
+		fi
 	fi
 	if [ -n "$siduxSources" ];then # sidux will get priority always
 		SIDUX_SOURCES='true'
