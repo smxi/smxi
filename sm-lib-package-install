@@ -67,6 +67,8 @@ package_group_installer()
 	local php5Modules='php5-curl php5-gd'
 	local php5Mysql='php5-mysql'
 	local php5Postgre='php5-pgsql'
+
+	# server/client packages/groups
 	local aTop='' iceDove='icedove' rdiff='rdiff-backup'
 	local alsaGroup='alsa-base alsa-utils'
 
@@ -626,7 +628,7 @@ utilities_installer()
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
 	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a good command line tool to setup wired and wireless networking."
-	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S}, a new fork of ${C}infobash${S}. Bigger, better, more features!"
+	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S}, a fork of ${C}infobash${S}. Bigger, better, more features!"
 	echo "     If ${C}Konversation${S} is present, also creats link so you can run inxi directly: ${C}/inxi${S}"
 	echo "     Runs once with full (${C}-F${S}) options when you install it. See ${C}inxi -h${S} for all options."
 	echo "${C}11${S} - ${C}rbxi${S} Download/install ${C}rbxi package${S}, the new rysnc/rdiff-backup tool."

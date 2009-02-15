@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.9
-####  Date: November 17 2008
+####  version: 2.7.10
+####  Date: February 15 2008
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
 ####  msg_on msg_off list_modules remove_the_kernel
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -46,8 +46,7 @@ clean_up()
 
 	# I'm leaving this as a template in case I want some -x option stuff later
 	# this stuff is now in misc tweaks legacy tweaks
-	if [ "$EXTRA_OPTIONS" == 'true' ]
-	then
+	if [ "$EXTRA_OPTIONS" == 'true' ];then
 		# tempCount=$(( $tempCount + 1 ))
 		# xOption='clean-kanotix-packages'
 		# advanced='echo -e "${C}'$tempCount'${S} - Runs ${C}clean-kanotix-packages${S}. This will clean up any legacy kanotix\n\tpackages left over after your ${C}sidux${S} conversion.\n\tEach item will ask you if you want to remove it, answer y or n."'
@@ -59,8 +58,7 @@ clean_up()
 
 	cont=$(( $tempCount ))
 
-	if [ -z "$currentKernels" ]
-	then
+	if [ -z "$currentKernels" ];then
 		currentKernels=$CURRENT_KERNEL
 	fi
 	local removeList='/boot/grub/menu.lst-bu* /etc/apt/sources.list-bu* /etc/apt/sources.list.d/*.list-bu* /etc/kde3/kdm/kdmrc.bu /etc/fstab.old \n /etc/X11/xorg.conf.1st* /etc/X11/xorg.conf-bu* /usr/share/services/kded/mediamanager.desktop-bu*'
@@ -161,8 +159,7 @@ clean_up()
 		break
 	done
 	eval $LOGME
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		clean_up
 	fi
 }
@@ -201,8 +198,7 @@ clean_cruft()
 			;;
 	esac
 
-	if [ "$doIt" == 'true' ]
-	then
+	if [ "$doIt" == 'true' ];then
 		log_function_data "toRemove: $toRemove"
 		for package in $toRemove
 		do
@@ -211,8 +207,7 @@ clean_cruft()
 		done
 	fi
 	eval $LOGPE
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		clean_cruft
 	fi
 }
@@ -221,8 +216,7 @@ apt_clean()
 {
 	eval $LOGPS
 	local aptcommand=$1 text1=''
-	if [ "$1" == 'autoclean' ]
-	then
+	if [ "$1" == 'autoclean' ];then
 		text1=' outdated'
 	fi
 
@@ -267,13 +261,11 @@ check_deborphans()
 	eval $LOGUS
 	local orphanFeature=0
 
-	if [ -z "$( package_tester 'deborphan' )" ]
-	then
+	if [ -z "$( package_tester 'deborphan' )" ];then
 		install_missing_apps 'deborphan' 'feature'
 		orphanFeature=$?
 	fi
-	if [ "$orphanFeature" -eq 0 ]
-	then
+	if [ "$orphanFeature" -eq 0 ];then
 		eval $LOGUE
 		debian_orphans
 	else
@@ -363,8 +355,7 @@ kernel_remover_main()
 	echo "then run this option and select the kernel you need removed at that time."
 
 	echo $LINE
-	if [ "$kernelRemoveOptNu" -gt 0 ]
-	then
+	if [ "$kernelRemoveOptNu" -gt 0 ];then
 		echo "${C}1-$kernelRemoveOptNu${S} - Remove any one of these installed kernels."
 	else
 		echo "${M}There are no kernels to remove!"
@@ -379,8 +370,7 @@ kernel_remover_main()
 	do
 		for kernel in $options
 		do
-			if [ "$opt" == "$kernel" ]
-			then
+			if [ "$opt" == "$kernel" ];then
 				userSelection=$kernel
 				break
 			fi
@@ -401,8 +391,7 @@ kernel_remover_main()
 		*)
 			confirm_kernel_removal "$userSelection"
 			removeValue="$?"
-			if [ "$removeValue" -le 1 ]
-			then
+			if [ "$removeValue" -le 1 ];then
 				remove_the_kernel "$userSelection"
 				case $removeValue in
 					0)
@@ -457,8 +446,7 @@ confirm_kernel_removal()
 	done
 	eval $LOGUE
 
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		confirm_kernel_removal "$1"
 	else
 		return $returnValue
@@ -476,8 +464,7 @@ remove_the_kernel()
 	local metaHeadersPackage=$( grep-available -F Depends linux-headers-$kernelToRemove -s Package | awk '{print $2}' )
 	local removeList="$( package_tester "$kernelToRemove" 'wild-full' )"
 
-	if [ "$kernelToRemove" != "$kernelCleaned" ]
-	then
+	if [ "$kernelToRemove" != "$kernelCleaned" ];then
 		removeList="$removeList $( package_tester "$kernelCleaned-common" 'wild-full' )"
 		removeList="$removeList $( package_tester "linux-support-$kernelCleaned" 'wild-full' )"
 	fi
@@ -491,8 +478,7 @@ remove_the_kernel()
 	echo "${S}Cleaning up any leftover kernel cruft from ${C}$kernelToRemove${S} now...${N}"
 	# dump empty directories/linux-headers if present, sometimes these are
 	# left over after the operation for various reasons
-	if [ ! -e "/boot/vmlinuz-$kernelToRemove" ]
-	then
+	if [ ! -e "/boot/vmlinuz-$kernelToRemove" ];then
 		rm -rf /lib/modules/$kernelToRemove
 		rm -rf /usr/src/linux-headers-$kernelToRemove
 	fi
@@ -517,24 +503,21 @@ clean_download_directories()
 
 	echo $LINE
 
-	if [ -d $kernDown -a -n "$subDirectories" ]
-	then
+	if [ -d $kernDown -a -n "$subDirectories" ];then
 		case $kernelRemoval in
 			all)
 				for directory in $subDirectories
 				do
 					# this handles new randomness in kernel naming conventions
 					kernelStringMatch=$( test_kernel_strings $directory )
-					if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ]
-					then
+					if [ "$directory" != "$normalizedCurrentKernel" -a "$kernelStringMatch" != 'true' ];then
 						remove_the_directory $kernDown $directory
 					fi
 				done
 				;;
 			*)
 				normalizedRemovedKernel=$( normalize_kernel_string $kernelRemoval )
-				if [ -d $kernDown/$normalizedRemovedKernel ]
-				then
+				if [ -d $kernDown/$normalizedRemovedKernel ];then
 					remove_the_directory $kernDown $normalizedRemovedKernel 'single'
 				else
 					echo "${M}Kernel directory: ${C}$kernDown/$normalizedRemovedKernel${M} does not exist.${N}"
@@ -563,11 +546,9 @@ remove_the_directory()
 	log_function_data "Remove the kernel install directory $1/$2\nkernelInGrub: $kernelInGrub\ncleanedKernelInGrub: $cleanedKernelInGrub"
 
 	# test to see if kernel is in /boot/grub/menu.lst, if not, offer to remove
-	if [ -z "$kernelInGrub" -a -z "$cleanedKernelInGrub" ]
-	then
+	if [ -z "$kernelInGrub" -a -z "$cleanedKernelInGrub" ];then
 		echo $LINE
-		if [ "$3" != 'single' ]
-		then
+		if [ "$3" != 'single' ];then
 			echo "${Q}Do you want to remove the kernel install directory ${C}$1/$2"
 			echo $LINE
 			echo -e $SLE
@@ -591,16 +572,14 @@ remove_the_directory()
 				break
 			done
 		fi
-		if [ "$removeIt" == 'true' -o "$3" == 'single' ]
-		then
+		if [ "$removeIt" == 'true' -o "$3" == 'single' ];then
 			echo "${S}Removing kernel directory: ${C}$1/$2${S}...${N}"
 			rm -fr $1/$2 && returnValue=0 || returnValue=2
 		fi
 
 		log_function_data "Return Value: $returnValue"
 		eval $LOGUE
-		if [ "$repeat" == 'true' ]
-		then
+		if [ "$repeat" == 'true' ];then
 			remove_the_directory "$1" "$2"
 		else
 			return $returnValue
@@ -642,11 +621,9 @@ list_modules()
 	for module in $installed
 	do
 		currentName=${module##*input-}
-		if [ "$currentName" == "$module" ]
-		then # we must filter the word video
+		if [ "$currentName" == "$module" ];then # we must filter the word video
 			currentName=${module##*video-}
-			if [ "$currentName" == "$module" ]
-			then # we must filter the word video
+			if [ "$currentName" == "$module" ];then # we must filter the word video
 				modtype="undef"
 			else
 				modtype="video"
@@ -655,8 +632,7 @@ list_modules()
 			modtype="input"
 		fi
 
-		if [ "$modtype" == "undef" ]
-		then
+		if [ "$modtype" == "undef" ];then
 			msg_off  'skipping...'
 		else
 			msg_off "Module $currentName is $modtype"
@@ -665,14 +641,11 @@ list_modules()
 			# list of the modules to be removed
 			is_in=$( echo $running | grep -i $currentName | wc -l )
 
-			if [ $is_in -eq 1 ]
-			then
+			if [ $is_in -eq 1 ];then
 				#msg_on "Module $module from type $modtype is currently used"
-				if [ "${currentName}" == "nvidia" ]
-				then
+				if [ "${currentName}" == "nvidia" ];then
 					nvidia=1
-				elif [ "${currentName}" == "fglrx" ]
-				then
+				elif [ "${currentName}" == "fglrx" ];then
 					ati=1
 				fi
 			else
@@ -682,16 +655,13 @@ list_modules()
 		fi
 	done
 
-	if [ "${nvidia}" == "1" ]
-	then
+	if [ "${nvidia}" == "1" ];then
 		modlist=$( echo $modlist | sed 's/xserver-xorg-video-nv//' )
-	elif [ "${ati}" == "1" ]
-	then
+	elif [ "${ati}" == "1" ];then
 		modlist=$( echo $modlist | sed 's/xserver-xorg-video-ati//' )
 	fi
 
-	if [ ! -z "${modlist}" ]
-	then
+	if [ ! -z "${modlist}" ];then
 		msg_on "$modlist"
 	fi
 	log_function_data "modlist: $modlist"
@@ -735,8 +705,7 @@ remove_xorg_modules()
 	do
 		for item in $LoopList
 		do
-			if [ "$opt" == "$item" ]
-			then
+			if [ "$opt" == "$item" ];then
 				case $item in
 					start-over)
 						StartOver='true'
@@ -766,21 +735,17 @@ remove_xorg_modules()
 				StartOver='true'
 			fi
 		done
-		if [ "$LeaveLoop" == 'true' ]
-		then
+		if [ "$LeaveLoop" == 'true' ];then
 			break
 		fi
 	done
 
-	if [ "$StartOver" == 'true' ]
-	then
+	if [ "$StartOver" == 'true' ];then
 		remove_xorg_modules
-	elif [ "$back" == 'true' ]
-	then
+	elif [ "$back" == 'true' ];then
 		echo $LINE
 		echo "${S}Returning to post-$DU_UPGRADE options.${N}"
-	elif [ "$remove" == 'true' ]
-	then
+	elif [ "$remove" == 'true' ];then
 		remove_xorg_components
 	fi
 	eval $LOGPE
@@ -795,8 +760,7 @@ remove_xorg_components()
 	do
 		for item in $X_ORG_LIST
 		do
-			if [ "$keep" != "$item" ]
-			then
+			if [ "$keep" != "$item" ];then
 				XorgListRemove="$XorgListRemove "$item
 			fi
 		done
@@ -806,11 +770,10 @@ remove_xorg_components()
 
 	echo $LINE
 
-	if [ "$X_ORG_LIST" != '' ]
-	then
+	if [ "$X_ORG_LIST" != '' ];then
 		echo "${S}Running ${C}$APT_TYPE purge${S} on the modules you did not preserve.${N}"
 		log_function_data "X_ORG_LIST: $X_ORG_LIST"
-		package_remover "$X_ORG_LIST" 'purge'
+		package_remover "$X_ORG_LIST" 'purge' 'group'
 		echo "${S}The following ${C}xorg modules${S} have been removed:"
 		echo "${C}$X_ORG_LIST"
 		echo $LINE
@@ -828,8 +791,7 @@ write_xorg_remove_log()
 	eval $LOGUS
 	local item=''
 
-	if [ ! -f $CLEAN_X_ORG_LOG ]
-	then
+	if [ ! -f $CLEAN_X_ORG_LOG ];then
 		touch $CLEAN_X_ORG_LOG
 	fi
 	echo $LINE >> $CLEAN_X_ORG_LOG
