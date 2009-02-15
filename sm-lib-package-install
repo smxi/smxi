@@ -67,10 +67,14 @@ package_group_installer()
 	local php5Modules='php5-curl php5-gd'
 	local php5Mysql='php5-mysql'
 	local php5Postgre='php5-pgsql'
-	local aTop=''
+	local aTop='' iceDove='icedove' rdiff='rdiff-backup'
+	local alsaGroup='alsa-base alsa-utils'
 
 	if [ "$SERVER_CLIENT" == 'server' ];then
+		alsaGroup=''
 		aTop='atop'
+		iceDove=''
+		rdiff=''
 	fi
 
 	# standard groups
@@ -87,18 +91,12 @@ package_group_installer()
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
 
-	local mozillaGroup='icedove iceweasel'
-	local rsyncGroup='rsync rdiff-backup'
+	local mozillaGroup="$iceDove iceweasel"
+	local rsyncGroup="rsync $rdiff"
 	local streamTuner='streamtuner streamripper'
-	local systemUtils='alsa-base alsa-utils anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev'
+	local systemUtils="$alsaGroup anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
 	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
-
-	if [ "$SERVER_CLIENT" == 'server' ];then
-		mozillaGroup='iceweasel'
-		rsyncGroup='rsync'
-		systemUtils='anacron dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev'
-	fi
 
 	echo $LINE
 	echo "${S}Installing ${C}$itemName${S}...${N}"
