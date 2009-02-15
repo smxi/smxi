@@ -67,10 +67,15 @@ package_group_installer()
 	local php5Modules='php5-curl php5-gd'
 	local php5Mysql='php5-mysql'
 	local php5Postgre='php5-pgsql'
+	local aTop=''
+
+	if [ "$SERVER_CLIENT" == 'server' ];then
+		aTop='atop'
+	fi
 
 	# standard groups
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local consoleTools="atop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
+	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
