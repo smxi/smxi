@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.12
+####  version: 2.7.13
 ####  Date: February 16 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -613,14 +613,14 @@ list_xorg_modules()
 
 	# first strip out the nv/radeon/radeonhd modules
 	if [ "$isNvidia" -ge 1 ];then
-		moduleList=$( sed 's/xserver-xorg-video-nv//' <<< "$moduleList" )
+		installedXorgPackages=$( sed 's/xserver-xorg-video-nv//' <<< "$installedXorgPackages" )
 	fi
 	if [ "$isFglrx" -ge 1 ];then
 		# note: if the fglrx driver is loaded, it's NOT an ati/r128/mach64 type card
 		# since fglrx does not support those cards
 		# moduleList=$( echo $moduleList | sed 's/xserver-xorg-video-ati//' )
-		moduleList=$( sed 's/xserver-xorg-video-radeonhd//' <<< "$moduleList" )
-		moduleList=$( sed 's/xserver-xorg-video-radeon//' <<< "$moduleList" )
+		installedXorgPackages=$( sed 's/xserver-xorg-video-radeonhd//' <<< "$installedXorgPackages" )
+		installedXorgPackages=$( sed 's/xserver-xorg-video-radeon//' <<< "$installedXorgPackages" )
 	fi
 
 	for module in $installedXorgPackages
