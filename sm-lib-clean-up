@@ -679,11 +679,11 @@ remove_xorg_modules()
 
 	X_ORG_SAVE_LIST='' # must be reset every round to handle start over
 	if [ "$B_TESTING_1" != 'true' ];then
-		X_ORG_LIST=$( list_xorg_modules | grep '^xserver-' )
+		X_ORG_LIST=$( list_xorg_modules )
 	else
 		list_xorg_modules
 	fi
-	local XorgListOpt=$X_ORG_LIST' remove-modules start-over back-to-main-menu'
+	local XorgListOpt="$X_ORG_LIST remove-modules start-over back-to-main-menu"
 	local RemoveModules=$( echo $XorgListOpt | awk '{print NF-2}' )
 
 	echo $MLINE
