@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.7.10
-####  Date: February 15 2009
+####  version: 2.7.11
+####  Date: February 16 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -599,22 +599,12 @@ remove_the_directory()
 ### clean xorg part 1: x-un-1 created this section, the core logic of the script
 ###---------------------------------------------------------------------
 
-msg_on()
-{
-	echo "$@"
-}
-
-msg_off()
-{
-	echo "$@" >/dev/null
-}
-
 list_modules()
 {
 	eval $LOGUS
-	local modlist="" modtype='' module='' nvidia='' ati=''
-	local installed=$(dpkg -l |grep xserver-xorg |awk '{print $2}')
-	local running=$(grep "LoadModule" /var/log/Xorg.0.log |sed -e 's/\"//g'|awk '{print $3}')
+	local modlist="" modtype='' module='' nvidia='' ati='' moduleLoaded=''
+	local installed=$( dpkg -l | grep xserver-xorg | awk '{ print $2 }' )
+	local running=$( grep -i 'LoadModule' /var/log/Xorg.0.log | sed -e 's/\"//g' | awk '{ print $3 }' )
 	running="vesa dummy $running"
 	local currentName=''
 
@@ -624,45 +614,54 @@ list_modules()
 		if [ "$currentName" == "$module" ];then # we must filter the word video
 			currentName=${module##*video-}
 			if [ "$currentName" == "$module" ];then # we must filter the word video
-				modtype="undef"
+				modtype='undef'
 			else
-				modtype="video"
+				modtype='video'
 			fi
 		else
-			modtype="input"
+			modtype='input'
 		fi
 
 		if [ "$modtype" == "undef" ];then
-			msg_off  'skipping...'
+			if [ "$B_TESTING_1" == 'true' ];then
+				echo "Xorg module calculations: skipping $modtype..."
+			fi
 		else
-			msg_off "Module $currentName is $modtype"
-			# now if the module is in the actual loaded list we skip it
-			# otherwise we add him to the
-			# list of the modules to be removed
-			is_in=$( echo $running | grep -i $currentName | wc -l )
-
-			if [ $is_in -eq 1 ];then
+			if [ "$B_TESTING_1" == 'true' ];then
+				echo "Xorg module calculations: Module $currentName is $modtype"
+			fi
+			# now if the module is in the loaded list we skip it
+			# otherwise we add it to the list of modules to be removed
+			moduleLoaded=$( echo $running | grep -ic $currentName )
+			# note: this needs to be > 1 because 2 fglrx modules can be loaded
+			if [ "$moduleLoaded" -gt 1 ];then
 				#msg_on "Module $module from type $modtype is currently used"
-				if [ "${currentName}" == "nvidia" ];then
-					nvidia=1
-				elif [ "${currentName}" == "fglrx" ];then
-					ati=1
+				if [ "$currentName" == 'nvidia' ];then
+					nvidia='true'
+				elif [ "$currentName" == 'fglrx' ];then
+					ati='true'
 				fi
 			else
-				#msg_on "Module $module vom type $modtype is not currently used"
+				if [ "$B_TESTING_1" == 'true' ];then
+					echo  "Module $module of type $modtype is not currently used"
+				fi
 				modlist="$modlist $module"
 			fi
 		fi
 	done
 
-	if [ "${nvidia}" == "1" ];then
+	if [ "$nvidia" == 'true' ];then
 		modlist=$( echo $modlist | sed 's/xserver-xorg-video-nv//' )
-	elif [ "${ati}" == "1" ];then
-		modlist=$( echo $modlist | sed 's/xserver-xorg-video-ati//' )
+	elif [ "$ati" == 'true' ];then
+		# note: if the fglrx driver is loaded, it's NOT an ati/r128/mach64 type card
+		# since fglrx does not support those cards
+		# modlist=$( echo $modlist | sed 's/xserver-xorg-video-ati//' )
+		modlist=$( echo $modlist | sed 's/xserver-xorg-video-radeonhd//' )
+		modlist=$( echo $modlist | sed 's/xserver-xorg-video-radeon//' )
 	fi
 
-	if [ ! -z "${modlist}" ];then
-		msg_on "$modlist"
+	if [ ! -z "$modlist" ];then
+		echo "$modlist"
 	fi
 	log_function_data "modlist: $modlist"
 	eval $LOGUE
