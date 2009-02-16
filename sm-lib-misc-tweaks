@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.18
-####  Date: February 5 2009
+####  version: 1.21.19
+####  Date: February 16 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -708,7 +708,7 @@ grub_gfx_selector()
 	options="grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-debian-1 grub-gfx-debian-sidux grub-gfx-debian-smxi grub-gfx-restore $grubReOpt continue"
 	returnNu=$( wc -w <<< $options )
 
-	if [ "$SYSTEM_BASE" != 'etch' ];then
+	if [ "$SYSTEM_BASE" != 'etch' -a "$SYSTEM_BASE" != 'stable' ] || [ "$B_OVERRIDE_GRUB_GFX" == 'true' ];then
 		grub_gfxboot_question
 		if [ "$?" -eq 0 ];then
 			echo $LINE
@@ -873,6 +873,7 @@ grub_gfxboot_question()
 			case $opt in
 				yes-install-grub-gfxboot)
 					install_grub_gfxboot
+					returnValue=$?
 					;;
 				no-skip-feature)
 					returnValue=1
@@ -895,6 +896,7 @@ grub_gfxboot_question()
 install_grub_gfxboot()
 {
 	eval $LOGUS
+	local grubGfxInstalled='' returnValue=1
 
 	# this adds, updates, then removes temp repo
 	check_add_remove_sources 'sidux' 'add'
@@ -906,7 +908,14 @@ install_grub_gfxboot()
 		check_message_debian
 	fi
 	update_grub_install
+
+	# we need to confirm that the package installed fine
+	grubGfxInstalled=$( package_tester 'grub-gfxboot'  )
+	if [ -n "$grubGfxInstalled" ];then
+		returnValue=0
+	fi
 	eval $LOGUE
+	return $returnValue
 }
 
 check_gfxboot_in_menu()
