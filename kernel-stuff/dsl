@@ -51,15 +51,17 @@ else
 fi
 # parameters supported: ''|alt|nozip|redo
 KERNEL_TYPE=$2
-
+# legacy, not currently used
 if [ "$KERNEL_TYPE" == 'alt' ];then
 	ALT_PATH='exp.'
 fi
 
+KERNEL_MAIN=$( cut -d '-' -f 1 <<< $KERNEL_BASE )
+
 NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_BASE.slh.$KERNEL_SUB"
 MIRROR_MAIN="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-sidux-2.6/"
 MIRROR_MODULES="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-modules-sidux-main-2.6/"
-MIRROR_EXTRA="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-kbuild-2.6/"
+MIRROR_EXTRA="http://sidux.com/debian/pool/${ALT_PATH}fix.main/l/linux-kbuild-2.6/"
 
 ########################################################################
 #### FUNCTIONS
@@ -188,17 +190,26 @@ check_kernel_exists()
 download_kernel_files()
 {
 	echo $LINE
-	echo "Grabbing all kernel debs now..."
+	echo "Starting grab of kernel packages now..."
+	echo
 	## download kernels and all related debs
+	echo "Getting module debs now..."
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-deb
 	# grab source zips/debs for modules
+	echo "Getting module tar.gz data now..."
 	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-tar.gz
+	echo "Getting primary kernel debs now..."
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
+	echo "Getting kernel diff.gz data now..."
 	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
 
-	if [ "$KERNEL_TYPE" == 'alt' ];then
+# 	if [ "$KERNEL_TYPE" == 'alt' ];then
+		echo "Getting kbuild debs now..."
 		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
-	fi
+		echo "Getting kbuild gx data now..."
+		wget -r -l3 -Nc -nd -np -A.gz $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
+# 	fi
+	echo "Done with kernel package data, continuing..."
 }
 
 create_sub_directories()
@@ -221,8 +232,8 @@ move_files_to_directories()
 	echo "Transferring files to directories..."
 	mv -f *2.6-sidux*i386.deb 32-meta
 	mv -f *2.6-sidux*amd64.deb 64-meta
-	cp -f *.gz 32
-	mv -f *.gz 64
+	cp -f *$KERNEL_MAIN*.gz 32
+	mv -f *$KERNEL_MAIN*.gz 64
 	mv -f *i386.deb 32
 	mv -f *amd64.deb 64
 	cp -f linux-patch-sidux* 32
