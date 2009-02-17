@@ -232,10 +232,10 @@ move_files_to_directories()
 	echo "Transferring files to directories..."
 	mv -f *2.6-sidux*i386.deb 32-meta
 	mv -f *2.6-sidux*amd64.deb 64-meta
-	cp -f *$KERNEL_MAIN*.gz 32
+	cp -f *${KERNEL_MAIN}*.gz 32
 	mv -f *$KERNEL_MAIN*.gz 64
-	mv -f *i386.deb 32
-	mv -f *amd64.deb 64
+	mv -f *${KERNEL_MAIN}*i386.deb 32
+	mv -f *${KERNEL_MAIN}*amd64.deb 64
 	cp -f linux-patch-sidux* 32
 	cp -f linux-patch-sidux* 64
 	echo "Completed download and handling of $NEW_KERNEL_DIRECTORY."

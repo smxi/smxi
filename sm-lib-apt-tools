@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.20.4
-####  Date: February 11 2009
+####  version: 1.20.5
+####  Date: February 16 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -642,7 +642,7 @@ $( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
 
 		hplip)
 			packages="
-$( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data)' )
+$( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data|hplip-gui)' )
 "
 			packageGroup='hplip'
 			;;
