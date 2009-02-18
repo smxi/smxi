@@ -643,17 +643,18 @@ $( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
 "
 			packageGroup='Gimp'
 			;;
-		gnome-1)
+			# libgksu2-0
+		gnome-1) # 2.22.0-1
 			packages="
 			$( package_tester '(gconf2|libgconf2|libbonoboui2)' 'wild' )"
 			packageGroup='Gnome Group 1'
 			;;
-		gnome-2)
+		gnome-2) # 2.20.1.1-2
 			packages="
 			$( package_tester '(libgnome2|libgnomeui)' 'wild' )"
 			packageGroup='Gnome Group 2'
 			;;
-		gnome-vfs)
+		gnome-vfs) # 1:2.22.0-5
 			packages="
 			$( package_tester '(libgnomevfs2)' 'wild' )"
 			packageGroup='Gnome VFS'
