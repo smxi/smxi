@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.19
-####  Date: February 16 2009
+####  version: 1.21.20
+####  Date: February 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -534,46 +534,65 @@ tweak_gecko_prefs()
 main_graphics_installer()
 {
 	eval $LOGPS
-	local opt='' option='' repeat=''
+	local opt='' repeat='' contOptNu='' options='grub-gfx-options continue'
+	local grubOptNu=''
+	local gfxHeader='GRAPHICS OPTIONS :: GRUB GRAPHIC INSTALLER'
+
+	if [ "$B_TESING_2" == 'true' ];then
+		options="kmenu-icon kmenu-sidebar $options"
+		gfxHeader='KDE SIDUX MENU BAR, KMENU ICON, GRUB GRAPHIC INSTALLER'
+	fi
+	contOptNu=$( wc -w <<< $options )
+	grubOptNu=$(( $contOptNu - 1 ))
 
 	echo $MLINE
-	echo "${M}KDE SIDUX MENU BAR, KMENU ICON, GRUB GRAPHIC INSTALLER"
+	echo "${M} $gfxHeader"
 	echo $LINE
-	echo "${S}This will install the new sidux kmenu graphics items for you."
-	echo "You have three main choices, and the kmenu sidebar will give you the choice"
-	echo "of 3 separate images to install, all are pretty nice by the way."
+
+	echo "${S}Grub gfx lets you change your default grub image you see when you first start"
+	echo "your computer, and also has an option to let you switch back to your original default."
 	echo
-	echo "To be clear: the kmenu sidebar graphic is the image on the left side of your"
-	echo "kmenu that you get to by clicking on the k button on your taskbar."
-	echo $LINE
-	echo "${C}1${S} - Installs ${C}sidux 's' kmenu icon${S}. This will replace your current"
-	echo "    ${C}k${S} on your taskbar with the sidux ${C}s${S}. Also creates backups for "
-	echo "    your old kmenu default graphic icons."
+	if [ "$B_TESING_2" == 'true' ];then
+		echo "${S}Also features basic graphics installer options are for kde eye candy."
+		echo "In kmenu items, you have three main choices, and the kmenu sidebar will give"
+		echo "you the choice of 3 separate images to install, all are pretty nice by the way."
+		echo
+		echo "To be clear: the kmenu sidebar graphic is the image on the left side of your"
+		echo "kmenu that you get to by clicking on the k button on your taskbar."
+		echo $LINE
+		echo "${C}1${S} - Installs ${C}sidux 's' kmenu icon${S}. This will replace your current"
+		echo "    ${C}k${S} on your taskbar with the sidux ${C}s${S}. Also creates backups for "
+		echo "    your old kmenu default graphic icons."
+		echo
+		echo "${C}2${S} - Will give you a choice of 3 different kmenu side bars to install, then"
+		echo "    will install them for you."
+	else
+		echo "${M}The kde graphics options are deprecated until KDE4 is stable and the methods"
+		echo "have been updated to be Debian compatible."
+		echo $LINE
+	fi
 	echo
-	echo "${C}2${S} - Will give you a choice of 3 different kmenu side bars to install, then"
-	echo "    will install them for you."
+	echo "${C}$grubOptNu - grub-gfx-options${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics"
+	echo "    from Cathbard, original black/red sidux, and a few new Debian themed ones by h2."
 	echo
-	echo "${C}3${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics from Cathbard,"
-	echo "    original black/red sidux, and a few new Debian themed ones by h2."
-	echo
-	echo "${C}4${S} - Returns to main menu."
+	echo "${C}$contOptNu - continue${S} - Returns to main menu."
 	echo $LINE
 	echo $SLE
 	echo $LINE
-	options="kmenu-icon kmenu-sidebar grub-gfx-options continue"
+
 	select opt in $options
 	do
 		case $opt in
+			grub-gfx-options)
+				grub_gfx_selector
+				repeat='true'
+				;;
 			kmenu-icon)
 				install_kmenu_icon
 				repeat='true'
 				;;
 			kmenu-sidebar)
 				install_kmenu_sidebar
-				repeat='true'
-				;;
-			grub-gfx-options)
-				grub_gfx_selector
 				repeat='true'
 				;;
 			continue)
