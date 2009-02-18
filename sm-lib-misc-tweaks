@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.20
+####  version: 1.21.21
 ####  Date: February 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -49,8 +49,9 @@ misc_hacks()
 	echo "    tweak_gecko_prefs: create more sane user defaults in prefs.js"
 	echo "    swiftfox-plugins creates symbolic link to iceweasel plugins from swiftfox."
 
-	echo "${C}2${S} - ${C}install-graphics${S} Options to install sidux ${C}s${S} taskbar icon,"
-	echo "    sidux ${C}kmenu${S} sidebar graphics, and various grub graphics images."
+# 	echo "${C}2${S} - ${C}install-graphics${S} Options to install sidux ${C}s${S} taskbar icon,"
+# 	echo "    sidux ${C}kmenu${S} sidebar graphics, and various grub graphics images."
+	echo "${C}2${S} - ${C}install-graphics${S} Options to install various grub graphics images."
 
 	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
 	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors, change-sidux-mirrors"
