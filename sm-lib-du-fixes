@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.2.1
-####  Date: February 14 2008
+####  version: 1.2.2
+####  Date: February 17 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -451,7 +451,8 @@ libc6_fix_1()
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
 		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
-		package_installer 'libc6 libc6-dev tzdata locales util-linux' 'force-always'
+		# temp removal of locales
+		package_installer 'libc6 libc6-dev tzdata util-linux' 'force-always'
 		# let's only set this if needed
  		if [ "$smPref" -eq 0 ];then
  			set_sticky_prefs $prefId
