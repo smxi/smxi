@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.20.5
-####  Date: February 16 2009
+####  version: 1.21.0
+####  Date: February 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -469,6 +469,7 @@ set_hold_install()
 		log_function_data "User held packages: $userPackages"
 		wget -T$TIME_OUT -t2 -Ncq $SCRIPT_DOWNLOAD$UPGRADE_DATA$HOLD_INSTALL
 		HOLD_INSTALL_ITEMS="$( cat $HOLD_INSTALL ) $userPackages"
+# 		HOLD_INSTALL_ITEMS="$userPackages"
 		log_function_data "Backend hold packages: $( cat $HOLD_INSTALL )"
 		if [ -f "$HOLD_INSTALL" ];then
 			rm -f $HOLD_INSTALL
@@ -482,6 +483,9 @@ set_hold_install()
 			advanced_broken_dependency_handler 'amarok'
 			advanced_broken_dependency_handler 'evolution'
 			advanced_broken_dependency_handler 'gimp'
+			advanced_broken_dependency_handler 'gnome-1'
+			advanced_broken_dependency_handler 'gnome-2'
+			advanced_broken_dependency_handler 'gnome-vfs'
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'ooo'
 			advanced_broken_dependency_handler 'transmission'
@@ -639,7 +643,21 @@ $( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
 "
 			packageGroup='Gimp'
 			;;
-
+		gnome-1)
+			packages="
+			$( package_tester '(gconf2|libgconf2|libbonoboui2)' 'wild' )"
+			packageGroup='Gnome Group 1'
+			;;
+		gnome-2)
+			packages="
+			$( package_tester '(libgnome2|libgnomeui)' 'wild' )"
+			packageGroup='Gnome Group 2'
+			;;
+		gnome-vfs)
+			packages="
+			$( package_tester '(libgnomevfs2)' 'wild' )"
+			packageGroup='Gnome VFS'
+			;;
 		hplip)
 			packages="
 $( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data|hplip-gui)' )
@@ -696,7 +714,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 			tempTwo=$tempOne
 			case $versionGroup in
 				# full version strings for picky package groups
-				amarok|evolution|transmission)
+				amarok|evolution|gnome-1|gnome-2|gnome-vfs|transmission)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
@@ -738,7 +756,10 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 	fi
 	eval $LOGUE
 }
-
+# package_tester '(gconf2|libgconf2|libbonoboui2)' 'wild'
+# package_tester '(libgnome2|libgnomeui)' 'wild'
+# package_tester '(libgnomevfs2)' 'wild'
+# exit
 ###---------------------------------------------------------------------
 ### apt update tools - update / keyrings / gpg / debian mirrors / non-free
 ###---------------------------------------------------------------------
