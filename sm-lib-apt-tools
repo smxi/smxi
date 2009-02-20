@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.0
-####  Date: February 17 2009
+####  version: 1.21.1
+####  Date: February 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -25,7 +25,9 @@
 ########################################################################
 
 # one global here just for convenience
-CHECK_HOLD_PACKAGES='amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common'
+# temp for sid volatile period:
+TEMP_HOLDS='p7zip-rar:p7zip-full'
+CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
 #egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
@@ -485,6 +487,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'gimp'
 			advanced_broken_dependency_handler 'gnome-1'
 			advanced_broken_dependency_handler 'gnome-2'
+			advanced_broken_dependency_handler 'gnome-3'
 			advanced_broken_dependency_handler 'gnome-vfs'
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'ooo'
@@ -646,13 +649,18 @@ $( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
 			# libgksu2-0
 		gnome-1) # 2.22.0-1
 			packages="
-			$( package_tester '(gconf2|libgconf2|libbonoboui2)' 'wild' )"
+			$( package_tester '(gconf2|libgconf2)' 'wild' )"
 			packageGroup='Gnome Group 1'
 			;;
 		gnome-2) # 2.20.1.1-2
 			packages="
 			$( package_tester '(libgnome2|libgnomeui)' 'wild' )"
 			packageGroup='Gnome Group 2'
+			;;
+		gnome-3)
+			packages="
+			$( package_tester '(libbonoboui2)' 'wild' )"
+			packageGroup='Gnome Group 3'
 			;;
 		gnome-vfs) # 1:2.22.0-5
 			packages="
@@ -715,7 +723,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 			tempTwo=$tempOne
 			case $versionGroup in
 				# full version strings for picky package groups
-				amarok|evolution|gnome-1|gnome-2|gnome-vfs|transmission)
+				amarok|evolution|gnome-1|gnome-2|gnome-3|gnome-vfs|transmission)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
