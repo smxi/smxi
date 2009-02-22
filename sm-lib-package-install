@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.11
-####  Date: February 14 2009
+####  version: 3.1.12
+####  Date: February 22 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -512,6 +512,8 @@ non_free_installer()
 	echo "${C}5${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
 	echo
 	echo -e "${C}6${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
+	echo "    ${M}NOTE: The current installer is broken, and won't work until the replacement comes into Debian."
+	echo "    ${S}Don't try this unless you just want to test if it's working again, thanks."
 	echo
 	echo "${C}7${S} - ${C}back-to-install-menu${S}"
 

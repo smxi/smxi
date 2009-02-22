@@ -37,7 +37,7 @@ KERNEL_64_INSTALLER_DIR="$KERNEL_DIR/64-installer"
 # data for kernels
 ALT_PATH=''
 KERNEL_WORKING=$1
-if [ -n "$( grep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
+if [ -n "$( egrep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
 	KERNEL_WORKING=$( gawk '{
 		mainNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\1", 1, $0 )
 		subNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\2", 1, $0 )
@@ -124,9 +124,9 @@ start_up_tests()
 	if [ -z "$KERNEL_BASE" ];then
 		error_handler 3 'KERNEL_BASE'
 	fi
-	if [ -z "$KERNEL_SUB" ];then
-		error_handler 3 'KERNEL_SUB'
-	fi
+# 	if [ -z "$KERNEL_SUB" ];then
+# 		error_handler 3 'KERNEL_SUB'
+# 	fi
 
 	# double check the parameters
 	case "$KERNEL_TYPE" in
@@ -172,6 +172,9 @@ check_kernel_exists()
 {
 	local fileName='tempTesterDsl' kernelExists=''
 	local kernelName="$KERNEL_BASE.slh.$KERNEL_SUB"
+	if [ "$KERNEL_TYPE" == 'alt' ];then
+		kernelName="$KERNEL_BASE"
+	fi
 	local kernelId="linux-image-$kernelName-sidux-686"
 
 	echo $LINE

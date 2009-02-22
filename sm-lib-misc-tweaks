@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.21
-####  Date: February 18 2009
+####  version: 1.21.22
+####  Date: February 20 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -383,7 +383,7 @@ swiftfox_link_tweak()
 {
 	eval $LOGUS
 	local ulsp='/usr/lib/swiftfox/plugins' ulip='/usr/lib/iceweasel/plugins'
-	local ulmp='/usr/lib/iceweasel/plugins'
+	local ulmp='/usr/lib/mozilla/plugins'
 	local uls='/usr/lib/swiftfox'
 
 	# remove swiftfox plugin directory if present
