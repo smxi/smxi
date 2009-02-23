@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.3
+####  version: 1.21.4
 ####  Date: February 22 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -602,7 +602,8 @@ broken_dependency_handler()
 			# the package gets held automatically if it and its -data version numbers do not match
 			if [ "$tempHolder1" != "$tempHolder2" ];then
 				echo # needed to handle the -n of the dots....
- 				echo "${M}${SPACER}Adding ${C}$package1${M} and ${C}$package2${M} to hold/install. Mismatched versions: ${C}$tempHolder1 $tempHolder2${N}"
+ 				echo "${M}${SPACER}Adding ${C}$package1${M} and ${C}$package2${M} to hold/install."
+ 				echo "${SPACER}Mismatched version numbers: ${C}$tempHolder1 $tempHolder2${N}"
 				HOLD_INSTALL_ITEMS="$HOLD_INSTALL_ITEMS $package1 $package2"
 				echo -n "${S}${SPACER}Continuing.."
 			fi
