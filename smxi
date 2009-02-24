@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.9
-####  Date: February 22 2009
+####  version: 8.10.10
+####  Date: February 23 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -109,6 +109,7 @@ CURRENT_KERNEL=$(uname -r)
 CURRENT_APT_KERNEL=''
 CURRENT_APT_KERNEL_GRUB=''
 CURRENT_DEBIAN_KERNEL=''
+CURRENT_LIQUORIX_KERNEL=''
 CURRENT_MEPIS_KERNEL=''
 CURRENT_SIDUX_KERNEL=''
 # 2.6.24-2.6.24.2.makke.rt1.s4-sidux-686
@@ -302,6 +303,7 @@ KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
 KERNEL_POST_DU_FLAG=''
 KERNEL_POST_DU_INSTALL=''
+LIQUORIX_SOURCES=''
 LOG_FILE='/var/log/smxi.log'
 LOG_INDENT=''
 LOGGING_STARTED=''
@@ -1282,8 +1284,9 @@ metapackage_launcher()
 set_distro_data()
 {
 	eval $LOGPS
-	local siduxSources=$( grep -Esil '^[[:space:]]*deb.*(deb-sdx|sidux)' $EAS $EAS.d/*.list )
+	local liquorixSources=$( grep -Esil '^[[:space:]]*deb.*(deb-lqx|liquorix)' $EAS $EAS.d/*.list )
 	local mepisSources=$( grep -Esil '^[[:space:]]*deb.*(deb-mep|mepis)' $EAS $EAS.d/*.list )
+	local siduxSources=$( grep -Esil '^[[:space:]]*deb.*(deb-sdx|sidux)' $EAS $EAS.d/*.list )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	# test to make sure it's safe for antix users and others to upgrade, this shows
 	# that kopt is using a safe UUID/LABEL method for root
@@ -1379,12 +1382,15 @@ set_distro_data()
 		SIDUX_SOURCES='true'
 		DEFAULT_KERNEL='sidux'
 	fi
+	if [ -n "$liquorixSources" ];then # sidux will get priority always
+		LIQUORIX_SOURCES='true'
+	fi
 	DISTRO_F="$DISTRO-$SYSTEM_BASE-$BITS"
 
 	## override defaults by user preference
 	# user set default kernel
 	case "$defaultKernel" in
-		debian|sidux|mepis|no-kernel)
+		debian|liquorix|mepis|sidux|no-kernel)
 			DEFAULT_KERNEL=$defaultKernel
 			;;
 	esac
