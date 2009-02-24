@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.9.18
-####  Date: February 23 2009
+####  version: 2.9.19
+####  Date: February 24 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
@@ -540,7 +540,7 @@ install_apt_kernel()
 			;;
 		liquorix)
 			currentAptKernel=$CURRENT_LIQUORIX_KERNEL
-			noAuthent='--allow-unauthenticated --force-yes'
+			noAuthent='--allow-unauthenticated --no'
 			;;
 		mepis)
 			currentAptKernel=$CURRENT_MEPIS_KERNEL
@@ -631,7 +631,7 @@ install_apt_kernel_modules()
 			log_function_data "module: $module"
 			log_function_data "modulePath: $modulePath"
 			#echo "${SPACER}${S}module path: ${C}$modulePath${N}"
-			modulePackage="$(dpkg -S ${modulePath} 2>/dev/null)"
+			modulePackage="$( dpkg -S ${modulePath} 2>/dev/null )"
 			log_function_data "modulePackage: $modulePackage"
 			# if the module has been merged into the kernel, we need to not try to install
 			# or the installer will try to install linux-image...

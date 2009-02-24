@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.6
-####  Date: February 23 2009
+####  version: 1.21.7
+####  Date: February 24 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -249,6 +249,10 @@ package_installer()
 	# nullify the entire set if one member is null
 	if [ "$installIt" == 'true' ];then
 		packageExists=''
+	fi
+	if [ -n "$( grep '\--no' <<< $extraInstallArgs )" ];then
+		extraInstallArgs=$( sed 's/--no//' <<< $extraInstallArgs )
+		doYes=''
 	fi
 
 	#  -o -n "$packageExists"
