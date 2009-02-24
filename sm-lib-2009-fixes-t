@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.0.0
-####  Date: February 2 2009
+####  version: 1.0.1
+####  Date: February 22 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -35,8 +35,8 @@
 run_2009_fixes()
 {
 	if [ "$1" == 'pre' ];then
-		if [ "$DISTRO_LEVEL" -lt 14 ];then
-			:
+		if [ "$DISTRO_LEVEL" -lt 15 ];then
+			cups_driver_fix_1
 		fi
 	elif [ "$1" == 'post' ];then
 		:
@@ -47,6 +47,21 @@ run_2009_fixes()
 ### specific du fixes
 ###---------------------------------------------------------------------
 
+cups_driver_fix_1()
+{
+	local prefId='cups-driver-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'cups-driver-gutenprint'  )
+	local isInstalled2=$( package_tester 'cupsys-driver-gutenprint' )
 
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isInstalled2" ];then
+		echo $LINE
+		echo "${S}Running ${C}cups-driver-gutenprint${S} update fix now...${N}"
+		# aptitude pulls all cups stuff out... bad aptitude, bad!
+		apt-get remove -y cupsys-driver-gutenprint
+		package_installer 'cups-driver-gutenprint' 'force-always'
+		set_sticky_prefs $prefId
+	fi
+}
 
 ###**EOF**###

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.2.2
-####  Date: February 17 2008
+####  version: 1.2.3
+####  Date: February 22 2008
 
 ####  Copyright (C) Harald Hope 2005-2008
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -186,7 +186,7 @@ pre_du_tasks()
 		# RUN FIRST CRITICAL FIXES. Must run before other fixes to avoid errors in apt
 		# generally, these are fixes for kernels, core libs etc, that a new kernel might
 		# make needed, like libncurses, libc6, and so on.
-		if [ "$DISTRO_LEVEL" -lt 14 ];then
+		if [ "$DISTRO_LEVEL" -lt 18 ];then
 			libc6_fix_1 'pre-du' # ongoing fix, update as needed
 		fi
 		# load the 2007 fixes
