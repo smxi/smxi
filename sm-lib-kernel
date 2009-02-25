@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.21
-####  Date: February 24 2009
+####  version: 2.5.22
+####  Date: February 25 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,10 +28,10 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists
-KERNEL_LIST_32='2.6.28.6-slh-smp-2 2.6.28.4-slh-smp-4 2.6.27.10-slh-smp-2 2.6.25.14-slh-smp-2 2.6.24.5-slh-smp-2  2.6.23.16-slh-smp-1 2.6.22.10-rc1-slh-smp-1 2.6.21.6-slh-smp-1 2.6.20.11-slh-smp-1 2.6.19.3-rc1-slh-smp-1 2.6.18.6-slh-smp-1'
+KERNEL_LIST_32='2.6.28-6.slh.2-sidux-686 2.6.28-4.slh.4-sidux-686 2.6.27-10.slh.2-sidux-686 2.6.26-6.slh.4-sidux-686 2.6.25-14.slh.2-sidux-686 2.6.24-5.slh.2-sidux-686'
 KERNEL_ADVANCED_LIST_32=''
 # 64 bit lists
-KERNEL_LIST_64='2.6.28.6-slh64-smp-2 2.6.28.4-slh64-smp-4 2.6.27.10-slh64-smp-2 2.6.26.6-slh64-smp-4 2.6.25.14-slh64-smp-2 2.6.24.5-slh64-smp-2 2.6.23.16-slh64-smp-1 2.6.22.10-rc1-slh64-smp-1 2.6.21.6-slh64-smp-1 2.6.20.11-slh64-smp-1 2.6.19.3-rc1-slh64-smp-1 2.6.18.6-slh64-smp-1'
+KERNEL_LIST_64='2.6.28-6.slh.2-sidux-amd64 2.6.28-4.slh.4-sidux-amd64 2.6.27-10.slh.2-sidux-amd64 2.6.26-6.slh.4-sidux-amd64 2.6.25-14.slh.2-sidux-amd64 2.6.24-5.slh.2-sidux-amd64'
 KERNEL_ADVANCED_LIST_64=''
 
 ########################################################################
@@ -303,7 +303,7 @@ kernel_module_installer()
 	local options="$availableModules continue"
 	local contCount=$( wc -w <<< $options )
 	local moduleCount=$(( $contCount - 1 ))
-	local isMeta=$( package_tester "linux-image-2.6-(sidux-|)(486|686|amd64)" '' )
+	local isMeta=$( package_tester "linux-image-2.6-(sidux-|liquorix-|)(486|686|amd64)" '' )
 
 	if [ -n "$isMeta" ];then
 		metaText='echo "Since you are using kernel metapackages, the script will install the module metapackage."'

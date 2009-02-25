@@ -1,9 +1,9 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: dsl
-####  Description: sidux archive kernel zip file constructor
-####  version: 2.1.6
-####  Date: February 17 2009
+####  Description: smxi archive kernel zip file constructor
+####  version: 2.2.0
+####  Date: February 25 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -29,39 +29,25 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # paths, change these to suite your needs
 SVN_DIR="$HOME/bin/scripts/smxi/svn/trunk"
-KERNEL_DIR="$HOME/large/sidux-kernels"
+KERNEL_DIR="$HOME/large/kernel-zips"
 KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
 KERNEL_32_INSTALLER_DIR="$KERNEL_DIR/32-installer"
 KERNEL_64_INSTALLER_DIR="$KERNEL_DIR/64-installer"
 
-# data for kernels
+# script values
 ALT_PATH=''
-KERNEL_WORKING=$1
-if [ -n "$( egrep '\.slh\.' <<< KERNEL_BASE=$1 )" ];then
-	KERNEL_WORKING=$( gawk '{
-		mainNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\1", 1, $0 )
-		subNumber=gensub( /^(.+)\.slh\.(.+)$/, "\\2", 1, $0 )
-		print mainNumber":"subNumber
-	}' <<< $1 )
-	KERNEL_BASE=$( cut -d ':' -f 1 <<< $KERNEL_WORKING )
-	KERNEL_SUB=$( cut -d ':' -f 2 <<< $KERNEL_WORKING )
-else
-	KERNEL_BASE=$1
-	KERNEL_SUB=''
-fi
-# parameters supported: ''|alt|nozip|redo
-KERNEL_TYPE=$2
-# legacy, not currently used
-if [ "$KERNEL_TYPE" == 'alt' ];then
-	ALT_PATH='exp.'
-fi
+KERNEL_TYPE='sidux' # default to this
+KERNEL_MAIN=''
+KERNEL_WORKING=''
+MIRROR_MAIN=''
+MIRROR_MODULES=''
+MIRROR_EXTRA=''
+NEW_KERNEL_DIRECTORY=''
 
-KERNEL_MAIN=$( cut -d '-' -f 1 <<< $KERNEL_BASE )
-
-NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_BASE.slh.$KERNEL_SUB"
-MIRROR_MAIN="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-sidux-2.6/"
-MIRROR_MODULES="http://sidux.com/debian/pool/${ALT_PATH}main/l/linux-modules-sidux-main-2.6/"
-MIRROR_EXTRA="http://sidux.com/debian/pool/${ALT_PATH}fix.main/l/linux-kbuild-2.6/"
+# boolean switches
+B_EXP=''
+B_REDO=''
+B_SKIP_ZIP=''
 
 ########################################################################
 #### FUNCTIONS
@@ -80,7 +66,7 @@ error_handler()
 			message="The directory: $2 does not exist, please fix this."
 			;;
 		3)
-			message="dsl parameter: $2 is unsupported, please fix this."
+			message="You have to have a -k <kernel> to run this, it's not optional"
 			;;
 		4)
 			message="wget download error when downloading: $2"
@@ -98,7 +84,13 @@ error_handler()
 			rm -f $2
 			;;
 		8)
-			message="Unsupported Value for: \$2: $2"
+			message="Startup error: $2"
+			;;
+		9)
+			message="Unsupported startup option: $2"
+			;;
+		10)
+			message="You can't run -r and -z together, they are mutually exclusive."
 			;;
 	esac
 	echo $LINE
@@ -106,6 +98,86 @@ error_handler()
 	echo "Error $1 - Exiting script, please correct the error"
 	echo $LINE
 	exit $1
+}
+
+get_options()
+{
+	local opt=''
+
+	if [ -z "$1" ];then
+		error_handler 8 'no arguments given'
+	fi
+	if [ -z "$( grep '^\-' <<< $1 )" ];then
+		error_handler 8 "Option: $1 used but must start with a: -"
+	fi
+
+	while getopts :ehk:lrz opt
+	do
+		case $opt in
+			e)	B_EXP='true'
+				ALT_PATH='exp.'
+				;;
+			k)	KERNEL_WORKING=$OPTARG
+				;;
+			l)	KERNEL_TYPE='liquorix'
+				;;
+			r)	B_REDO='true'
+				;;
+			z)	B_SKIP_ZIP='true'
+				;;
+			h)
+				echo "Useage:
+-e Use exp.main data
+-k Kernel to download. Requires -k <2.6.26-8.lqx.2 type syntax
+   NOTE: -k <kernel> is required to run dsl always
+-r Redo zip without downloading again.
+-z Download only, no zip creation
+"
+				exit 0
+				;;
+			*)
+				error_handler 9 "-$OPTARG"
+				;;
+		esac
+	done
+
+	if [ "$B_REDO" == 'true' -a "$B_SKIP_ZIP" == 'true' ];then
+		error_handler 10
+	fi
+	if [ -z "$KERNEL_WORKING" ];then
+		error_handler 3
+	fi
+}
+
+set_values()
+{
+	local repoPre='' repoMain='' repoModules='' repoExtra=''
+
+	case $KERNEL_TYPE in
+		liquorix)
+			repoPre="http://liquorix.net/debian/pool/${ALT_PATH}main/l/"
+			repoMain='linux-liquorix-2.6/'
+			repoModules='linux-modules-liquorix-main-2.6/'
+			repoExtra=''
+			;;
+		sidux)
+			repoPre="http://sidux.com/debian/pool/${ALT_PATH}main/l/"
+			repoMain='linux-sidux-2.6/'
+			repoModules='linux-modules-sidux-main-2.6/'
+			repoExtra='linux-kbuild-2.6/'
+			;;
+	esac
+
+	MIRROR_MAIN="$repoPre$repoMain"
+	MIRROR_MODULES="$repoPre$repoModules"
+	if [ -n "$repoExtra" ];then
+		MIRROR_EXTRA="$repoPre$repoExtra"
+	fi
+
+	# set directory name
+	NEW_KERNEL_DIRECTORY="$KERNEL_DIR/$KERNEL_WORKING"
+	# then get the 2.6.28 slice
+	KERNEL_MAIN=$( cut -d '-' -f 1 <<< $KERNEL_WORKING )
 }
 
 start_up_tests()
@@ -120,24 +192,6 @@ start_up_tests()
 		error_handler 1
 	fi
 
-	# make sure the args are right
-	if [ -z "$KERNEL_BASE" ];then
-		error_handler 3 'KERNEL_BASE'
-	fi
-# 	if [ -z "$KERNEL_SUB" ];then
-# 		error_handler 3 'KERNEL_SUB'
-# 	fi
-
-	# double check the parameters
-	case "$KERNEL_TYPE" in
-		''|alt|nozip|redo)
-			: # null or supported values for $2
-			;;
-		*)
-			error_handler 8 "$KERNEL_TYPE"
-			;;
-	esac
-
 	# make sure the paths you made are right and exist
 	for startDir in $KERNEL_DIR $KERNEL_32_INSTALLER_DIR $KERNEL_64_INSTALLER_DIR $SVN_DIR
 	do
@@ -146,11 +200,11 @@ start_up_tests()
 		fi
 	done
 
-	if [ ! -f $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh ];then
-		error_handler 6 $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh
+	if [ ! -f $KERNEL_32_INSTALLER_DIR/install-kernel-32.sh ];then
+		error_handler 6 $KERNEL_32_INSTALLER_DIR/install-kernel-32.sh
 	fi
-	if [ ! -f $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh ];then
-		error_handler 6 $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh
+	if [ ! -f $KERNEL_64_INSTALLER_DIR/install-kernel-64.sh ];then
+		error_handler 6 $KERNEL_64_INSTALLER_DIR/install-kernel-64.sh
 	fi
 
 	echo "Start up tests: passed"
@@ -171,20 +225,25 @@ create_kernel_directory()
 check_kernel_exists()
 {
 	local fileName='tempTesterDsl' kernelExists=''
-	local kernelName="$KERNEL_BASE.slh.$KERNEL_SUB"
-	if [ "$KERNEL_TYPE" == 'alt' ];then
-		kernelName="$KERNEL_BASE"
-	fi
-	local kernelId="linux-image-$kernelName-sidux-686"
+	local kernelId=''
+
+	case $KERNEL_TYPE in
+		liquorix)
+			kernelId="linux-image-$KERNEL_WORKING-liquorix-686"
+			;;
+		sidux)
+			kernelId="linux-image-$KERNEL_WORKING-sidux-686"
+			;;
+	esac
 
 	echo $LINE
-	echo "Confirming that kernel $kernelName exists on server..."
+	echo "Confirming that kernel $KERNEL_WORKING exists on server..."
 	wget -O $fileName -q -e robots=off $MIRROR_MAIN
 
 	kernelExists=$( grep -i "$kernelId" $fileName )
 	rm -f $fileName
 	if [ -z "$kernelExists" ];then
-		error_handler 5 $kernelName
+		error_handler 5 $KERNEL_WORKING
 	else
 		echo "Kernel appears to exist on remote server, continuing..."
 	fi
@@ -226,7 +285,7 @@ download_kernel_files()
 	echo
 	sleep $sleepTime
 
-# 	if [ "$KERNEL_TYPE" == 'alt' ];then
+	if [ -n "$MIRROR_EXTRA" ];then
 		echo "Getting kbuild debs now..."
 		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
 		echo $LINE
@@ -239,7 +298,7 @@ download_kernel_files()
 		echo $LINE
 		echo
 		sleep $sleepTime
-# 	fi
+	fi
 	echo "Done with kernel package data, continuing..."
 }
 
@@ -249,7 +308,7 @@ create_sub_directories()
 	local directory=''
 
 	echo $LINE
-	echo "Generating 32/64 bit and meta directories..."
+	echo 'Generating 32/64 bit and meta directories...'
 	for directory in $directories
 	do
 		if [ ! -d $directory ];then
@@ -260,56 +319,89 @@ create_sub_directories()
 
 move_files_to_directories()
 {
+	local kernelType=''
+
+	case $KERNEL_TYPE in
+		liquorix)
+			kernelType='liquorix'
+			;;
+		sidux)
+			kernelType='sidux'
+			;;
+	esac
+
 	echo "Transferring files to directories..."
-	mv -f *2.6-sidux*i386.deb 32-meta
-	mv -f *2.6-sidux*amd64.deb 64-meta
+	mv -f *2.6-${kernelType}*i386.deb 32-meta
+	mv -f *2.6-${kernelType}*amd64.deb 64-meta
 	cp -f *${KERNEL_MAIN}*.gz 32
 	mv -f *$KERNEL_MAIN*.gz 64
+	cp -f *linux-support*.deb 32
+	cp -f *linux-support*.deb 64
 	mv -f *${KERNEL_MAIN}*i386.deb 32
 	mv -f *${KERNEL_MAIN}*amd64.deb 64
-	cp -f linux-patch-sidux* 32
-	cp -f linux-patch-sidux* 64
+	cp -f linux-patch-${kernelType}* 32
+	cp -f linux-patch-${kernelType}* 64
 	echo "Completed download and handling of $NEW_KERNEL_DIRECTORY."
 }
 
 add_update_installer_files()
 {
-	local fullKernelString="$KERNEL_BASE.slh.$KERNEL_SUB-sidux"
+	local fullKernelString32='' fullKernelString64=''
+
+	case $KERNEL_TYPE in
+		liquorix)
+			fullKernelString32="$KERNEL_WORKING-liquorix-686"
+			fullKernelString64="$KERNEL_WORKING-liquorix-amd64"
+			;;
+		sidux)
+			fullKernelString32="$KERNEL_WORKING-sidux-686"
+			fullKernelString64="$KERNEL_WORKING-sidux-amd64"
+			;;
+	esac
 
 	echo $LINE
-	echo "Adding installer files and updating files..."
-	cp $KERNEL_32_INSTALLER_DIR/install-kernel-sidux-32.sh 32/install-kernel-sidux.sh
-	cp $KERNEL_64_INSTALLER_DIR/install-kernel-sidux-64.sh 64/install-kernel-sidux.sh
+	echo 'Adding installer files and updating files...'
+	cp $KERNEL_32_INSTALLER_DIR/install-kernel-32.sh 32/install-kernel.sh
+	cp $KERNEL_64_INSTALLER_DIR/install-kernel-64.sh 64/install-kernel.sh
 
-	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString'-686\"/' 32/install-kernel-sidux.sh
-	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString'-amd64\"/' 64/install-kernel-sidux.sh
+	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString32'\"/' 32/install-kernel.sh
+	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString64'\"/' 64/install-kernel.sh
 }
 
 make_zip_files()
 {
-	local zipKernelId=$( echo $KERNEL_BASE | tr '-' '.' )
-	local contents='' filename=''
+	local contents=''
+	local kernel32Zip='' kernel64Zip=''
+
+	case $KERNEL_TYPE in
+		liquorix)
+			kernel32Zip="$KERNEL_WORKING-liquorix-686.zip"
+			kernel64Zip="$KERNEL_WORKING-liquorix-amd64.zip"
+			;;
+		sidux)
+			kernel32Zip="$KERNEL_WORKING-sidux-686.zip"
+			kernel64Zip="$KERNEL_WORKING-sidux-amd64.zip"
+			;;
+	esac
 
 	echo $LINE
 	echo 'Making 32 bit zip file now...'
 	cd 32
 	contents=$(ls)
-	fileName="kernel-$zipKernelId-slh-smp-$KERNEL_SUB.zip"
-	zip $fileName $contents
-	echo "Testing 32 bit kernel zip file for corruption..."
-	unzip -t $fileName || error_handler 7 $fileName
+	zip $kernel32Zip $contents
+	echo 'Testing 32 bit kernel zip file for corruption...'
+	unzip -t $kernel32Zip || error_handler 7 $kernel32Zip
 	echo "32 bit kernel zip corruption test: passed"
-	mv $fileName ../kernel-full-zips/
+	mv $kernel32Zip ../kernel-full-zips/
 
 	echo 'Making 64 bit zip file now...'
 	cd ../64
 	contents=$(ls)
-	fileName="kernel-$zipKernelId-slh64-smp-$KERNEL_SUB.zip"
-	zip $fileName $contents
-	echo "Testing 64 bit kernel zip file for corruption..."
-	unzip -t $fileName || error_handler 7 $fileName
-	echo "64 bit kernel zip corruption test: passed"
-	mv $fileName ../kernel-full-zips/
+	zip $kernel64Zip $contents
+	echo 'Testing 64 bit kernel zip file for corruption...'
+	unzip -t $kernel64Zip || error_handler 7 $kernel64Zip
+	echo '64 bit kernel zip corruption test: passed'
+	mv $kernel64Zip ../kernel-full-zips/
 }
 
 clean_up()
@@ -321,17 +413,20 @@ clean_up()
 finish_it_up()
 {
 	echo $LINE
-	echo "OK, all finished. Remember to add new kernels to sm-lib-kernel global and upload the zips."
+	echo 'OK, all finished. Remember to add new kernels to sm-lib-kernel global and upload the zips.'
 }
 
 ########################################################################
 #### EXECUTE
 ########################################################################
 
-if [ "$KERNEL_TYPE" == 'redo' ];then
+get_options "$@"
+set_values
+
+if [ "$B_REDO" == 'true' ];then
 	#start_up_tests
-	create_kernel_directory
 	#check_kernel_exists
+	create_kernel_directory
 	#download_kernel_files
 	create_sub_directories
 	move_files_to_directories
@@ -339,10 +434,10 @@ if [ "$KERNEL_TYPE" == 'redo' ];then
 	make_zip_files
 	clean_up
 	finish_it_up
-elif [ "$KERNEL_TYPE" == 'nozip' ];then
+elif [ "$B_SKIP_ZIP" == 'true' ];then
 	start_up_tests
-	create_kernel_directory
 	check_kernel_exists
+	create_kernel_directory
 	download_kernel_files
 	create_sub_directories
 	#move_files_to_directories
@@ -352,8 +447,8 @@ elif [ "$KERNEL_TYPE" == 'nozip' ];then
 	finish_it_up
 else
 	start_up_tests
-	create_kernel_directory
 	check_kernel_exists
+	create_kernel_directory
 	download_kernel_files
 	create_sub_directories
 	move_files_to_directories

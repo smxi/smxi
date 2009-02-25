@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.8
-####  Date: February 2 2009
+####  version: 2.4.9
+####  Date: February 25 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -43,7 +43,7 @@ SVMI_SVN="$HOME/bin/scripts/svmi/svn/trunk/"
 WORKING_SVN_DIR=$SMXI_SVN
 
 # then set the other stuff
-KERNEL_DIR="$HOME/large/sidux-kernels/"
+KERNEL_DIR="$HOME/large/kernel-zips/"
 RBXI_BZIP="$HOME/bin/scripts/rbxi/rbxi/"
 RBXI_DEV="$HOME/bin/scripts/rbxi/dev/"
 RBXI_HOME="$HOME/bin/scripts/rbxi/"
@@ -393,6 +393,7 @@ process_rbxi()
 	echo "Done with rbxi specific tasks now."
 }
 #construct_smxi_version_number;exit
+
 # add closing steps for sm_versions file
 finalize_sm_versions()
 {
@@ -409,15 +410,15 @@ finalize_sm_versions()
 	# cp -f --preserve=timestamps $SM_VERSIONS $SMXI_SVN
 }
 
-# extra scripts used in smxi, kernel installers for zipped sidux kernels
+# extra scripts used in smxi, kernel installers for zipped kernels
 update_kernel_installers()
 {
-	local sidux32='install-kernel-sidux-32.sh'
-	local sidux64='install-kernel-sidux-64.sh'
+	local installer32='install-kernel-32.sh'
+	local installer64='install-kernel-64.sh'
 
 	# update kernel installers if needed
-	cp -f ${KERNEL_DIR}64-installer/$sidux64 $KERNEL_SVN$sidux64
-	cp -f ${KERNEL_DIR}32-installer/$sidux32 $KERNEL_SVN$sidux32
+	cp -f ${KERNEL_DIR}64-installer/$installer64 $KERNEL_SVN$installer64
+	cp -f ${KERNEL_DIR}32-installer/$installer32 $KERNEL_SVN$installer32
 }
 
 # developer scripts for creating smxi

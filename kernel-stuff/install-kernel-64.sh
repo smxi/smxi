@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# install-kernel-sidux.sh - installer for archived 64 bit sidux kernels
+# install-kernel.sh - installer for archived 64 bit sidux kernels
 # Script is based on kelmo and slh's kernel installer from the
 # old sidux kernel installer zips. Copyright belongs to them
 # license: GPL 2
@@ -9,8 +9,8 @@
 # Changes and modifications are by Harald Hope, and neither slh nor kelmo should be blamed
 # for any mistakes I make.
 # Utility version and date:
-# version: 1.0.1
-# date: 2008-08-04
+# version: 1.0.2
+# date: 2009-02-25
 
 VER="2.6.24-2.6.24.3.slh.11-sidux-amd64"
 
@@ -36,7 +36,7 @@ if [ -w /etc/kernel-img.conf ]; then
 		-e "s/\(do_initrd\).*/\1\ \=\ Yes/" \
 		-e "/ramdisk.*mkinitrd\\.yaird/d" \
 			/etc/kernel-img.conf
-	
+
 	if ! grep -q do_initrd /etc/kernel-img.conf; then
 		echo "do_initrd = Yes" >> /etc/kernel-img.conf
 	fi
@@ -109,7 +109,7 @@ done
 
 # something went wrong, allow apt an attempt to fix it
 if [ "$?" -ne 0 ]; then
-	if [ -e "/boot/vmlinuz-${VER}" ]; then 
+	if [ -e "/boot/vmlinuz-${VER}" ]; then
 		apt-get --fix-broken install
 	else
 		[ -x /usr/sbin/update-grub ] && update-grub
@@ -157,7 +157,7 @@ for i in acer_acpi acerhk acx atl2 aufs av5100 btrfs drbd8 eeepc_acpi em8300 et1
 					#apt-get --fix-broken install
 					:
 				else
-					# ignore error cases for now, apt will do the "right" thing to get 
+					# ignore error cases for now, apt will do the "right" thing to get
 					# into a consistent state and worst that could happen is some external
 					# module not getting installed
 					:
@@ -189,7 +189,7 @@ fi
 echo
 echo "Now you can simply reboot when using GRUB (default). If you use the LILO"
 echo "bootloader you will have to configure it to use the new kernel."
-echo 
+echo
 echo "Make sure that /etc/fstab and /boot/grub/menu.lst use UUID or LABEL"
 echo "based mounting, which is required for classic IDE vs. lib(p)ata changes!"
 echo
