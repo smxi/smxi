@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.23
-####  Date: February 24 2009
+####  version: 1.21.24
+####  Date: February 26 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1117,7 +1117,7 @@ set_default_system_kernel()
 	else
 		altKernelSetting='Currently Unset'
 	fi
-	if [ -n "$LIQUORIX_SOURCES" -a "$BITS" == '32' ];then
+	if [ -n "$LIQUORIX_SOURCES" ];then
 		options="$options liquorix"
 	fi
 	if [ -n "$SIDUX_SOURCES" ];then
