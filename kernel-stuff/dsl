@@ -241,7 +241,7 @@ check_kernel_exists()
 	wget -O $fileName -q -e robots=off $MIRROR_MAIN
 
 	kernelExists=$( grep -i "$kernelId" $fileName )
-	rm -f $fileName
+	#rm -f $fileName
 	if [ -z "$kernelExists" ];then
 		error_handler 5 $KERNEL_WORKING
 	else
