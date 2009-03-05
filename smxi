@@ -34,7 +34,7 @@
 ####  Script requires the following library files to run completely, these are
 ####  downloaded automatically when required:
 ####  sm-lib-apt-tools - all apt functions, package tests, etc
-####  sm-lib-clean-up - cleanup functionscontinue for installs
+####  sm-lib-clean-up - cleanup functions for installs
 ####  sm-lib-distro-conversion - various smxi distro options for conversion, run
 ####  sm-lib-du-fixes - du section, primary du section, plus static du-fixes and tools.
 ####  sm-lib-graphics - graphics installer question and functions
