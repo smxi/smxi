@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.13
-####  Date: March 5 2009
+####  version: 8.10.14
+####  Date: March 6 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1029,7 +1029,7 @@ update_all_scripts()
 download_test_file()
 {
 	eval $LOGUS
-	local fileName=$1 fileNameTemp=''
+	local fileName=$1 fileNameTemp='' messageString=''
 	local isGood='' wgetError=0 update=''
 	local downloadLocation=$SCRIPT_DOWNLOAD downloadFile=$1 downloadUrl=''
 
@@ -1055,9 +1055,10 @@ download_test_file()
 			;;
 		$MOD_INXI)
 			downloadLocation=$SCRIPT_DOWNLOAD_IN
+			messageString='echo "${S}Updating ${C}$MOD_INXI${S} to latest version now...${N}"'
 			;;
 	esac
-
+	eval $messageString
 	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
 	downloadUrl="$downloadLocation$downloadFile$update"
 	log_function_data "download url: $downloadUrl"
