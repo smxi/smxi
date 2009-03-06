@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.10.11
-####  Date: February 25 2009
+####  version: 8.10.12
+####  Date: March 5 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3476,6 +3476,10 @@ run_script_components()
 	if [ "$SKIP_CONNECTIONS" != 'true' ];then
 		run_script_import $LIB_APT_TOOLS
 		run_script_import $LIB_DU_FIXES
+		# update if inxi is installed by users
+		if [ -f "$SCRIPT_HOME$MOD_INXI" ];then
+			test_version_info $MOD_INXI
+		fi
 	else
 		run_script_import $LIB_APT_TOOLS 'no-download'
 		run_script_import $LIB_DU_FIXES 'no-download'
