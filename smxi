@@ -3477,7 +3477,7 @@ run_script_components()
 		run_script_import $LIB_APT_TOOLS
 		run_script_import $LIB_DU_FIXES
 		# update if inxi is installed by users
-		if [ -f "$SCRIPT_HOME$MOD_INXI" ];then
+		if [ -f "$SCRIPT_HOME/$MOD_INXI" ];then
 			test_version_info $MOD_INXI
 		fi
 	else
