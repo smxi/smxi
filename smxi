@@ -1055,7 +1055,7 @@ download_test_file()
 			;;
 		$MOD_INXI)
 			downloadLocation=$SCRIPT_DOWNLOAD_IN
-			messageString='echo "${S}Updating ${C}$MOD_INXI${S} to latest version now...${N}"'
+			messageString='echo -e "$LINE\n${S}Updating ${C}$MOD_INXI${S} to latest version now...${N}"'
 			;;
 	esac
 	eval $messageString
