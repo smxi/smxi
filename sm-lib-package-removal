@@ -105,7 +105,7 @@ confirm_kick_items()
 	echo $LINE
 	echo "${S}These are your current selections. You will be asked one by one to"
 	echo "remove the packages/groups that are installed on your system, and you will"
-	echo "be alerted which are not installed as well after it is finished."
+	echo "be alerted which are not installed as well as the remover runs."
 	echo "${C}$kickItems"
 	echo -e "${Q}Are you sure you want to completely remove these?"
 	echo $LINE
