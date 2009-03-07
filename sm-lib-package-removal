@@ -183,6 +183,7 @@ remove_kick_packages()
 		else
 			plural=''
 		fi
+		echo $LINE
 		if [ -n "$packages" ];then
 			echo "${S}Removing ${C}$kickIt${S} package$plural now...${N}"
 			package_remover "$packages" 'purge' 'group'
