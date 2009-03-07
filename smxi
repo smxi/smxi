@@ -1299,13 +1299,13 @@ set_distro_data()
 	local aptProx=$( grep -Esil '^[[:space:]]*deb.*:9999/' $EAS $EAS.d/*.list )
 	local nonDebianPattern='(deb-sdx|sidux|deb-op|opera|deb-mm|debian-multimedia|deb-mep|mepis|deb-skp|skype|deb-swift|swiftfox|deb-vb|virtualbox)'
 
-	# these tests will be improved over time, but are ok for now
+# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
 	local isLenny=$( grep -is '^5.' $EDV )
 	local isSqueeze=$( egrep -is '^(squeeze|6\.)' $EDV )
 
-	# first test sources
-	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '([[:space:]]stable|/stable|etch|lenny)' )
+	# first tests sources
+	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|lenny|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 
