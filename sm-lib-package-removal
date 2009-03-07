@@ -100,29 +100,41 @@ confirm_kick_items()
 {
 	eval $LOGUS
 
-	local repeat='' kickItems="$1"
+	local opt='' options='' kickItems="$1"
 
 	echo $LINE
-	echo "${S}These are your current selections. You will be asked one by one to remove the packages/groups."
+	echo "${S}These are your current selections. You will be asked one by one to"
+	echo "remove the packages/groups that are installed on your system, and you will"
+	echo "be alerted which are not installed as well after it is finished."
 	echo "${C}$kickItems"
-	echo -e "${Q}Are you sure you want to completely remove these?$YNE"
+	echo -e "${Q}Are you sure you want to completely remove these?"
 	echo $LINE
-	read response
+	echo -e $SLE
+	echo $LINE
+	options="yes-remove-all no-start-over"
 
-	case $response in
-		y)	remove_kick_packages "$kickItems"
-			;;
-		n)	echo "${S}Ok, let's start over again.${N}"
-			package_removal
-			;;
-		*)	repeat='true'
-			print_error yn
-			;;
-	esac
+	select opt in $options
+	do
+		log_function_data "opt selected: $opt"
+		case $opt in
+			yes-remove-all)
+				remove_kick_packages "$kickItems"
+				;;
+			no-start-over)
+				echo "${S}Ok, let's start over again.${N}"
+				package_removal
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
 
 	eval $LOGUE
 	if [ "$repeat" == 'true' ];then
-		confirm_kick_items
+		confirm_kick_items "$kickItems"
 	fi
 }
 
@@ -178,8 +190,9 @@ remove_kick_packages()
 			echo "${M}No ${C}$kickIt${M} package installed on your system...${N}"
 		fi
 	done
-
+	echo $LINE
 	echo "${S}Finished removing components.${N}"
+	print_hec
 	eval $LOGUE
 }
 
