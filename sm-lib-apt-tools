@@ -95,7 +95,10 @@ package_tester()
 	# basically, only run this is if not aptitude or if aptitude tests are null
 	if [ "$runDefault" == 'true' ];then
 		# note that we need [ \t]+ so that only cases of whitespace after are counted
-		packageStatus=$( dpkg -l | awk '/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/{print $2}' )
+		packageStatus=$( dpkg -l | awk '
+		/^'$installType'[ \t]*'$wildFull$item'[ \t]'$doWild'/ {
+			print $2
+		}' )
 	fi
 
 	echo $packageStatus
