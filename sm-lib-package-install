@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.13
-####  Date: February 22 2009
+####  version: 3.1.14
+####  Date: March 12 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1560,11 +1560,11 @@ nfs_package_installer()
 		log_function_data "opt selected: $opt"
 		case $opt in
 			nfs-server)
-				package_group_installer 'plain' 'nfs-common portmap'
+				package_group_installer 'plain' 'nfs-kernel-server nfs-common portmap'
 				repeat='true'
 				;;
 			nfs-client)
-				package_group_installer 'plain' 'nfs-kernel-server nfs-common portmap'
+				package_group_installer 'plain' 'nfs-common portmap'
 				repeat='true'
 				;;
 			back-to-menu)

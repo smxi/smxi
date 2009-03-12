@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.2.0
-####  Date: February 25 2009
+####  version: 2.2.1
+####  Date: March 10 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -222,6 +222,21 @@ create_kernel_directory()
 	cd $NEW_KERNEL_DIRECTORY
 }
 
+create_sub_directories()
+{
+	local directories='32 32-meta 64 64-meta kernel-installer-files src-gz kernel-full-zips'
+	local directory=''
+
+	echo $LINE
+	echo 'Generating 32/64 bit and meta directories...'
+	for directory in $directories
+	do
+		if [ ! -d $directory ];then
+			mkdir $directory
+		fi
+	done
+}
+
 check_kernel_exists()
 {
 	local fileName='tempTesterDsl' kernelExists=''
@@ -279,7 +294,18 @@ download_kernel_files()
 	echo
 	sleep $sleepTime
 	echo "Getting kernel diff.gz data now..."
+	# might as well include this for sidux kernels because the src gz is small
+	case $KERNEL_TYPE in
+		liquorix)
+			cd src-gz
+			;;
+	esac
 	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
+	case $KERNEL_TYPE in
+		liquorix)
+			cd ../
+			;;
+	esac
 	echo $LINE
 	echo $LINE
 	echo
@@ -300,21 +326,6 @@ download_kernel_files()
 		sleep $sleepTime
 	fi
 	echo "Done with kernel package data, continuing..."
-}
-
-create_sub_directories()
-{
-	local directories='32 32-meta 64 64-meta kernel-installer-files kernel-full-zips'
-	local directory=''
-
-	echo $LINE
-	echo 'Generating 32/64 bit and meta directories...'
-	for directory in $directories
-	do
-		if [ ! -d $directory ];then
-			mkdir $directory
-		fi
-	done
 }
 
 move_files_to_directories()
@@ -341,7 +352,7 @@ move_files_to_directories()
 	mv -f *${KERNEL_MAIN}*amd64.deb 64
 	cp -f linux-patch-${kernelType}* 32
 	cp -f linux-patch-${kernelType}* 64
-	echo "Completed download and handling of $NEW_KERNEL_DIRECTORY."
+	echo "Completed download and handling of: $NEW_KERNEL_DIRECTORY"
 }
 
 add_update_installer_files()
@@ -427,8 +438,8 @@ if [ "$B_REDO" == 'true' ];then
 	#start_up_tests
 	#check_kernel_exists
 	create_kernel_directory
-	#download_kernel_files
 	create_sub_directories
+	#download_kernel_files
 	move_files_to_directories
 	add_update_installer_files
 	make_zip_files
@@ -438,8 +449,8 @@ elif [ "$B_SKIP_ZIP" == 'true' ];then
 	start_up_tests
 	check_kernel_exists
 	create_kernel_directory
-	download_kernel_files
 	create_sub_directories
+	download_kernel_files
 	#move_files_to_directories
 	add_update_installer_files
 	#make_zip_files
@@ -449,8 +460,8 @@ else
 	start_up_tests
 	check_kernel_exists
 	create_kernel_directory
-	download_kernel_files
 	create_sub_directories
+	download_kernel_files
 	move_files_to_directories
 	add_update_installer_files
 	make_zip_files
