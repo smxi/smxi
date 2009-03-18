@@ -287,6 +287,13 @@ download_kernel_files()
 	echo $LINE
 	echo
 	sleep $sleepTime
+	# grab source zips/debs for modules
+	echo "Getting module diff.gz data now..."
+	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-tar.gz
+	echo $LINE
+	echo $LINE
+	echo
+	sleep $sleepTime
 	echo "Getting primary kernel debs now..."
 	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
 	echo $LINE
