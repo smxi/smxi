@@ -495,6 +495,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'gnome-1'
 			advanced_broken_dependency_handler 'gnome-2'
 			advanced_broken_dependency_handler 'gnome-3'
+			# advanced_broken_dependency_handler 'gnome-ruby'
 			advanced_broken_dependency_handler 'gnome-vfs'
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'ooo'
@@ -644,7 +645,7 @@ $( package_tester '(amarok|amarok-common|amarok-engine-xine|amarok-engine-yauap|
 		# libecal1.2-7 libedata-cal1
 		evolution)
 			packages="
-$( package_tester '(evolution|evolution-data-server|evolution-data-server-common)' )
+$( package_tester '(evolution|evolution-data-server|evolution-data-server-common|evolution-exchange)' )
 "
 			packageGroup='Evolution'
 			;;
