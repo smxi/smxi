@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.11
+####  version: 1.21.12
 ####  Date: March 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1399,9 +1399,11 @@ get_sidux_mirrors()
 	for mirror in $siduxMirrors $badSiduxMirrors
 	do
 		mirrorTemp=$( echo $mirror | cut -d ':' -f 2-4 )
-		# it's very important here to search only for start deb, no #
+		# it's very important here to search only for start deb, no # and also there are
+		# some cases where the bad repo name is contained in the good repo name so that
+		# requires a test for ending it with / or no / and space
 		# echo mirrorTemp: $mirrorTemp
-		mirrorFiles="$( egrep -ls "^[[:space:]]*(deb|deb-src)[[:space:]]*$mirrorTemp" $EAS $EAS.d/*.list )"
+		mirrorFiles="$( egrep -ls "^[[:space:]]*(deb|deb-src)[[:space:]]*$mirrorTemp[/]*[[:space:]]" $EAS $EAS.d/*.list )"
 
 		if [ -n "$mirrorFiles" ];then
 			# case one we return a list of all found mirrors
@@ -1421,7 +1423,9 @@ get_sidux_mirrors()
 					fi
 					;;
 			esac
+			# set back to null
 			mirrorTemp=''
+			log_function_data "mirrorsFound: $mirrorsFound"
 		fi
 	done
 
