@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.10
+####  version: 1.21.11
 ####  Date: March 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -657,20 +657,26 @@ $( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
 			# libgksu2-0
 		gnome-1) # 2.22.0-1
 			packages="
-			$( package_tester '(gconf2|libgconf2)' 'wild' )"
+			$( package_tester '(gconf2|libgconf2-[0-9])' 'wild' )"
 			packageGroup='Gnome Group 1'
 			;;
 		gnome-2) # 2.20.1.1-2
 		# note: libgnomeui32 does NOT have the same versioning numbers
 		# so we need to test for libgnomeui- instead
 			packages="
-			$( package_tester '(libgnome2|libgnomeui-)' 'wild' )"
+			$( package_tester '(libgnome2|libgnome2-common|libgnomeui-*)'  )"
 			packageGroup='Gnome Group 2'
 			;;
 		gnome-3)
 			packages="
 			$( package_tester '(libbonoboui2)' 'wild' )"
 			packageGroup='Gnome Group 3'
+			;;
+		# unused for now
+		gnome-ruby)
+			packages="
+			$( package_tester '(libgconf2-ruby|libgnome2-ruby)' 'wild' )"
+			packageGroup='Gnome Ruby'
 			;;
 		gnome-vfs) # 1:2.22.0-5
 			packages="
@@ -739,7 +745,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 				# shorter version number strings for less picky package groups
 				# I'm adding in the + test to handle those beta versions and some other odd
 				# syntaxes: 2.8.4+2.8.4-1;
-				gimp|gnome-1|gnome-2|gnome-3|gnome-vfs|hplip|vegastrike|xpdf)
+				gimp|gnome-1|gnome-2|gnome-3|gnome-ruby|gnome-vfs|hplip|vegastrike|xpdf)
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases
