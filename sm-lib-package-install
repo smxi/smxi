@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.14
-####  Date: March 12 2009
+####  version: 3.1.15
+####  Date: March 19 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1715,8 +1715,8 @@ samba_package_installer()
 	echo "${S}The following servers, client apps, and tools, are available:${N}"
 	echo $LINE
 	echo "${M}::  Samba Server ::"
-	echo "${C}1 - samba-server${S} - the main ${C}Samba${S} server group. Includes ${C}samba${S}, ${C}smbclient${S},"
-	echo "    ${C}swat${S}, ${C}smbfs${S}, and ${C}winbind${S}."
+	echo "${C}1 - samba-server${S} - the main ${C}Samba${S} server. Does not include ${C}smbclient${S},"
+	echo "    ${C}swat${S}, ${C}smbfs${S}, or ${C}winbind${S}."
 	echo "${C}2 - swat${S} - Web administration tool for ${C}Samba${S} server."
 	echo "${M}::  Samba Clients ::"
 	echo "${C}3 - smb-client${S} - These ${C}Samba ${S}client packages both contain the command"
@@ -1733,7 +1733,7 @@ samba_package_installer()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="samba-server swat samba-client smb4k winbind fuse-smb samba-docs back-to-menu"
+	options="samba-server swat samba-client smb4k komba2 winbind fuse-smb samba-docs back-to-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
