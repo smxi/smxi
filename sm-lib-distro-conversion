@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.11
-####  Date: January 27 2009
+####  version: 3.2.12
+####  Date: March 25 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -19,7 +19,7 @@
 ####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
-####  Script URL: http://smxi.org/sm/sm-lib-sidux-conversion
+####  Script URL: http://smxi.org/sm/sm-lib-sidux-packages
 ####  Script SVN: http://code.google.com/p/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
@@ -43,18 +43,20 @@ check_debian()
 	eval $LOGMS
 	trap 'conversion_trap_handler $FUNCNAME' INT TERM EXIT
 	local opt='' options='' repeat='' optionSet='debian'
-	local conversionOptions='sidux-sources sidux-conversion'
+	local conversionOptions='sidux-sources sidux-packages'
 	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
+	local mepisId=''
 
-	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'etch' ]
-	then
+	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'etch' ];then
+		if [ "$DISTRO" == 'mepis' ];then
+			mepisId=' Mepis'
+		fi
 		conversionOptions=''
-		altText1="${M}It is not safe to run sidux sources with your Debian Stable system\nso those options are not being offered to you, sorry."
+		altText1="${M}It is not safe to run sidux sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
 		optionSet='stable'
 	fi
-	if [ "$DISTRO" == 'antix' ]
-	then
-		conversionOptions='antix-sid antix-sid-sidux antix-sidux-conversion'
+	if [ "$DISTRO" == 'antix' ];then
+		conversionOptions='antix-sid antix-sid-sidux antix-sidux-packages'
 		altText1="${M}Here are your options for your Anti-X system:"
 		optionSet='antix'
 	fi
@@ -66,7 +68,7 @@ check_debian()
 	echo "${M}You appear to be using Debian or a Debian derived distro based on ${C}Debian $SYSTEM_BASE${S}."
 	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
 	echo
-	echo "${W}There are no guarantees, support for all the options is still experimental.${S}"
+	echo "${W}There are no guarantees, support for all the options is a work in progress.${S}"
 	echo -e "$altText1"
 	echo $LINE
 	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
@@ -76,14 +78,16 @@ check_debian()
 		debian)
 			echo "${C}2${S} - ${C}sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
 			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-			echo "${C}3${S} - ${C}sidux-conversion${S} Will proceed to attempt to convert your system to sidux."
+			echo "${C}3${S} - ${C}sidux-packages${S} Will add sidux sources and install core sidux packages."
+			echo "    ${M}NOTE: This will not ${C}convert${M} your system to sidux, just install some packages."
 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
 			;;
 		antix)
 			echo "${C}2${S} - ${C}antix-sid${S} Adds sid sources to your apt repos, otherwise no change."
 			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-			echo "${C}3${S} - ${C}antix-sid-sidux${S} Adds sid sources and sidux sources, no conversion."
-			echo "${C}4${S} - ${C}antix-sidux-conversion${S} Adds sid sources and sidux sources, runs conversion."
+			echo "${C}3${S} - ${C}antix-sid-sidux${S} Adds sid sources and sidux sources, no sidux package installs."
+			echo "${C}4${S} - ${C}antix-sidux-packages${S} Adds sid sources/sidux sources, installs core sidux packages."
+			echo "    ${M}NOTE: This will not ${C}convert${M} your system to sidux, just install some packages."
 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
 			;;
 	esac
@@ -120,7 +124,7 @@ check_debian()
 				antix_fix_1
 				trap - INT TERM EXIT
 				;;
-			antix-sidux-conversion)
+			antix-sidux-packages)
 				update_smxi_data
 				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
@@ -139,7 +143,7 @@ check_debian()
 				set_default_system_kernel 'conversion'
 				trap - INT TERM EXIT
 				;;
-			sidux-conversion)
+			sidux-packages)
 				update_smxi_data
 				update_to_new_sources 'sidux'
 				run_script_import $LIB_MISC_TWEAKS
@@ -159,8 +163,7 @@ check_debian()
 		break
 	done
 	eval $LOGME
-	if [ "$repeat" == 'true' ]
-	then
+	if [ "$repeat" == 'true' ];then
 		check_debian 'repeat'
 	fi
 }
@@ -169,8 +172,9 @@ print_conversion_information()
 {
 	eval $LOGUS
 	echo $MLINE
-	echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will bring your system into sync."
-	echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux conversion is completed!"
+	echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will update your system to current."
+	echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux package"
+	echo "install is completed!"
 	echo ""
 	print_hec
 	eval $LOGUE
@@ -196,21 +200,20 @@ install_sidux_components()
 	eval $LOGPS
 	local prefId='install-sidux-packages-1'
 	local smPref=$( sm_pref_tester $prefId )
-	local siduxPackages='configure-cups configure-dsl configure-gprs configure-isdn configure-ndiswrapper ceni deborphan distro-defaults etcskel-sidux gfxboot-theme-sidux gpm sidux-irc sidux-kernelhacking sidux-keyrings sidux-scripts udev-config-sidux wodim'
+	local siduxPackages='apt-conf-sidux configure-cups configure-dsl configure-ndiswrapper ceni deborphan distro-defaults gfxboot-theme-sidux gpm sidux-irc sidux-kernelhacking sidux-keyrings sidux-scripts udev-config-sidux wodim'
 	# grub-gfxboot
 	local i='' installedPackage=''
 
-	if [ "$smPref" -eq 0 ]
-	then
+	if [ "$smPref" -eq 0 ];then
 		echo $MBAR
 		echo "${M}SIDUX PACKAGE INSTALL"
 		echo $LINE
-		echo "${S}This will double check your system to make sure you have all the"
-		echo "${C}sidux${S} packages that you need for a complete install."
+		echo "${S}This will double check your system to make sure you have the main"
+		echo "${C}sidux${S} packages that you need for basic sidux functionality."
 		echo
 		echo "Please read each item and tell ${C}apt${S} if you want it or not by"
 		echo "answering ${C}y${S} or ${C}n${S} to $APT_TYPE install questions. For example, "
-		echo "if you don't have ${C}isdn${S} or ${C}xawtv${S}, answer ${C}n${S} to the isdn or xawtv stuff.${N}"
+		echo "if you don't use ${C}ndiswrapper${S} or ${C}dsl${S}, answer ${C}n${S} to those packages.${N}"
 
 		print_hec
 		echo "${S}Checking for and installing missing ${C}sidux${S} packages now...${N}"
@@ -236,25 +239,21 @@ sidux_graphics_legacy()
 	local OldGrub=$( awk -F= '/^# groot/{print $2}' /boot/grub/menu.lst | sed -r 's/\((.*)\)/\1/' )
 	local bm='/boot/message'
 
-	if [ "$1" == 'grub1' -a "$smPref" -eq 0 ]
-	then
+	if [ "$1" == 'grub1' -a "$smPref" -eq 0 ];then
 		echo $LINE
 		echo "${S}Running ${C}sidux grub${S} fix...${N}"
 		# make a copy of old penguin graphic
-		if [ -f $bm.hd -a "$DISTRO_LEVEL" -lt 5 ]
-		then
+		if [ -f $bm.hd -a "$DISTRO_LEVEL" -lt 5 ];then
 			cp $bm.hd $bm.hd-bu
 		fi
 		# check for old physical file, move to renamed
-		if [ -f $bm ]
-		then
+		if [ -f $bm ];then
 			mv -f $bm $bm.presidux
 		fi
 		# package_installer 'sidux-graphics sidux-graphics-common' 'install-always' '--reinstall'
 
 		# force link to file
-		if [ -L $bm -o ! -e $bm ]
-		then
+		if [ -L $bm -o ! -e $bm ];then
 			ln -fs message.hd $bm
 		else
 			echo "${E}No grub graphics file was found. Sorry, script cannot resolve this for you.${N}"
@@ -296,8 +295,7 @@ set_distro_version()
 	debian-other
 	'
 
-	if [ ! -f $SMDV -a ! -f $EAX ]
-	then
+	if [ ! -f $SMDV -a ! -f $EAX ];then
 		echo $MLINE
 		echo "${M}Set Distro Version Data"
 		echo $MLINE
@@ -328,12 +326,10 @@ set_distro_version()
 			break
 		done
 		eval $LOGPE
-		if [ "$repeat" == 'true' ]
-		then
+		if [ "$repeat" == 'true' ];then
 			set_distro_version
 		fi
-	elif [ ! -f $SMDV -a -f $EAX ]
-	then
+	elif [ ! -f $SMDV -a -f $EAX ];then
 		write_smdv_file 'anti-x'
 		eval $LOGPE
 	fi
@@ -374,8 +370,7 @@ distro_number_calculator()
 	2010:12:21
 	'
 
-	if [ ! -f $SMDL ]
-	then
+	if [ ! -f $SMDL ];then
 		echo $LINE
 		echo "${S}Setting distro level identification for internal script use now...${N}"
 
@@ -437,8 +432,7 @@ update_to_new_sources()
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff
-	if [ "$?" -eq 0 ]
-	then
+	if [ "$?" -eq 0 ];then
 		doUpdate='true'
 	else
 		doUpdate='false'
@@ -455,8 +449,7 @@ tweak_antix_vb_source()
 	eval $LOGUS
 	local fixVB=$( egrep '^deb[[:space:]].*virtualbox.*' $EAS )
 
-	if [ -n "$fixVB" ]
-	then
+	if [ -n "$fixVB" ];then
 		echo "${S}Commenting out broken virtualbox repo ...${N}"
 		sed -i -r 's%^(deb[[:space:]].*virtualbox.*)%##\1%g' $EAS
 	fi
@@ -470,14 +463,12 @@ tweak_antix_sources()
 	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
 	local doUpdate=''
 
-	if [ -n "$fixDM" ]
-	then
+	if [ -n "$fixDM" ];then
 		echo "${S}Removing uncommented unstable source...${N}"
 		sed -i -r 's%^#.*(deb[[:space:]].*ian-mult.*unstable.*)%\1%g' $EAS
 		doUpdate='true'
 	fi
-	if [ -n "$fixDS" ]
-	then
+	if [ -n "$fixDS" ];then
 		echo "${S}Removing uncommented Debian unstable source...${N}"
 		sed -i -r 's%^#.*(deb[[:space:]].*debian\.org.*unstable.*)%\1%g' $EAS
 		doUpdate='true'
@@ -494,8 +485,7 @@ update_completion_handler()
 	eval $LOGUS
 	local doUpdate=$1 whichUpdate=$2
 
-	if [ "$doUpdate" == 'true' ]
-	then
+	if [ "$doUpdate" == 'true' ];then
 		UPDATED=''
 		run_script_import $LIB_APT_TOOLS
 		apt_update_handler 'distro-conversion'
