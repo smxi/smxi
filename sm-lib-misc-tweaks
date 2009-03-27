@@ -1439,7 +1439,7 @@ restore_standard_sources()
 # args: $1 - pre-du / misc-launched
 update_locales()
 {
-	if [ "$1" == 'misc-launched' ] || [ "$1" == 'pre-du' -a "$DISTRO" == 'sidux' ];then
+	if [ "$1" == 'misc-launched' -o "$B_LOCALES" == 'true' ] || [ "$1" == 'pre-du' -a "$DISTRO" == 'sidux' ];then
 		eval $LOGUS
 		local upl='dpkg-reconfigure locales'
 		local opt='' options='yes-reconfigure no-change-continue'
