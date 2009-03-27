@@ -1480,7 +1480,7 @@ update_locales()
 				yes-reconfigure)
 					echo "${S}Ok, running the reconfiguration now...${N}"
 					eval $upl
-					echo "${S}Done with the reconfiguration now...${N}"
+					echo "${S}Done with the reconfiguration. Continuing...${N}"
 					;;
 				no-change-continue)
 					echo "${S}Skipping the locales reconfiguration.${N}"
