@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.0
-####  Date: March 12 2009
+####  version: 8.11.1
+####  Date: March 27 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -251,6 +251,7 @@ SET_2009_FIXES=''
 ADVANCED_KERNEL=''
 B_APT_PROX=''
 B_DEBUG=''
+B_LOCALES=''
 B_OVERRIDE_GRUB_GFX=''
 B_TESTING_1=''
 B_TESTING_2=''
@@ -1230,6 +1231,11 @@ launch_function_trigger()
 		nvidia-sse)
 			prefId='nvidia-sse-test-1'
 			scriptFunction='nvidia_sse_alert'
+			;;
+		reconfigure-locales)
+			prefId='reconfigure-locales'
+			scriptOption=$B_LOCALES
+			scriptFunction='run_script_import $LIB_MISC_TWEAKS;update_locales pre-du'
 			;;
 		tester)
 			prefId='smxi-kernel-mirror'
@@ -3250,6 +3256,7 @@ print_usage()
 	echo "The following are advanced script options:"
 	echo "${C}-j${S} Alternate text/output script colors. Requires this syntax: -j 0 (sets to monochrome )"
 	echo "   -j 1 (script default); -j 2 (alternate color scheme); -j 3 (nice earthy scheme)"
+	echo "${C}-L${S} Runs the option to reconfigure ${C}L${S}ocales prior to system upgrade."
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
 	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
@@ -3302,7 +3309,7 @@ get_options()
 
 	# no point in running this if nothing to do
 	if [ -n "$1" ];then
-		while getopts :dehHgij:kKlmMNpP:sStvwW:frRuUxX:Z:@!: opt
+		while getopts :dehHgij:kKlLmMNpP:sStvwW:frRuUxX:Z:@!: opt
 		do
 			case $opt in
 				h)	print_usage
@@ -3352,6 +3359,9 @@ get_options()
 					;;
 				K)	ADVANCED_KERNEL='true'
 					START_OPTIONS="$START_OPTIONS -K"
+					;;
+				L)	B_LOCALES='true'
+					START_OPTIONS="$START_OPTIONS -L"
 					;;
 				f)	FORCE_DOWNLOAD='true'
 					;;

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.21.25
-####  Date: March 12 2009
+####  version: 1.22.0
+####  Date: March 27 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -205,7 +205,7 @@ advanced_tweaks()
 				repeat='true'
 				;;
 			update-locales)
-				update_locales
+				update_locales 'misc-launched'
 				repeat='true'
 				;;
 			set-default-runlevel)
@@ -1329,53 +1329,43 @@ set_upgrade_type()
 	local upgradeType=$( sm_pref_tester $smPref 'equal' )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	local upgradeStyle='upgrade' # default, for apt-get / deprecated aptitude
-	local fullUpgrade='' fullUpgradeOpt='' upgradeOptNu='2'
-	local upgradeTypeSetting=''
-	local tempTest=''
+	local fullUpgradeStyle='dist-upgrade'
 	local repeat='' opt=''
 
 	if [ -n "$aptType" -a "$aptType" == 'aptitude' ];then
-		fullUpgradeOpt='full-upgrade'
+		fullUpgradeStyle='full-upgrade'
 		upgradeStyle='safe-upgrade'
-		fullUpgrade='echo -e "${C}2 - $fullUpgradeOpt${S} Recommended method to do full upgrades (dist-upgrade is deprecated) in aptitude."'
-		upgradeOptNu='3'
 	fi
 	# etch aptitude doesn't support the new syntaxes
 	if [ "$SYSTEM_BASE" == 'etch' ];then
-		upgradeStyle='upgrade' # etch aptitude doesn't have safe-upgrade option
-		fullUpgrade=''
-		fullUpgradeOpt=''
-		upgradeOptNu='2'
+		# etch aptitude doesn't have safe-upgrade/full-upgrade option
+		fullUpgradeStyle='dist-upgrade'
+		upgradeStyle='upgrade' 
 	fi
-	local options="dist-upgrade $upgradeStyle $fullUpgradeOpt continue exit"
-	exitNu=$( wc -w <<< $options )
-	contNu=$(( $exitNu - 1 ))
+	local options="$fullUpgradeStyle $upgradeStyle continue exit"
 
 	echo $LINE
-	echo "${S}Set ${C}$SCRIPT_NAME${S} to use upgrade type ${C}dist-upgrade${S} or ${C}$upgradeStyle${S}."
+	echo "${S}Set ${C}$SCRIPT_NAME${S} to use upgrade type ${C}$fullUpgradeStyle${S} or ${C}$upgradeStyle${S}."
 	echo $MLINE
 	echo "${M}Your system base appears to be: ${C}Debian $SYSTEM_BASE"
 	echo
-	echo "${S}In general, for ${C}Debian Sid${S}, ${C}dist-upgrade${S} is the better choice for maintaining your system"
-	echo "for ${C}apt-get, and ${C}full-upgrade${S} or ${C}safe-upgrade${S} for ${C}aptitude${S}."
-	echo "For ${C}Debian Testing${S}, ${C}dist-upgrade${S} should work fine, but some users prefer ${C}$upgradeStyle${S} because"
+	echo "${S}In general, for ${C}Debian Sid${S}, ${C}$fullUpgradeStyle${S} is the better choice for maintaining your system"
+	echo "For ${C}Debian Testing${S}, ${C}$fullUpgradeStyle${S} should work fine, but some users prefer ${C}$upgradeStyle${S} because"
 	echo "it's more stable. If you choose ${C}$upgradeStyle${S} for either Sid or Testing systems, you must run"
-	echo "dist-upgrade manually now and then to fully update your system, or change it here,"
+	echo "$fullUpgradeStyle manually now and then to fully update your system, or change it here,"
 	echo "then change it back. ${C}Debian Stable${S} always uses ${C}$upgradeStyle${S} by default."
 	echo $MLINE
-	echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S}"
-	echo "will use that for all its operations. If you are in doubt, maybe exit here to learn more"
-	echo "about the pros and cons of each method."
+	echo "${S}Please select the upgrade type you want and ${C}$SCRIPT_NAME${S} will use that for all"
+	echo "its operations. You can always change it in ${C}Miscellaneous Tweaks/Advanced${S} section later."
 	echo
 	echo "Your current setting is: ${C}$upgradeType"
 	echo $LINE
-	echo "${C}1 - dist-upgrade${S} Full distribution upgrade to all current and latest packages and libraries."
-	eval "$fullUpgrade"
-	echo "${C}$upgradeOptNu - $upgradeStyle${S} Only upgrade packages that do not require upgrading your current libraries etc."
+	echo "${C}1 - $fullUpgradeStyle${S} Full distribution upgrade to all current and latest packages and libraries."
+	echo "${C}2 - $upgradeStyle${S} Only upgrade packages that do not require upgrading your current libraries etc."
 
 	echo
-	echo "${C}$contNu - continue${S} Don't change or set."
-	echo "${C}$exitNu - exit${S} Don't want to decide now, I'll study up on this and try later."
+	echo "${C}3 - continue${S} Don't change or set."
+	echo "${C}4 - exit${S} Don't want to decide now, I'll study up on this and try later."
 	echo $LINE
 	echo $SLE
 	echo $LINE
@@ -1383,7 +1373,7 @@ set_upgrade_type()
 	select opt in $options
 	do
 		case $opt in
-			upgrade|safe-upgrade|full-upgrade|dist-upgrade)
+			dist-upgrade|full-upgrade|safe-upgrade|upgrade)
 				echo $LINE
 				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default upgrade type: ${C}$opt${N}"
 				set_sm_pref_values "$smPref" "$opt"
@@ -1446,27 +1436,68 @@ restore_standard_sources()
 	eval $LOGUE
 }
 
+# args: $1 - pre-du / misc-launched
 update_locales()
 {
-	eval $LOGUS
-	local upl='dpkg-reconfigure locales'
-
-	echo $LINE
-	echo "${S}This will run this command: ${C}$upl${S}"
-	echo "This will start the reconfiguring of your ${C}locales${S}. You will see a box with"
-	echo "all the available locales. The ones you are currently using have a small star"
-	echo "next to them, you can activate or deactivate that local by hitting your space bar."
-	echo
-	echo "You can move up and down the list using your up/down arrows. Once you have selected"
-	echo "or deselected your desired locales, use your tab key to highlight ok, hit enter,"
-	echo "then ${C}dpkg${S} will ask you to select your default system locale."
-	echo
-	echo "Once you select OK and hit enter, ${C}dpkg${S} will get rid of or add your locales."
-	echo " Hint: for older installs, change your default locale to use ${C}UTF 8${S},"
-	echo "that will let you see all the characters."
-	print_hec
-	eval $upl
-	eval $LOGUE
+	if [ "$1" == 'misc-launched' ] || [ "$1" == 'pre-du' -a "$DISTRO" == 'sidux' ];then
+		eval $LOGUS
+		local upl='dpkg-reconfigure locales'
+		local opt='' options='yes-reconfigure no-change-continue'
+		
+		echo $MLINE
+		echo "${M}Reconfigure Locales"
+		if [ "$1" == 'pre-du' -a "$DISTRO" == 'sidux' ];then
+			echo $MLINE
+			echo "${S}You will only see this option one time prior to the $DU_UPGRADE."
+			echo "If you would like to run it again, go to section: ${C}Miscellaneous Tweaks/Advanced Tweaks${S}"
+			echo "${M}NOTE: if you are a current $SCRIPT_NAME user, this is simply a new feature which runs"
+			echo "one time, if you have already done this, or don't want to do it, just skip it."
+		fi
+	
+		echo $LINE
+		echo "${S}This operation will run this command: ${C}$upl${S}"
+		echo "This will start the reconfiguring of your ${C}locales${S}. You will see a box with"
+		echo "all the available locales. The ones you are currently using have a small star"
+		echo "next to them, you can activate or deactivate that local by hitting your space bar."
+		echo
+		echo "You can move up and down the list using your up/down arrows. Once you have selected"
+		echo "or deselected your desired locales, use your tab key to highlight ok, hit enter,"
+		echo "then ${C}dpkg${S} will ask you to select your default system locale."
+		echo
+		echo "Once you select OK and hit enter, ${C}dpkg${S} will get rid of or add your locales."
+		echo " Hint: for older installs, change your default locale to use ${C}UTF 8${S},"
+		echo "that will let you see all the characters."
+		echo $LINE
+		echo "${C}1 - yes-reconfigure${S} Run the locales reconfiguration to remove extra locales."
+		echo "${C}2 - no-change-continue${S} Continue without changing anything."
+		echo $LINE
+		echo $SLE
+		echo $LINE
+		
+		select opt in $options
+		do
+			case $opt in
+				yes-reconfigure)
+					echo "${S}Ok, running the reconfiguration now...${N}"
+					eval $upl
+					echo "${S}Done with the reconfiguration now...${N}"
+					;;
+				no-change-continue)
+					echo "${S}Skipping the locales reconfiguration.${N}"
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+	
+		eval $LOGUE
+		if [ "$repeat" == 'true' ];then
+			update_locales $1
+		fi
+	fi
 }
 # this should search and modify .bashrc if required.
 update_bash_completion()

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.2.4
-####  Date: March 9 2009
+####  version: 1.2.5
+####  Date: March 27 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -181,6 +181,7 @@ pre_du_tasks()
 
 	echo $LINE
 	echo "${S}Running assorted tasks to prepare for the system $DU_UPGRADE...${N}"
+	launch_function_trigger 'reconfigure-locales'
 	if [ "$SYSTEM_BASE" != 'stable' -a "$SYSTEM_BASE" != 'etch' ];then
 		set_hold_install hold
 
