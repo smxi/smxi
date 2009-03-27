@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.0
+####  version: 1.22.1
 ####  Date: March 27 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1439,14 +1439,23 @@ restore_standard_sources()
 # args: $1 - pre-du / misc-launched
 update_locales()
 {
-	if [ "$1" == 'misc-launched' -o "$B_LOCALES" == 'true' ] || [ "$1" == 'pre-du' -a "$DISTRO" == 'sidux' ];then
+	local distroTest='false'
+	local upl='dpkg-reconfigure locales'
+	local opt='' options='yes-reconfigure no-change-continue'
+	
+	# only some distros have lots of locales added
+	case $DISTRO in
+		antix|sidux)
+			distroTest='true'
+			;;
+	esac
+	
+	if [ "$1" == 'misc-launched' -o "$B_LOCALES" == 'true' ] || [ "$1" == 'pre-du' -a "$distroTest" == 'true' ];then
 		eval $LOGUS
-		local upl='dpkg-reconfigure locales'
-		local opt='' options='yes-reconfigure no-change-continue'
-		
+
 		echo $MLINE
 		echo "${M}Reconfigure Locales"
-		if [ "$1" == 'pre-du' -a "$DISTRO" == 'sidux' ];then
+		if [ "$1" == 'pre-du' -a "$distroTest" == 'true' ];then
 			echo $MLINE
 			echo "${S}You will only see this option one time prior to the $DU_UPGRADE."
 			echo "If you would like to run it again, go to section: ${C}Miscellaneous Tweaks/Advanced Tweaks${S}"
@@ -1499,6 +1508,7 @@ update_locales()
 		fi
 	fi
 }
+
 # this should search and modify .bashrc if required.
 update_bash_completion()
 {
