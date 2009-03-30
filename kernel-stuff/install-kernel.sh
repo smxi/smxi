@@ -235,7 +235,10 @@ install_kernel_debs()
 		echo $LINE
 		echo "Installing archived kernel deb package: $package"
 		dpkg -i $package
-		installedPackages="$installedPackages $package"
+		# only add if the install went right
+		if [ "$?" -eq 0 ];then
+			installedPackages="$installedPackages $package"
+		fi
 	done
 	# get these into system for aptitude
 	if [ "$APT_TYPE" == 'aptitude' -a -n "$installedPackages" ];then
@@ -312,7 +315,10 @@ kernel_module_deb_installer()
 					echo $LINE
 					echo 'Installing archived kernel module deb: '$modulePackageDeb
 					dpkg -i $modulePackageDeb
-					installedPackages="$installedPackages $modulePackageDeb"
+					# only add if the install went right
+					if [ "$?" -eq 0 ];then
+						installedPackages="$installedPackages $modulePackageDeb"
+					fi
 					if [ "$?" -ne 0 ]; then
 						#apt-get --fix-broken install
 						:
