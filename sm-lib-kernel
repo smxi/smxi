@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.24
+####  version: 2.5.26
 ####  Date: March 29 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -27,12 +27,14 @@
 ########################################################################
 ####  VARIABLES
 ########################################################################
-# 32 bit lists 2.6.28-8.lqx.1-liquorix-686 
+# 32 bit lists 
 KERNEL_LIST_32='2.6.28-6.slh.2-sidux-686  2.6.27-10.slh.2-sidux-686 2.6.26-6.slh.4-sidux-686 2.6.25-14.slh.2-sidux-686 2.6.24-5.slh.2-sidux-686'
 KERNEL_ADVANCED_LIST_32=''
-# 64 bit lists 2.6.28-8.lqx.1-liquorix-amd64 
+TESTING_KERNEL_32='2.6.28-8.lqx.1-liquorix-686'
+# 64 bit lists 
 KERNEL_LIST_64='2.6.28-6.slh.2-sidux-amd64 2.6.27-10.slh.2-sidux-amd64 2.6.26-6.slh.4-sidux-amd64 2.6.25-14.slh.2-sidux-amd64 2.6.24-5.slh.2-sidux-amd64'
 KERNEL_ADVANCED_LIST_64=''
+TESTING_KERNEL_64='2.6.28-8.lqx.1-liquorix-amd64'
 
 ########################################################################
 ####  FUNCTIONS
@@ -567,16 +569,21 @@ install_the_module()
 set_kernel_data()
 {
 	eval $LOGUS
-	local isUpSmp=''
+	local isUpSmp='' testingKernel=''
 
 	# run_script_import $LIB_KERNELS
 
 	if [ "$BITS" == "64" ];then
 		KERNEL_LIST=$KERNEL_LIST_64 # with -K, this includes advanced list
 		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_64
+		testingKernel=$TESTING_KERNEL_64
 	else
 		KERNEL_LIST=$KERNEL_LIST_32
 		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_32
+		testingKernel=$TESTING_KERNEL_32
+	fi
+	if [ "$B_TESTING_1" == 'true' ];then
+		KERNEL_LIST="$testingKernel $KERNEL_LIST"
 	fi
 	# this will be used for kernel mirror selection, only standard/testing default will be
 	# attempted via mirror install
