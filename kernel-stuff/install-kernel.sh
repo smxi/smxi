@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh - installer for archived kernels
 ####  version: 2.0.0
-####  Date: 2009-03-30
+####  Date: March 30 2009
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
 ####  Copyright (C) 2006-2008: Kel Modderman Stefan Lippers-Hollmann (sidux project)
