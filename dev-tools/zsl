@@ -116,8 +116,9 @@ copy_files_to_target_directory()
 set_file_permissions()
 {
 	echo "Changing file owner to root and permissions to -x..."
-	chown root $ZIP_DIR/*
+	chown root:root $ZIP_DIR/*
 	chmod +x $ZIP_DIR/*
+	ls -l $ZIP_DIR/
 }
 
 create_zip_file()

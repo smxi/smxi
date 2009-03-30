@@ -469,7 +469,7 @@ zip_it_up()
 {
 	if [ "$UPDATE_TYPE" != 'r' -a "$UPDATE_TYPE" != 'i' ];then
 		cd $HOME
-		su # && ${DEV_TOOLS_SVN}zsl
+		su -c "${DEV_TOOLS_SVN}zsl"
 	fi
 }
 
