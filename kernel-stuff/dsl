@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.2.1
-####  Date: March 10 2009
+####  version: 2.3.0
+####  Date: March 30 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -31,11 +31,11 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 SVN_DIR="$HOME/bin/scripts/smxi/svn/trunk"
 KERNEL_DIR="$HOME/large/kernel-zips"
 KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
-KERNEL_32_INSTALLER_DIR="$KERNEL_DIR/32-installer"
-KERNEL_64_INSTALLER_DIR="$KERNEL_DIR/64-installer"
+KERNEL_INSTALLER_DIR="$KERNEL_DIR/kernel-installer"
 
 # script values
 ALT_PATH=''
+GCC_ALT=''
 KERNEL_TYPE='sidux' # default to this
 KERNEL_MAIN=''
 KERNEL_WORKING=''
@@ -92,6 +92,12 @@ error_handler()
 		10)
 			message="You can't run -r and -z together, they are mutually exclusive."
 			;;
+		11)
+			message="Unsupported GCC -g data: $2"
+			;;
+		12)
+			message="You have failed to set non default kernel -l flag"
+			;;
 	esac
 	echo $LINE
 	echo -e $message
@@ -111,11 +117,17 @@ get_options()
 		error_handler 8 "Option: $1 used but must start with a: -"
 	fi
 
-	while getopts :ehk:lrz opt
+	while getopts :eg:hk:lrz opt
 	do
 		case $opt in
 			e)	B_EXP='true'
 				ALT_PATH='exp.'
+				;;
+			g) if [ -n "$( grep -Es '[3-4]\.[0-9]' <<< $OPTARG )" ];then
+					GCC_ALT=$OPTARG
+				else
+					error_handler 11 "$OPTARG"
+				fi
 				;;
 			k)	KERNEL_WORKING=$OPTARG
 				;;
@@ -128,7 +140,8 @@ get_options()
 			h)
 				echo "Useage:
 -e Use exp.main data
--k Kernel to download. Requires -k <2.6.26-8.lqx.2 type syntax
+-g Use alternate GCC values. Syntax: -g [3-4].[0-9]
+-k Kernel to download. Requires -k <2.6.26-8.lqx.2> type syntax
    NOTE: -k <kernel> is required to run dsl always
 -r Redo zip without downloading again.
 -z Download only, no zip creation
@@ -146,6 +159,10 @@ get_options()
 	fi
 	if [ -z "$KERNEL_WORKING" ];then
 		error_handler 3
+	fi
+	# avoid careless errors
+	if [ -n "$( grep 'lqx' <<< $KERNEL_WORKING )" -a "$KERNEL_TYPE" != 'liquorix' ];then
+		error_handler 12
 	fi
 }
 
@@ -193,18 +210,15 @@ start_up_tests()
 	fi
 
 	# make sure the paths you made are right and exist
-	for startDir in $KERNEL_DIR $KERNEL_32_INSTALLER_DIR $KERNEL_64_INSTALLER_DIR $SVN_DIR
+	for startDir in $KERNEL_DIR $KERNEL_INSTALLER_DIR $SVN_DIR
 	do
 		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
 		fi
 	done
 
-	if [ ! -f $KERNEL_32_INSTALLER_DIR/install-kernel-32.sh ];then
-		error_handler 6 $KERNEL_32_INSTALLER_DIR/install-kernel-32.sh
-	fi
-	if [ ! -f $KERNEL_64_INSTALLER_DIR/install-kernel-64.sh ];then
-		error_handler 6 $KERNEL_64_INSTALLER_DIR/install-kernel-64.sh
+	if [ ! -f $KERNEL_INSTALLER_DIR/install-kernel.sh ];then
+		error_handler 6 "$KERNEL_INSTALLER_DIR/install-kernel.sh"
 	fi
 
 	echo "Start up tests: passed"
@@ -379,11 +393,17 @@ add_update_installer_files()
 
 	echo $LINE
 	echo 'Adding installer files and updating files...'
-	cp $KERNEL_32_INSTALLER_DIR/install-kernel-32.sh 32/install-kernel.sh
-	cp $KERNEL_64_INSTALLER_DIR/install-kernel-64.sh 64/install-kernel.sh
+	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 32/install-kernel.sh
+	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 64/install-kernel.sh
 
-	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString32'\"/' 32/install-kernel.sh
-	sed -i 's/VER=\".*\"/VER=\"'$fullKernelString64'\"/' 64/install-kernel.sh
+	sed -i 's/^VER=\".*\"/VER=\"'$fullKernelString32'\"/' 32/install-kernel.sh
+	sed -i 's/^VER=\".*\"/VER=\"'$fullKernelString64'\"/' 64/install-kernel.sh
+	
+	if [ -n "$GCC_ALT" ];then
+		echo "Updating GCC data to use: $GCC_ALT"
+		sed -i 's/^GCC_VERSION=\".*\"/GCC_VERSION=\"'$GCC_ALT'\"/' 32/install-kernel.sh
+		sed -i 's/^GCC_VERSION=\".*\"/GCC_VERSION=\"'$GCC_ALT'\"/' 64/install-kernel.sh
+	fi
 }
 
 make_zip_files()

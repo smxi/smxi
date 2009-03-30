@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.10
-####  Date: March 29 2009
+####  version: 2.4.11
+####  Date: March 30 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -413,12 +413,10 @@ finalize_sm_versions()
 # extra scripts used in smxi, kernel installers for zipped kernels
 update_kernel_installers()
 {
-	local installer32='install-kernel-32.sh'
-	local installer64='install-kernel-64.sh'
+	local kernelInstaller='install-kernel.sh'
 
 	# update kernel installers if needed
-	cp -f ${KERNEL_DIR}64-installer/$installer64 $KERNEL_SVN$installer64
-	cp -f ${KERNEL_DIR}32-installer/$installer32 $KERNEL_SVN$installer32
+	cp -f ${KERNEL_DIR}kernel-installer/$kernelInstaller $KERNEL_SVN$kernelInstaller
 }
 
 # developer scripts for creating smxi
