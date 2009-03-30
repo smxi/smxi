@@ -1,6 +1,7 @@
 #!/bin/bash
 ########################################################################
-####  Script Name:  install-kernel.sh - installer for archived kernels
+####  Script Name:  install-kernel.sh
+####  Description: this is the included installer script in smxi kernel zip files
 ####  version: 2.0.0
 ####  Date: March 30 2009
 ########################################################################
@@ -9,8 +10,8 @@
 ####  Subsequent changes: copyright (C) 2008-2009: Harald Hope
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
-####  the terms of the GNU General Public License 2 as published by the Free Software
-####  Foundation.
+####  the terms of the GNU General Public License version 2 as published by the Free
+####  Software Foundation.
 ####
 ####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -19,7 +20,7 @@
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 ########################################################################
 ####  NOTE: kernel names are upgraded automatically for each new archive
-
+####  Dynamic dsl updates: KERNEL_VERSION; Optional dynamic: GCC_VERSION
 ########################################################################
 #### VARIABLES
 ########################################################################
@@ -27,8 +28,8 @@ LINE='--------------------------------------------------------------------'
 ## set core variables: 
 # make this match version kernel was built with, can be overridden with -g in dsl
 GCC_VERSION='4.3'
-# VER will be set dynamically by dsl
-VER="2.6.24"
+# KERNEL_VERSION will be set dynamically by dsl, must use "" for smxi version data
+KERNEL_VERSION="2.6.24"
 SCRIPT_NAME=$( basename $0)
 UDEV_CONFIG_SIDUX='0.5.0'
 
@@ -51,9 +52,9 @@ error_handler()
 	case $1 in
 		1)	message="$SCRIPT_NAME must be run as root."
 			;;
-		2)	message="/boot/vmlinuz-$VER already exists."
+		2)	message="/boot/vmlinuz-$KERNEL_VERSION already exists."
 			;;
-		3)	message="Kernel file linux-image-$VER failed to install correctly.\nPlease try to find out what went wrong with the install process."
+		3)	message="Kernel file linux-image-$KERNEL_VERSION failed to install correctly.\nPlease try to find out what went wrong with the install process."
 			;;
 	esac
 
@@ -96,7 +97,7 @@ start_up_tests()
 		fi
 	fi
 	
-	if [ -e "/boot/vmlinuz-$VER" ]; then
+	if [ -e "/boot/vmlinuz-$KERNEL_VERSION" ]; then
 		error_handler 2
 	fi
 	echo 'Startup tests passed. Continuing...'
@@ -216,7 +217,7 @@ install_kernel_debs()
 	# add linux-image and linux-headers to the install lists
 	# the order here is critical, common is a dependency
 	local package='' linuxHeadersAllArch='' linuxHeadersAll=''
-	local linuxImage=$( ls linux-image-$VER*.deb 2> /dev/null )
+	local linuxImage=$( ls linux-image-$KERNEL_VERSION*.deb 2> /dev/null )
 	local linuxHeadersCommon=$( ls linux-headers-*-common*.deb 2> /dev/null )
 	local linuxHeadersMain=$( ls linux-headers-*.deb 2> /dev/null | grep -v '\-all' )
 	# linuxHeadersAllArch=$( ls linux-headers-*-all-*.deb 2> /dev/null )
@@ -244,7 +245,7 @@ install_kernel_debs()
 	
 	# something went wrong, allow apt an attempt to fix it
 	if [ "$?" -ne 0 ]; then
-		if [ -e "/boot/vmlinuz-$VER" ];then
+		if [ -e "/boot/vmlinuz-$KERNEL_VERSION" ];then
 			apt-get --fix-broken install
 		else
 			if [ -x /usr/sbin/update-grub ];then
@@ -260,8 +261,8 @@ post_kernel_install_steps()
 	echo $LINE
 	echo -n 'Running post kernel install steps...'
 	# we do need an initrd
-	if [ ! -f "/boot/initrd.img-$VER" ];then
-		update-initramfs -k "$VER" -c
+	if [ ! -f "/boot/initrd.img-$KERNEL_VERSION" ];then
+		update-initramfs -k "$KERNEL_VERSION" -c
 	fi
 	
 	# set new kernel as default
@@ -275,17 +276,17 @@ post_kernel_install_steps()
 		rm -f /boot/System.map
 	fi
 	if [ -L /vmlinuz ];then
-		ln -fs "boot/vmlinuz-$VER" /vmlinuz
+		ln -fs "boot/vmlinuz-$KERNEL_VERSION" /vmlinuz
 	fi
 	if [ -L /initrd.img ];then
-		ln -fs "boot/initrd.img-$VER" /initrd.img
+		ln -fs "boot/initrd.img-$KERNEL_VERSION" /initrd.img
 	fi
 	# in case we just created an initrd, update menu.lst
 	if [ -x /usr/sbin/update-grub ]; then
 		update-grub
 	fi
 	# set symlinks to the kernel headers
-	ln -fs "linux-headers-$VER" /usr/src/linux >/dev/null 2>&1
+	ln -fs "linux-headers-$KERNEL_VERSION" /usr/src/linux >/dev/null 2>&1
 	echo 'done.'
 }
 
@@ -303,7 +304,7 @@ kernel_module_deb_installer()
 			modulePackage="$( dpkg -S $modulePath 2>/dev/null )"
 			# need to avoid modules already in the kernel image
 			if [ -n "$modulePackage" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ]; then
-				modulePackage="$( echo $modulePackage | sed s/$( uname -r ).*/$VER/g )"
+				modulePackage="$( echo $modulePackage | sed s/$( uname -r ).*/$KERNEL_VERSION/g )"
 				#if grep-aptavail -PX "${modulePackage}" >/dev/null 2>&1; then
 				modulePackageDeb=$( ls $modulePackage*.deb 2> /dev/null )
 				if [ -n "$modulePackageDeb" -a -f "$modulePackageDeb" ]
@@ -343,7 +344,7 @@ madwifi_module_handler()
 				if [ -d /usr/src/modules/madwifi/ ]; then
 					rm -rf /usr/src/modules/madwifi/
 				fi
-				m-a --text-mode --non-inter -l "$VER" a-i madwifi
+				m-a --text-mode --non-inter -l "$KERNEL_VERSION" a-i madwifi
 			else
 				echo $LINE
 				echo "Atheros Wireless Network Adaptor will not work until"

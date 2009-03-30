@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.0
+####  version: 2.3.1
 ####  Date: March 30 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -396,8 +396,8 @@ add_update_installer_files()
 	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 32/install-kernel.sh
 	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 64/install-kernel.sh
 
-	sed -i 's/^VER=\".*\"/VER=\"'$fullKernelString32'\"/' 32/install-kernel.sh
-	sed -i 's/^VER=\".*\"/VER=\"'$fullKernelString64'\"/' 64/install-kernel.sh
+	sed -i 's/^KERNEL_VERSION=\".*\"/KERNEL_VERSION=\"'$fullKernelString32'\"/' 32/install-kernel.sh
+	sed -i 's/^KERNEL_VERSION=\".*\"/KERNEL_VERSION=\"'$fullKernelString64'\"/' 64/install-kernel.sh
 	
 	if [ -n "$GCC_ALT" ];then
 		echo "Updating GCC data to use: $GCC_ALT"
