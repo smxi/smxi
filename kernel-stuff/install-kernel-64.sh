@@ -6,7 +6,7 @@
 # NOTE: relevant paths and kernel names are upgraded automatically for each new archive
 # Changes and modifications are by Harald Hope
 # Utility version and date:
-# version: 1.1.0
+# version: 1.1.1
 # date: 2009-03-29
 
 ## set core variables: VER will be set dynamically
@@ -20,7 +20,6 @@ LINE='--------------------------------------------------------------------'
 # args: $1 - package to test; $2 c/i
 check_package_status()
 {
-	eval $LOGUS
 	local packageVersion='' statusType=''
 
 	case $2 in
@@ -33,12 +32,12 @@ check_package_status()
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
 
 	echo $packageVersion
-	log_function_data "Package Version: $packageVersion"
-	eval $LOGUE
 }
 
 if [ "$(id -u)" -ne 0 ]; then
-	[ -x "$(which su-to-root)" ] && exec su-to-root -c "$0"
+	if [ -x "$(which su-to-root)" ];then
+		exec su-to-root -c "$0"
+	fi
 	printf "ERROR: $0 needs root capabilities, please start it as root.\n\n" >&2
 	exit 1
 fi
