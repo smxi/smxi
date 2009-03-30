@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.10.6
-####  Date: February 27 2009
+####  version: 2.10.7
+####  Date: March 29 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
@@ -113,7 +113,8 @@ advanced_kernel_install()
 	echo "${M}NOTE: The listed kernels are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
 	echo "For current, standard apt kernel install, RETURN TO MAIN MENU!!"
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
-	echo "       (${C}slh${S} marked kernels are sidux kernels - 2.6.25 and greater: no fglrx support)"
+	echo "       ${C}slh${S} marked kernels are sidux kernels - 2.6.25 and greater: no fglrx support"
+	echo "       ${C}liquorix${S} kernels: zen kernel sources; made by damentz; have fglrx support: ${M}EXPERIMENTAL${S}"
 	echo
 	print_alt_kernel_option "$altKernelOption1" "$altKernOpt1" "$altKernelText1"
 	print_alt_kernel_option "$altKernelOption4" "$altKernOpt4" "$altKernelText4"
