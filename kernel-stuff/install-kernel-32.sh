@@ -1,18 +1,41 @@
 #!/bin/bash
 
-# install-kernel.sh - installer for archived 32 bit sidux kernels
-# Script is based on kelmo and slh's kernel installer from the
-# old sidux kernel installer zips. Copyright belongs to them
+# install-kernel.sh - installer for archived 32 bit kernels
+# Script is based on kelmo and slh's kernel installer. Copyright belongs to them
 # license: GPL 2
 # NOTE: relevant paths and kernel names are upgraded automatically for each new archive
-# zip file created, this is only the working template.
-# Changes and modifications are by Harald Hope, and neither slh nor kelmo should be blamed
-# for any mistakes I make.
+# Changes and modifications are by Harald Hope
 # Utility version and date:
-# version: 1.0.2
-# date: 2009-02-25
+# version: 1.1.0
+# date: 2009-03-29
 
-VER="2.6.24-2.6.24.3.slh.11-sidux-686"
+## set core variables: VER will be set dynamically
+VER="2.6.24"
+# make this match version kernel was built with
+GCC_VERSION='4.3'
+INSTALL_DEP=''
+LINE='--------------------------------------------------------------------'
+
+# Returns null if package is not available in user system apt.
+# args: $1 - package to test; $2 c/i
+check_package_status()
+{
+	eval $LOGUS
+	local packageVersion='' statusType=''
+
+	case $2 in
+		c)	statusType='Candidate:'
+			;;
+		i)	statusType='Installed:'
+			;;
+	esac
+
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+
+	echo $packageVersion
+	log_function_data "Package Version: $packageVersion"
+	eval $LOGUE
+}
 
 if [ "$(id -u)" -ne 0 ]; then
 	[ -x "$(which su-to-root)" ] && exec su-to-root -c "$0"
@@ -53,9 +76,12 @@ EOF
 fi
 
 # install important dependencies before attempting to install kernel
-INSTALL_DEP=
-[ -x /usr/bin/gcc-4.2 ]           || INSTALL_DEP="$INSTALL_DEP gcc-4.2"
-[ -x /usr/sbin/update-initramfs ] || INSTALL_DEP="$INSTALL_DEP initramfs-tools"
+if [ ! -x /usr/bin/gcc-$GCC_VERSION ];then
+	INSTALL_DEP="$INSTALL_DEP gcc-$GCC_VERSION"
+fi
+if [ ! -x /usr/sbin/update-initramfs ];then
+	INSTALL_DEP="$INSTALL_DEP initramfs-tools"
+fi
 
 # take care to install b43-fwcutter, if bcm43xx-fwcutter is already installed
 if dpkg -l bcm43xx-fwcutter 2>/dev/null | grep -q '^[hi]i' || [ -e /lib/firmware/bcm43xx_pcm4.fw ]; then
@@ -65,27 +91,32 @@ fi
 # make sure udev-config-sidux is up to date
 # - do not blacklist b43, we need it for kernel >= 2.6.23
 # - make sure to install the IEEE1394 vs. FireWire "Juju" blacklist
-if [ -r /etc/modprobe.d/sidux ] || [ -r /etc/modprobe.d/ieee1394 ] || [ -r /etc/modprobe.d/mac80211 ]; then
-	VERSION=$(dpkg -l udev-config-sidux 2>/dev/null | awk '/^[hi]i/{print $3}')
-	dpkg --compare-versions ${VERSION:-0} lt 0.4.3
-	if [ "$?" -eq 0 ]; then
+if [ -n "$( check_package_status 'udev-config-sidux' )" ];then
+	if [ -r /etc/modprobe.d/sidux ] || [ -r /etc/modprobe.d/ieee1394 ] || [ -r /etc/modprobe.d/mac80211 ]; then
+		VERSION=$(dpkg -l udev-config-sidux 2>/dev/null | awk '/^[hi]i/{print $3}')
+		dpkg --compare-versions ${VERSION:-0} lt 0.4.3
+		if [ "$?" -eq 0 ]; then
+			INSTALL_DEP="$INSTALL_DEP udev-config-sidux"
+		fi
+	else
 		INSTALL_DEP="$INSTALL_DEP udev-config-sidux"
 	fi
-else
-	INSTALL_DEP="$INSTALL_DEP udev-config-sidux"
 fi
-
-# check resume partition configuration is valid
-if [ -x /usr/sbin/get-resume-partition ]; then
-	VERSION=$(dpkg -l sidux-scripts 2>/dev/null | awk '/^[hi]i/{print $3}')
-	dpkg --compare-versions ${VERSION:-0} ge 0.1.38
-	if [ "$?" -eq 0 ]; then
-		get-resume-partition
+if [ -n "$( check_package_status 'sidux-scripts' 'i' )" ];the
+	# check resume partition configuration is valid
+	if [ -x /usr/sbin/get-resume-partition ]; then
+		VERSION=$(dpkg -l sidux-scripts 2>/dev/null | awk '/^[hi]i/{print $3}')
+		dpkg --compare-versions ${VERSION:-0} ge 0.1.38
+		if [ "$?" -eq 0 ]; then
+			get-resume-partition
+		fi
 	fi
 fi
 
 # install kernel, headers, documentation and any extras that were detected
 if [ -n "$INSTALL_DEP" ]; then
+	echo $LINE
+	echo "Installing missing applications for kernel install."
 	apt-get update
 	apt-get --assume-yes install $INSTALL_DEP
 fi
@@ -94,17 +125,19 @@ fi
 # the order here is critical, common is a dependency
 LIMAGE=$( ls linux-image-${VER}*.deb 2> /dev/null )
 LHEADERS_COMMON=$( ls linux-headers-*-common*.deb 2> /dev/null )
-LHEADERS_SIDUX=$( ls linux-headers-*-sidux*.deb 2> /dev/null )
-LHEADERS_ALL_ARCH=$( ls linux-headers-*-all-*.deb 2> /dev/null )
-LHEADERS_ALL=$( ls linux-headers-*-all_*.deb 2> /dev/null )
+LHEADERS_MAIN=$( ls linux-headers-*.deb 2> /dev/null | grep -v '\-all' )
+# LHEADERS_ALL_ARCH=$( ls linux-headers-*-all-*.deb 2> /dev/null )
+# LHEADERS_ALL=$( ls linux-headers-*-all_*.deb 2> /dev/null )
 LKBUILD=$( ls linux-kbuild-2.6*.deb 2> /dev/null )
 
-INSTALL_KERNEL="$LIMAGE $LHEADERS_COMMON $LHEADERS_SIDUX $LHEADERS_ALL_ARCH $LHEADERS_ALL $LKBUILD"
+INSTALL_KERNEL="$LIMAGE $LHEADERS_COMMON $LHEADERS_MAIN $LHEADERS_ALL_ARCH $LHEADERS_ALL $LKBUILD"
+echo $LINE
 echo 'Installing dpkg based local kernel components now...'
 echo 'Install directory: ' $(pwd)
 for PACKAGE in $INSTALL_KERNEL
 do
-	echo 'Sidux archived kernel installing kernel package: '$PACKAGE
+	echo $LINE
+	echo 'Installing archived kernel package: '$PACKAGE
 	dpkg -i $PACKAGE
 done
 
@@ -145,13 +178,15 @@ for i in acer_acpi acerhk acx atl2 aufs av5100 btrfs drbd8 eeepc_acpi em8300 et1
 	MODULE_PATH="$(/sbin/modinfo -k $(uname -r) -F filename "${i}" 2>/dev/null)"
 	if [ -n "${MODULE_PATH}" ]; then
 		MODULE_PACKAGE="$(dpkg -S ${MODULE_PATH} 2>/dev/null)"
-		if [ -n "${MODULE_PACKAGE}" ]; then
+		# need to avoid modules already in the kernel image
+		if [ -n "${MODULE_PACKAGE}" -a -z "$( grep 'linux-image-' <<< ${MODULE_PACKAGE} )" ]; then
 			MODULE_PACKAGE="$(echo ${MODULE_PACKAGE} | sed s/$(uname -r).*/${VER}/g)"
 			#if grep-aptavail -PX "${MODULE_PACKAGE}" >/dev/null 2>&1; then
 			MPACKAGE=$( ls ${MODULE_PACKAGE}*.deb 2> /dev/null )
 			if [ -n "$MPACKAGE" -a -f "$MPACKAGE" ]
 			then
-				echo 'Sidux archive kernel module installing: '$MPACKAGE
+				echo $LINE
+				echo 'Installing archived kernel module: '$MPACKAGE
 				dpkg -i $MPACKAGE
 				#apt-get --assume-yes install "${MODULE_PACKAGE}"
 				if [ "$?" -ne 0 ]; then
@@ -179,7 +214,7 @@ if /sbin/modinfo -k $(uname -r) -F filename ath_pci >/dev/null 2>&1; then
 
 		m-a --text-mode --non-inter -l "${VER}" a-i madwifi
 	else
-		echo
+		echo $LINE
 		echo "Atheros Wireless Network Adaptor will not work until"
 		echo "the non-free madwifi driver is reinstalled."
 		echo
@@ -187,7 +222,7 @@ if /sbin/modinfo -k $(uname -r) -F filename ath_pci >/dev/null 2>&1; then
 fi
 
 # grub notice
-echo
+echo $LINE
 echo "Now you can simply reboot when using GRUB (default). If you use the LILO"
 echo "bootloader you will have to configure it to use the new kernel."
 echo
@@ -198,5 +233,5 @@ echo "For more details about UUID or LABEL fstab usage see the sidux manual:"
 echo "   http://manual.sidux.com/en/part-cfdisk-en.htm#disknames"
 echo
 echo "Have fun!"
-echo
+echo 
 
