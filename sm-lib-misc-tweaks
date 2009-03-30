@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.2
-####  Date: March 27 2009
+####  version: 1.22.3
+####  Date: March 29 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1445,7 +1445,7 @@ update_locales()
 	
 	# only some distros have lots of locales added
 	case $DISTRO in
-		antix|mepis|sidux)
+		antix|mepis*|sidux)
 			distroTest='true'
 			;;
 	esac
