@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.0.0
+####  version: 2.0.1
 ####  Date: March 30 2009
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
@@ -223,7 +223,8 @@ install_kernel_debs()
 	# linuxHeadersAllArch=$( ls linux-headers-*-all-*.deb 2> /dev/null )
 	# linuxHeadersAll=$( ls linux-headers-*-all_*.deb 2> /dev/null )
 	local linuxKbuild=$( ls linux-kbuild-2.6*.deb 2> /dev/null )
-	local kernelPackages="$linuxImage $linuxHeadersCommon $linuxHeadersMain $linuxHeadersAllArch $linuxHeadersAll $linuxKbuild"
+	# dependency sequence: image -> kbuild (if present) -> headers
+	local kernelPackages="$linuxImage $linuxKbuild $linuxHeadersCommon $linuxHeadersMain"
 	local installedPackages=''
 	
 	echo $LINE
