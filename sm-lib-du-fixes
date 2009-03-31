@@ -442,11 +442,17 @@ libc6_fix_1()
 	local prefId='libc6-fix-4'
 	local smPref=$( sm_pref_tester $prefId )
 	local kernelMessage=' with your new kernel'
-	local initramfsTools='initramfs-tools'
 	
-	if [ "$1" == 'pre-du' ];then
-		kernelMessage=" before you $DU_UPGRADE"
-	fi
+	case $1 in
+		pre-du)
+			kernelMessage=" before you $DU_UPGRADE"
+			;;
+		kernel)
+			kernelMessage=' with your new kernel'
+			# we want to make sure this is done prior to running locales update if never done
+			launch_function_trigger 'reconfigure-locales'
+			;;
+	esac
 
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ];then
 		echo $LINE
