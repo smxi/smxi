@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.2.6
+####  version: 1.2.7
 ####  Date: March 30 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -450,7 +450,8 @@ libc6_fix_1()
 
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ];then
 		echo $LINE
-		echo "${S}Updating ${C}libc6/initramfs-tools/locales/tzdata${S} packages to make sure" echo "your system will work right$kernelMessage...${N}"
+		echo "${S}Updating ${C}libc6/initramfs-tools/locales/tzdata${S} packages to make sure"
+		echo "your system will work right$kernelMessage...${N}"
 		#echo
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
