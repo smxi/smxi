@@ -25,12 +25,13 @@
 #### VARIABLES
 ########################################################################
 LINE='--------------------------------------------------------------------'
-## set core variables: 
+## set core variables: gcc/kernel version are dynamically set if needed
 # make this match version kernel was built with, can be overridden with -g in dsl
 GCC_VERSION='4.3'
 # KERNEL_VERSION will be set dynamically by dsl, must use "" for smxi version data
 KERNEL_VERSION="2.6.24"
-SCRIPT_NAME=$( basename $0)
+
+SCRIPT_NAME=$( basename $0 )
 UDEV_CONFIG_SIDUX='0.5.0'
 
 # initialize globals
@@ -170,15 +171,19 @@ check_script_dependencies()
 	# make sure udev-config-sidux is up to date
 	# - do not blacklist b43, we need it for kernel >= 2.6.23
 	# - make sure to install the IEEE1394 vs. FireWire "Juju" blacklist
-	if [ -n "$( check_package_status 'udev-config-sidux' 'c' )" ];then
+	# only need this for sidux kernels
+	if [ -n "$( check_package_status 'udev-config-sidux' 'c' )" -a -n "$( grep 'slh' <<< $KERNEL_VERSION )" ];then
 		if [ -r /etc/modprobe.d/sidux ] || [ -r /etc/modprobe.d/ieee1394 ] || [ -r /etc/modprobe.d/mac80211 ]; then
-			packageVersion=$(dpkg -l udev-config-sidux 2>/dev/null | awk '/^[hi]i/{print $3}')
+			packageVersion=$(dpkg -l udev-config-sidux 2>/dev/null | awk '
+			/^(hi|ii)/ {
+				print $3
+			}')
 			dpkg --compare-versions ${packageVersion:-0} lt $UDEV_CONFIG_SIDUX
 			if [ "$?" -eq 0 ]; then
 				installDependencies="$installDependencies udev-config-sidux"
 			fi
-		else
-			installDependencies="$installDependencies udev-config-sidux"
+# 		else
+# 			installDependencies="$installDependencies udev-config-sidux"
 		fi
 	fi
 	if [ -z "$( check_package_status 'sidux-scripts' 'i' )" -a -n "$( check_package_status 'sidux-scripts' 'c' )" ];then
@@ -199,7 +204,10 @@ set_resume_partition()
 	if [ -n "$( check_package_status 'sidux-scripts' 'i' )" ];then
 		# check resume partition configuration is valid
 		if [ -x /usr/sbin/get-resume-partition ]; then
-			packageVersion=$( dpkg -l sidux-scripts 2>/dev/null | awk '/^[hi]i/{print $3}' )
+			packageVersion=$( dpkg -l sidux-scripts 2>/dev/null | awk '
+			/^(hi|ii)/ {
+				print $3
+			}' )
 			dpkg --compare-versions ${packageVersion:-0} ge 0.1.38
 			if [ "$?" -eq 0 ]; then
 				get-resume-partition
