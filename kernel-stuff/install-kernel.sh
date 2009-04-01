@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.0.2
-####  Date: March 31 2009
+####  version: 2.1.0
+####  Date: April 1 2009
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
 ####  Copyright (C) 2006-2008: Kel Modderman Stefan Lippers-Hollmann (sidux project)
@@ -164,8 +164,10 @@ check_script_dependencies()
 	fi
 	
 	# take care to install b43-fwcutter, if bcm43xx-fwcutter is already installed
-	if dpkg -l bcm43xx-fwcutter 2>/dev/null | grep -q '^[hi]i' || [ -e /lib/firmware/bcm43xx_pcm4.fw ]; then
-		dpkg -l b43-fwcutter 2>/dev/null | grep -q '^[hi]i' || installDependencies="$installDependencies b43-fwcutter"
+	if [ -n "$( check_package_status 'bcm43xx-fwcutter' 'i' )" ] || [ -e /lib/firmware/bcm43xx_pcm4.fw ]; then
+		if [ -z "$( check_package_status 'b43-fwcutter' 'i' )" -a -n "$( check_package_status 'b43-fwcutter' 'c' )" ];then
+ 			installDependencies="$installDependencies b43-fwcutter"
+ 		fi
 	fi
 	
 	# make sure udev-config-sidux is up to date
@@ -174,10 +176,7 @@ check_script_dependencies()
 	# only need this for sidux kernels
 	if [ -n "$( check_package_status 'udev-config-sidux' 'c' )" -a -n "$( grep 'slh' <<< $KERNEL_VERSION )" ];then
 		if [ -r /etc/modprobe.d/sidux ] || [ -r /etc/modprobe.d/ieee1394 ] || [ -r /etc/modprobe.d/mac80211 ]; then
-			packageVersion=$(dpkg -l udev-config-sidux 2>/dev/null | awk '
-			/^(hi|ii)/ {
-				print $3
-			}')
+			packageVersion=$( check_package_status 'udev-config-sidux' 'i' )
 			dpkg --compare-versions ${packageVersion:-0} lt $UDEV_CONFIG_SIDUX
 			if [ "$?" -eq 0 ]; then
 				installDependencies="$installDependencies udev-config-sidux"
@@ -201,14 +200,12 @@ check_script_dependencies()
 
 set_resume_partition()
 {
-	if [ -n "$( check_package_status 'sidux-scripts' 'i' )" ];then
+	local siduxScripts=$( check_package_status 'sidux-scripts' 'i' )
+	
+	if [ -n "$siduxScripts" ];then
 		# check resume partition configuration is valid
 		if [ -x /usr/sbin/get-resume-partition ]; then
-			packageVersion=$( dpkg -l sidux-scripts 2>/dev/null | awk '
-			/^(hi|ii)/ {
-				print $3
-			}' )
-			dpkg --compare-versions ${packageVersion:-0} ge 0.1.38
+			dpkg --compare-versions $siduxScripts ge 0.1.38
 			if [ "$?" -eq 0 ]; then
 				get-resume-partition
 			fi
@@ -233,8 +230,8 @@ install_kernel_debs()
 	local linuxKbuild=$( ls linux-kbuild-2.6*.deb 2> /dev/null )
 	# dependency sequence: image -> kbuild (if present) -> headers
 	local kernelPackages="$linuxImage $linuxKbuild $linuxHeadersCommon $linuxHeadersMain"
-	local installedPackages=''
-	
+	local installedPackages='' packageSlice='' installBroke=0 installStatus=0
+	 
 	echo $LINE
 	echo 'Installing with dpkg -i kernel deb files now...'
 	echo 'Install directory: ' $( pwd )
@@ -242,16 +239,24 @@ install_kernel_debs()
 	for package in $kernelPackages
 	do
 		echo $LINE
-		echo "Installing archived kernel deb package: $package"
-		dpkg -i $package
-		# only add if the install went right
-		if [ "$?" -eq 0 ];then
-			installedPackages="$installedPackages $package"
+		packageSlice=$( cut -d '_' -f 1 <<< $package )
+		if [ -z "$( check_package_status $packageSlice 'i' )" ];then
+			echo "Installing archived kernel deb package: $package"
+			dpkg -i $package
+			installStatus=$?
+			# only add if the install went right
+			if [ "$installStatus" -eq 0 ];then
+				installedPackages="$installedPackages $package"
+			else
+				installBroke=$installStatus
+			fi
+		else
+			echo "The package: $package is already installed on your system, skipping install."
 		fi
 	done
 
 	# something went wrong, allow apt an attempt to fix it
-	if [ "$?" -ne 0 ]; then
+	if [ "$installBroke" -ne 0 ]; then
 		if [ -e "/boot/vmlinuz-$KERNEL_VERSION" ];then
 			apt-get --fix-broken install
 		else
@@ -306,7 +311,7 @@ kernel_module_deb_installer()
 {
 	local moduleList='acer_acpi acerhk acx atl2 aufs av5100 btrfs drbd8 eeepc_acpi em8300 et131x fsam7400 gspca kqemu lirc_modules lirc loop_aes lzma ndiswrapper nilfs omnibook qc_usb quickcam r5u870 r6040 rfswitch rt73 sfc speakup sqlzma squashfs tp_smapi vboxadd vboxdrv'
 	local module='' modulePath='' modulePackage='' modulePackageDeb=''
-	local installedPackages=''
+	local installedPackages='' packageSlice='' installBroke=0 installStatus=0
 	
 	# try to install external dfsg-free module packages
 	for module in $moduleList
@@ -322,20 +327,26 @@ kernel_module_deb_installer()
 				if [ -n "$modulePackageDeb" -a -f "$modulePackageDeb" ]
 				then
 					echo $LINE
-					echo 'Installing archived kernel module deb: '$modulePackageDeb
-					dpkg -i $modulePackageDeb
-					# only add if the install went right
-					if [ "$?" -eq 0 ];then
-						installedPackages="$installedPackages $modulePackageDeb"
-					fi
-					if [ "$?" -ne 0 ]; then
-						#apt-get --fix-broken install
-						:
+					packageSlice=$( cut -d '_' -f 1 <<< $modulePackageDeb )
+					if [ -z "$( check_package_status $packageSlice 'i' )" ];then
+						echo 'Installing archived kernel module deb: '$modulePackageDeb
+						dpkg -i $modulePackageDeb
+						installStatus=$?
+						# only add if the install went right
+						if [ "$installStatus" -eq 0 ];then
+							installedPackages="$installedPackages $modulePackageDeb"
+						fi
+						if [ "$installStatus" -ne 0 ]; then
+							#apt-get --fix-broken install
+							:
+						else
+							# ignore error cases for now, apt will do the "right" thing to get
+							# into a consistent state and worst that could happen is some external
+							# module not getting installed
+							:
+						fi
 					else
-						# ignore error cases for now, apt will do the "right" thing to get
-						# into a consistent state and worst that could happen is some external
-						# module not getting installed
-						:
+						echo "The module: $modulePackageDeb is already installed on your system, skipping install."
 					fi
 				fi
 			fi
@@ -350,21 +361,30 @@ kernel_module_deb_installer()
 
 madwifi_module_handler()
 {
+	local driverTest=$( /sbin/modinfo -k $( uname -r ) -F filename ath_pci 2>/dev/null )
+	local moduleSourcePresent=$( check_package_status 'madwifi-source' 'c' )
+	
 	# hints for madwifi
-	if [ -n "$( which m-a >/dev/null )" ];then
-		if /sbin/modinfo -k $( uname -r ) -F filename ath_pci >/dev/null 2>&1; then
-			if [ -f /usr/src/madwifi.tar.bz2 ]; then
-				# user setup madwifi with module-assistant already
-				# we may as well do that for him again now
-				if [ -d /usr/src/modules/madwifi/ ]; then
-					rm -rf /usr/src/modules/madwifi/
+	if [ -n "$( which m-a 2>/dev/null )" ];then
+		if [ -n "$driverTest" -a -z "$( grep 'linux-image-' <<< $driverTest )" ];then
+			if [ -n "$moduleSourcePresent" ];then
+				if [ -f /usr/src/madwifi.tar.bz2 ]; then
+					# user setup madwifi with module-assistant already
+					# we may as well do that for him again now
+					if [ -d /usr/src/modules/madwifi/ ]; then
+						rm -rf /usr/src/modules/madwifi/
+					fi
+					m-a --text-mode --non-inter -l "$KERNEL_VERSION" a-i madwifi
+				else
+					echo $LINE
+					echo "Atheros Wireless Network Adaptor will not work until"
+					echo "the non-free madwifi driver is reinstalled."
+					echo
 				fi
-				m-a --text-mode --non-inter -l "$KERNEL_VERSION" a-i madwifi
 			else
 				echo $LINE
-				echo "Atheros Wireless Network Adaptor will not work until"
-				echo "the non-free madwifi driver is reinstalled."
-				echo
+				echo "There is no source for madwifi module building, you'll need to get the"
+				echo "ath_pci modules configured yourself after this install is done."
 			fi
 		fi
 	fi

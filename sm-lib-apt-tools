@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.13
-####  Date: March 30 2009
+####  version: 1.21.14
+####  Date: April 1 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -146,9 +146,14 @@ check_package_status()
 	eval $LOGUS
 	local packageVersion='' statusType='Candidate:'
 
-	if [ "$2" == 'installed' ];then
-		statusType='Installed:'
-	fi
+	case $2 in
+		c|candidate)	
+			statusType='Candidate:'
+			;;
+		i|installed)	
+			statusType='Installed:'
+			;;
+	esac
 
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
 
