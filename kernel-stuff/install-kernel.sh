@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.0.1
+####  version: 2.0.2
 ####  Date: March 31 2009
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
@@ -31,11 +31,10 @@ LINE='--------------------------------------------------------------------'
 GCC_VERSION="4.3"
 # KERNEL_VERSION will be set dynamically by dsl, 
 KERNEL_VERSION="2.6.24"
-
-SCRIPT_NAME=$( basename $0 )
-UDEV_CONFIG_SIDUX='0.5.0'
+UDEV_CONFIG_SIDUX="0.5.0"
 
 # initialize globals
+SCRIPT_NAME=$( basename $0 )
 APT_TYPE=''
 
 ########################################################################
@@ -250,12 +249,7 @@ install_kernel_debs()
 			installedPackages="$installedPackages $package"
 		fi
 	done
-	# get these into system for aptitude
-	if [ "$APT_TYPE" == 'aptitude' -a -n "$installedPackages" ];then
-		echo "Installing kernel packages with $APT_TYPE to enter them into the $APT_TYPE database now..."
-		$APT_TYPE install $installedPackages
-	fi
-	
+
 	# something went wrong, allow apt an attempt to fix it
 	if [ "$?" -ne 0 ]; then
 		if [ -e "/boot/vmlinuz-$KERNEL_VERSION" ];then
@@ -266,6 +260,11 @@ install_kernel_debs()
 			fi
 			error_handler 3
 		fi
+	fi
+	# get these into system for aptitude
+	if [ "$APT_TYPE" == 'aptitude' -a -n "$installedPackages" ];then
+		echo "Installing kernel packages with $APT_TYPE to enter them into the $APT_TYPE database now..."
+		$APT_TYPE install $installedPackages
 	fi
 }
 
