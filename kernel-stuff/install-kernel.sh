@@ -251,7 +251,7 @@ install_kernel_debs()
 				installBroke=$installStatus
 			fi
 		else
-			echo "The package: $package is already installed on your system, skipping install."
+			echo "The package: $packageSlice is already installed on your system, skipping install."
 		fi
 	done
 
@@ -345,7 +345,7 @@ kernel_module_deb_installer()
 							:
 						fi
 					else
-						echo "The module: $modulePackageDeb is already installed on your system, skipping install."
+						echo "The module: $packageSlice is already installed on your system, skipping install."
 					fi
 				fi
 			fi
