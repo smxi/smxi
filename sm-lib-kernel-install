@@ -1300,6 +1300,7 @@ extra_module_installer()
 			error_handler 'value-bad' $FUNCNAME "$moduleName"
 			;;
 	esac
+	echo $LINE
 	echo "${S}Checking ${C}$module${S} status now...${N}"
 	# note: etch doesn't support -k option but that's ok, it will soon be lenny
 	driverTest=$( /sbin/modinfo -k $CURRENT_KERNEL -F filename $filename 2>/dev/null )
@@ -1309,7 +1310,6 @@ extra_module_installer()
 		#/sbin/modinfo -k $CURRENT_KERNEL -F filename $filename 2>/dev/null 2>&1
 		if [ -n "$driverTest" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
 			if [ -n "$moduleSourcePresent" ];then
-				echo $LINE
 	# 			echo "${S}Checking to see if ${C}$extra$module${S} can be built for your wifi card...${N}"
 	# 			if [ -f /usr/src/${tarball} ] && which m-a >/dev/null
 	# 			then
