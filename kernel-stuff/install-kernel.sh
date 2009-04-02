@@ -320,7 +320,7 @@ kernel_module_deb_installer()
 		if [ -n "$modulePath" ]; then
 			modulePackage="$( dpkg -S $modulePath 2>/dev/null )"
 			# need to avoid modules already in the kernel image
-			if [ -n "$modulePackage" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ]; then
+			if [ -n "$modulePackage" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
 				modulePackage="$( echo $modulePackage | sed s/$( uname -r ).*/$KERNEL_VERSION/g )"
 				#if grep-aptavail -PX "${modulePackage}" >/dev/null 2>&1; then
 				modulePackageDeb=$( ls $modulePackage*.deb 2> /dev/null )
