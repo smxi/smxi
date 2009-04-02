@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.1.0
+####  version: 2.1.1
 ####  Date: April 1 2009
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
@@ -362,29 +362,33 @@ kernel_module_deb_installer()
 madwifi_module_handler()
 {
 	local driverTest=$( /sbin/modinfo -k $( uname -r ) -F filename ath_pci 2>/dev/null )
+	local modulePackage=''
 	local moduleSourcePresent=$( check_package_status 'madwifi-source' 'c' )
 	
 	# hints for madwifi
 	if [ -n "$( which m-a 2>/dev/null )" ];then
-		if [ -n "$driverTest" -a -z "$( grep 'linux-image-' <<< $driverTest )" ];then
-			if [ -n "$moduleSourcePresent" ];then
-				if [ -f /usr/src/madwifi.tar.bz2 ]; then
-					# user setup madwifi with module-assistant already
-					# we may as well do that for him again now
-					if [ -d /usr/src/modules/madwifi/ ]; then
-						rm -rf /usr/src/modules/madwifi/
+		if [ -n "$driverTest" ];then
+			modulePackage="$( dpkg -S $driverTest 2>/dev/null )"
+			if [ -n "$modulePackage" -a  -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
+				if [ -n "$moduleSourcePresent" ];then
+					if [ -f /usr/src/madwifi.tar.bz2 ]; then
+						# user setup madwifi with module-assistant already
+						# we may as well do that for him again now
+						if [ -d /usr/src/modules/madwifi/ ]; then
+							rm -rf /usr/src/modules/madwifi/
+						fi
+						m-a --text-mode --non-inter -l "$KERNEL_VERSION" a-i madwifi
+					else
+						echo $LINE
+						echo "Atheros Wireless Network Adaptor will not work until"
+						echo "the non-free madwifi driver is reinstalled."
+						echo
 					fi
-					m-a --text-mode --non-inter -l "$KERNEL_VERSION" a-i madwifi
 				else
 					echo $LINE
-					echo "Atheros Wireless Network Adaptor will not work until"
-					echo "the non-free madwifi driver is reinstalled."
-					echo
+					echo "There is no source for madwifi module building, you'll need to get the"
+					echo "ath_pci modules configured yourself after this install is done."
 				fi
-			else
-				echo $LINE
-				echo "There is no source for madwifi module building, you'll need to get the"
-				echo "ath_pci modules configured yourself after this install is done."
 			fi
 		fi
 	fi
