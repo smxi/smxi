@@ -318,9 +318,9 @@ kernel_module_deb_installer()
 	do
 		modulePath="$( /sbin/modinfo -k $(uname -r) -F filename "$module" 2>/dev/null )"
 		if [ -n "$modulePath" ]; then
-			modulePackage="$( dpkg -S $modulePath 2>/dev/null )"
+			modulePackage="$( dpkg -S $modulePath 2>/dev/null | grep -iv 'linux-image-' )"
 			# need to avoid modules already in the kernel image
-			if [ -n "$modulePackage" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
+			if [ -n "$modulePackage" ];then
 				modulePackage="$( echo $modulePackage | sed s/$( uname -r ).*/$KERNEL_VERSION/g )"
 				#if grep-aptavail -PX "${modulePackage}" >/dev/null 2>&1; then
 				modulePackageDeb=$( ls $modulePackage*.deb 2> /dev/null )
@@ -368,8 +368,8 @@ madwifi_module_handler()
 	# hints for madwifi
 	if [ -n "$( which m-a 2>/dev/null )" ];then
 		if [ -n "$driverTest" ];then
-			modulePackage="$( dpkg -S $driverTest 2>/dev/null )"
-			if [ -n "$modulePackage" -a  -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
+			modulePackage="$( dpkg -S $driverTest 2>/dev/null | grep -iv 'linux-image-' )"
+			if [ -n "$modulePackage" ];then
 				if [ -n "$moduleSourcePresent" ];then
 					if [ -f /usr/src/madwifi.tar.bz2 ]; then
 						# user setup madwifi with module-assistant already

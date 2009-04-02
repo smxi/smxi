@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.10.15
+####  version: 2.10.16
 ####  Date: April 1 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -650,14 +650,14 @@ install_apt_kernel_modules()
 			log_function_data "module: $module"
 			log_function_data "modulePath: $modulePath"
 			#echo "${SPACER}${S}module path: ${C}$modulePath${N}"
-			modulePackage="$( dpkg -S ${modulePath} 2>/dev/null )"
+			modulePackage="$( dpkg -S ${modulePath} 2>/dev/null | grep -iv 'linux-image-' )"
 			log_function_data "modulePackage: $modulePackage"
 			# if the module has been merged into the kernel, we need to not try to install
 			# or the installer will try to install linux-image...
-			if [ -n "$modulePackage" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
+			if [ -n "$modulePackage" ];then
 				#echo "${SPACER}${S}module package a: ${C}$modulePackage${N}"
 				# now we pull out the actual module name we will test for in the installer
-				modulePackage="$(echo ${modulePackage} | sed s/$(uname -r).*/${moduleType}/g)"
+				modulePackage="$( echo $modulePackage | sed s/$(uname -r).*/${moduleType}/g )"
 				install_the_apt_kernel_module "$modulePackage" 'auto'
 			fi
 		fi
@@ -1310,7 +1310,7 @@ extra_module_installer()
 		#/sbin/modinfo -k $CURRENT_KERNEL -F filename $filename 2>/dev/null 2>&1
 		if [ -n "$driverTest" ];then
 			# this is a slow test so only run if needed
-			modulePackage="$( dpkg -S $driverTest 2>/dev/null | grep -v 'linux-image-' )"
+			modulePackage="$( dpkg -S $driverTest 2>/dev/null | grep -iv 'linux-image-' )"
 			if [ -n "$modulePackage" ];then
 				if [ -n "$moduleSourcePresent" ];then
 		# 			echo "${S}Checking to see if ${C}$extra$module${S} can be built for your wifi card...${N}"
