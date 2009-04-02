@@ -224,7 +224,7 @@ install_kernel_debs()
 	local package='' linuxHeadersAllArch='' linuxHeadersAll=''
 	local linuxImage=$( ls linux-image-$KERNEL_VERSION*.deb 2> /dev/null )
 	local linuxHeadersCommon=$( ls linux-headers-*-common*.deb 2> /dev/null )
-	local linuxHeadersMain=$( ls linux-headers-*.deb 2> /dev/null | grep -v '\-all' )
+	local linuxHeadersMain=$( ls linux-headers-*.deb 2> /dev/null | grep -Ev '(\-all|common)' )
 	# linuxHeadersAllArch=$( ls linux-headers-*-all-*.deb 2> /dev/null )
 	# linuxHeadersAll=$( ls linux-headers-*-all_*.deb 2> /dev/null )
 	local linuxKbuild=$( ls linux-kbuild-2.6*.deb 2> /dev/null )
