@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.1
-####  Date: March 30 2009
+####  version: 2.3.2
+####  Date: April 1 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -239,6 +239,7 @@ create_kernel_directory()
 create_sub_directories()
 {
 	local directories='32 32-meta 64 64-meta kernel-installer-files src-gz kernel-full-zips'
+	local redoDirectories='32 32-meta 64 64-meta'
 	local directory=''
 
 	echo $LINE
@@ -249,6 +250,18 @@ create_sub_directories()
 			mkdir $directory
 		fi
 	done
+	if [ "$B_REDO" == 'true' ];then
+		echo $LINE
+		echo "Restoring original condition of build by moving data back to base directory."
+		for directory in $redoDirectories
+		do
+			echo "Emptying $directory..."
+			cd $directory
+			mv -f * ../
+			cd ../
+		done
+		rm -f kernel-full-zips/*
+	fi
 }
 
 check_kernel_exists()
