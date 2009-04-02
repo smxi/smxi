@@ -324,8 +324,7 @@ kernel_module_deb_installer()
 				modulePackage="$( echo $modulePackage | sed s/$( uname -r ).*/$KERNEL_VERSION/g )"
 				#if grep-aptavail -PX "${modulePackage}" >/dev/null 2>&1; then
 				modulePackageDeb=$( ls $modulePackage*.deb 2> /dev/null )
-				if [ -n "$modulePackageDeb" -a -f "$modulePackageDeb" ]
-				then
+				if [ -n "$modulePackageDeb" -a -f "$modulePackageDeb" ];then
 					echo $LINE
 					packageSlice=$( cut -d '_' -f 1 <<< $modulePackageDeb )
 					if [ -z "$( check_package_status $packageSlice 'i' )" ];then
