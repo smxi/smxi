@@ -1310,8 +1310,8 @@ extra_module_installer()
 		#/sbin/modinfo -k $CURRENT_KERNEL -F filename $filename 2>/dev/null 2>&1
 		if [ -n "$driverTest" ];then
 			# this is a slow test so only run if needed
-			modulePackage="$( dpkg -S $driverTest 2>/dev/null )"
-			if [ -n "$modulePackage" -a -z "$( grep 'linux-image-' <<< $modulePackage )" ];then
+			modulePackage="$( dpkg -S $driverTest 2>/dev/null | grep -v 'linux-image-' )"
+			if [ -n "$modulePackage" ];then
 				if [ -n "$moduleSourcePresent" ];then
 		# 			echo "${S}Checking to see if ${C}$extra$module${S} can be built for your wifi card...${N}"
 		# 			if [ -f /usr/src/${tarball} ] && which m-a >/dev/null
