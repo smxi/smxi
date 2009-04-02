@@ -328,7 +328,7 @@ kernel_module_deb_installer()
 					echo $LINE
 					packageSlice=$( cut -d '_' -f 1 <<< $modulePackageDeb )
 					if [ -z "$( check_package_status $packageSlice 'i' )" ];then
-						echo 'Installing archived kernel module deb: '$modulePackageDeb
+						echo "Installing archived kernel module deb: $modulePackageDeb"
 						dpkg -i $modulePackageDeb
 						installStatus=$?
 						# only add if the install went right
