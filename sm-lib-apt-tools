@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.15
+####  version: 1.21.16
 ####  Date: April 2 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1580,8 +1580,7 @@ new-zealand-1:ftp://debian.co.nz/Sidux/debian/
 list_sidux_mirrors()
 {
 	eval $LOGUS
-	# new mirror: launch 2009--02-28 after proves solid
-	# alt-brazil-1:http://sidux.c3sl.ufpr.br/debian/
+
 	local siduxMirrors="
 core-eu-1:http://debian.tu-bs.de/project/sidux/debian/
 core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/
@@ -1591,6 +1590,7 @@ core-eu-5:http://sidux.net/debian/
 alt-africa-1:http://ftp.leg.uct.ac.za/pub/linux/sidux/debian/
 alt-asia-1:http://ftp.tw.debian.org/pub/Sidux/debian/
 alt-asia-2:ftp://ftp.tw.debian.org/pub/Sidux/debian/
+alt-brazil-1:http://sidux.c3sl.ufpr.br/debian/
 alt-australia-1:http://mirror.aarnet.edu.au/pub/sidux/debian/
 alt-australia-2:ftp://mirror.aarnet.edu.au/pub/sidux/debian/
 alt-eu-1:http://www.mirrorservice.org/sites/sidux.com/sidux/debian/
