@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.16
-####  Date: March 19 2009
+####  version: 3.1.17
+####  Date: April 7 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -44,6 +44,7 @@ package_group_installer()
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
 	local pdfLight='epdfview' mlocate='mlocate' kioapt='kio-apt' kpdf='kpdf'
+	local karm='karm'
 
 	# note: these packages are not in every Debian level
 	if [ -z "$( check_package_status 'epdfview' )" ];then
@@ -65,6 +66,13 @@ package_group_installer()
 				kpdf='okular'
 			else
 				kpdf=''
+			fi
+		fi 
+		if [ -z "$( check_package_status 'karm' )" ];then
+			if [ -n "$( check_package_status 'ktimetracker' )" ];then
+				karm='ktimetracker'
+			else
+				karm=''
 			fi
 		fi
 	fi
@@ -103,9 +111,9 @@ package_group_installer()
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
 	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
-	local kdeExtras="ark karm kate-plugins kdeaddons-kfile-plugins kdemultimedia-kfile-plugins kdemultimedia-kio-plugins kicker-applets $kioapt kmix kmoon knemo konq-plugins kpowersave ksensors ksnapshot kuser"
+	local kdeExtras="ark $karm kate-plugins kdeaddons-kfile-plugins kdemultimedia-kfile-plugins kdemultimedia-kio-plugins kicker-applets $kioapt kmix kmoon knemo konq-plugins kpowersave ksensors ksnapshot kuser"
 	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation $kpdf ksvg $dmUse kdm"
-	local kdepimPackages='kdepim karm kontact korganizer kalarm'
+	local kdepimPackages="kmail $karm kontact korganizer kalarm"
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.1
-####  Date: March 27 2009
+####  version: 8.11.2
+####  Date: April 7 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -201,6 +201,7 @@ LIB_CLEAN_UP='sm-lib-clean-up'
 LIB_DISTRO_CONVERSION='sm-lib-distro-conversion'
 LIB_DU_FIXES='sm-lib-du-fixes'
 LIB_GRAPHICS='sm-lib-graphics'
+LIB_KDE4_UPDATER='sm-lib-kde4-updater'
 LIB_KERNEL='sm-lib-kernel'
 LIB_KERNEL_INSTALL='sm-lib-kernel-install'
 # LIB_KERNELS='sm-lib-kernels'
@@ -234,6 +235,7 @@ SET_APT_TOOLS=''
 SET_CLEAN_UP=''
 SET_DU_FIXES=''
 SET_GRAPHICS=''
+SET_KDE4_UPDATER=''
 SET_KERNEL=''
 SET_KERNEL_INSTALL=''
 SET_MISC_TWEAKS=''
@@ -749,6 +751,12 @@ run_script_import()
 			if [ "$SET_GRAPHICS" != 'true' ];then
 				loadIt='true'
 				SET_GRAPHICS='true'
+			fi
+			;;
+		$LIB_KDE4_UPDATER)
+			if [ "$SET_KDE4_UPDATER" != 'true' ];then
+				loadIt='true'
+				SET_KDE4_UPDATER='true'
 			fi
 			;;
 		$LIB_KERNEL)
@@ -2614,6 +2622,10 @@ print_lib_info()
 			;;
 		$LIB_GRAPHICS)
 			scriptText='GRAPHICS QUESTION'
+			printIt='true'
+			;;
+		$LIB_KDE4_UPDATER)
+			scriptText='KDE 3 to KDE 4 Updater'
 			printIt='true'
 			;;
 		$LIB_KERNEL)
