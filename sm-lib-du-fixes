@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.0
+####  version: 1.3.1
 ####  Date: April 7 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -436,7 +436,7 @@ post_du_tasks()
 kde4_updater()
 {
 	eval $LOGUS
-	local kwinVersionCan=$( check_package_status 'kwin' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
+	local kateVersionCan=$( check_package_status 'kate' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
 	local kwinVersionInst=$( check_package_status 'kwin' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
 	local kdmVersionCan=$( check_package_status 'kdm' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
 	local kdmVersionInst=$( check_package_status 'kdm' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
@@ -458,7 +458,7 @@ kde4_updater()
 	log_function_data "kwinVersionCan: $kwinVersionCan\nkwinVersionInst: $kwinVersionInst\nkdmVersionCan: $kdmVersionCan\nkdmVersionInst: $kdmVersionInst"
 	
 	if [ "$B_TESTING_2" == 'true' ] && [ "$kwinVersionInst" -gt 0 -o "$kdmVersionInst" -gt 0 ];then
-		if [ "$kwinVersionInst" -eq 3 -a "$kwinVersionCan" -gt 3 ] || [ "$kdmVersionInst" -eq 3 -a "$kdmVersionCan" -gt 3 ];then
+		if [ "$kwinVersionInst" -eq 3 -a "$kateVersionCan" -gt 3 ] || [ "$kdmVersionInst" -eq 3 -a "$kdmVersionCan" -gt 3 ];then
 			run_script_import $LIB_KDE4_UPDATER
 			kde3_to_kde4_updater_main
 		fi
