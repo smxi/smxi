@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.1
+####  version: 0.7.2
 ####  Date: April 8 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -36,7 +36,7 @@ kde3_to_kde4_updater_main()
 {
 	eval $LOGPS
 	# get the du data for processing
-	local repeat='' options='' opt=''
+	local repeat='' options='' opt='' 
 	
 	print_lib_info $LIB_KDE4_UPDATER
 	echo $MLINE
@@ -84,7 +84,7 @@ kde3_log_and_removal()
 	eval $LOGUS
 	local removedPackages='' cleanedRemovePackages=''  kdeUpgradeInfo='' 
 	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
-	local extraPackages='' tempName=''
+	local extraPackages='' tempName='' package='' lineSize=''
 	# note: kde-i18n temp removed
 	local noUseWildcard='\-data|kcontrol|kdebase|kdelib|kdesktop|kde-core|kformula|kicker|kio-apt|kmenuedit|kmoon|knewsticker|kpersonalizer|kpowersave|ksmserver|ksplash|ktip|kwin|^lib|\-lib|sidux|superkaramba'
 	
@@ -152,7 +152,17 @@ kde3_log_and_removal()
 	echo "once it begins or things will get very unpredictable. The next step will remove your"
 	echo "installed ${C}KDE 3 / 4${S} completely, then reinstall every package possible."
 	echo $LINE
-	echo "${C}$cleanedRemovePackages${N}"
+	for package in $cleanedRemovePackages
+	do
+		if [ "$( wc -c <<< $lineSize )" -lt 70 ];then
+			tempName="$tempName$package "
+			lineSize="$lineSize$package "
+		else
+			lineSize=''
+			tempName="$tempName$package\n"
+		fi
+	done
+	echo -e "${C}$tempName${N}"
 	print_hec
 # 	echo "${S}The following is the list of all packages to be removed:${N}"
 # 	echo "${C}$removedPackages${N}"
