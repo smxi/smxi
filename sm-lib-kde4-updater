@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.0
+####  version: 0.7.1
 ####  Date: April 8 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -97,6 +97,9 @@ kde3_log_and_removal()
 	# dpkgKdePackagesAll="$( package_tester 'kde' 'wild-full' ) kde-i18n-zhcn"
 	if [ -n "$( grep 'kde-i18n' <<< $dpkgKdePackagesAll )" ];then
 		dpkgKdePackagesAll=$( sed 's/kde-i18n/kde-l10n/g' <<< "$dpkgKdePackagesAll" )
+	fi
+	if [ -n "$( package_tester 'superkaramba' )" ];then
+		extraPackages="$extraPackages plasma-scriptengine-superkaramba"
 	fi
 	if [ -n "$( grep 'libk3b3-extracodecs' <<< $dpkgKdePackagesAll )" ];then
 		extraPackages="$extraPackages libk3b3-extracodecs"
