@@ -1,0 +1,229 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-kde4-updater
+####  version: 0.6.4
+####  Date: April 7 2009
+
+####  Copyright (C) Harald Hope 2009
+####  This program is free software; you can redistribute it and/or modify it under
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 2 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here:
+####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+####  Script Author: Harald Hope
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://smxi.org/sm/sm-lib-kde4-updater
+####  Script SVN: http://code.google.com/p/smxi
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+
+########################################################################
+####  FUNCTIONS
+########################################################################
+
+###---------------------------------------------------------------------
+### primary updating tools
+###---------------------------------------------------------------------
+
+kde3_to_kde4_updater_main()
+{
+	eval $LOGPS
+	# get the du data for processing
+	local repeat='' options='' opt=''
+	
+	print_lib_info $LIB_KDE4_UPDATER
+	echo $MLINE
+	echo "${S}Beginning the kde 3 to kde 4 conversion process. This is beta testing mode, be careful."
+	echo "Please report, with ${C}$LOG_FILE${S}, any issues to sidux or techpatterns.com/smxi forums.${N}"
+	echo $LINE
+
+	echo "${C}1 - yes-remove-kde3-install-kde4${S} - Run full conversion to KDE 4, which will remove all of KDE 3"
+	echo "    then try to reinstall any package possible from the list of your current kde packages."
+	echo "${C}2 - no-exit-now${S} - Forget it, going to exit and see what to do."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="yes-remove-kde3-install-kde4 no-exit-now"
+	select opt in $options
+	do
+		log_function_data "opt selected: $opt"
+		case $opt in
+			yes-remove-kde3-install-kde4)
+				kde3_log_and_removal
+				;;
+			no-exit-now)
+				print_quit
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	eval $LOGPE
+	if [ "$repeat" == 'true' ];then
+		kde3_to_kde4_updater_main
+	fi
+}
+# libk3b-extracodecs arts
+kde3_log_and_removal()
+{
+	eval $LOGUS
+	local removedPackages='' cleanedRemovePackages=''  kdeUpgradeInfo='' 
+	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
+	local extraPackages=''
+	# note: kde-i18n temp removed
+	local noUseWildcard='\-data|kcontrol|kdebase|kdelib|kdesktop|kde-core|kde-i18n|kformula|kicker|kio-apt|kmenuedit|kmoon|kpersonalizer|kpowersave|ksmserver|ksplash|ktip|kwin|^lib|\-lib|sidux'
+	
+	echo $LINE
+	echo "${S}Preparing and procesing your ${C}KDE 3${S} to ${C}KDE 4${S} package data, please wait...${N}"
+	
+	echo "${S}Calculating and logging installed dpkg kde data (all + cleaned for processing lists)...${N}"
+	dpkgKdePackagesAll=$( dpkg -l | grep -i 'kde' | awk '{print $2}' )
+	
+	if [ -n "$( grep 'libk3b3-extracodecs' <<< $dpkgKdePackagesAll )" ];then
+		extraPackages="libk3b3-extracodecs"
+	fi
+	log_function_data "kde 3 installed dpkg list (all):\n$dpkgKdePackagesAll"
+	
+	dpkgCleanKdePackages=$( egrep -v '('$noUseWildcard')' <<< "$dpkgKdePackagesAll" )
+	log_function_data "kde 3 installed dpkg list (cleaned):\n$dpkgCleanKdePackages"
+	
+	echo "${S}Calculating and logging kde data of packages to be removed (can take a while)...${N}"
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= kdeUpgradeInfo="$( echo 'n' | apt-get purge kdelibs kdelibs4c2a kdm 2> /dev/null | sed 's/\*//g' )"
+	log_function_data "kde 4 primary upgrade list:\n$kdeUpgradeInfo"
+	
+	removedPackages=$( echo "$kdeUpgradeInfo" | awk '
+	BEGIN { IGNORECASE=1 }
+	/.*REMOVED:/ {
+		# just to make sure no junk gets included, just the raw data
+		while ( getline && !/The following|upgraded|installed/ )
+		{
+			print $0
+		}
+	}
+	' )
+	log_function_data "kde 4 package remove list:\n$removedPackages"
+	
+	# construct a master made up of apt-get construct and dpkg installed list
+	for package in $removedPackages $dpkgCleanKdePackages
+	do
+		# swap known package names
+		case $package in
+			kpdf)
+				package='okular'
+				;;
+			karm)
+				package='ktimetracker'
+				;;
+		esac
+# 		if [ -n "$( grep -Ev '('$noUseWildcard')' <<< $package )" ];then
+		if [ -n "$( grep -Ev '('$noUseWildcard')' <<< $package )" -a *" $package "* != " $cleanedRemovePackages " ];then
+			cleanedRemovePackages="$cleanedRemovePackages $package"
+		fi
+	done 
+	cleanedRemovePackages="$cleanedRemovePackages $extraPackages"
+	cleanedRemovePackages="$( sed 's/[[:space:]]/\n/g' <<< $cleanedRemovePackages )"
+	cleanedRemovePackages=$( echo -e "$cleanedRemovePackages" | sort -f | uniq )
+	cleanedRemovePackages=$( echo $cleanedRemovePackages )
+	log_function_data "kde 4 cleaned package remove list:\n$cleanedRemovePackages"
+	echo
+	echo "${S}Data calculated. The following packages will be reinstalled if possible after"
+	echo "the KDE 3 removal and KDE 4 install is completed. Please do not exit this process"
+	echo "once it begins or things will get very unpredictable. The next step will remove your"
+	echo "installed KDE 3 / 4 completely, then reinstall every package possible."
+	echo "${C}$cleanedRemovePackages${N}"
+	print_hec
+# 	echo "${S}The following is the list of all packages to be removed:${N}"
+# 	echo "${C}$removedPackages${N}"
+# 	echo "${S}Please exit with ctrl + c now. This data has been logged to ${C}$LOG_FILE${N}"
+# 	read fred
+	#print_hec
+	eval $LOGUE
+	
+	remove_all_kde "$dpkgKdePackagesAll"
+	if [ "$?" -eq 0 ];then
+		install_kde4 "$cleanedRemovePackages"
+	else
+		echo "${E}Error in removing KDE 3. Unknown issue.${N}"
+	fi
+}
+
+# args: $1 - full kde package list to be removed
+remove_all_kde()
+{
+	local retValue=0 removeList=$( echo $1 ) # dump line breaks
+	
+	eval $LOGUS
+	echo $LINE
+	echo "${S}Removing all detected KDE packages now prior to reinstallation of packages (please wait)...${N}"
+	
+	package_remover "$removeList" 'purge' 'group'
+	retValue=$?
+	# clean cruft that will break kdm
+	rm -rf /etc/default/kdm.d/* 2>/dev/null
+	return $retValue
+	eval $LOGUE
+}
+
+# args: $1 - list of pre-existing kde 3 packages to be replaced
+install_kde4()
+{
+	local package=''
+	local installList=$( echo $1 ) # dump line breaks
+	
+	eval $LOGUS
+	echo $LINE
+	echo "${S}Beginning ${C}KDE 4${S} install / update process."
+	echo "${S}Installing core components of ${C}KDE4${S} now...${N}"
+	print_hec
+	package_installer "kde4-minimal kdm kaboom" 'install-missing'
+	echo $LINE
+	echo "${S}Attempting reinstall of your previous kde packages. This will go through"
+	echo "the ${C}KDE 3${S} package list and try to re-install each one. Some packages"
+	echo "will require that you say ${C}y/n${S} to the install. This is important because"
+	echo "it's too hard to predict individual user systems. Check that a package does not"
+	echo "attempt to remove KDE 4 components during this process. If it does, let h2 know.${N}"
+	print_hec
+	for package in $installList
+	do
+		echo $LINE
+		echo "${S}Testing install status of $package now...${N}"
+		package_installer "$package" 'install-user-ok'
+	done
+	echo "${S}Done with package install process.${N}"
+	eval $LOGUE
+	print_kde4_message
+}
+
+print_kde4_message()
+{
+	eval $LOGUS
+	echo $LINE
+	echo "${S}Please note: the first time each user logs-in to their new ${C}KDE 4${S} desktop,"
+	echo "the ${C}Kaboom${S} program will run. I recommend the following options:"
+	echo "${M}(*) Use crrent KDE 3 settings as initial for KDE 4 (standard)"
+	echo "${M}[x] Backup existing KDE 3 settings (highly recommended)"
+	echo "${S}Please note that if you had a lot of data in kmail or other places in your settings .xxx files,"
+	echo "you may want to make sure you have enough space before proceeding. Kaboom will print"
+	echo "how much room the backup needs: eg: ${M}Backup needs 205kB free disk space'"
+	echo 
+	echo "${S}If the system feels slow or sluggish after the desktop starts, try disabling"
+	echo "${C}Effects${S} in ${C}System Settings${S} (${M}K-Menu -> Computer -> System Settings${S})"
+	echo 
+	echo "${S}Ok, good luck, I hope this works for you. Remember, you'll have to redo your desktop"
+	echo "completely, only the data type stuff like kmail will transfer if it works.${N}"
+	print_hec
+	eval $LOGUE
+}
+
+###**EOF**###
