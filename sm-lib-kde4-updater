@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.2
+####  version: 0.7.3
 ####  Date: April 8 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -85,8 +85,8 @@ kde3_log_and_removal()
 	local removedPackages='' cleanedRemovePackages=''  kdeUpgradeInfo='' 
 	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
 	local extraPackages='' tempName='' package='' lineSize=''
-	# note: kde-i18n temp removed
-	local noUseWildcard='\-data|kcontrol|kdebase|kdelib|kdesktop|kde-core|kformula|kicker|kio-apt|kmenuedit|kmoon|knewsticker|kpersonalizer|kpowersave|ksmserver|ksplash|ktip|kwin|^lib|\-lib|sidux|superkaramba'
+	# note: kipi-plugins, koffice, temp possible holds
+	local noUseWildcard='^arts$|\-data|kcontrol|kdebase|kdelib|kdesktop|kde-core|kformula|kicker|kio-apt|kmenuedit|kmoon|knewsticker|kpersonalizer|kpowersave|ksmserver|ksplash|ktip|kwin|^lib|\-lib|sidux|superkaramba'
 	
 	echo $LINE
 	echo "${S}Preparing and procesing your ${C}KDE 3${S} to ${C}KDE 4${S} package data, please wait...${N}"
