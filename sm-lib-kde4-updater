@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.6.4
-####  Date: April 7 2009
+####  version: 0.6.5
+####  Date: April 8 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -82,7 +82,7 @@ kde3_log_and_removal()
 	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
 	local extraPackages=''
 	# note: kde-i18n temp removed
-	local noUseWildcard='\-data|kcontrol|kdebase|kdelib|kdesktop|kde-core|kde-i18n|kformula|kicker|kio-apt|kmenuedit|kmoon|kpersonalizer|kpowersave|ksmserver|ksplash|ktip|kwin|^lib|\-lib|sidux'
+	local noUseWildcard='\-data|kcontrol|kdebase|kdelib|kdesktop|kde-core|kde-i18n|kformula|kicker|kio-apt|kmenuedit|kmoon|knewsticker|kpersonalizer|kpowersave|ksmserver|ksplash|ktip|kwin|^lib|\-lib|sidux'
 	
 	echo $LINE
 	echo "${S}Preparing and procesing your ${C}KDE 3${S} to ${C}KDE 4${S} package data, please wait...${N}"
