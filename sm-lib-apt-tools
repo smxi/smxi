@@ -1611,11 +1611,12 @@ alt-usa-3:http://mira.sunsite.utk.edu/sidux/debian/
 ###---------------------------------------------------------------------
 
 # check apt for latest kernel version
-# args: $1 - debian/debian-486/sidux - optional, to get current sid kernel version if needed
+# args: $1 - debian/debian-486/liquorix/mepis (no metapackage)/sidux - optional,
+# to get current sid kernel version if needed
 get_current_apt_kernel()
 {
 	eval $LOGUS
-	local tempKernels='' kernelThird=0
+	local tempKernels='' kernelThird=0 
 	local kernel1='' kernel2='' kernel1Greater='' kernelStringExtra=''
 	local defaultKernel=$1 distro='' currentKernel='' kernelPackageExists=''
 	# needed for alt platforms, no easy way to handle say move from 486 to 686, so
@@ -1666,7 +1667,7 @@ get_current_apt_kernel()
 				fi
 				;;
 		esac
-		log_function_data "Platform: $platform"
+		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra"
 
 		# little trick here to present just debian kernels if not distro
 		if [ "$SIDUX_SOURCES" != 'true' -a "$LIQUORIX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
