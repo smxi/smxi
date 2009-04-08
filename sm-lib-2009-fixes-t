@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.0.1
-####  Date: February 22 2009
+####  version: 1.0.2
+####  Date: April 7 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -35,6 +35,9 @@
 run_2009_fixes()
 {
 	if [ "$1" == 'pre' ];then
+		if [ "$DISTRO_LEVEL" -lt 17 ];then
+			acroread_fix_1
+		fi
 		if [ "$DISTRO_LEVEL" -lt 15 ];then
 			cups_driver_fix_1
 		fi
@@ -46,6 +49,22 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+acroread_fix_1()
+{
+	local prefId='acroread-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'acroread'  )
+	local isAvailable=$( check_package_status 'acroread-debian-files' 'c' )
+
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ];then
+		echo $LINE
+		echo "${S}Running ${C}acroread${S} update fix now...${N}"
+		# aptitude pulls all cups stuff out... bad aptitude, bad!
+		package_installer 'acroread-debian-files' 'force-always'
+		set_sticky_prefs $prefId
+	fi
+}
 
 cups_driver_fix_1()
 {
