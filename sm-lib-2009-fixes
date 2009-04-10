@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.0.2
-####  Date: April 7 2009
+####  version: 1.1.2
+####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -44,13 +44,54 @@ run_2009_fixes()
 			cups_driver_fix_1
 		fi
 	elif [ "$1" == 'post' ];then
-		:
+		if [ "$DISTRO_LEVEL" -lt 17 ];then
+			xorg_1_6_fix_1
+		fi
 	fi
 }
 
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+xorg_1_6_fix_1()
+{
+	local prefId='xorg-1-6-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local case1=$( grep -i 'AllowEmptyInput' $X_ORG_PATH )
+	local case2=$( grep -i 'AutoAddDevices' $X_ORG_PATH )
+	local case3=$( grep -i 'DontZap' $X_ORG_PATH )
+	local newX='false'
+	local xVersion=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
+	
+	if [ -z "$xVersion" ];then
+		xVersion=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
+	fi
+	case $xVersion in
+		1.[6-9]|7.[4-9])
+			newX='true'
+			;;
+	esac
+	log_function_data "xVersion: $xVersion\ncase1: $case1\ncase2: $case2\ncase3: $case3"
+	if [ "$smPref" -eq 0 -a "$newX" == 'true' ] && [ -z "$case1" -o -z "$case2" -o -z "$case3" ];then
+		echo $LINE
+		echo "${S}Running ${C}Xorg >= 1.6 xorg.conf${S} tweaks now...${N}"
+		if [ -z "$case1" ];then
+			echo "$SPACER${S}Adding: ${C}Option \"AllowEmptyInput\" \"0\"${S}...${N}"
+			perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AllowEmptyInput" "0"/' $X_ORG_PATH
+		fi
+		if [ -z "$case2" ];then
+			echo "$SPACER${S}Adding: ${C}Option \"AutoAddDevices\" \"0\"${S}...${N}"
+			perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AutoAddDevices" "0"/' $X_ORG_PATH
+		fi
+		if [ -z "$case3" ];then
+			echo "$SPACER${S}Adding: ${C}Option \"DontZap\" \"Off\"${S}...${N}"
+			perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "DontZap" "Off"/' $X_ORG_PATH
+		fi
+		echo "${S}Done with ${C}Xorg >= 1.6 xorg.conf${S} update, continuing.${N}"
+		set_sticky_prefs $prefId
+	fi
+}
 
 cups_driver_fix_1()
 {
