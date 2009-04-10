@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.4
+####  version: 8.11.5
 ####  Date: April 10 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1836,7 +1836,7 @@ start_windows_manager()
 
 }
 
-# arg: $1 - start/stop; $2 - stop/start
+# arg: $1 - full/nowmstart/killroot; $2 - stop/start
 start_stop_default_dm()
 {
 	eval $LOGUS
@@ -1844,7 +1844,7 @@ start_stop_default_dm()
 	local success=''
 	local dmList='entrance gdm kdm slim wdm xdm' dm=''
 	local noHup='nohup' xActionString=''  finalXKill=''
-	if [ -z "$DISPLAY" -a "$1" == 'stop' ];then
+	if [ -z "$DISPLAY" -a "$2" == 'stop' ];then
 		noHup=''
 	fi
 
@@ -1854,14 +1854,19 @@ start_stop_default_dm()
 				for dm in $dmList
 				do
 					if [ -x /etc/init.d/$dm ];then
-						echo -n "${S}Action for display manager: /etc/init.d/$dman $1 attempted now... ${N}"
+						echo -n "${S}Action for display manager: /etc/init.d/$dm $2 attempted now... ${N}"
+						if [ -n "$noHup" ];then
+							echo
+						fi
 						# nohup is required to make sure dm is fully stopped, and pids removed
 						xActionString="$noHup /etc/init.d/$dm $2 && success='true'"
 						eval $xActionString
-						if [ "$success" == 'true' ];then
-							echo "${S}success${N}"
-						else
-							echo "${W}failed${N}"
+						if [ -z "$noHup" ];then
+							if [ "$success" == 'true' ];then
+								echo "${S}success${N}"
+							else
+								echo "${W}failed${N}"
+							fi
 						fi
 						break
 					fi
@@ -1869,14 +1874,19 @@ start_stop_default_dm()
 			else
 				# question: why is this in some cases not working? No init 5 is happening
 				if [ -x /etc/init.d/$displayManager ];then
-					echo -n "${S}Action for default display manager: /etc/init.d/$DISPLAY_MANAGER $1 attempted now... ${N}"
+					echo -n "${S}Action for default display manager: /etc/init.d/$displayManager $2 attempted now... ${N}"
+					if [ -n "$noHup" ];then
+						echo
+					fi
 					# nohup is required to make sure dm is fully stopped, and pids removed
 					xActionString="$noHup /etc/init.d/$displayManager $2 && success='true'"
 					eval $xActionString
-					if [ "$success" == 'true' ];then
-						echo "${S}success${N}"
-					else
-						echo "${W}failed${N}"
+					if [ -z "$noHup" ];then
+						if [ "$success" == 'true' ];then
+							echo "${S}success${N}"
+						else
+							echo "${W}failed${N}"
+						fi
 					fi
 				fi
 			fi
@@ -1885,12 +1895,17 @@ start_stop_default_dm()
 			if [ "$2" == 'stop' ];then
 				if [ "$( x_is_running )" -eq 0 ];then
 					echo -n "${M}Note: display manager shutdown failed... shutting down X directly instead... ${N}"
+					if [ -n "$noHup" ];then
+						echo
+					fi
 					xActionString="$noHup killall Xorg && finalXKill='true'"
 					eval $xActionString
-					if [ "$finalXKill" == 'true' ];then
-						echo "${S}success${N}"
-					else
-						echo "${W}failed${N}"
+					if [ -z "$noHup" ];then
+						if [ "$finalXKill" == 'true' ];then
+							echo "${S}success${N}"
+						else
+							echo "${W}failed${N}"
+						fi
 					fi
 				fi
 			fi
