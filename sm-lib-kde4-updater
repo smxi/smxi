@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.4
-####  Date: April 9 2009
+####  version: 0.7.5
+####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -95,9 +95,7 @@ kde3_log_and_removal()
 	dpkgKdePackagesAll="$( dpkg -l | grep -i 'kde' | awk '$1 ~ /(hi|ii)/ {print $2}' )"
 	# this doesn't get enough of the packages
 	# dpkgKdePackagesAll="$( package_tester 'kde' 'wild-full' ) kde-i18n-zhcn"
-	if [ -n "$( grep 'kde-i18n' <<< $dpkgKdePackagesAll )" ];then
-		dpkgKdePackagesAll=$( sed 's/kde-i18n/kde-l10n/g' <<< "$dpkgKdePackagesAll" )
-	fi
+	
 	if [ -n "$( package_tester 'superkaramba' )" ];then
 		extraPackages="$extraPackages plasma-scriptengine-superkaramba"
 	fi
@@ -142,6 +140,9 @@ kde3_log_and_removal()
 		fi
 	done 
 	cleanedRemovePackages="$cleanedRemovePackages $extraPackages"
+	if [ -n "$( grep 'kde-i18n' <<< $cleanedRemovePackages )" ];then
+		cleanedRemovePackages=$( sed 's/kde-i18n/kde-l10n/g' <<< "$cleanedRemovePackages" )
+	fi
 	cleanedRemovePackages="$( sed 's/[[:space:]]/\n/g' <<< $cleanedRemovePackages )"
 	cleanedRemovePackages=$( echo -e "$cleanedRemovePackages" | sort -f | uniq )
 	cleanedRemovePackages=$( echo $cleanedRemovePackages )
