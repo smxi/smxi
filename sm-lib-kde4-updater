@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.18
+####  version: 0.7.19
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -85,8 +85,8 @@ kde3_log_and_removal()
 	local removedPackages='' cleanedRemovePackages=''  kdeUpgradeInfo='' 
 	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
 	local extraPackages='' tempName='' package='' lineSize=''
-	# note: kipi-plugins, koffice, temp possible holds
-	local noUseWildcard='^arts$|\-data|gwenview-i18n|kandy|kate-plugins|kcontrol|kdebase|kdeeject|kdelib|kdesktop|kde-core|kfile-plugin|kformula|kghostview|kicker|kio-apt|kcoloredit|kmailcvt|kmenuedit|kmoon|knewsticker|korn|kpersonalizer|kpowersave|ksmserver|ksplash|ksvg|ktip|ktnef|kwin|^lib|\-lib|networkstatus|sidux|superkaramba'
+	# note: kipi-plugins, koffice, temp possible holds: to be put back in: ktnef kitchensync
+	local noUseWildcard='^arts$|\-data|gwenview-i18n|kandy|kate-plugins|kcontrol|kdebase|kdeeject|kdelib|kdesktop|kde-core|kfile-plugin|kformula|kghostview|kicker|kio-apt|kcoloredit|kmailcvt|kmenuedit|kmoon|knewsticker|korn|kpersonalizer|kpowersave|ksmserver|ksplash|ksvg|ktip|kwin|^lib|\-lib|networkstatus|sidux|superkaramba'
 	local keepWildCards='kpager'
 	
 	echo $LINE
