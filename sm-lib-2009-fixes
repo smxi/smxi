@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.2
+####  version: 1.1.3
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -58,11 +58,10 @@ xorg_1_6_fix_1()
 {
 	local prefId='xorg-1-6-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
-	local case1=$( grep -i 'AllowEmptyInput' $X_ORG_PATH )
-	local case2=$( grep -i 'AutoAddDevices' $X_ORG_PATH )
-	local case3=$( grep -i 'DontZap' $X_ORG_PATH )
+	local case1='' case2='' case3=''
 	local newX='false'
 	local xVersion=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
+	local xorgMouseI='' xorgMouseC=''
 	
 	if [ -z "$xVersion" ];then
 		xVersion=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
@@ -73,22 +72,40 @@ xorg_1_6_fix_1()
 			;;
 	esac
 	log_function_data "xVersion: $xVersion\ncase1: $case1\ncase2: $case2\ncase3: $case3"
-	if [ "$smPref" -eq 0 -a "$newX" == 'true' ] && [ -z "$case1" -o -z "$case2" -o -z "$case3" ];then
-		echo $LINE
-		echo "${S}Running ${C}Xorg >= 1.6 xorg.conf${S} tweaks now...${N}"
-		if [ -z "$case1" ];then
-			echo "$SPACER${S}Adding: ${C}Option \"AllowEmptyInput\" \"0\"${S}...${N}"
-			perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AllowEmptyInput" "0"/' $X_ORG_PATH
+	# note: this will be false if no X is installed
+	if [ "$smPref" -eq 0 -a "$newX" == 'true' ];then
+		case1=$( grep -is 'AllowEmptyInput' $X_ORG_PATH )
+		case2=$( grep -is 'AutoAddDevices' $X_ORG_PATH )
+		case3=$( grep -is 'DontZap' $X_ORG_PATH )
+		if [ -z "$case1" -o -z "$case2" -o -z "$case3" ];then
+			echo $LINE
+			echo "${S}Running ${C}Xorg >= 1.6 xorg.conf${S} tweaks now...${N}"
+			if [ -f $X_ORG_PATH ];then
+				if [ -z "$case1" ];then
+					echo "$SPACER${S}Adding: ${C}Option \"AllowEmptyInput\" \"0\"${S}...${N}"
+					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AllowEmptyInput" "0"/' $X_ORG_PATH
+				fi
+				if [ -z "$case2" ];then
+					echo "$SPACER${S}Adding: ${C}Option \"AutoAddDevices\" \"0\"${S}...${N}"
+					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AutoAddDevices" "0"/' $X_ORG_PATH
+				fi
+				if [ -z "$case3" ];then
+					echo "$SPACER${S}Adding: ${C}Option \"DontZap\" \"Off\"${S}...${N}"
+					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "DontZap" "Off"/' $X_ORG_PATH
+				fi
+				echo "${S}Done with ${C}Xorg >= 1.6 xorg.conf${S} update, continuing.${N}"
+			else
+				echo "${E}No ${C}$X_ORG_PATH${S} found. Unable to modify ${C}xorg.conf${S} data.${N}"
+			fi
 		fi
-		if [ -z "$case2" ];then
-			echo "$SPACER${S}Adding: ${C}Option \"AutoAddDevices\" \"0\"${S}...${N}"
-			perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AutoAddDevices" "0"/' $X_ORG_PATH
+		# check the mouse stuff too, this is an aptitude fix mainly, which does the upgrade wrong
+		xorgMouseI=$( check_package_status 'xserver-xorg-input-mouse' 'i' )
+		xorgMouseC=$( check_package_status 'xserver-xorg-input-mouse' 'c' )
+		
+		if [ -z "$xorgMouseI" -a -n "$xorgMouseC" ];then
+			echo "${S}Installing  missing package ${C}xserver-xorg-input-mouse${S}...${N}"
+			package_installer 'xserver-xorg-input-mouse' 'install-missing'
 		fi
-		if [ -z "$case3" ];then
-			echo "$SPACER${S}Adding: ${C}Option \"DontZap\" \"Off\"${S}...${N}"
-			perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "DontZap" "Off"/' $X_ORG_PATH
-		fi
-		echo "${S}Done with ${C}Xorg >= 1.6 xorg.conf${S} update, continuing.${N}"
 		set_sticky_prefs $prefId
 	fi
 }
