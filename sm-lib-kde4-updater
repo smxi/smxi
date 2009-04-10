@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.9
+####  version: 0.7.10
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -127,11 +127,14 @@ kde3_log_and_removal()
 	do
 		# swap known package names
 		case $package in
+			karm)
+				package='ktimetracker'
+				;;
 			kpdf)
 				package='okular okular-extra-backends'
 				;;
-			karm)
-				package='ktimetracker'
+			khelpcenter)
+				package='khelpcenter4'
 				;;
 		esac
 # 		if [ -n "$( grep -Ev '('$noUseWildcard')' <<< $package )" ];then
