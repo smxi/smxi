@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.5
+####  version: 8.11.6
 ####  Date: April 10 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1854,18 +1854,15 @@ start_stop_default_dm()
 				for dm in $dmList
 				do
 					if [ -x /etc/init.d/$dm ];then
-						echo -n "${S}Action for display manager: /etc/init.d/$dm $2 attempted now... ${N}"
-						if [ -n "$noHup" ];then
-							echo
-						fi
+						echo "${S}Attempting to ${C}$2${S} display manager $dm now... ${N}"
 						# nohup is required to make sure dm is fully stopped, and pids removed
 						xActionString="$noHup /etc/init.d/$dm $2 && success='true'"
 						eval $xActionString
 						if [ -z "$noHup" ];then
 							if [ "$success" == 'true' ];then
-								echo "${S}success${N}"
+								echo "${S}Display manager ${C}$2${S} successful.${N}"
 							else
-								echo "${W}failed${N}"
+								echo "${W}Display manager ${C}$2${S} failed${N}"
 							fi
 						fi
 						break
@@ -1874,18 +1871,15 @@ start_stop_default_dm()
 			else
 				# question: why is this in some cases not working? No init 5 is happening
 				if [ -x /etc/init.d/$displayManager ];then
-					echo -n "${S}Action for default display manager: /etc/init.d/$displayManager $2 attempted now... ${N}"
-					if [ -n "$noHup" ];then
-						echo
-					fi
+					echo "${S}Attempting to ${C}$2${S} default display manager $displayManager now... ${N}"
 					# nohup is required to make sure dm is fully stopped, and pids removed
 					xActionString="$noHup /etc/init.d/$displayManager $2 && success='true'"
 					eval $xActionString
 					if [ -z "$noHup" ];then
 						if [ "$success" == 'true' ];then
-							echo "${S}success${N}"
+							echo "${S}Display manager ${C}$2${S} successful.${N}"
 						else
-							echo "${W}failed${N}"
+							echo "${W}Display manager ${C}$2${S} failed${N}"
 						fi
 					fi
 				fi
@@ -1894,17 +1888,14 @@ start_stop_default_dm()
 			# startx x starts can for example bypass kdm tests, etc
 			if [ "$2" == 'stop' ];then
 				if [ "$( x_is_running )" -eq 0 ];then
-					echo -n "${M}Note: display manager shutdown failed... shutting down X directly instead... ${N}"
-					if [ -n "$noHup" ];then
-						echo
-					fi
+					echo "${M}Note: display manager shutdown failed... trying to shut down X directly instead... ${N}"
 					xActionString="$noHup killall Xorg && finalXKill='true'"
 					eval $xActionString
 					if [ -z "$noHup" ];then
 						if [ "$finalXKill" == 'true' ];then
-							echo "${S}success${N}"
+							echo "${S}X shutdown successful.${N}"
 						else
-							echo "${W}failed${N}"
+							echo "${W}X shutdown failed.${N}"
 						fi
 					fi
 				fi
