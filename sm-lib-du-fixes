@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.2
-####  Date: April 8 2009
+####  version: 1.3.3
+####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -456,8 +456,8 @@ kde4_updater()
 	fi
 	
 	log_function_data "kateVersionCan: $kateVersionCan\nkwinVersionInst: $kwinVersionInst\nkdmVersionCan: $kdmVersionCan\nkdmVersionInst: $kdmVersionInst"
-	
-	if [ "$B_TESTING_2" == 'true' ] && [ "$kwinVersionInst" -gt 0 -o "$kdmVersionInst" -gt 0 ];then
+	# [ "$B_TESTING_2" == 'true' ] && 
+	if [ "$kwinVersionInst" -gt 0 -o "$kdmVersionInst" -gt 0 ];then
 		if [ "$kwinVersionInst" -eq 3 -a "$kateVersionCan" -gt 3 ] || [ "$kdmVersionInst" -eq 3 -a "$kdmVersionCan" -gt 3 ];then
 			run_script_import $LIB_KDE4_UPDATER
 			kde3_to_kde4_updater_main
