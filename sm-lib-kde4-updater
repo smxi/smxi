@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.15
+####  version: 0.7.16
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -86,13 +86,14 @@ kde3_log_and_removal()
 	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
 	local extraPackages='' tempName='' package='' lineSize=''
 	# note: kipi-plugins, koffice, temp possible holds
-	local noUseWildcard='^arts$|\-data|kandy|kate-plugins|kcontrol|kdebase|kdeeject|kdelib|kdesktop|kde-core|kfile-plugin|kformula|kghostview|kicker|kio-apt|kcoloredit|kmailcvt|kmenuedit|kmoon|knewsticker|korn|kpager|kpersonalizer|kpowersave|ksmserver|ksplash|ksvg|ktip|kwin|^lib|\-lib|networkstatus|sidux|superkaramba'
+	local noUseWildcard='^arts$|\-data|kandy|kate-plugins|kcontrol|kdebase|kdeeject|kdelib|kdesktop|kde-core|kfile-plugin|kformula|kghostview|kicker|kio-apt|kcoloredit|kmailcvt|kmenuedit|kmoon|knewsticker|korn|kpersonalizer|kpowersave|ksmserver|ksplash|ksvg|ktip|kwin|^lib|\-lib|networkstatus|sidux|superkaramba'
+	local keepWildCards='kpager'
 	
 	echo $LINE
 	echo "${S}Preparing and procesing your ${C}KDE 3${S} to ${C}KDE 4${S} package data, please wait...${N}"
 	
 	echo "${S}Calculating and logging installed dpkg kde data (cleaned for processing lists)...${N}"
-	dpkgKdePackagesAll="$( dpkg -l | grep -i 'kde' | awk '$1 ~ /(hi|ii)/ {print $2}' )"
+	dpkgKdePackagesAll="$( dpkg -l | grep -i 'kde' | awk '$1 ~ /(hi|ii)/ {print $2}'  )"
 	# this doesn't get enough of the packages
 	# dpkgKdePackagesAll="$( package_tester 'kde' 'wild-full' ) kde-i18n-zhcn"
 	
