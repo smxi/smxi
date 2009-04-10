@@ -1843,7 +1843,7 @@ start_stop_default_dm()
 	local displayManager=$( get_default_display_manager )
 	local success=''
 	local dmList='entrance gdm kdm slim wdm xdm' dm=''
-	local noHup='nohup' xKillString=''
+	local noHup='nohup' xActionString=''
 	if [ -z "$DISPLAY" -a "$1" == 'stop' ];then
 		noHup=''
 	fi
@@ -1855,8 +1855,8 @@ start_stop_default_dm()
 				do
 					if [ -x /etc/init.d/$dm ];then
 						# nohup is required to make sure dm is fully stopped, and pids removed
-						xKillString="$noHup /etc/init.d/$dm $2 && success='true'"
-						eval $xKillString
+						xActionString="$noHup /etc/init.d/$dm $2 && success='true'"
+						eval $xActionString
 						break
 					fi
 				done
@@ -1864,8 +1864,8 @@ start_stop_default_dm()
 				# question: why is this in some cases not working? No init 5 is happening
 				if [ -x /etc/init.d/$displayManager ];then
 					# nohup is required to make sure dm is fully stopped, and pids removed
-					xKillString="$noHup /etc/init.d/$displayManager $2 && success='true'"
-					eval $xKillString
+					xActionString="$noHup /etc/init.d/$displayManager $2 && success='true'"
+					eval $xActionString
 				fi
 			fi
 			# this handles cases where somehow X is still running
@@ -1873,8 +1873,8 @@ start_stop_default_dm()
 			if [ "$2" == 'stop' ];then
 				if [ "$( x_is_running )" -eq 0 ];then
 					echo "${M}Note: display manager shutdown failed... shutting down X directly instead...${N}"
-					xKillString="$noHup killall Xorg"
-					eval $xKillString
+					xActionString="$noHup killall Xorg"
+					eval $xActionString
 				fi
 			fi
 			;;
