@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.14
+####  version: 0.7.15
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -129,6 +129,9 @@ kde3_log_and_removal()
 		case $package in
 			karm)
 				package='ktimetracker'
+				;;
+			kcoloredit)
+				package='kcolorchooser'
 				;;
 			kpdf)
 				package='okular okular-extra-backends'
