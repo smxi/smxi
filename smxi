@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.6
-####  Date: April 10 2009
+####  version: 8.11.7
+####  Date: April 11 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -255,6 +255,7 @@ B_APT_PROX=''
 B_DEBUG=''
 B_LOCALES=''
 B_OVERRIDE_GRUB_GFX=''
+B_SKIP_KDE4=''
 B_TESTING_1=''
 B_TESTING_2=''
 CHANGE_KERNEL_MIRROR=''
@@ -3335,6 +3336,7 @@ print_usage()
 		echo "${C}-! 12${S} - Triggers an update from svn branch two - if present, of course."
 		echo "${C}-! <http://......>${S} - Triggers an update from whatever server you list."
 		echo "${C}-! 30${S} - Allows grub-gfxboot install even with Debian Stable: ${W}USE AT YOUR OWN RISK!!!!"
+		echo "${C}-! 31${S} - Skips the KDE 3 to KDE 4 upgrade section. ${W}USE AT YOUR OWN RISK!!!!"
 		echo "And only use if you know how to do chroot recovery of failed grub install from a live cd!!!!${S}"
 	fi
 	echo
@@ -3505,6 +3507,9 @@ get_options()
 							;;
 						30)
 							B_OVERRIDE_GRUB_GFX='true'
+							;;
+						31)
+							B_SKIP_KDE4='true'
 							;;
 						*)	error_handler 'unsupported-option' 'option-handler' "-$opt $OPTARG\nDevelopers: see $SCRIPT_NAME -H for advanced testing options."
 							;;

@@ -126,7 +126,7 @@ package_group_installer()
 	local rsyncGroup="rsync $rdiff"
 	local streamTuner='streamtuner streamripper'
 	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
-	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
+	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-session xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 
 	echo $LINE

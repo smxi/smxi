@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.3
-####  Date: April 10 2009
+####  version: 1.3.4
+####  Date: April 11 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -436,31 +436,34 @@ post_du_tasks()
 kde4_updater()
 {
 	eval $LOGUS
-	local kateVersionCan=$( check_package_status 'kate' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
-	local kwinVersionInst=$( check_package_status 'kwin' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
-	local kdmVersionCan=$( check_package_status 'kdm' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
-	local kdmVersionInst=$( check_package_status 'kdm' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
-	
-	## validate
-	if [ -z "$kateVersionCan" ];then
-		kateVersionCan=0
-	fi
-	if [ -z "$kwinVersionInst" ];then
-		kwinVersionInst=0
-	fi
-	if [ -z "$kdmVersionCan" ];then
-		kdmVersionCan=0
-	fi
-	if [ -z "$kdmVersionInst" ];then
-		kdmVersionInst=0
-	fi
-	
-	log_function_data "kateVersionCan: $kateVersionCan\nkwinVersionInst: $kwinVersionInst\nkdmVersionCan: $kdmVersionCan\nkdmVersionInst: $kdmVersionInst"
-	# [ "$B_TESTING_2" == 'true' ] && 
-	if [ "$kwinVersionInst" -gt 0 -o "$kdmVersionInst" -gt 0 ];then
-		if [ "$kwinVersionInst" -eq 3 -a "$kateVersionCan" -gt 3 ] || [ "$kdmVersionInst" -eq 3 -a "$kdmVersionCan" -gt 3 ];then
-			run_script_import $LIB_KDE4_UPDATER
-			kde3_to_kde4_updater_main
+	# this needs an off switch for certain cases
+	if [ "$B_SKIP_KDE4" != 'true' ];then
+		local kateVersionCan=$( check_package_status 'kate' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
+		local kwinVersionInst=$( check_package_status 'kwin' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
+		local kdmVersionCan=$( check_package_status 'kdm' 'c' | cut -d ':' -f 2 | cut -d '.' -f 1 )
+		local kdmVersionInst=$( check_package_status 'kdm' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
+		
+		## validate
+		if [ -z "$kateVersionCan" ];then
+			kateVersionCan=0
+		fi
+		if [ -z "$kwinVersionInst" ];then
+			kwinVersionInst=0
+		fi
+		if [ -z "$kdmVersionCan" ];then
+			kdmVersionCan=0
+		fi
+		if [ -z "$kdmVersionInst" ];then
+			kdmVersionInst=0
+		fi
+		
+		log_function_data "kateVersionCan: $kateVersionCan\nkwinVersionInst: $kwinVersionInst\nkdmVersionCan: $kdmVersionCan\nkdmVersionInst: $kdmVersionInst"
+		# [ "$B_TESTING_2" == 'true' ] && 
+		if [ "$kwinVersionInst" -gt 0 -o "$kdmVersionInst" -gt 0 ];then
+			if [ "$kwinVersionInst" -eq 3 -a "$kateVersionCan" -gt 3 ] || [ "$kdmVersionInst" -eq 3 -a "$kdmVersionCan" -gt 3 ];then
+				run_script_import $LIB_KDE4_UPDATER
+				kde3_to_kde4_updater_main
+			fi
 		fi
 	fi
 	eval $LOGUE
