@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.8.1
+####  version: 2.8.2
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -661,7 +661,8 @@ list_xorg_modules()
 						echo  "Module $module : type $moduleType : Status: not currently used"
 					fi
 					# not sure about xorg 1.6, so just keeping these in case they are needed
-					if [ -z "$( grep -Ei '(input-kbd|input-mouse)' <<< $module )" ];then
+					# note: removing input-evdev removes ALL xorg, so needs to be filtered out, jiro found this
+					if [ -z "$( grep -Ei '(input-kbd|input-mouse|input-evdev)' <<< $module )" ];then
 						moduleList="$moduleList $module"
 					else
 						if [ "$B_TESTING_1" == 'true' ];then
