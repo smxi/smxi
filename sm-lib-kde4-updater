@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.21
+####  version: 0.7.22
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -222,7 +222,7 @@ install_kde4()
 	echo "${S}Beginning ${C}KDE 4${S} install/reinstall/ update process."
 	echo "${S}Installing core components of ${C}KDE4${S} now...${N}"
 	print_hec
-	package_installer "kde4-minimal kdm kaboom" 'install-missing'
+	package_installer "kde4-minimal kdm kaboom plasma-widgets-addons plasma-widgets-workspace" 'install-missing'
 	echo $LINE
 	echo "${S}Attempting reinstall of your previous KDE packages. This will go through the list created"
 	echo "above of ${C}KDE${S} packages to be removed and try to re-install the packages, one by one."
