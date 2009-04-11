@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.20
+####  version: 0.7.21
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -191,13 +191,19 @@ kde3_log_and_removal()
 # args: $1 - full kde package list to be removed
 remove_all_kde()
 {
-	local retValue=0 removeList=$( echo $1 ) # dump line breaks
-	
 	eval $LOGUS
-	echo $LINE
-	echo "${S}Removing all detected KDE packages prior to reinstallation of KDE (can take time: please wait)...${N}"
+	local retValue=0 removeList=$( echo $1 ) # dump line breaks
+	local powersaved=''
 	
-	package_remover "$removeList" 'purge' 'group'
+	if [ -n "$( check_package_status 'powersaved' 'i' )" ];then
+		powersaved='powersaved'
+	fi
+	echo $LINE
+	if [ -n "$powersaved" ];then
+		echo "${S}NOTE: Removing ${C}powersaved${S} to let the native ${C}KDE 4${S} powersave tool ${C}powerdevil${S} work.${N}"
+	fi
+	echo "${S}Removing all detected ${C}KDE${S} packages prior to reinstallation of ${C}KDE${S} (can take time: please wait)...${N}"
+	package_remover "$removeList $powersaved" 'purge' 'group'
 	retValue=$?
 	# clean cruft that will break kdm
 	rm -rf /etc/default/kdm.d/* 2>/dev/null
