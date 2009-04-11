@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.20
+####  version: 3.1.21
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -49,6 +49,7 @@ package_group_installer()
 	local kdeMultimediaKfile='kdemultimedia-kfile-plugins'
 	local kdebase='kdebase kdebase-kio-plugins kde-core kdelibs'
 	local khelp='khelpcenter' kcolor='kcoloredit' plasmaWidgets=''
+	local qt4Config=''
 
 	# note: these packages are not in every Debian level
 	if [ -z "$( check_package_status 'epdfview' )" ];then
@@ -77,6 +78,7 @@ package_group_installer()
 			kpower=''
 			ksvg=''
 			plasmaWidgets='plasma-widgets-addons plasma-widgets-workspace'
+			qt4Config='qt4-qtconfig'
 		fi
 	fi
 
@@ -114,7 +116,7 @@ package_group_installer()
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
 	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
-	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets"
+	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config"
 	local kdePackages="$kdebase konqueror konversation $kpdf $ksvg $dmUse kdm"
 	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
 	local kofficePackages='koffice '
