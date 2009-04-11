@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.8.0
-####  Date: February 16 2009
+####  version: 2.8.1
+####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -660,7 +660,14 @@ list_xorg_modules()
 					if [ "$B_TESTING_1" == 'true' ];then
 						echo  "Module $module : type $moduleType : Status: not currently used"
 					fi
-					moduleList="$moduleList $module"
+					# not sure about xorg 1.6, so just keeping these in case they are needed
+					if [ -z "$( grep -Ei '(input-kbd|input-mouse)' <<< $module )" ];then
+						moduleList="$moduleList $module"
+					else
+						if [ "$B_TESTING_1" == 'true' ];then
+							echo  "Skipping module $module : type $moduleType"
+						fi
+					fi
 				fi
 			fi
 		done

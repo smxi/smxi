@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.17
-####  Date: April 7 2009
+####  version: 3.1.18
+####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -44,7 +44,11 @@ package_group_installer()
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
 	local pdfLight='epdfview' mlocate='mlocate' kioapt='kio-apt' kpdf='kpdf'
-	local karm='karm'
+	local karm='karm' ksvg='ksvg' katePlugins='kate-plugins' kpower='kpowersave'
+	local kmoon='kmoon' kickerApplets='kicker-applets' kdeAddonsKfile='kdeaddons-kfile-plugins'
+	local kdeMultimediaKfile='kdemultimedia-kfile-plugins'
+	local kdebase='kdebase kdebase-kio-plugins kde-core kdelibs'
+	local khelp='khelpcenter' kcolor='kcoloredit'
 
 	# note: these packages are not in every Debian level
 	if [ -z "$( check_package_status 'epdfview' )" ];then
@@ -58,22 +62,24 @@ package_group_installer()
 		if [ "$dmUse" == 'kdm' ];then
 			dmUse=''
 		fi
-		if [ -z "$( check_package_status 'kio-apt' )" ];then
-			kioapt=''
+		if [ -z "$( check_package_status 'kate-plugins' )" ];then
+			katePlugins=''
 		fi
-		if [ -z "$( check_package_status 'kpdf' )" ];then
-			if [ -n "$( check_package_status 'okular' )" ];then
-				kpdf='okular'
-			else
-				kpdf=''
-			fi
-		fi 
-		if [ -z "$( check_package_status 'karm' )" ];then
-			if [ -n "$( check_package_status 'ktimetracker' )" ];then
-				karm='ktimetracker'
-			else
-				karm=''
-			fi
+		if [ -z "$( check_package_status 'kmoon' )" ];then
+			kmoon=''
+		fi
+		if [ -n "$( check_package_status 'kde4-minimal' )" ];then
+			karm='ktimetracker'
+			kcolor='kcolorchooser'
+			kdeAddonsKfile=''
+			kdeBase='kde4-minimal kaboom'
+			kdeMultimediaKfile=''
+			khelp='khelpcenter4'
+			kickerApplets=''
+			kioapt=''
+			kpdf='okular okular-extra-backends'
+			kpower=''
+			ksvg=''
 		fi
 	fi
 
@@ -111,9 +117,9 @@ package_group_installer()
 	local fluxPackages="$baseLightPackages fluxbox fluxconf"
 	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
-	local kdeExtras="ark $karm kate-plugins kdeaddons-kfile-plugins kdemultimedia-kfile-plugins kdemultimedia-kio-plugins kicker-applets $kioapt kmix kmoon knemo konq-plugins kpowersave ksensors ksnapshot kuser"
-	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation $kpdf ksvg $dmUse kdm"
-	local kdepimPackages="kmail $karm kontact korganizer kalarm"
+	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser"
+	local kdePackages="$kdebase konqueror konversation $kpdf $ksvg $dmUse kdm"
+	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
 
@@ -778,10 +784,10 @@ display_manager_installer()
 	echo "${C}4${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
 	echo "${C}5${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
 	echo "${C}6${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
-	echo "${C}7${S} - ${C}kde${S} Base packages for kde desktop + kpdf, konversation, konqueror."
+	echo "${C}7${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
 	echo "${C}8${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
-	echo "${C}9${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, other useful kde things."
-	echo "${C}10${S} - ${C}kde-pim${S} karm, kontact, korganizer, kalarm."
+	echo "${C}9${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
+	echo "${C}10${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
 	echo "${C}11${S} - ${C}fluxbox${S} Installs lightweight package group. No gtk/qt apps. Good for old hardware."
 	echo "${C}12${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies + display manager."
 	echo "${C}13${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
