@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.19
+####  version: 3.1.20
 ####  Date: April 10 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -62,14 +62,9 @@ package_group_installer()
 		if [ "$dmUse" == 'kdm' ];then
 			dmUse=''
 		fi
-		if [ -z "$( check_package_status 'kate-plugins' )" ];then
-			katePlugins=''
-		fi
-		if [ -z "$( check_package_status 'kmoon' )" ];then
-			kmoon=''
-		fi
 		if [ -n "$( check_package_status 'kde4-minimal' )" ];then
 			karm='ktimetracker'
+			katePlugins=''
 			kcolor='kcolorchooser'
 			kdeAddonsKfile=''
 			kdeBase='kde4-minimal kaboom'
@@ -77,6 +72,7 @@ package_group_installer()
 			khelp='khelpcenter4'
 			kickerApplets=''
 			kioapt=''
+			kmoon=''
 			kpdf='okular okular-extra-backends'
 			kpower=''
 			ksvg=''
