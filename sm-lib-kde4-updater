@@ -125,6 +125,7 @@ kde3_log_and_removal()
 	log_function_data "kde 4 package remove list:\n$removedPackages"
 	
 	# construct a master made up of apt-get construct and dpkg installed list
+	# to be added later: gtk-qt-engine-kde4 (gtk-qt-engine) skanlite (for kooka)
 	for package in $removedPackages $dpkgCleanKdePackages
 	do
 		# swap known package names
