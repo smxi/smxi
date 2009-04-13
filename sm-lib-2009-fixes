@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.4
+####  version: 1.1.5
 ####  Date: April 12 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -74,17 +74,17 @@ xorg_1_6_fix_1()
 	log_function_data "xVersion: $xVersion\ncase1: $case1\ncase2: $case2\ncase3: $case3"
 	# note: this will be false if no X is installed
 	if [ "$smPref" -eq 0 -a "$newX" == 'true' ];then
-		#case1=$( grep -is 'AllowEmptyInput' $X_ORG_PATH )
+		case1=$( grep -is 'AllowEmptyInput' $X_ORG_PATH )
 		case2=$( grep -is 'AutoAddDevices' $X_ORG_PATH )
 		case3=$( grep -is 'DontZap' $X_ORG_PATH )
 		if [ -z "$case1" -o -z "$case2" -o -z "$case3" ];then
 			echo $LINE
 			echo "${S}Running ${C}Xorg >= 1.6 xorg.conf${S} tweaks now...${N}"
 			if [ -f $X_ORG_PATH ];then
-# 				if [ -z "$case1" ];then
-# 					echo "$SPACER${S}Adding: ${C}Option \"AllowEmptyInput\" \"0\"${S}...${N}"
-# 					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AllowEmptyInput" "0"/' $X_ORG_PATH
-# 				fi
+				if [ -z "$case1" ];then
+					echo "$SPACER${S}Adding: ${C}Option \"AllowEmptyInput\" \"0\"${S}...${N}"
+					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AllowEmptyInput" "0"/' $X_ORG_PATH
+				fi
 				if [ -z "$case2" ];then
 					echo "$SPACER${S}Adding: ${C}Option \"AutoAddDevices\" \"0\"${S}...${N}"
 					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AutoAddDevices" "0"/' $X_ORG_PATH
