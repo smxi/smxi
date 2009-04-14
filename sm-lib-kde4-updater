@@ -260,7 +260,7 @@ print_kde4_message()
 	echo $LINE
 	echo "${S}Please note: the first time each user logs-in to their new ${C}KDE 4${S} desktop,"
 	echo "the ${C}Kaboom${S} program will run. I recommend the following options:"
-	echo "${M}(*) Use crrent KDE 3 settings as initial for KDE 4 (standard)"
+	echo "${M}(*) Use current KDE 3 settings as initial for KDE 4 (standard)"
 	echo "${M}[x] Backup existing KDE 3 settings (highly recommended)"
 	echo "${S}Please note that if you had a lot of data in kmail or other places in your settings .xxx files,"
 	echo "you may want to make sure you have enough space before proceeding. Kaboom will print"
