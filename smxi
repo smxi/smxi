@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.7
-####  Date: April 11 2009
+####  version: 8.11.8
+####  Date: April 14 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1041,14 +1041,14 @@ download_test_file()
 {
 	eval $LOGUS
 	local fileName=$1 fileNameTemp='' messageString=''
-	local isGood='' wgetError=0 update=''
 	local downloadLocation=$SCRIPT_DOWNLOAD downloadFile=$1 downloadUrl=''
+	local isGood='' wgetError=0 ua="-U s-tools/$downloadFile"
 
 	if [ -f "$fileNameTemp" ];then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
 	fi
 	if [ "$downloadFile" == "$LIB_WARNING" ];then
-		update="?$DISTRO_F"
+		ua="$ua.$DISTRO_F"
 	fi
 	if [ "$downloadFile" == "$USER_SCRIPT_URL" ];then
 		downloadLocation=$USER_SCRIPT_URL
@@ -1071,10 +1071,10 @@ download_test_file()
 	esac
 	eval $messageString
 	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
-	downloadUrl="$downloadLocation$downloadFile$update"
+	downloadUrl="$downloadLocation$downloadFile"
 	log_function_data "download url: $downloadUrl"
 	# always using -O here because -Nc is really buggy over time lines and fast file changes
-	wget -T$TIME_OUT -t 2 -q -O$fileNameTemp $downloadUrl &>/dev/null || wgetError="$?"
+	wget $ua -T$TIME_OUT -t 2 -q -O$fileNameTemp $downloadUrl &>/dev/null || wgetError="$?"
 	if [ "$wgetError" -gt 0 ];then
  		file_download_error "$fileName" 'server-problem' "$wgetTest"
 	else
