@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.24
-####  Date: April 13 2009
+####  version: 0.7.25
+####  Date: April 14 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -213,11 +213,18 @@ remove_all_kde()
 	fi
 	echo "${S}Removing all detected ${C}KDE${S} packages prior to reinstallation of ${C}KDE${S} (can take time: please wait)...${N}"
 	package_remover "$removeList $powersaved" 'purge' 'group'
-	retValue=$?
-	# clean cruft that will break kdm
-	rm -rf /etc/default/kdm.d/* 2>/dev/null
-	return $retValue
-	eval $LOGUE
+	retValue="$?"
+	# aptitude is far too unpredictable to try to do any real error handling here, so
+	# I'm simply not even going to bother trying since it gives 0 retval for q exit, for example.
+	log_function_data "retVal for package removal: $retValue"
+	if [ "$retValue" -eq 0 -o "$APT_TYPE" == 'aptitude' ];then
+		# clean cruft that will break kdm
+		rm -rf /etc/default/kdm.d/* 2>/dev/null
+		eval $LOGUE
+	else
+		eval $LOGUE
+		error_handler 'kde4-updater-remove' "$FUNCNAME" "$retValue"
+	fi
 }
 
 # args: $1 - list of pre-existing kde 3 packages to be replaced

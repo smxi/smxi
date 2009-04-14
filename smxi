@@ -465,6 +465,10 @@ error_handler()
 			errorCode=4
 			errorMessage="The forced update of $SCRIPT_NAME failed. Returned error code: $errorExtra"
 			;;
+		kde4-updater-remove)
+			errorCode=50
+			errorMessage="The attempt to remove kde 4 failed with apt error code: $errorExtra\nBecause this probably means you have a conflict error in apt already, \nyou will need to fix this manually before you can continue."
+			;;
 		not-root)
 			errorCode=2
 			errorMessage="You must be logged in as root to run this script.\n${LOG_INDENT}Please start $SCRIPT_NAME as root."
