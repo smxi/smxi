@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.26
+####  version: 0.7.27
 ####  Date: April 14 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -86,8 +86,8 @@ kde3_log_and_removal()
 	local package='' packageD='' dpkgCleanKdePackages='' dpkgKdePackagesAll=''
 	local extraPackages='' tempName='' package='' lineSize=''
 	  
-	# note: kipi-plugins, koffice, temp possible holds: to be put back in: ktnef kitchensync
-	local noUseWildcard='^arts$|artsbuilder|\-data|gwenview-i18n|kandy|kate-plugins|kbstate|kcoloredit|kcontrol|kdat|kdebase|kdeeject|kdelib|kdelirc|kdepim-kio-plugins|kdeprint|kdesktop|kde-core|kdict|kdnssd|kdvi|kfax|kfile-plugin|kformula|kghostview|kicker|kiconedit|kio-apt|kmailcvt|kmenuedit|kmoon|kmrml|knewsticker|kolourpaint$|kooka|korn|kpersonalizer|kpovmodeler|kpowersave|ksayit|ksmserver|ksplash|ksvg|ksysv|ktip|kuickshow|kview$|kviewshell|kwifimanager|kwin|kworldclock|^lib|\-lib|networkstatus|quanta|sidux|superkaramba'
+	# note: kipi-plugins, temp possible holds: to be put back in: ktnef kitchensync
+	local noUseWildcard='^arts$|artsbuilder|\-data|gwenview-i18n|kandy|kate-plugins|kbstate|kcoloredit|kcontrol|kdat|kdebase|kdeeject|kdelib|kdelirc|kdepim-kio-plugins|kdeprint|kdesktop|kde-core|kdict|kdnssd|kdvi|kfax|kfile-plugin|kghostview|khelpcenter$|kicker|kiconedit|kio-apt|kmailcvt|kmenuedit|kmoon|kmrml|knewsticker|kolourpaint$|kooka|korn|kpersonalizer|kpovmodeler|kpowersave|ksayit|ksmserver|ksplash|ksvg|ksysv|ktip|kuickshow|kview$|kviewshell|kwifimanager|kwin|kworldclock|^lib|\-lib|networkstatus|quanta|sidux|superkaramba'
 	local keepWildCards='kpager'
 	
 	echo $LINE
