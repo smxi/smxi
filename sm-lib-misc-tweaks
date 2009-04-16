@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.3
-####  Date: March 29 2009
+####  version: 1.22.4
+####  Date: April 15 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -622,7 +622,6 @@ install_kmenu_sidebar()
 	local siduxKmenuBarUrl2=$siduxUrl'kside_213.png'
 	# raider700 sidebar
 	local siduxKmenuBarUrl3=$siduxUrl'kside_810.png'
-	local opt='' option='' menu='' ksp='kside.png'
 
 	echo $LINE
 	echo "${S}Please select one of the following kmenu side graphics:"
@@ -819,11 +818,12 @@ grub_gfx_message_installer()
 	local bgmc=$SCRIPT_DOWNLOAD'artwork/'$cbrd
 	# make sure not commented out etc
 	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
+	local ua="-U s-tools/grub-gfx.$cbrd"
 
 	echo $LINE
 	if [ -n "$gfxGrubExists" ];then
 		echo "${S}Downloading ${C}$cbrd${S} file now...${N}"
-		wget -T$TIME_OUT -t 2 -O $grubCbrd $bgmc
+		wget $ua -T$TIME_OUT -t 2 -O $grubCbrd $bgmc
 		if [ -s "$grubCbrd" ];then
 			echo "${S}Updating ${C}$GRUB_PATH${S} to use the new grub boot image...${N}"
 			# we're being careful here to not overwrite any other /boot/message type files or links
