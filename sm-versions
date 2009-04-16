@@ -1,4 +1,4 @@
-smxi=8.11.11:April 15 2009
+smxi=8.11.12:April 15 2009
 sm-lib-apt-tools=1.21.17:April 14 2009
 sm-lib-clean-up=2.8.3:April 15 2009
 sm-lib-distro-conversion=3.2.13:March 29 2009
@@ -6,11 +6,11 @@ sm-lib-du-fixes=1.3.4:April 11 2009
 sm-lib-graphics=2.4.1:January 23 2009
 sm-lib-kde4-updater=0.7.27:April 14 2009
 sm-lib-kernel=2.5.29:March 31 2009
-sm-lib-kernel-install=2.10.18:April 15 2009
+sm-lib-kernel-install=2.10.19:April 15 2009
 sm-lib-misc-tweaks=1.22.3:March 29 2009
 sm-lib-package-install=3.1.27:April 14 2009
 sm-lib-package-removal=1.4.0:March 6 2009
-sm-lib-warning=2.0.2:November 17 2008
+sm-lib-warning=2.0.2:April 15 2009
 sm-lib-2006-fixes=1.2.2:June 8 2008
 sm-lib-2007-fixes=1.3.20:November 17 2008
 sm-lib-2008-fixes=1.4.2:December 26 2008
@@ -19,10 +19,10 @@ sm-lib-2008-fixes-t=1.0.2:November 18 2008
 sm-lib-2009-fixes=1.1.5:April 12 2009
 sm-lib-2009-fixes-s=1.0.1:April 7 2009
 sm-lib-2009-fixes-t=1.1.5:April 12 2009
-sgfxi=4.5.34:April 15 2009
-svmi=2.3.12:April 15 2009
+sgfxi=4.5.35:April 15 2009
+svmi=2.3.13:April 15 2009
 inxi=1.0.11:20 March 2009
 rbxi=2.5.2:2 March 2009
-sm-main-version=8.25.49:April 15 2009
+sm-main-version=8.25.50:April 15 2009
 
 ###**EOF**###
