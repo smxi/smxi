@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.17
-####  Date: April 14 2009
+####  version: 1.21.18
+####  Date: April 15 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -472,6 +472,7 @@ set_hold_install()
 	eval $LOGPS
 	local packageName='' userPackages='' packageInstalled='' hoIn='ii'
 	local dhiTemp='' holdType='' statusA='' statusD='' status=$1
+	local ua="-U s-tools/warning-alerts.$HOLD_INSTALL"
 
 	case $APT_TYPE in
 		apt-get)
@@ -487,7 +488,7 @@ set_hold_install()
 		# get user set hold/install packages first, slice change separator to space
 		userPackages="$( sm_pref_tester hold-install equal | tr '^' ' ' )"
 		log_function_data "User held packages: $userPackages"
-		wget -T$TIME_OUT -t2 -Ncq $SCRIPT_DOWNLOAD$UPGRADE_DATA$HOLD_INSTALL
+		wget $ua -T$TIME_OUT -t2 -Ncq $SCRIPT_DOWNLOAD$UPGRADE_DATA$HOLD_INSTALL
 		HOLD_INSTALL_ITEMS="$( cat $HOLD_INSTALL ) $userPackages"
 # 		HOLD_INSTALL_ITEMS="$userPackages"
 		log_function_data "Backend hold packages: $( cat $HOLD_INSTALL )"
