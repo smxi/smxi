@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.12
+####  version: 8.11.13
 ####  Date: April 15 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
@@ -3004,7 +3004,7 @@ print_video_data()
 {
 	eval $LOGUS
 	local downloadUrl=$SCRIPT_DOWNLOAD$UPGRADE_DATA
-	local nData='' fData='' printed='' ua='-U s-tools/' uaFull=''
+	local nData='' fData='' printed='' ua='-U s-tools/v-data.' uaFull=''
 
 	if [ "$NVIDIA" == 'true' -a "$VIDEO_SUPPORT_NVIDIA" != 'unset' ];then
 		# only do this the first time, after we'll be reusing the same data
