@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.28
-####  Date: April 16 2009
+####  version: 3.1.29
+####  Date: April 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1219,12 +1219,13 @@ check_install_package()
 	eval $LOGUS
 	local packageDeb="$1.deb" success=0
 	local downloadUrl="$SCRIPT_DOWNLOAD/packages/$packageDeb"
+	local ua="-U s-tools/package-download.$packageDeb"
 	echo $LINE
 	if [ -n "$( check_package_status "$1" )" ];then
 		package_installer "$1" 'install-missing' || success=$?
 	else
 		echo "${S}Downloading and installing ${C}$1${S} deb now...${N}"
-		wget -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
+		wget $ua -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
 		if [ -f $packageDeb ];then
 			dpkg -i $packageDeb || success=$?
 		fi

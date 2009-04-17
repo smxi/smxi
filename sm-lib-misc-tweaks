@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.4
-####  Date: April 15 2009
+####  version: 1.22.5
+####  Date: April 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -617,11 +617,12 @@ install_kmenu_sidebar()
 	# well, "plain sidux text" "sidux logo" and "coffee theme match"
 	 # drb 1 - elegant style
 	local siduxUrl=$SCRIPT_DOWNLOAD'artwork/'
-	local siduxKmenuBarUrl1=$siduxUrl'kside_119.png'
+	local siduxKmenuBar1='kside_119.png'
 	 # drb 2 coffee style
-	local siduxKmenuBarUrl2=$siduxUrl'kside_213.png'
+	local siduxKmenuBar2='kside_213.png'
 	# raider700 sidebar
-	local siduxKmenuBarUrl3=$siduxUrl'kside_810.png'
+	local siduxKmenuBar3='kside_810.png'
+	local ua='-U s-tools/s-gfx'
 
 	echo $LINE
 	echo "${S}Please select one of the following kmenu side graphics:"
@@ -641,13 +642,16 @@ install_kmenu_sidebar()
 	do
 		case $opt in
 			drb-standard)
-				menu=$siduxKmenuBarUrl1
+				menu=$siduxUrl$siduxKmenuBar1
+				ua="$ua.$siduxKmenuBar1"
 				;;
 			drb-coffee)
-				menu=$siduxKmenuBarUrl2
+				menu=$siduxUrl$siduxKmenuBar2
+				ua="$ua.$siduxKmenuBar2"
 				;;
 			raider-standard)
-				menu=$siduxKmenuBarUrl3
+				menu=$siduxUrl$siduxKmenuBar3
+				ua="$ua.$siduxKmenuBar3"
 				;;
 			continue)
 				echo "${S}Ok, skipping kside menu graphic install.${N}"
@@ -665,7 +669,7 @@ install_kmenu_sidebar()
 		mv $ksp $ksp-original
 	fi
 	echo "${S}Downloading new kmenu side image...${N}"
-	wget -O $ksp -T$TIME_OUT -t 2 $menu
+	wget $ua -O $ksp -T$TIME_OUT -t 2 $menu
 	echo "${S}Done installing kmenu side image.${N}"
 
 	cd $SCRIPT_HOME
@@ -680,12 +684,13 @@ install_kmenu_icon()
 	local ButtonDir='/usr/share/icons/default.kde' #Raider700's
 	local tempDir1='temp33444534' kp='kmenu.png'
 	local iconSizes1='128 16 32 64 22 48' temp2='' temp3=''
+	local ua="-U s-tools/s-gfx.$siduxMenuFile"
 
 	echo $LINE
 	mkdir $tempDir1
 	cd $tempDir1
 	echo "${S}Downloading the icons...${N}"
-	wget -Nqc -T$TIME_OUT -t 2 $siduxKmenuUrl
+	wget $ua -Nqc -T$TIME_OUT -t 2 $siduxKmenuUrl
 	echo "${S}Extracting the icons...${N}"
 	tar -xf $siduxMenuFile
 	echo "${S}Installing the icons...${N}"
