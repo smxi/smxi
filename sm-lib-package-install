@@ -780,7 +780,8 @@ display_manager_installer()
 
 	echo $LINE
 	echo "${C}1${S} - ${C}select-display-manager${S} Select an alternate display manager to use"
-	echo "${C}2${S} - ${C}base-light-packages${S} Installs basic light apps for light desktops (xchat, leafpad, pcmanfm, etc)."
+	echo "${C}2${S} - ${C}base-light-packages${S} Installs basic light apps for light desktops"
+	echo "    (xchat, leafpad, pcmanfm, etc). No gtk/qt apps."
 	echo "${C}3${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
 	echo "${C}4${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
 	echo "${C}5${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
@@ -790,7 +791,7 @@ display_manager_installer()
 	echo "${C}9${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
 	echo "${C}10${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
 	echo "${C}11${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
-	echo "${C}12${S} - ${C}fluxbox${S} Installs lightweight window manager. No gtk/qt apps. Good for old hardware."
+	echo "${C}12${S} - ${C}fluxbox${S} Installs lightweight window manager.  Good for old hardware."
 	echo "${C}13${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies/base light packages + display manager."
 	echo "${C}14${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
 	echo "${C}15${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
