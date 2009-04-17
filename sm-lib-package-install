@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.29
+####  version: 3.1.30
 ####  Date: April 17 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -113,8 +113,8 @@ package_group_installer()
 	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
-	local fluxPackages="$baseLightPackages fluxbox fluxconf"
-	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
+	local fluxPackages="fluxbox fluxconf"
+	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config"
 	local kdePackages="$kdebase konqueror konversation $kpdf $ksvg $dmUse kdm"
@@ -128,7 +128,7 @@ package_group_installer()
 	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
-	local xfcePackages="$baseLightPackages gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-utils xfce4-terminal xfdesktop4 xfmedia"
+	local xfcePackages="gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-utils xfce4-terminal xfdesktop4 xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 
 	echo $LINE
@@ -173,6 +173,9 @@ package_group_installer()
 			packageName="$php5Postgre"
 			;;
 		## main packages
+		base-light-packages)
+			packageName="$baseLightPackages"
+			;;
 		ceni-stuff)
 			packageName="$ceniStuff"
 			;;
@@ -186,19 +189,19 @@ package_group_installer()
 			packageName="$fluxPackages $dmUse"
 			;;
 		fluxbox-full)
-			packageName="$fluxPackages $systemUtils $xorgPackages $dmUse"
+			packageName="$fluxPackages $xorgPackages $dmUse"
 			;;
 		fvwm-crystal)
 			packageName="$fvwmCrystal $dmUse"
 			;;
 		fvwm-crystal-full)
-			packageName="$fvwmCrystal $systemUtils $xorgPackages $dmUse"
+			packageName="$fvwmCrystal $xorgPackages $dmUse"
 			;;
 		kde)
 			packageName="$kdePackages $dmUse"
 			;;
 		kde-full)
-			packageName="$kdePackages $systemUtils $xorgPackages $dmUse"
+			packageName="$kdePackages $xorgPackages $dmUse"
 			;;
 		kde-extras)
 			packageName="$kdeExtras"
@@ -228,13 +231,13 @@ package_group_installer()
 			packageName="$xfcePackages $dmUse"
 			;;
 		xfce-full)
-			packageName="$xfcePackages $systemUtils $xorgPackages $dmUse"
+			packageName="$xfcePackages $xorgPackages $dmUse"
 			;;
 		xorg)
 			packageName="$xorgPackages $dmUse"
 			;;
 		xorg-full)
-			packageName="$systemUtils $xorgPackages $dmUse"
+			packageName="$xorgPackages $dmUse"
 			;;
 		google-earth)
 			packageName="$googleEarth"
@@ -780,83 +783,99 @@ display_manager_installer()
 
 	echo $LINE
 	echo "${C}1${S} - ${C}select-display-manager${S} Select an alternate display manager to use"
-	echo "${C}2${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
-	echo "${C}3${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
-	echo "${C}4${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
-	echo "${C}5${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
-	echo "${C}6${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
-	echo "${C}7${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
-	echo "${C}8${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
-	echo "${C}9${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
-	echo "${C}10${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
-	echo "${C}11${S} - ${C}fluxbox${S} Installs lightweight package group. No gtk/qt apps. Good for old hardware."
-	echo "${C}12${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies + display manager."
-	echo "${C}13${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
-	echo "${C}14${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies + display manager."
-	echo "${C}15${S} - ${C}back-to-install-menu${S}"
+	echo "${C}2${S} - ${C}base-light-packages${S} Installs basic light apps for light desktops (xchat, leafpad, pcmanfm, etc)."
+	echo "${C}3${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
+	echo "${C}4${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
+	echo "${C}5${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
+	echo "${C}6${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo "${C}7${S} - ${C}xfce-full${S} xfce + xorg + system utitilies/base light packages + wdm if kdm/gdm not present."
+	echo "${C}8${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
+	echo "${C}9${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
+	echo "${C}10${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
+	echo "${C}11${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
+	echo "${C}12${S} - ${C}fluxbox${S} Installs lightweight window manager. No gtk/qt apps. Good for old hardware."
+	echo "${C}13${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies/base light packages + display manager."
+	echo "${C}14${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
+	echo "${C}15${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
+	echo "${C}16${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="select-display-manager system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fluxbox fluxbox-full fvwm-crystal fvwm-crystal-full back-to-install-menu"
+	options="select-display-manager base-light-packages system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fluxbox fluxbox-full fvwm-crystal fvwm-crystal-full back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
+			base-light-packages)
+				package_group_installer 'plain' 'base-light-packages'
+				;;
+			fluxbox)
+				package_group_installer 'plain' 'fluxbox'
+				repeat='true'
+				;;
+			fluxbox-full)
+# 				package_group_installer 'plain' 'xorg'
+				package_group_installer 'plain' 'fluxbox-full'
+				package_group_installer 'plain' 'system-utilities'
+				package_group_installer 'plain' 'base-light-packages'
+				repeat='true'
+				;;
+			fvwm-crystal)
+				package_group_installer 'plain' 'fvwm-crystal'
+				repeat='true'
+				;;
+			fvwm-crystal-full)
+# 				package_group_installer 'plain' 'xorg'
+				package_group_installer 'plain' 'fvwm-crystal-full'
+				package_group_installer 'plain' 'system-utilities'
+				package_group_installer 'plain' 'base-light-packages'
+				repeat='true'
+				;;
+			kde)
+				package_group_installer 'plain' 'kde'
+				repeat='true'
+				;;
+			kde-full)
+# 				package_group_installer 'plain' 'xorg'
+				package_group_installer 'plain' 'kde-full'
+				package_group_installer 'plain' 'system-utilities'
+				repeat='true'
+				;;
+			kde-extras)
+				package_group_installer 'plain' 'kde-extras'
+				repeat='true'
+				;;
+			kde-pim)
+				package_group_installer 'plain' 'kde-pim'
+				repeat='true'
+				;;
 			select-display-manager)
 				select_display_manager
 				repeat='true'
 				;;
 			system-utilities)
-				package_group_installer plain system-utilities
+				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
 			xorg)
-				package_group_installer plain xorg
+				package_group_installer 'plain' 'xorg'
 				repeat='true'
 				;;
 			xorg-full)
-				package_group_installer plain xorg-full
+				package_group_installer 'plain' 'xorg-full'
+				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
 			xfce)
-				package_group_installer plain xfce
+				package_group_installer 'plain' 'xfce'
 				repeat='true'
 				;;
 			xfce-full)
-				package_group_installer plain xfce-full
-				repeat='true'
-				;;
-			kde)
-				package_group_installer plain kde
-				repeat='true'
-				;;
-			kde-full)
-				package_group_installer plain kde-full
-				repeat='true'
-				;;
-			kde-extras)
-				package_group_installer plain kde-extras
-				repeat='true'
-				;;
-			kde-pim)
-				package_group_installer plain kde-pim
-				repeat='true'
-				;;
-			fluxbox)
-				package_group_installer plain fluxbox
-				repeat='true'
-				;;
-			fluxbox-full)
-				package_group_installer plain fluxbox-full
-				repeat='true'
-				;;
-			fvwm-crystal)
-				package_group_installer plain fvwm-crystal
-				repeat='true'
-				;;
-			fvwm-crystal-full)
-				package_group_installer plain fvwm-crystal-full
+# 				package_group_installer 'plain' 'xorg'
+				package_group_installer 'plain' 'xfce-full'
+				package_group_installer 'plain' 'system-utilities'
+				package_group_installer 'plain' 'base-light-packages'
 				repeat='true'
 				;;
 			back-to-install-menu)
