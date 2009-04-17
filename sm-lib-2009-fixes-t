@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.5
-####  Date: April 12 2009
+####  version: 1.1.6
+####  Date: April 16 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -44,6 +44,7 @@ run_2009_fixes()
 	elif [ "$1" == 'post' ];then
 		if [ "$DISTRO_LEVEL" -lt 17 ];then
 			xorg_1_6_fix_1
+			vbox_qt_fix_1
 		fi
 	fi
 }
@@ -51,6 +52,22 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+vbox_qt_fix_1()
+{
+	local prefId='vbox-qt-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	if [ "$smPref" -eq 0 ];then
+		local packageVersion=$( check_package_status 'virtualbox-ose' 'i' )
+		packageVersion=$( grep -Ei '^(2\.[2-9]|[3-5])' <<< $packageVersion )
+		local isInstalled2=$( package_tester 'virtualbox-ose-qt'  )
+		
+		if [ -n "$packageVersion" -a -z "$isInstalled2" ];then
+			package_installer 'virtualbox-ose-qt' 'install-missing'
+			set_sticky_prefs $prefId
+		fi
+	fi
+}
 
 xorg_1_6_fix_1()
 {
