@@ -812,7 +812,6 @@ display_manager_installer()
 				repeat='true'
 				;;
 			fluxbox-full)
-# 				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'fluxbox-full'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
@@ -823,7 +822,6 @@ display_manager_installer()
 				repeat='true'
 				;;
 			fvwm-crystal-full)
-# 				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'fvwm-crystal-full'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
@@ -834,7 +832,6 @@ display_manager_installer()
 				repeat='true'
 				;;
 			kde-full)
-# 				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'kde-full'
 				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
@@ -869,7 +866,6 @@ display_manager_installer()
 				repeat='true'
 				;;
 			xfce-full)
-# 				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'xfce-full'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
