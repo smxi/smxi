@@ -236,9 +236,6 @@ package_group_installer()
 		xorg)
 			packageName="$xorgPackages $dmUse"
 			;;
-		xorg-full)
-			packageName="$xorgPackages $dmUse"
-			;;
 		google-earth)
 			packageName="$googleEarth"
 			;;
@@ -863,7 +860,7 @@ display_manager_installer()
 				repeat='true'
 				;;
 			xorg-full)
-				package_group_installer 'plain' 'xorg-full'
+				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
