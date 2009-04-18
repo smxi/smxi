@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.30
-####  Date: April 17 2009
+####  version: 3.1.31
+####  Date: April 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -188,19 +188,19 @@ package_group_installer()
 		fluxbox)
 			packageName="$fluxPackages $dmUse"
 			;;
-		fluxbox-full)
+		base-plus-fluxbox)
 			packageName="$fluxPackages $xorgPackages $dmUse"
 			;;
 		fvwm-crystal)
 			packageName="$fvwmCrystal $dmUse"
 			;;
-		fvwm-crystal-full)
+		base-plus-fvwm-crystal)
 			packageName="$fvwmCrystal $xorgPackages $dmUse"
 			;;
 		kde)
 			packageName="$kdePackages $dmUse"
 			;;
-		kde-full)
+		base-plus-kde)
 			packageName="$kdePackages $xorgPackages $dmUse"
 			;;
 		kde-extras)
@@ -230,7 +230,7 @@ package_group_installer()
 		xfce)
 			packageName="$xfcePackages $dmUse"
 			;;
-		xfce-full)
+		base-plus-xfce)
 			packageName="$xfcePackages $xorgPackages $dmUse"
 			;;
 		xorg)
@@ -784,24 +784,24 @@ display_manager_installer()
 	echo "    (xchat, leafpad, pcmanfm, etc). No gtk/qt apps."
 	echo "${C}3${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
 	echo "${C}4${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
-	echo "${C}5${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
+	echo "${C}5${S} - ${C}base-plus-xorg${S} xorg + system-utilities + wdm if kdm/gdm not present."
 	echo "${C}6${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
-	echo "${C}7${S} - ${C}xfce-full${S} xfce + xorg + system utitilies/base light packages + wdm if kdm/gdm not present."
+	echo "${C}7${S} - ${C}base-plus-xfce${S} xfce + xorg + system utitilies/base light packages + wdm if kdm/gdm not present."
 	echo "${C}8${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
-	echo "${C}9${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
+	echo "${C}9${S} - ${C}base-plus-kde${S} kde + xorg + system utitilies + kdm."
 	echo "${C}10${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
 	echo "${C}11${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
 	echo "${C}12${S} - ${C}fluxbox${S} Installs lightweight window manager.  Good for old hardware."
-	echo "${C}13${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies/base light packages + display manager."
+	echo "${C}13${S} - ${C}base-plus-fluxbox${S} fluxbox + xorg + system utitilies/base light packages + display manager."
 	echo "${C}14${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
-	echo "${C}15${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
+	echo "${C}15${S} - ${C}base-plus-fvwm-crystal${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
 	echo "${C}16${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="select-display-manager base-light-packages system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fluxbox fluxbox-full fvwm-crystal fvwm-crystal-full back-to-install-menu"
+	options="select-display-manager base-light-packages system-utilities xorg base-plus-xorg xfce base-plus-xfce kde base-plus-kde kde-extras kde-pim fluxbox base-plus-fluxbox fvwm-crystal base-plus-fvwm-crystal back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -812,8 +812,8 @@ display_manager_installer()
 				package_group_installer 'plain' 'fluxbox'
 				repeat='true'
 				;;
-			fluxbox-full)
-				package_group_installer 'plain' 'fluxbox-full'
+			base-plus-fluxbox)
+				package_group_installer 'plain' 'base-plus-fluxbox'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
 				repeat='true'
@@ -822,8 +822,8 @@ display_manager_installer()
 				package_group_installer 'plain' 'fvwm-crystal'
 				repeat='true'
 				;;
-			fvwm-crystal-full)
-				package_group_installer 'plain' 'fvwm-crystal-full'
+			base-plus-fvwm-crystal)
+				package_group_installer 'plain' 'base-plus-fvwm-crystal'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
 				repeat='true'
@@ -832,8 +832,8 @@ display_manager_installer()
 				package_group_installer 'plain' 'kde'
 				repeat='true'
 				;;
-			kde-full)
-				package_group_installer 'plain' 'kde-full'
+			base-plus-kde)
+				package_group_installer 'plain' 'base-plus-kde'
 				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
@@ -857,7 +857,7 @@ display_manager_installer()
 				package_group_installer 'plain' 'xorg'
 				repeat='true'
 				;;
-			xorg-full)
+			base-plus-xorg)
 				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
@@ -866,8 +866,8 @@ display_manager_installer()
 				package_group_installer 'plain' 'xfce'
 				repeat='true'
 				;;
-			xfce-full)
-				package_group_installer 'plain' 'xfce-full'
+			base-plus-xfce)
+				package_group_installer 'plain' 'base-plus-xfce'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
 				repeat='true'
@@ -965,7 +965,7 @@ assign_display_manager()
 			displayManager=$DEFAULT_DM
 		else
 			case $itemName in
-				kde|kde-full)
+				kde|base-plus-kde)
 					displayManager='kdm'
 					;;
 				gnome|gnome-full)
