@@ -1160,7 +1160,8 @@ install_google_earth()
 	echo
 	echo "Downloading installer file and creating ${C}$goog${S} deb...${N}"
 	cd /var/cache/apt/archives
-	make-googleearth-package 2>>$LOG_FILE 2>&1
+	# force required to build as root
+	make-googleearth-package --force 2>>$LOG_FILE 2>&1
 	echo "${S}Installing ${C}$goog${S} deb...${N}"
 	dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
 	if [ "$APT_TYPE" == 'aptitude' ];then
