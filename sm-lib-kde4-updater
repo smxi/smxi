@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.27
-####  Date: April 14 2009
+####  version: 0.7.28
+####  Date: April 18 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -87,7 +87,7 @@ kde3_log_and_removal()
 	local extraPackages='' tempName='' package='' lineSize=''
 	  
 	# note: kipi-plugins, temp possible holds: to be put back in: ktnef kitchensync
-	local noUseWildcard='^arts$|artsbuilder|\-data|gwenview-i18n|kandy|kate-plugins|kbstate|kcoloredit|kcontrol|kdat|kdebase|kdeeject|kdelib|kdelirc|kdepim-kio-plugins|kdeprint|kdesktop|kde-core|kdict|kdnssd|kdvi|kfax|kfile-plugin|kghostview|khelpcenter$|kicker|kiconedit|kio-apt|kmailcvt|kmenuedit|kmoon|kmrml|knewsticker|kolourpaint$|kooka|korn|kpersonalizer|kpovmodeler|kpowersave|ksayit|ksmserver|ksplash|ksvg|ksysv|ktip|kuickshow|kview$|kviewshell|kwifimanager|kwin|kworldclock|^lib|\-lib|networkstatus|quanta|sidux|superkaramba'
+	local noUseWildcard='^arts$|artsbuilder|\-data|digikamimageplugins-doc|gwenview-i18n|kaddressbook-plugins|kandy|kate-plugins|kbstate|kcoloredit|kcontrol|kdat|kdebase|kdeeject|kdelib|kdelirc|kdepim-kio-plugins|kdeprint|kdesktop|kde-core|kdict|kdnssd|kdvi|kfax|kfile-plugin|kghostview|khelpcenter$|kicker|kiconedit|kio-apt|kitchensync|kmailcvt|kmenuedit|kmoon|kmrml|knewsticker|knights|kolourpaint$|kooka|korn|kpager|kpersonalizer|kpovmodeler|kpowersave|ksayit|ksmserver|ksplash|ksvg|ksysv|ktip|kuickshow|kview$|kviewshell|kwifimanager|kwin|kworldclock|^lib|\-lib|networkstatus|quanta|sidux|superkaramba'
 	local keepWildCards='kpager'
 	
 	echo $LINE
