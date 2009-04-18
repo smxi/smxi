@@ -543,8 +543,7 @@ non_free_installer()
 	echo "${C}5${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
 	echo
 	echo -e "${C}6${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
-	echo "    ${M}NOTE: The current installer is broken, and won't work until the replacement comes into Debian."
-	echo "    ${S}Don't try this unless you just want to test if it's working again, thanks."
+	echo "    ${M}NOTE: This is working again in at least Debian Sid, installs latest and it starts."
 	echo
 	echo "${C}7${S} - ${C}back-to-install-menu${S}"
 
