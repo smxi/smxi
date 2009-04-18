@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.31
+####  version: 3.1.32
 ####  Date: April 18 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1162,17 +1162,25 @@ install_google_earth()
 	cd /var/cache/apt/archives
 	# force required to build as root
 	make-googleearth-package --force 2>>$LOG_FILE 2>&1
-	echo "${S}Installing ${C}$goog${S} deb...${N}"
-	dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
-	if [ "$APT_TYPE" == 'aptitude' ];then
-		$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
+	
+	if [ -n "$( ls googleearth*.deb 2>/dev/null )" ];then
+		echo "${S}Installing ${C}$goog${S} deb...${N}"
+		dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
+		if [ "$APT_TYPE" == 'aptitude' ];then
+			$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
+		fi
+		cd $SCRIPT_HOME
+		#echo "${S}Cleaning up ${C}$goog${S} installer stuff...${N}"
+		# package_remover 'googleearth-package' 'purge -y'
+		echo "${S}Completed install of ${C}$goog${S}.${N}"
+		echo $LINE
+		echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
+	else
+		echo $ELINE
+		echo "${E}Oh, too bad, the ${C}googleearth deb${E} package failed to build, sorry about that."
+		echo "${S}Check forums and other information to see if the Debian package builder is broken."
+		echo "Unable to install googleearth using this method, sorry.${N}"
 	fi
-	cd $SCRIPT_HOME
-	#echo "${S}Cleaning up ${C}$goog${S} installer stuff...${N}"
-	# package_remover 'googleearth-package' 'purge -y'
-	echo "${S}Completed install of ${C}$goog${S}.${N}"
-	echo $LINE
-	echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
 
 	print_hec
 	eval $LOGPE
