@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.4
-####  Date: April 11 2009
+####  version: 1.3.5
+####  Date: April 20 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -431,6 +431,34 @@ post_du_tasks()
 ###---------------------------------------------------------------------
 ### permanent du fixes
 ###---------------------------------------------------------------------
+
+# note, this should in general not be needed, with the exception of cases
+# where distro-defaults fails to reset kdm runlevels on kdm reinstall. sidux seems to do this
+# but not consistently. I'm not sure about other distros
+kdm_3_to_4_fix_1()
+{
+	eval $LOGUS
+	local displayManager=$( get_default_display_manager )
+	local prefId='kdm-3-4-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local defaultRunlevels=''
+	local stopLevels='0 1 2 3 4 5 6'
+	
+	# no point in updating if it's already default debian 2
+	if [ -n "$prefId" -a "$displayManager" == 'kdm' -a "$INIT_LEVEL" != 2 ];then
+		defaultRunlevels=$( get_display_manager_runlevels )
+		if [ "$INIT_LEVEL" != "$defaultRunlevels" ];then
+			echo $LINE
+			echo "${S}It looks like your ${C}kdm${S} runlevels got changed by accident. Resetting to default ${C}$INIT_LEVEL${S} now...${N}"
+			stopLevels=$( sed "s/$INIT_LEVEL//" <<< $stopLevels )
+			update-rc.d -f kdm remove
+			update-rc.d kdm start 99 $INIT_LEVEL . stop 01 $stopLevels .
+			# this should only get set in case where something happened
+			set_sticky_prefs $prefId
+		fi
+	fi
+	eval $LOGUE
+}
 
 # test for kde3, if present and kde 4 present, start the procedure
 kde4_updater()

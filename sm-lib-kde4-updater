@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.28
-####  Date: April 18 2009
+####  version: 0.7.29
+####  Date: April 20 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -256,6 +256,8 @@ install_kde4()
 	done
 	echo "${S}Done with package install process.${N}"
 	eval $LOGUE
+	# double check kdm runlevels and fix if required
+	kdm_3_to_4_fix_1
 	print_kde4_message
 }
 
