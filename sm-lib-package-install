@@ -63,7 +63,7 @@ package_group_installer()
 		if [ "$dmUse" == 'kdm' ];then
 			dmUse=''
 		fi
-		if [ -n "$( check_package_status 'kde4-minimal' )" ];then
+		if [ -n "$( check_package_status 'kde-minimal' )" ];then
 			karm='ktimetracker'
 			katePlugins=''
 			kcolor='kcolorchooser'
