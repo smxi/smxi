@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.7
-####  Date: April 20 2009
+####  version: 1.1.8
+####  Date: May 4 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -39,6 +39,7 @@ run_2009_fixes()
 	if [ "$1" == 'pre' ];then
 		if [ "$DISTRO_LEVEL" -lt 17 ];then
 			acroread_fix_1
+			opeoffice_kde_fix_1
 		fi
 		if [ "$DISTRO_LEVEL" -lt 16 ];then
 			kdm_3_to_4_fix_1
@@ -57,6 +58,23 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+opeoffice_kde_fix_1()
+{
+	local prefId='openoffice-kde-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	if [ "$smPref" -eq 0 ];then
+		local kdmVersionInst=$( check_package_status 'kdm' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
+		local isInstalled=$( package_tester 'openoffice.org-kde'  )
+		if [ -z "$kdmVersionInst" ];then
+			kdmVersionInst=0
+		fi
+		if [ [ "$kdmVersionInst" -ge 4 -a -n "$isInstalled" ];then
+			package_remover 'openoffice.org-kde' 'purge'
+			set_sticky_prefs $prefId
+		fi
+	fi
+}
 
 vbox_qt_fix_1()
 {
