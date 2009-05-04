@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.34
-####  Date: May 3 2009
+####  version: 3.1.35
+####  Date: May 4 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1017,7 +1017,7 @@ install_openoffice()
 	echo "When you select one of these your ${C}openoffice${S} install will use"
 	echo "any available language specific items for your chosen language, including"
 	echo "the language pack, help, thesaurus, and dictionaries."
-	echo "Also installs appropriate desktop integration package for either gnome or kde."
+# 	echo "Also installs appropriate desktop integration package for either gnome or kde."
 	echo
 	echo "Select the number for ${C}no-change${S} if you want to return to main script."
 
@@ -1066,46 +1066,46 @@ install_openoffice()
 	done
 
 	if [ "$found" == 'true' ];then
-		echo $LINE
-		if [ "$skip" != 'true' ];then
-			echo "${S}Please select your desktop manager. This will install the correct"
-			echo "OpenOffice.org desktop integration package for either kde or gnome."
-			echo "${C}1 - kde${S} Installs kde integration."
-			echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
-			echo "${C}3 - other${S} Does not install integration package."
-			echo $LINE
-			echo -e $SLE
-			echo $LINE
-
-			doptions='kde gnome other'
-
-			select dopt in $doptions
-			do
-				case $dopt in
-					kde)
-						oooDesk='openoffice.org-kde'
-						complete='true'
-						;;
-					gnome)
-						oooDesk='openoffice.org-gnome openoffice.org-gtk'
-						complete='true'
-						;;
-					other)
-						oooDesk=''
-						complete='true'
-						;;
-					*)
-						echo "${E}Invalid Selection${N}"
-						;;
-				esac
-				if [ "$complete" == 'true' ];then
-					break
-				fi
-			done
+# 		echo $LINE
+# 		if [ "$skip" != 'true' ];then
+# 			echo "${S}Please select your desktop manager. This will install the correct"
+# 			echo "OpenOffice.org desktop integration package for either kde or gnome."
+# 			echo "${C}1 - kde${S} Installs kde integration."
+# 			echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
+# 			echo "${C}3 - other${S} Does not install integration package."
+# 			echo $LINE
+# 			echo -e $SLE
+# 			echo $LINE
+# 
+# 			doptions='kde gnome other'
+# 
+# 			select dopt in $doptions
+# 			do
+# 				case $dopt in
+# 					kde)
+# 						oooDesk='openoffice.org-kde'
+# 						complete='true'
+# 						;;
+# 					gnome)
+# 						oooDesk='openoffice.org-gnome openoffice.org-gtk'
+# 						complete='true'
+# 						;;
+# 					other)
+# 						oooDesk=''
+# 						complete='true'
+# 						;;
+# 					*)
+# 						echo "${E}Invalid Selection${N}"
+# 						;;
+# 				esac
+# 				if [ "$complete" == 'true' ];then
+# 					break
+# 				fi
+# 			done
 
 			echo $LINE
 			echo "${S}Installing your selected language [${C}$opt${S}] components and openoffice.org.${N}"
-			package_installer "openoffice.org openoffice.org-base openoffice.org-calc openoffice.org-common openoffice.org-core openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
+			package_installer "openoffice.org-calc openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
 			echo "${S}OpenOffice.org install is completed.${N}"
 		else
 			echo "${S}Continuing on to main script without installing OpenOffice.org.${N}"
