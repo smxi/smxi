@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.33
-####  Date: April 26 2009
+####  version: 3.1.34
+####  Date: May 3 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -80,6 +80,12 @@ package_group_installer()
 			plasmaWidgets='plasma-widgets-addons plasma-widgets-workspace'
 			qt4Config='qt4-qtconfig'
 		fi
+	fi
+	# set these to null to avoid installing the desktop gunk unless needed
+	if [ "$dmUse" == 'kdm' && -n "$( check_package_status 'kdm' 'i' )" ];then
+		dmUse=''
+	elif [ "$dmUse" == 'gdm' && -n "$( check_package_status 'gdm' 'i' )" ];then
+		dmUse=''
 	fi
 
 	# package groups, console stuff first so it's included in following
