@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.35
+####  version: 3.1.36
 ####  Date: May 4 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -1067,7 +1067,7 @@ install_openoffice()
 
 	if [ "$found" == 'true' ];then
 # 		echo $LINE
-# 		if [ "$skip" != 'true' ];then
+		if [ "$skip" != 'true' ];then
 # 			echo "${S}Please select your desktop manager. This will install the correct"
 # 			echo "OpenOffice.org desktop integration package for either kde or gnome."
 # 			echo "${C}1 - kde${S} Installs kde integration."
