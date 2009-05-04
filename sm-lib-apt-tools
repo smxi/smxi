@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.18
-####  Date: April 15 2009
+####  version: 1.21.19
+####  Date: May 4 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -706,7 +706,7 @@ $( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data|hplip-gui)' )
 		ooo)
 			packages="
 $( package_tester '(openoffice.org-base|openoffice.org-base-core|openoffice.org-common|openoffice.org-java-common|openoffice.org-core|python-uno)' )
-$(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-kde|openoffice.org-gnome|openoffice.org-writer|openoffice.org-math)' )
+$(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-gnome|openoffice.org-writer|openoffice.org-math)' )
 $(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-filter-)' 'wild-full')
 "
 			packageGroup='OpenOffice.org'
