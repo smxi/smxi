@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.9
-####  Date: May 4 2009
+####  version: 1.1.10
+####  Date: May 5 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -73,13 +73,19 @@ openoffice_kde_fix_1()
 			echo $LINE
 			echo "${S}Removing ${C}openoffice.org-kde${S} to let OOo and KDE upgrade properly...${N}"
 			package_remover 'openoffice.org-kde' 'purge'
+			# ooo-gtk conflicts with this package
+			if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
+				echo "${S}Installing ${C}openoffice.org-gtk${S} so that OOo looks nice again...${N}"
+				package_installer 'openoffice.org-gtk' 'install-missing'
+			else
+				echo "${S}Please note: without ${C}openoffice.org-kde${S} Openoffice.org will be very ugly."
+				echo "Since you are using the package ${C}gtk-qt-engine${S} you cannot install ${C}openoffice.org-gtk${S}"
+				echo "Since ${C}$SCRIPT_NAME${S} can't know what you want to do, it's going"
+				echo "to leave it up to you to handle manually, but the upgrade can't work with the" 
+				echo "openoffice.org-kde package installed, so that had to be removed. There's no"
+				echo "great solution here, sorry."
+			fi
 			set_sticky_prefs $prefId
-			
-			echo "${S}Please note: without ${C}openoffice.org-kde${S} Openoffice.org will be very ugly."
-			echo "If you do not use the package ${C}gtk-qt-engine${S} you can install: ${C}openoffice.org-gtk${S}"
-			echo "which works fine. Since ${C}$SCRIPT_NAME${S} can't know what you want to do, it's going"
-			echo "to leave it up to you to handle manually, but the upgrade can't work with the" echo "openoffice.org-kde package installed, so that had to be removed. There's no"
-			echo "great solution here, sorry."
 			print_hec
 		fi
 	fi

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.36
-####  Date: May 4 2009
+####  version: 3.1.37
+####  Date: May 5 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -998,9 +998,14 @@ install_openoffice()
 	# oooLanguagePack:oooHyphenation:oooHelp:oooThesaurus:myspell:<Language Name>
 	local oooData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
 
-	local oooLanguages='' l='' ll='' language=''
+	local oooLanguages='' l='' ll='' language='' 
 	local oooLang='' oooHyph='' oooHelp='' oooThes='' oooDict='' oooDesk=''
 	local doptions='' dopt='' complete='' options=''  opt='' found='' skip=''
+	
+	# ooo-gtk conflicts with this package
+	if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
+		oooDesk='openoffice.org-gtk'
+	fi
 
 	for l in $oooData
 	do
@@ -1017,7 +1022,9 @@ install_openoffice()
 	echo "When you select one of these your ${C}openoffice${S} install will use"
 	echo "any available language specific items for your chosen language, including"
 	echo "the language pack, help, thesaurus, and dictionaries."
-# 	echo "Also installs appropriate desktop integration package for either gnome or kde."
+	if [ -n "$oooDesk" ];then
+		echo "Also installs the desktop integration package: $oooDesk"
+	fi
 	echo
 	echo "Select the number for ${C}no-change${S} if you want to return to main script."
 
