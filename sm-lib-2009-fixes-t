@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.8
+####  version: 1.1.9
 ####  Date: May 4 2009
 
 ####  Copyright (C) Harald Hope 2009
@@ -36,7 +36,7 @@ run_2009_fixes()
 {
 	if [ "$1" == 'pre' ];then
 		if [ "$DISTRO_LEVEL" -lt 18 ];then
-			opeoffice_kde_fix_1
+			openoffice_kde_fix_1
 			acroread_fix_1
 			kdm_3_to_4_fix_1
 		fi
@@ -55,7 +55,7 @@ run_2009_fixes()
 ### specific du fixes
 ###---------------------------------------------------------------------
 
-opeoffice_kde_fix_1()
+openoffice_kde_fix_1()
 {
 	local prefId='openoffice-kde-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
@@ -66,8 +66,17 @@ opeoffice_kde_fix_1()
 			kdmVersionInst=0
 		fi
 		if [ [ "$kdmVersionInst" -ge 4 -a -n "$isInstalled" ];then
+			echo $LINE
+			echo "${S}Removing ${C}openoffice.org-kde${S} to let OOo and KDE upgrade properly...${N}"
 			package_remover 'openoffice.org-kde' 'purge'
 			set_sticky_prefs $prefId
+			
+			echo "${S}Please note: without ${C}openoffice.org-kde${S} Openoffice.org will be very ugly."
+			echo "If you do not use the package ${C}gtk-qt-engine${S} you can install: ${C}openoffice.org-gtk${S}"
+			echo "which works fine. Since ${C}$SCRIPT_NAME${S} can't know what you want to do, it's going"
+			echo "to leave it up to you to handle manually, but the upgrade can't work with the" echo "openoffice.org-kde package installed, so that had to be removed. There's no"
+			echo "great solution here, sorry."
+			print_hec
 		fi
 	fi
 }
