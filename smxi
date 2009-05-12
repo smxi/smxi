@@ -485,6 +485,10 @@ error_handler()
 			errorCode=3
 			errorMessage="The $errorExtra distro is not supported by $SCRIPT_NAME, sorry."
 			;;
+		no-menu-lst)
+			errorCode=7
+			errorMessage="Your system does not have a mounted $GRUB_PATH, unable to continue."
+			;;
 		# kernel section errors
 		kernel-download-failed)
 			errorCode=30
@@ -2077,6 +2081,10 @@ start_up_tests()
 # 	fi
 	if [ ! -e $ESV -a ! -e $EDV ];then
 		error_handler 'unidentified-distro' $FUNCNAME ''
+	fi
+	
+	if [ ! -e $GRUB_PATH ];then
+		error_handler 'no-menu-lst' $FUNCNAME ''
 	fi
 
 }
