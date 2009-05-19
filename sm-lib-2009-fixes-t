@@ -65,7 +65,7 @@ ooo_fix_2009_5()
 	
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a ! -d $missingOooDir ];then
 		echo "${S}Updating OOo to fix missing directory issue...${N}"
-		mkdir $missingOooDir
+		mkdir -p $missingOooDir
 		set_sticky_prefs $prefId
 	fi
 }
