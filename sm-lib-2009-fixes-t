@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.11
-####  Date: May 5 2009
+####  version: 1.1.12
+####  Date: May 19 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -37,6 +37,7 @@ run_2009_fixes()
 	if [ "$1" == 'pre' ];then
 		if [ "$DISTRO_LEVEL" -lt 18 ];then
 			openoffice_kde_fix_1
+			ooo_fix_2009_5
 			acroread_fix_1
 			kdm_3_to_4_fix_1
 		fi
@@ -54,6 +55,20 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+ooo_fix_2009_5()
+{
+	local missingOooDir='/var/lib/openoffice/share/config'
+	local isInstalled=$( package_tester 'openoffice.org-common' )
+	local prefId='openoffice-missing-dir-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a ! -d $missingOooDir ];then
+		echo "${S}Updating OOo to fix missing directory issue...${N}"
+		mkdir $missingOooDir
+		set_sticky_prefs $prefId
+	fi
+}
 
 openoffice_kde_fix_1()
 {

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.19
-####  Date: May 4 2009
+####  version: 1.21.20
+####  Date: May 19 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -27,7 +27,7 @@
 # one global here just for convenience
 # temp for sid volatile period:
 TEMP_HOLDS='p7zip-rar:p7zip-full '
-CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
+CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data kdenlive:kdenlive-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
 #egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
