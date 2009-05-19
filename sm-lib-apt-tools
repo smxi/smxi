@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.21.20
+####  version: 1.21.21
 ####  Date: May 19 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -27,7 +27,7 @@
 # one global here just for convenience
 # temp for sid volatile period:
 TEMP_HOLDS='p7zip-rar:p7zip-full '
-CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data kdenlive:kdenlive-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xfdesktop4:xfdesktop4-data xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
+CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data kdenlive:kdenlive-data k3b:k3b-data libgnokii3:gnokii-common pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
 #egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
@@ -514,6 +514,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'transmission'
 			advanced_broken_dependency_handler 'vegastrike'
 			advanced_broken_dependency_handler 'wesnoth'
+			advanced_broken_dependency_handler 'xfce4'
 			advanced_broken_dependency_handler 'xpdf'
 		fi
 	fi
@@ -601,7 +602,7 @@ broken_dependency_handler()
 			# determine whether to do full or partial version number tests
 			# using cut -f 2-4 to handle cases of numbering like 1:2.5.6-3
 			case $package1 in
-				amule|gnucash|libgnokii3|rosegarden|thunar|xchat|xfdesktop4|xsane)
+				amule|gnucash|libgnokii3|rosegarden|thunar|xchat|xsane)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					tempHolder1=$( check_package_status "$package1" )
 					tempHolder2=$( check_package_status "$package2" )
@@ -729,6 +730,12 @@ $( package_tester '(transmission|transmission-common|transmission-cli|transmissi
 "
 			packageGroup='Transmission'
 			;;
+		xfce4)
+			packages="
+$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-settings|xfce4-session|xfwm4|xfce4-panel|xfconf)' )
+"
+			packageGroup='Xfce4'
+			;;
 		xpdf)
 			packages="
 $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
@@ -752,7 +759,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 			tempTwo=$tempOne
 			case $versionGroup in
 				# full version strings for picky package groups
-				evolution|transmission|wesnoth)
+				evolution|transmission|wesnoth|xfce4)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
