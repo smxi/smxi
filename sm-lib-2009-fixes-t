@@ -58,7 +58,7 @@ run_2009_fixes()
 
 ooo_fix_2009_5()
 {
-	local missingOooDir='/var/lib/openoffice/share/config'
+	local missingOooDir='/var/lib/openoffice/share'
 	local isInstalled=$( package_tester 'openoffice.org-common' )
 	local prefId='openoffice-missing-dir-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
