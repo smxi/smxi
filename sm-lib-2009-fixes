@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
 ####  version: 1.1.13
-####  Date: May 19 2009
+####  Date: May 20 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -41,6 +41,7 @@ run_2009_fixes()
 			acroread_fix_1
 			openoffice_kde_fix_1
 			ooo_fix_2009_5
+			kdenlive_fix_1
 		fi
 		if [ "$DISTRO_LEVEL" -lt 16 ];then
 			kdm_3_to_4_fix_1
@@ -59,6 +60,26 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+kdenlive_fix_1()
+{
+	local prefId='kdenlive-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'kdenlive' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+		local isInstalled2=$( package_tester 'mlt' )
+		local isAvailable=$( check_package_status 'inigo' 'c' )
+		if [ -n "$isInstalled2" -a -n "$isAvailable" ];then
+			echo $LINE
+			echo "${S}Running ${C}kdenlive${S} update now. Removing ${C}kdenlive/mlt${S}...${N}"
+			package_remover 'kdenlive mlt' 'purge'
+			echo "${S}Reinstalling ${C}kdenlive${S} now to bring in new packages...${N}"
+			package_installer 'kdenlive' 'install-missing'
+			set_sticky_prefs $prefId
+		fi
+	fi
+}
 
 ooo_fix_2009_5()
 {
