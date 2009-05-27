@@ -612,7 +612,7 @@ install_the_apt_kernel()
 	authentication_handler $1 
 	echo $LINE
 	echo "${S}Installing your new ${C}$1${S} kernel now...${N}"
-	package_installer "$kernelHeaders $kernelImage" 'install-always' "$extraArgs"
+	package_installer "$kernelHeaders $kernelImage" 'install-always' 
 	eval $LOGUE
 }
 
@@ -699,7 +699,7 @@ install_the_apt_kernel_module()
 	# if grep-aptavail -PX "$modulePackage" >/dev/null 2>&1
 	if [ -n "$moduleExists" ];then
 		#echo "${SPACER}${S}Checkinging kernel module: ${C}$modulePackage${N}"
-		package_installer "$modulePackage" 'install-always' "$extraArgs"
+		package_installer "$modulePackage" 'install-always' 
 		if [ "$?" -ne 0 ];then
 			$APT_TYPE -f install
 		else
@@ -735,7 +735,7 @@ download_remaining_module_debs()
 		echo -n "${SPACER}${S}Checking for ${C}$module$1${S} now...${N}"
 		moduleError=''
 		# note: $APT_TYPE using apt-get to avoid aptitude deciding to install these during du
-		apt-get install -d -y $extraArgs $module$1 &> /dev/null || moduleError='true'
+		apt-get install -d -y $module$1 &> /dev/null || moduleError='true'
 		if [ "$moduleError" == 'true' ];then
 			missingModules="$missingModules $module$1"
 			echo "${SPACER}${SPACER}${M}Module not available${N}"
