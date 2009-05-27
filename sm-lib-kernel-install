@@ -546,7 +546,7 @@ authentication_handler()
 
 	if [ -n "$( grep 'liquorix' <<< $1 )" ];then
 		if [ -z "$( package_tester "$liquorixKeyrings" )" ];then
-			package_installer "$liquorixKeyrings" 'install-missing' '--allow-unauthenticated'
+			package_installer "$liquorixKeyrings" 'install-missing' '--allow-unauthenticated -y'
 		fi
 	fi
 
