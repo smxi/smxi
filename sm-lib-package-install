@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.38
+####  version: 3.1.39
 ####  Date: May 29 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -82,9 +82,9 @@ package_group_installer()
 		fi
 	fi
 	# set these to null to avoid installing the desktop gunk unless needed
-	if [ "$dmUse" == 'kdm' && -n "$( check_package_status 'kdm' 'i' )" ];then
+	if [ "$dmUse" == 'kdm' -a -n "$( check_package_status 'kdm' 'i' )" ];then
 		dmUse=''
-	elif [ "$dmUse" == 'gdm' && -n "$( check_package_status 'gdm' 'i' )" ];then
+	elif [ "$dmUse" == 'gdm' -a -n "$( check_package_status 'gdm' 'i' )" ];then
 		dmUse=''
 	fi
 
