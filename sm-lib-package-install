@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.37
-####  Date: May 5 2009
+####  version: 3.1.38
+####  Date: May 29 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -812,6 +812,7 @@ display_manager_installer()
 		case $opt in
 			base-light-packages)
 				package_group_installer 'plain' 'base-light-packages'
+				repeat='true'
 				;;
 			fluxbox)
 				package_group_installer 'plain' 'fluxbox'
