@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.13
-####  Date: May 20 2009
+####  version: 1.1.14
+####  Date: June 1 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -36,6 +36,7 @@ run_2009_fixes()
 {
 	if [ "$1" == 'pre' ];then
 		if [ "$DISTRO_LEVEL" -lt 18 ];then
+			ed_fix_1
 			openoffice_kde_fix_1
 			ooo_fix_2009_5
 			acroread_fix_1
@@ -56,6 +57,22 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+ed_fix_1()
+{
+	local prefId='test-ed-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'ed' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+		if [ ! -d /bin/ed ];then
+			echo $LINE
+			echo "${S}Updating ${C}ed${S}. Adding ${C}/bin/ed${S}...${N}"
+			mkdir /bin/ed
+		fi
+		set_sticky_prefs $prefId
+	fi
+}
 
 kdenlive_fix_1()
 {
