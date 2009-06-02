@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.14
-####  Date: June 1 2009
+####  version: 1.1.15
+####  Date: June 2 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -65,9 +65,10 @@ ed_fix_1()
 	local isInstalled=$( package_tester 'ed' )
 	
 	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
-		if [ ! -d /bin/ed ];then
+		if [ ! -e /bin/ed ];then
 			echo $LINE
-			echo "${S}Updating ${C}ed${S}. Adding ${C}/bin/ed${S}...${N}"
+			echo "${S}Updating ${C}ed${S}. Linking ${C}/usr/bin/ed${S} to ${C}/bin/ed${S}...${N}"
+			ln -s /usr/bin/ed /bin/ed
 			mkdir /bin/ed
 		fi
 		set_sticky_prefs $prefId
