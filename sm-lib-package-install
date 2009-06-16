@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.1.39
-####  Date: May 29 2009
+####  version: 3.1.40
+####  Date: June 16 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1204,6 +1204,7 @@ install_google_earth()
 inxi_installer()
 {
 	local konviPath='/usr/share/apps/konversation/scripts/'
+	local konviKde4Path='/usr/share/kde4/apps/konversation/scripts/'
 	local netTools='net-tools' isAvailable=''
 
 	echo $LINE
@@ -1218,6 +1219,10 @@ inxi_installer()
 	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviPath ];then
 		echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
 		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviPath}$MOD_INXI
+	fi
+	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviKde4Path ];then
+		echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
+		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviKde4Path}$MOD_INXI
 	fi
 	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options in sidux irc!!!"
 	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-d${S} or ${C}-v3${S}"
