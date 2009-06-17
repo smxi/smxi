@@ -233,7 +233,7 @@ super_advanced_kernel_options()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="kernel-metapackage-options add-liquorix-sources change-smxi-default-kernel  return-to-previous-menu"
+	options="kernel-metapackage-options add-liquorix-sources change-$SCRIPT_NAME-default-kernel  return-to-previous-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
