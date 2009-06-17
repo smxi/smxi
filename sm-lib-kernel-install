@@ -233,15 +233,11 @@ super_advanced_kernel_options()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="kernel-metapackage-options add-liquorix-sources change-smxi-default-kernel return-to-previous-menu"
+	options="kernel-metapackage-options add-liquorix-sources change-smxi-default-kernel  return-to-previous-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
 		case $opt in
-			kernel-metapackage-options)
-				kernel_meta_package_handler standard
-				repeat='true'
-				;;
 			add-liquorix-sources)
 				if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
 					update_sources 'liquorix'
@@ -254,6 +250,10 @@ super_advanced_kernel_options()
 			change-$SCRIPT_NAME-default-kernel)
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel
+				repeat='true'
+				;;
+			kernel-metapackage-options)
+				kernel_meta_package_handler standard
 				repeat='true'
 				;;
 			return-to-previous-menu)
