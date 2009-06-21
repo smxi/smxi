@@ -1171,7 +1171,6 @@ set_default_system_kernel()
 				case $opt in
 					debian|liquorix|sidux)
 						if [ "$SKIP_CONNECTIONS" != 'true' ];then
-							echo "${S}Getting current ${C}$DEFAULT_KERNEL${S} version now...${N}"
 							get_current_apt_kernel $DEFAULT_KERNEL
 						fi
 						;;
