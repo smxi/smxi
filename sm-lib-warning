@@ -2,9 +2,9 @@
 ########################################################################
 ####  Script Name: sm-lib-warning
 ####  version: 2.0.2
-####  Date: November 17 2008
+####  Date: April 15 2009
 
-####  Copyright (C) Harald Hope 2005-2008
+####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -30,8 +30,9 @@
 get_status()
 {
 	eval $LOGUS
+	local ua="-U s-tools/warning-alerts.$WARNING_STATUS"
 	if [ "$1" != 'print' ];then
-		wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$WARNING_STATUS $SCRIPT_DOWNLOAD$UPGRADE_DATA$WARNING_STATUS || error_handler 'warning-status-file-missing' $FUNCNAME $WARNING_STATUS
+		wget $ua -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$WARNING_STATUS $SCRIPT_DOWNLOAD$UPGRADE_DATA$WARNING_STATUS || error_handler 'warning-status-file-missing' $FUNCNAME $WARNING_STATUS
 	fi
 	if [ -f $WARNING_STATUS ];then
 		STATUS=$( cat $WARNING_STATUS)
@@ -46,9 +47,11 @@ get_status()
 get_warning()
 {
 	eval $LOGUS
+	local ua="-U s-tools/warning-alerts." uaFull=''
 	if [ "$STATUS" == 'danger' -o "$STATUS" == 'danger-alert' -a "$1" == 'danger' ];then
 		if [ "$2" != 'print' ];then
-			wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$WARNING_BODY $SCRIPT_DOWNLOAD$UPGRADE_DATA$WARNING_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $WARNING_BODY
+			uaFull="$ua$WARNING_BODY"
+			wget $uaFull -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$WARNING_BODY $SCRIPT_DOWNLOAD$UPGRADE_DATA$WARNING_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $WARNING_BODY
 		fi
 		if [ -f $WARNING_BODY ];then
 			cat $WARNING_BODY
@@ -58,7 +61,8 @@ get_warning()
 	fi
 	if [ "$STATUS" == 'alert' -o "$STATUS" == 'danger-alert' -a "$1" == 'alert' ];then
 		if [ "$2" != 'print' ];then
-			wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$ALERT_BODY $SCRIPT_DOWNLOAD$UPGRADE_DATA$ALERT_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $ALERT_BODY
+			uaFull="$ua$ALERT_BODY"
+			wget $uaFull -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$ALERT_BODY $SCRIPT_DOWNLOAD$UPGRADE_DATA$ALERT_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $ALERT_BODY
 		fi
 		if [ -f $ALERT_BODY ];then
 			cat $ALERT_BODY
@@ -75,8 +79,9 @@ get_warning()
 get_configs()
 {
 	eval $LOGUS
+	local ua="-U s-tools/warning-alerts.$CONFIGS_BODY"
 	if [ "$1" != 'print' ];then
-		wget -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$CONFIGS_BODY $SCRIPT_DOWNLOAD$UPGRADE_DATA$CONFIGS_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $CONFIGS_BODY
+		wget $ua -T$TIME_OUT -t2 -q -O $SCRIPT_HOME/$CONFIGS_BODY $SCRIPT_DOWNLOAD$UPGRADE_DATA$CONFIGS_BODY || error_handler 'warning-data-wget-error' $FUNCNAME $CONFIGS_BODY
 	fi
 	if [ -f "$CONFIGS_BODY" -a -n "$( cat $CONFIGS_BODY )" ];then
 		echo "${M}Answer ${C}y${M} instead of the standard ${C}n${M} if you are asked to"
@@ -163,7 +168,7 @@ upgrade_warning()
 		case $opt in
 			continue|c)
 				# start xorg install, update, dist-upgrade, xorg component install
-				install_dist_upgrade first
+				install_dist_upgrade 'first'
 				;;
 			continue-no-$DU_UPGRADE)
 				echo "${S}Skipping ${C}$DU_UPGRADE${S} for now. Continuing with script.${N}"
