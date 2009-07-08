@@ -36,8 +36,10 @@
 # args: $1 - pre / post
 run_2008_fixes()
 {
-	if [ "$1" == 'pre' ];then
-		if [ "$DISTRO_LEVEL" -lt 11 ];then
+	if [ "$1" == 'pre' ]
+	then
+		if [ "$DISTRO_LEVEL" -lt 11 ]
+		then
 			sidux_security_patch_1
 			libdjvulibre15_fix_1
 			update_amarok_xine_1
@@ -48,16 +50,19 @@ run_2008_fixes()
 			b43_fwcutter_fix_1
 			# libavutil_fix_1 # don't use this
 		fi
-		if [ "$DISTRO_LEVEL" -lt 12 ];then
+		if [ "$DISTRO_LEVEL" -lt 12 ]
+		then
 			syslinux_fix_1
 			gpm_fix_1 # preview requires this fix, unfortunately
 			libavutil_fix_1
 			libpigment_fix_1
 		fi
-		if [ "$DISTRO_LEVEL" -lt 13 ];then
+		if [ "$DISTRO_LEVEL" -lt 13 ]
+		then
 			ipw2x00_fix_1
 		fi
-	elif [ "$1" == 'post' ];then
+	elif [ "$1" == 'post' ]
+	then
 		:
 	fi
 }
@@ -74,7 +79,8 @@ ipw2x00_fix_1()
 	local isInstalled2=$( package_tester 'ipw2200-firmware'  )
 	local isAvailable=$( check_package_status 'firmware-ipw2x00' )
 
-	if [ "$smPref" -eq 0 -a -n "$isAvailable" ] && [ -n "$isInstalled" -o -n "$isInstalled2" ];then
+	if [ "$smPref" -eq 0 -a -n "$isAvailable" ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}ipw2x00${S} update fix now. This will replace the older firmware"
 		echo "with the new Debian package. You will be asked to agree to the firmware license,"
@@ -97,7 +103,8 @@ sidux_security_patch_1()
 	local prefId='sidux-security-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 
-	if [ "$smPref" -eq 0 -a -f $ESV ];then
+	if [ "$smPref" -eq 0 -a -f $ESV ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}sidux config file removal${S} security fix now...${N}"
 		find /root /home -maxdepth 2 -type f -name '.sidconf*' -delete
@@ -112,7 +119,8 @@ syslinux_fix_1()
 	local isInstalled=$( package_tester 'syslinux'  )
 	local isAvailable=$( check_package_status 'syslinux-common' )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}syslinux${S} update fix now...${N}"
 		package_remover 'syslinux' 'purge -y'
@@ -128,7 +136,8 @@ libpigment_fix_1()
 	local isInstalled=$( package_tester 'libpigment0.3-4'  )
 	local isAvailable=$( check_package_status 'libpigment0.3-5' )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}libpigment0.3-4/5${S} update fix now...${N}"
 		package_installer 'libpigment0.3-5' 'install-always'
@@ -145,7 +154,8 @@ libdjvulibre15_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'libdjvulibre15'  )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}libdjvulibre15${S} update fix now...${N}"
 		package_remover 'libdjvulibre15' 'purge'
@@ -159,7 +169,8 @@ gpm_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'gpm'  )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}gpm${S} update fix now...${N}"
 		package_installer 'gpm' 'install-always'
@@ -174,7 +185,8 @@ libavutil_fix_1()
 	local isInstalled=$( package_tester 'libavutilcvs49'  )
 	local isInstalled2=$( package_tester 'libavcodeccvs51'  )
 
-	if [ "$smPref" -eq 0 -a "$DISTRO" == 'antix' ] && [ -n "$isInstalled" -o -n "$isInstalled2" ];then
+	if [ "$smPref" -eq 0 -a "$DISTRO" == 'antix' ] && [ -n "$isInstalled" -o -n "$isInstalled2" ]
+	then
 		echo $LINE
 		echo "${S}Running ffmpeg fix...${N}"
 		#package_installer 'libavutil49 libavcodec51' 'install-always' '-d'
@@ -194,7 +206,8 @@ b43_fwcutter_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'b43-fwcutter'  )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a "$KERNEL_THIRD" -ge 25 ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a "$KERNEL_THIRD" -ge 25 ]
+	then
 		echo $LINE
 		echo "${S}Running ${C}b43-fwcutter${S} fix now...${N}"
 		package_remover 'b43-fwcutter' 'purge -y'
@@ -210,7 +223,8 @@ console_tools_kbd_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'console-tools'  )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
 		echo $LINE
 		# odd trick here, this will remove console-tools, only works with apt-get
 		package_installer 'kbd' 'install-always' '--purge'
@@ -224,7 +238,8 @@ amsn_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'amsn' 'ii' )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
 		echo $LINE
 		package_installer 'amsn' 'force-always'
 		set_sticky_prefs $prefId
@@ -237,7 +252,8 @@ update_amarok_xine_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'amarok-xine' 'ii' )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
 		echo $LINE
 		echo "${S}Replacing ${C}amarok-xine${S} with new ${C}amarok-engine-xine${S} now...${N}"
 		package_installer 'amarok-engine-xine' 'install-always'
@@ -252,7 +268,8 @@ libstlport4_fix_1()
 
 	local isInstalled=$( package_tester 'libstlport4.6c2' )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ]
+	then
 		echo $LINE
 		echo "${S}Runnning ${C}libstlport4.6c2${S} fix now. This may also upgrade your ${C}openoffice.org${S}"
 		echo "if it's installed due to dependency issues. ${M}You MUST upgrade both now or your dist-upgrade will fail!${N}"

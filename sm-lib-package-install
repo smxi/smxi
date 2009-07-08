@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.2.0
-####  Date: June 17 2009
+####  version: 3.1.12
+####  Date: February 22 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -43,13 +43,7 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
-	local pdfLight='epdfview' mlocate='mlocate' kioapt='kio-apt' kpdf='kpdf'
-	local karm='karm' ksvg='ksvg' katePlugins='kate-plugins' kpower='kpowersave'
-	local kmoon='kmoon' kickerApplets='kicker-applets' kdeAddonsKfile='kdeaddons-kfile-plugins'
-	local kdeMultimediaKfile='kdemultimedia-kfile-plugins'
-	local kdebase='kdebase kdebase-kio-plugins kde-core kdelibs'
-	local khelp='khelpcenter' kcolor='kcoloredit' plasmaWidgets=''
-	local qt4Config=''
+	local pdfLight='epdfview' mlocate='mlocate'
 
 	# note: these packages are not in every Debian level
 	if [ -z "$( check_package_status 'epdfview' )" ];then
@@ -57,35 +51,6 @@ package_group_installer()
 	fi
 	if [ -z "$( check_package_status "$mlocate" )" ];then
 		mlocate=''
-	fi
-	# handle incoming changes to kde as well
-	if [ -n "$( grep -i 'kde' <<< $2 )" ];then
-		if [ "$dmUse" == 'kdm' ];then
-			dmUse=''
-		fi
-		if [ -n "$( check_package_status 'kde-minimal' )" ];then
-			karm='ktimetracker'
-			katePlugins=''
-			kcolor='kcolorchooser'
-			kdeAddonsKfile=''
-			kdeBase='kde-minimal kaboom'
-			kdeMultimediaKfile=''
-			khelp='khelpcenter4'
-			kickerApplets=''
-			kioapt=''
-			kmoon=''
-			kpdf='okular okular-extra-backends'
-			kpower=''
-			ksvg=''
-			plasmaWidgets='plasma-widgets-addons plasma-widgets-workspace'
-			qt4Config='qt4-qtconfig'
-		fi
-	fi
-	# set these to null to avoid installing the desktop gunk unless needed
-	if [ "$dmUse" == 'kdm' -a -n "$( check_package_status 'kdm' 'i' )" ];then
-		dmUse=''
-	elif [ "$dmUse" == 'gdm' -a -n "$( check_package_status 'gdm' 'i' )" ];then
-		dmUse=''
 	fi
 
 	# package groups, console stuff first so it's included in following
@@ -117,24 +82,22 @@ package_group_installer()
 	# standard groups
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
-	local baseLightPackages="$consoleBrowsers $consoleTools aterm leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
+	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl resolvconf udev wireless-tools wpasupplicant"
-	local fluxPackages="fluxbox fluxconf"
-	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
+	local fluxPackages="$baseLightPackages fluxbox fluxconf"
+	local fvwmCrystal="$baseLightPackages audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local googleEarth='googleearth-package fakeroot'
-	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config"
-	local kdePackages="$kdebase konqueror konversation $kpdf $ksvg $dmUse kdm"
-	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
+	local kdeExtras='ark karm kate-plugins kdeaddons-kfile-plugins kdemultimedia-kfile-plugins kdemultimedia-kio-plugins kicker-applets kio-apt kmix kmoon knemo konq-plugins kpowersave ksensors ksnapshot kuser'
+	local kdePackages="kdebase kdebase-kio-plugins kde-core kdelibs konqueror konversation kpdf ksvg $dmUse kdm"
+	local kdepimPackages='kdepim karm kontact korganizer kalarm'
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
 
 	local mozillaGroup="$iceDove iceweasel"
 	local rsyncGroup="rsync $rdiff"
 	local streamTuner='streamtuner streamripper'
-	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
-	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
-	# bad:  xfce4-session xfce4-settings
-	local xfcePackages="gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia"
+	local systemUtils="$alsaGroup anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
+	local xfcePackages="$baseLightPackages thunar thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfce4 xfce4-terminal xfce4-utils xfmedia"
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg xserver-xorg-video-all xterm xutils'
 
 	echo $LINE
@@ -179,9 +142,6 @@ package_group_installer()
 			packageName="$php5Postgre"
 			;;
 		## main packages
-		base-light-packages)
-			packageName="$baseLightPackages"
-			;;
 		ceni-stuff)
 			packageName="$ceniStuff"
 			;;
@@ -194,20 +154,20 @@ package_group_installer()
 		fluxbox)
 			packageName="$fluxPackages $dmUse"
 			;;
-		base-plus-fluxbox)
-			packageName="$fluxPackages $xorgPackages $dmUse"
+		fluxbox-full)
+			packageName="$fluxPackages $systemUtils $xorgPackages $dmUse"
 			;;
 		fvwm-crystal)
 			packageName="$fvwmCrystal $dmUse"
 			;;
-		base-plus-fvwm-crystal)
-			packageName="$fvwmCrystal $xorgPackages $dmUse"
+		fvwm-crystal-full)
+			packageName="$fvwmCrystal $systemUtils $xorgPackages $dmUse"
 			;;
 		kde)
 			packageName="$kdePackages $dmUse"
 			;;
-		base-plus-kde)
-			packageName="$kdePackages $xorgPackages $dmUse"
+		kde-full)
+			packageName="$kdePackages $systemUtils $xorgPackages $dmUse"
 			;;
 		kde-extras)
 			packageName="$kdeExtras"
@@ -236,11 +196,14 @@ package_group_installer()
 		xfce)
 			packageName="$xfcePackages $dmUse"
 			;;
-		base-plus-xfce)
-			packageName="$xfcePackages $xorgPackages $dmUse"
+		xfce-full)
+			packageName="$xfcePackages $systemUtils $xorgPackages $dmUse"
 			;;
 		xorg)
 			packageName="$xorgPackages $dmUse"
+			;;
+		xorg-full)
+			packageName="$systemUtils $xorgPackages $dmUse"
 			;;
 		google-earth)
 			packageName="$googleEarth"
@@ -256,6 +219,64 @@ package_group_installer()
 	fi
 	update_sources $1
 	package_installer "$packageName" 'install-user-ok'
+	eval $LOGUE
+}
+
+# the main updater function is going to handle most of the checking here, but
+# if the sources are updated, this will force the update
+update_sources()
+{
+	eval $LOGUS
+	local op='' multi='' doUpdate='' plain='' skyp='' swift=''
+	local operaSources='deb http://deb.opera.com/opera sid non-free'
+	local operaApt="$EAS.d/opera.list"
+	local skypeSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
+	local skypeApt="$EAS.d/skype.list"
+	local swiftSources='deb http://getswiftfox.com/builds/debian unstable non-free'
+	local swiftApt="$EAS.d/swiftfox.list"
+	local extraFunctions='' grepSearch='' sourceFile='' sourcesData='' searchIdentifier=''
+
+	case $1 in
+		opera)
+			# opera keyrings
+			extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
+			grepSearch='(opera|deb-op)'
+			searchIdentifier='Opera'
+			sourceFile=$operaApt
+			sourcesData=$operaSources
+			;;
+		skype)
+			grepSearch='(skype|deb-skp)'
+			searchIdentifier='Skype'
+			sourceFile=$skypeApt
+			sourcesData=$skypeSources
+			;;
+		swiftfox)
+			grepSearch='(swiftfox|deb-swift)'
+			searchIdentifier='Swiftfox'
+			sourceFile=$swiftApt
+			sourcesData=$swiftSources
+			;;
+		plain)
+			if [ "$UPDATED" != 'true' ];then
+				doUpdate='true'
+			fi
+			;;
+	esac
+
+	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData" "$searchIdentifier"
+	# if we have to add in any sources to sources.list, we'll need to do a new update
+	# we have to set the update flag to null here or the main updater
+	# won't update the stuff
+	if [ "$?" -eq 0 ];then
+		eval $extraFunctions
+		doUpdate='true'
+		UPDATED=''
+	fi
+
+	if [ "$doUpdate" == 'true' ];then
+		apt_update_handler 'package-install'
+	fi
 	eval $LOGUE
 }
 
@@ -491,7 +512,8 @@ non_free_installer()
 	echo "${C}5${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
 	echo
 	echo -e "${C}6${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
-	echo "    ${M}NOTE: This is working again in at least Debian Sid, installs latest and it starts."
+	echo "    ${M}NOTE: The current installer is broken, and won't work until the replacement comes into Debian."
+	echo "    ${S}Don't try this unless you just want to test if it's working again, thanks."
 	echo
 	echo "${C}7${S} - ${C}back-to-install-menu${S}"
 
@@ -727,97 +749,83 @@ display_manager_installer()
 
 	echo $LINE
 	echo "${C}1${S} - ${C}select-display-manager${S} Select an alternate display manager to use"
-	echo "${C}2${S} - ${C}base-light-packages${S} Installs basic light apps for light desktops"
-	echo "    (xchat, leafpad, pcmanfm, etc). No gtk/qt apps."
-	echo "${C}3${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
-	echo "${C}4${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
-	echo "${C}5${S} - ${C}base-plus-xorg${S} xorg + system-utilities + wdm if kdm/gdm not present."
-	echo "${C}6${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
-	echo "${C}7${S} - ${C}base-plus-xfce${S} xfce + xorg + system utitilies/base light packages + wdm if kdm/gdm not present."
-	echo "${C}8${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
-	echo "${C}9${S} - ${C}base-plus-kde${S} kde + xorg + system utitilies + kdm."
-	echo "${C}10${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
-	echo "${C}11${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
-	echo "${C}12${S} - ${C}fluxbox${S} Installs lightweight window manager.  Good for old hardware."
-	echo "${C}13${S} - ${C}base-plus-fluxbox${S} fluxbox + xorg + system utitilies/base light packages + display manager."
-	echo "${C}14${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
-	echo "${C}15${S} - ${C}base-plus-fvwm-crystal${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
-	echo "${C}16${S} - ${C}back-to-install-menu${S}"
+	echo "${C}2${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
+	echo "${C}3${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
+	echo "${C}4${S} - ${C}xorg-full${S} xorg + system-utilities + wdm if kdm/gdm not present."
+	echo "${C}5${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo "${C}6${S} - ${C}xfce-full${S} xfce + xorg + system utitilies + wdm if kdm/gdm not present."
+	echo "${C}7${S} - ${C}kde${S} Base packages for kde desktop + kpdf, konversation, konqueror."
+	echo "${C}8${S} - ${C}kde-full${S} kde + xorg + system utitilies + kdm."
+	echo "${C}9${S} - ${C}kde-extras${S} Installs nice extras like konq-plugins, kioplugins, other useful kde things."
+	echo "${C}10${S} - ${C}kde-pim${S} karm, kontact, korganizer, kalarm."
+	echo "${C}11${S} - ${C}fluxbox${S} Installs lightweight package group. No gtk/qt apps. Good for old hardware."
+	echo "${C}12${S} - ${C}fluxbox-full${S} fluxbox + xorg + system utitilies + display manager."
+	echo "${C}13${S} - ${C}fvwm-crystal${S} Installs basic packages needed, plus some small apps."
+	echo "${C}14${S} - ${C}fvwm-crystal-full${S} fvwm-crystal + xorg + system utitilies + display manager."
+	echo "${C}15${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="select-display-manager base-light-packages system-utilities xorg base-plus-xorg xfce base-plus-xfce kde base-plus-kde kde-extras kde-pim fluxbox base-plus-fluxbox fvwm-crystal base-plus-fvwm-crystal back-to-install-menu"
+	options="select-display-manager system-utilities xorg xorg-full xfce xfce-full kde kde-full kde-extras kde-pim fluxbox fluxbox-full fvwm-crystal fvwm-crystal-full back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
-			base-light-packages)
-				package_group_installer 'plain' 'base-light-packages'
-				repeat='true'
-				;;
-			fluxbox)
-				package_group_installer 'plain' 'fluxbox'
-				repeat='true'
-				;;
-			base-plus-fluxbox)
-				package_group_installer 'plain' 'base-plus-fluxbox'
-				package_group_installer 'plain' 'system-utilities'
-				package_group_installer 'plain' 'base-light-packages'
-				repeat='true'
-				;;
-			fvwm-crystal)
-				package_group_installer 'plain' 'fvwm-crystal'
-				repeat='true'
-				;;
-			base-plus-fvwm-crystal)
-				package_group_installer 'plain' 'base-plus-fvwm-crystal'
-				package_group_installer 'plain' 'system-utilities'
-				package_group_installer 'plain' 'base-light-packages'
-				repeat='true'
-				;;
-			kde)
-				package_group_installer 'plain' 'kde'
-				repeat='true'
-				;;
-			base-plus-kde)
-				package_group_installer 'plain' 'base-plus-kde'
-				package_group_installer 'plain' 'system-utilities'
-				repeat='true'
-				;;
-			kde-extras)
-				package_group_installer 'plain' 'kde-extras'
-				repeat='true'
-				;;
-			kde-pim)
-				package_group_installer 'plain' 'kde-pim'
-				repeat='true'
-				;;
 			select-display-manager)
 				select_display_manager
 				repeat='true'
 				;;
 			system-utilities)
-				package_group_installer 'plain' 'system-utilities'
+				package_group_installer plain system-utilities
 				repeat='true'
 				;;
 			xorg)
-				package_group_installer 'plain' 'xorg'
+				package_group_installer plain xorg
 				repeat='true'
 				;;
-			base-plus-xorg)
-				package_group_installer 'plain' 'xorg'
-				package_group_installer 'plain' 'system-utilities'
+			xorg-full)
+				package_group_installer plain xorg-full
 				repeat='true'
 				;;
 			xfce)
-				package_group_installer 'plain' 'xfce'
+				package_group_installer plain xfce
 				repeat='true'
 				;;
-			base-plus-xfce)
-				package_group_installer 'plain' 'base-plus-xfce'
-				package_group_installer 'plain' 'system-utilities'
-				package_group_installer 'plain' 'base-light-packages'
+			xfce-full)
+				package_group_installer plain xfce-full
+				repeat='true'
+				;;
+			kde)
+				package_group_installer plain kde
+				repeat='true'
+				;;
+			kde-full)
+				package_group_installer plain kde-full
+				repeat='true'
+				;;
+			kde-extras)
+				package_group_installer plain kde-extras
+				repeat='true'
+				;;
+			kde-pim)
+				package_group_installer plain kde-pim
+				repeat='true'
+				;;
+			fluxbox)
+				package_group_installer plain fluxbox
+				repeat='true'
+				;;
+			fluxbox-full)
+				package_group_installer plain fluxbox-full
+				repeat='true'
+				;;
+			fvwm-crystal)
+				package_group_installer plain fvwm-crystal
+				repeat='true'
+				;;
+			fvwm-crystal-full)
+				package_group_installer plain fvwm-crystal-full
 				repeat='true'
 				;;
 			back-to-install-menu)
@@ -913,7 +921,7 @@ assign_display_manager()
 			displayManager=$DEFAULT_DM
 		else
 			case $itemName in
-				kde|base-plus-kde)
+				kde|kde-full)
 					displayManager='kdm'
 					;;
 				gnome|gnome-full)
@@ -941,14 +949,9 @@ install_openoffice()
 	# oooLanguagePack:oooHyphenation:oooHelp:oooThesaurus:myspell:<Language Name>
 	local oooData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
 
-	local oooLanguages='' l='' ll='' language='' 
+	local oooLanguages='' l='' ll='' language=''
 	local oooLang='' oooHyph='' oooHelp='' oooThes='' oooDict='' oooDesk=''
 	local doptions='' dopt='' complete='' options=''  opt='' found='' skip=''
-	
-	# ooo-gtk conflicts with this package
-	if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
-		oooDesk='openoffice.org-gtk'
-	fi
 
 	for l in $oooData
 	do
@@ -965,9 +968,7 @@ install_openoffice()
 	echo "When you select one of these your ${C}openoffice${S} install will use"
 	echo "any available language specific items for your chosen language, including"
 	echo "the language pack, help, thesaurus, and dictionaries."
-	if [ -n "$oooDesk" ];then
-		echo "Also installs the desktop integration package: $oooDesk"
-	fi
+	echo "Also installs appropriate desktop integration package for either gnome or kde."
 	echo
 	echo "Select the number for ${C}no-change${S} if you want to return to main script."
 
@@ -1016,46 +1017,46 @@ install_openoffice()
 	done
 
 	if [ "$found" == 'true' ];then
-# 		echo $LINE
+		echo $LINE
 		if [ "$skip" != 'true' ];then
-# 			echo "${S}Please select your desktop manager. This will install the correct"
-# 			echo "OpenOffice.org desktop integration package for either kde or gnome."
-# 			echo "${C}1 - kde${S} Installs kde integration."
-# 			echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
-# 			echo "${C}3 - other${S} Does not install integration package."
-# 			echo $LINE
-# 			echo -e $SLE
-# 			echo $LINE
-# 
-# 			doptions='kde gnome other'
-# 
-# 			select dopt in $doptions
-# 			do
-# 				case $dopt in
-# 					kde)
-# 						oooDesk='openoffice.org-kde'
-# 						complete='true'
-# 						;;
-# 					gnome)
-# 						oooDesk='openoffice.org-gnome openoffice.org-gtk'
-# 						complete='true'
-# 						;;
-# 					other)
-# 						oooDesk=''
-# 						complete='true'
-# 						;;
-# 					*)
-# 						echo "${E}Invalid Selection${N}"
-# 						;;
-# 				esac
-# 				if [ "$complete" == 'true' ];then
-# 					break
-# 				fi
-# 			done
+			echo "${S}Please select your desktop manager. This will install the correct"
+			echo "OpenOffice.org desktop integration package for either kde or gnome."
+			echo "${C}1 - kde${S} Installs kde integration."
+			echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
+			echo "${C}3 - other${S} Does not install integration package."
+			echo $LINE
+			echo -e $SLE
+			echo $LINE
+
+			doptions='kde gnome other'
+
+			select dopt in $doptions
+			do
+				case $dopt in
+					kde)
+						oooDesk='openoffice.org-kde'
+						complete='true'
+						;;
+					gnome)
+						oooDesk='openoffice.org-gnome openoffice.org-gtk'
+						complete='true'
+						;;
+					other)
+						oooDesk=''
+						complete='true'
+						;;
+					*)
+						echo "${E}Invalid Selection${N}"
+						;;
+				esac
+				if [ "$complete" == 'true' ];then
+					break
+				fi
+			done
 
 			echo $LINE
 			echo "${S}Installing your selected language [${C}$opt${S}] components and openoffice.org.${N}"
-			package_installer "openoffice.org-calc openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
+			package_installer "openoffice.org openoffice.org-base openoffice.org-calc openoffice.org-common openoffice.org-core openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
 			echo "${S}OpenOffice.org install is completed.${N}"
 		else
 			echo "${S}Continuing on to main script without installing OpenOffice.org.${N}"
@@ -1115,27 +1116,18 @@ install_google_earth()
 	echo
 	echo "Downloading installer file and creating ${C}$goog${S} deb...${N}"
 	cd /var/cache/apt/archives
-	# force required to build as root
-	make-googleearth-package --force 2>>$LOG_FILE 2>&1
-	
-	if [ -n "$( ls googleearth*.deb 2>/dev/null )" ];then
-		echo "${S}Installing ${C}$goog${S} deb...${N}"
-		dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
-		if [ "$APT_TYPE" == 'aptitude' ];then
-			$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
-		fi
-		cd $SCRIPT_HOME
-		#echo "${S}Cleaning up ${C}$goog${S} installer stuff...${N}"
-		# package_remover 'googleearth-package' 'purge -y'
-		echo "${S}Completed install of ${C}$goog${S}.${N}"
-		echo $LINE
-		echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
-	else
-		echo $ELINE
-		echo "${E}Oh, too bad, the ${C}googleearth deb${E} package failed to build, sorry about that."
-		echo "${S}Check forums and other information to see if the Debian package builder is broken."
-		echo "Unable to install googleearth using this method, sorry.${N}"
+	make-googleearth-package 2>>$LOG_FILE 2>&1
+	echo "${S}Installing ${C}$goog${S} deb...${N}"
+	dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
+	if [ "$APT_TYPE" == 'aptitude' ];then
+		$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
 	fi
+	cd $SCRIPT_HOME
+	#echo "${S}Cleaning up ${C}$goog${S} installer stuff...${N}"
+	# package_remover 'googleearth-package' 'purge -y'
+	echo "${S}Completed install of ${C}$goog${S}.${N}"
+	echo $LINE
+	echo "${S}To start ${C}$goog${S}, simply run the command from your desktop: ${C}googleearth${N}"
 
 	print_hec
 	eval $LOGPE
@@ -1146,7 +1138,6 @@ install_google_earth()
 inxi_installer()
 {
 	local konviPath='/usr/share/apps/konversation/scripts/'
-	local konviKde4Path='/usr/share/kde4/apps/konversation/scripts/'
 	local netTools='net-tools' isAvailable=''
 
 	echo $LINE
@@ -1161,10 +1152,6 @@ inxi_installer()
 	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviPath ];then
 		echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
 		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviPath}$MOD_INXI
-	fi
-	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviKde4Path ];then
-		echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
-		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviKde4Path}$MOD_INXI
 	fi
 	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options in sidux irc!!!"
 	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-d${S} or ${C}-v3${S}"
@@ -1201,13 +1188,12 @@ check_install_package()
 	eval $LOGUS
 	local packageDeb="$1.deb" success=0
 	local downloadUrl="$SCRIPT_DOWNLOAD/packages/$packageDeb"
-	local ua="-U s-tools/package-download.$packageDeb"
 	echo $LINE
 	if [ -n "$( check_package_status "$1" )" ];then
 		package_installer "$1" 'install-missing' || success=$?
 	else
 		echo "${S}Downloading and installing ${C}$1${S} deb now...${N}"
-		wget $ua -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
+		wget -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
 		if [ -f $packageDeb ];then
 			dpkg -i $packageDeb || success=$?
 		fi
@@ -1574,11 +1560,11 @@ nfs_package_installer()
 		log_function_data "opt selected: $opt"
 		case $opt in
 			nfs-server)
-				package_group_installer 'plain' 'nfs-kernel-server nfs-common portmap'
+				package_group_installer 'plain' 'nfs-common portmap'
 				repeat='true'
 				;;
 			nfs-client)
-				package_group_installer 'plain' 'nfs-common portmap'
+				package_group_installer 'plain' 'nfs-kernel-server nfs-common portmap'
 				repeat='true'
 				;;
 			back-to-menu)
@@ -1729,8 +1715,8 @@ samba_package_installer()
 	echo "${S}The following servers, client apps, and tools, are available:${N}"
 	echo $LINE
 	echo "${M}::  Samba Server ::"
-	echo "${C}1 - samba-server${S} - the main ${C}Samba${S} server. Does not include ${C}smbclient${S},"
-	echo "    ${C}swat${S}, ${C}smbfs${S}, or ${C}winbind${S}."
+	echo "${C}1 - samba-server${S} - the main ${C}Samba${S} server group. Includes ${C}samba${S}, ${C}smbclient${S},"
+	echo "    ${C}swat${S}, ${C}smbfs${S}, and ${C}winbind${S}."
 	echo "${C}2 - swat${S} - Web administration tool for ${C}Samba${S} server."
 	echo "${M}::  Samba Clients ::"
 	echo "${C}3 - smb-client${S} - These ${C}Samba ${S}client packages both contain the command"
@@ -1747,7 +1733,7 @@ samba_package_installer()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="samba-server swat samba-client smb4k komba2 winbind fuse-smb samba-docs back-to-menu"
+	options="samba-server swat samba-client smb4k winbind fuse-smb samba-docs back-to-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.15
-####  Date: June 2 2009
+####  version: 1.0.1
+####  Date: February 22 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -37,186 +37,17 @@
 run_2009_fixes()
 {
 	if [ "$1" == 'pre' ];then
-		if [ "$DISTRO_LEVEL" -lt 17 ];then
-			ed_fix_1
-			acroread_fix_1
-			openoffice_kde_fix_1
-			ooo_fix_2009_5
-			kdenlive_fix_1
-		fi
-		if [ "$DISTRO_LEVEL" -lt 16 ];then
-			kdm_3_to_4_fix_1
-		fi
 		if [ "$DISTRO_LEVEL" -lt 15 ];then
 			cups_driver_fix_1
 		fi
 	elif [ "$1" == 'post' ];then
-		if [ "$DISTRO_LEVEL" -lt 17 ];then
-			xorg_1_6_fix_1
-			vbox_qt_fix_1
-		fi
+		:
 	fi
 }
 
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
-
-ed_fix_1()
-{
-	local prefId='test-ed-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	local isInstalled=$( package_tester 'ed' )
-	
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
-		if [ ! -e /bin/ed ];then
-			echo $LINE
-			echo "${S}Updating ${C}ed${S}. Linking ${C}/usr/bin/ed${S} to ${C}/bin/ed${S}...${N}"
-			ln -s /usr/bin/ed /bin/ed
-			mkdir /bin/ed
-		fi
-		set_sticky_prefs $prefId
-	fi
-}
-
-kdenlive_fix_1()
-{
-	local prefId='kdenlive-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	local isInstalled=$( package_tester 'kdenlive' )
-	
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
-		local isInstalled2=$( package_tester 'mlt' )
-		local isAvailable=$( check_package_status 'inigo' 'c' )
-		if [ -n "$isInstalled2" -a -n "$isAvailable" ];then
-			echo $LINE
-			echo "${S}Running ${C}kdenlive${S} update now. Removing ${C}kdenlive/mlt${S}...${N}"
-			package_remover 'kdenlive mlt' 'purge'
-			echo "${S}Reinstalling ${C}kdenlive${S} now to bring in new packages...${N}"
-			package_installer 'kdenlive' 'install-missing'
-			set_sticky_prefs $prefId
-		fi
-	fi
-}
-
-ooo_fix_2009_5()
-{
-	local missingOooDir='/var/lib/openoffice/share'
-	local isInstalled=$( package_tester 'openoffice.org-common' )
-	local prefId='openoffice-missing-dir-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a ! -d $missingOooDir ];then
-		echo $LINE
-		echo "${S}Updating OOo to fix missing directory issue...${N}"
-		mkdir -p $missingOooDir
-		set_sticky_prefs $prefId
-	fi
-}
-
-openoffice_kde_fix_1()
-{
-	local prefId='openoffice-kde-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	if [ "$smPref" -eq 0 ];then
-		local kdmVersionInst=$( check_package_status 'kdm' 'i' | cut -d ':' -f 2 | cut -d '.' -f 1 )
-		local isInstalled=$( package_tester 'openoffice.org-kde'  )
-		if [ -z "$kdmVersionInst" ];then
-			kdmVersionInst=0
-		fi
-		if [ "$kdmVersionInst" -ge 4 -a -n "$isInstalled" ];then
-			echo $LINE
-			echo "${S}Removing ${C}openoffice.org-kde${S} to let OOo and KDE upgrade properly...${N}"
-			package_remover 'openoffice.org-kde' 'purge'
-			# ooo-gtk conflicts with this package
-			if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
-				echo "${S}Installing ${C}openoffice.org-gtk${S} so that OOo looks nice again...${N}"
-				package_installer 'openoffice.org-gtk' 'install-missing'
-			else
-				echo "${S}Please note: without ${C}openoffice.org-kde${S} Openoffice.org will be very ugly."
-				echo "Since you are using the package ${C}gtk-qt-engine${S} you cannot install ${C}openoffice.org-gtk${S}"
-				echo "Since ${C}$SCRIPT_NAME${S} can't know what you want to do, it's going"
-				echo "to leave it up to you to handle manually, but the upgrade can't work with the" 
-				echo "openoffice.org-kde package installed, so that had to be removed. There's no"
-				echo "great solution here, sorry."
-			fi
-			set_sticky_prefs $prefId
-			print_hec
-		fi
-	fi
-}
-
-vbox_qt_fix_1()
-{
-	local prefId='vbox-qt-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	if [ "$smPref" -eq 0 ];then
-		local packageVersion=$( check_package_status 'virtualbox-ose' 'i' )
-		packageVersion=$( grep -Ei '^(2\.[2-9]|[3-5])' <<< $packageVersion )
-		local isInstalled2=$( package_tester 'virtualbox-ose-qt'  )
-		
-		if [ -n "$packageVersion" -a -z "$isInstalled2" ];then
-			package_installer 'virtualbox-ose-qt' 'install-missing'
-			set_sticky_prefs $prefId
-		fi
-	fi
-}
-
-xorg_1_6_fix_1()
-{
-	local prefId='xorg-1-6-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	local case1='' case2='' case3=''
-	local newX='false'
-	local xVersion=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
-	local xorgMouseI='' xorgMouseC=''
-	
-	if [ -z "$xVersion" ];then
-		xVersion=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
-	fi
-	case $xVersion in
-		1.[6-9]|7.[4-9])
-			newX='true'
-			;;
-	esac
-	log_function_data "xVersion: $xVersion\ncase1: $case1\ncase2: $case2\ncase3: $case3"
-	# note: this will be false if no X is installed
-	if [ "$smPref" -eq 0 -a "$newX" == 'true' ];then
-		case1=$( grep -is 'AllowEmptyInput' $X_ORG_PATH )
-		case2=$( grep -is 'AutoAddDevices' $X_ORG_PATH )
-		case3=$( grep -is 'DontZap' $X_ORG_PATH )
-		if [ -z "$case1" -o -z "$case2" -o -z "$case3" ];then
-			echo $LINE
-			echo "${S}Running ${C}Xorg >= 1.6 xorg.conf${S} tweaks now...${N}"
-			if [ -f $X_ORG_PATH ];then
-				if [ -z "$case1" ];then
-					echo "$SPACER${S}Adding: ${C}Option \"AllowEmptyInput\" \"0\"${S}...${N}"
-					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AllowEmptyInput" "0"/' $X_ORG_PATH
-				fi
-				if [ -z "$case2" ];then
-					echo "$SPACER${S}Adding: ${C}Option \"AutoAddDevices\" \"0\"${S}...${N}"
-					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "AutoAddDevices" "0"/' $X_ORG_PATH
-				fi
-				if [ -z "$case3" ];then
-					echo "$SPACER${S}Adding: ${C}Option \"DontZap\" \"Off\"${S}...${N}"
-					perl -pi -e 's/^([\s]*Section\s*"ServerFlags")/\1\n\tOption "DontZap" "Off"/' $X_ORG_PATH
-				fi
-				echo "${S}Done with ${C}Xorg >= 1.6 xorg.conf${S} update, continuing.${N}"
-			else
-				echo "${E}No ${C}$X_ORG_PATH${S} found. Unable to modify ${C}xorg.conf${S} data.${N}"
-			fi
-		fi
-		# check the mouse stuff too, this is an aptitude fix mainly, which does the upgrade wrong
-		xorgMouseI=$( check_package_status 'xserver-xorg-input-mouse' 'i' )
-		xorgMouseC=$( check_package_status 'xserver-xorg-input-mouse' 'c' )
-		
-		if [ -z "$xorgMouseI" -a -n "$xorgMouseC" ];then
-			echo "${S}Installing  missing package ${C}xserver-xorg-input-mouse${S}...${N}"
-			package_installer 'xserver-xorg-input-mouse' 'install-missing'
-		fi
-		set_sticky_prefs $prefId
-	fi
-}
 
 cups_driver_fix_1()
 {
@@ -231,22 +62,6 @@ cups_driver_fix_1()
 		# aptitude pulls all cups stuff out... bad aptitude, bad!
 		apt-get remove -y cupsys-driver-gutenprint
 		package_installer 'cups-driver-gutenprint' 'force-always'
-		set_sticky_prefs $prefId
-	fi
-}
-
-acroread_fix_1()
-{
-	local prefId='acroread-fix-1'
-	local smPref=$( sm_pref_tester $prefId )
-	local isInstalled=$( package_tester 'acroread'  )
-	local isAvailable=$( check_package_status 'acroread-debian-files' 'c' )
-
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ];then
-		echo $LINE
-		echo "${S}Running ${C}acroread${S} update fix now...${N}"
-		# aptitude pulls all cups stuff out... bad aptitude, bad!
-		package_installer 'acroread-debian-files' 'force-always'
 		set_sticky_prefs $prefId
 	fi
 }
