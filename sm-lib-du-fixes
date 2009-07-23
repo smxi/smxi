@@ -517,6 +517,7 @@ libc6_fix_1()
 			kernelMessage=' with your new kernel'
 			# we want to make sure this is done prior to running locales update if never done
 			launch_function_trigger 'reconfigure-locales'
+			
 			;;
 	esac
 
