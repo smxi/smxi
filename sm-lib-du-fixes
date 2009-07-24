@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.5
-####  Date: April 20 2009
+####  version: 1.3.6
+####  Date: July 23 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -508,29 +508,36 @@ libc6_fix_1()
 	local prefId='libc6-fix-4'
 	local smPref=$( sm_pref_tester $prefId )
 	local kernelMessage=' with your new kernel'
+	local firmwareLinux='firmware-linux' firmwareLinuxText='firmware-linux/'
+	
+	# package is not in stable branches yet
+	if [ -z "$( check_package_status 'firmware-linux' 'c' )" ];then
+		firmwareLinux=''
+		firmwareLinuxText=''
+	fi
 	
 	case $1 in
 		pre-du)
 			kernelMessage=" before you $DU_UPGRADE"
+			add_firmware_linux "$firmwareLinux"
 			;;
 		kernel)
 			kernelMessage=' with your new kernel'
 			# we want to make sure this is done prior to running locales update if never done
 			launch_function_trigger 'reconfigure-locales'
-			
 			;;
 	esac
 
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ];then
 		echo $LINE
-		echo "${S}Updating ${C}libc6/initramfs-tools/locales/tzdata${S} packages to make sure"
+		echo "${S}Updating ${C}${firmwareLinuxText}libc6/initramfs-tools/locales/tzdata${S} packages to make sure"
 		echo "your system will work right$kernelMessage...${N}"
 		#echo
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
 		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
 		# temp removal of locales
-		package_installer "initramfs-tools libc6 libc6-dev locales tzdata util-linux" 'force-always'
+		package_installer "$firmwareLinux initramfs-tools libc6 libc6-dev locales tzdata util-linux" 'force-always'
 		# let's only set this if needed
  		if [ "$smPref" -eq 0 ];then
  			set_sticky_prefs $prefId
@@ -539,6 +546,20 @@ libc6_fix_1()
  	eval $LOGUE
  	# I'm putting this in here to make sure it has fired at least once pre kernel install
  	busybox_fix_1
+}
+
+# args: $1 - firmwareLinux, if null, it's stable debian, not present
+add_firmware_linux()
+{
+	local prefId='add-firmware-linux-1'
+	local smPref=$( sm_pref_tester $prefId )
+	
+	if [ "$smPref" -eq 0 -a -n "$1" ];then
+		echo $LINE
+		echo "${S}Adding ${C}$1${S} just in case you need that...${N}"
+		package_installer "$1" 
+		set_sticky_prefs $prefId
+	fi
 }
 
 busybox_fix_1()
