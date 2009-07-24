@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.6
+####  version: 1.3.7
 ####  Date: July 23 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -557,7 +557,7 @@ add_firmware_linux()
 	if [ "$smPref" -eq 0 -a -n "$1" ];then
 		echo $LINE
 		echo "${S}Adding ${C}$1${S} just in case you need that...${N}"
-		package_installer "$1" 
+		package_installer "$1" 'install-missing'
 		set_sticky_prefs $prefId
 	fi
 }
