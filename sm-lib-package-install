@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.2.2
-####  Date: July 27 2009
+####  version: 3.2.3
+####  Date: August 5 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1408,14 +1408,16 @@ swiftfox_installer()
 	local LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= cpuType=$( grep -i -m 1 'model name' /proc/cpuinfo | cut -d ':' -f 2  )
 	# current swiftfox packages
 	# http://getswiftfox.com/builds/debian/packages
+	# note, the following were dropped:
+	# swiftfox-athlon-xp
+	# swiftfox-pentium-m
+	# swiftfox-pentium3
+	# swiftfox-pentium3m
+	# swiftfox-pentium4
+	
 	local swiftfoxChoices="
-	swiftfox-i686:(Athlon-Thunderbird-or-Pentium-2)
-	swiftfox-athlon-xp
+	swiftfox-i686:(Athlon-Thunderbird/xp-or-Pentium-2/3/m/4)
 	swiftfox-athlon64-32bit:(AMD-64-users-on-a-32bit-OS)
-	swiftfox-pentium-m
-	swiftfox-pentium3
-	swiftfox-pentium3m
-	swiftfox-pentium4
 	swiftfox-prescott:(Intel-Core-duo/solo)
 	return-to-menu
 	"

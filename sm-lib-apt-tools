@@ -138,7 +138,6 @@ package_tester_aptitude()
 	eval $LOGUE
 }
 
-
 # Returns null if package is not available in user system apt.
 # args: $1 - package to test; $2 [optional] - candidate/installed
 check_package_status()
