@@ -650,9 +650,10 @@ advanced_broken_dependency_handler()
 	# different group numbers, ie: openoffice.org-thesaurus etc
 	case $versionGroup in
 				amarok)
-			# note: removed these from sid: |amarok-engine-xine|amarok-engine-yauap|amarok-engines
+			# note: removed these from sid:
+			#  |amarok-engine-xine|amarok-engine-yauap|amarok-engines|amarok-konqsidebar
 			packages="
-$( package_tester '(amarok|amarok-common|amarok-konqsidebar)' )
+$( package_tester '(amarok|amarok-common)' )
 "
 			packageGroup='Amarok'
 			;;
