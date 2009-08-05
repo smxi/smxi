@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.2
-####  Date: July 28 2009
+####  version: 1.22.3
+####  Date: August 4 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -650,8 +650,9 @@ advanced_broken_dependency_handler()
 	# different group numbers, ie: openoffice.org-thesaurus etc
 	case $versionGroup in
 				amarok)
+			# note: removed these from sid: |amarok-engine-xine|amarok-engine-yauap|amarok-engines
 			packages="
-$( package_tester '(amarok|amarok-common|amarok-engine-xine|amarok-engine-yauap|amarok-engines|amarok-konqsidebar)' )
+$( package_tester '(amarok|amarok-common|amarok-konqsidebar)' )
 "
 			packageGroup='Amarok'
 			;;
