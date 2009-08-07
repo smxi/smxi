@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.2.4
+####  version: 3.3.0
 ####  Date: August 7 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -50,6 +50,8 @@ package_group_installer()
 	local kdeBase='kdebase kdebase-kio-plugins kde-core kdelibs'
 	local khelp='khelpcenter' kcolor='kcoloredit' plasmaWidgets=''
 	local qt4Config=''
+	local lxdeLMC='libmenu-cache0' lxdeMD='lxmenu-data' lxdeSE='lxsession-edit'
+	local lxdeIP='lxinput' lxdeM='lxmusic'
 
 	# note: these packages are not in every Debian level
 	if [ -z "$( check_package_status 'epdfview' )" ];then
@@ -79,6 +81,15 @@ package_group_installer()
 			ksvg=''
 			plasmaWidgets='plasma-widgets-addons plasma-widgets-workspace'
 			qt4Config='qt4-qtconfig'
+		fi
+	fi
+	if [ -n "$( grep -i 'lxde' <<< $2 )" ];then
+		if [ -z "$( check_package_status $lxdeSE )" ];then
+			lxdeLMC=''
+			lxdeMD=''
+			lxdeSE=''
+			lxdeIP=''
+			lxdeM=''
 		fi
 	fi
 	# set these to null to avoid installing the desktop gunk unless needed
@@ -127,6 +138,8 @@ package_group_installer()
 	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
+	local lxdePackages="$lxdeLMC lxappearance lxde-core lxde-settings-daemon $lxdeMD lxrandr $lxdeSE lxterminal"
+	local lxdeExtras="$lxdeIP lxlauncher $lxdeM lxnm"
 
 	local mozillaGroup="$iceDove iceweasel"
 	local rsyncGroup="rsync $rdiff"
@@ -220,6 +233,15 @@ package_group_installer()
 			;;
 		light-office)
 			packageName="$lightOfficePackages"
+			;;
+		lxde)
+			packageName="$lxdePackages $dmUse"
+			;;
+		base-plus-lxde)
+			packageName="$lxdePackages $xorgPackages $dmUse"
+			;;
+		lxde-extras)
+			packageName="$lxdeExtras"
 			;;
 		mozilla-group)
 			packageName="$mozillaGroup"
@@ -742,13 +764,16 @@ display_manager_installer()
 	echo "${C}13${S} - ${C}base-plus-fluxbox${S} fluxbox + xorg + system utitilies/base light packages + display manager."
 	echo "${C}14${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
 	echo "${C}15${S} - ${C}base-plus-fvwm-crystal${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
-	echo "${C}16${S} - ${C}back-to-install-menu${S}"
+	echo "${C}16${S} - ${C}lxde${S} Installs popular new lightweight window manager.  Good for old hardware."
+	echo "${C}17${S} - ${C}base-plus-lxde${S} lxde + xorg + system utitilies/base light packages + display manager."
+	echo "${C}18${S} - ${C}lxde-extras${S} Installs extras like lxnm, lxlauncher, lxmusic, etc (if available)."
+	echo "${C}19${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="select-display-manager base-light-packages system-utilities xorg base-plus-xorg xfce base-plus-xfce kde base-plus-kde kde-extras kde-pim fluxbox base-plus-fluxbox fvwm-crystal base-plus-fvwm-crystal back-to-install-menu"
+	options="select-display-manager base-light-packages system-utilities xorg base-plus-xorg xfce base-plus-xfce kde base-plus-kde kde-extras kde-pim fluxbox base-plus-fluxbox fvwm-crystal base-plus-fvwm-crystal lxde base-plus-lxde lxde-extras back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -791,6 +816,20 @@ display_manager_installer()
 				;;
 			kde-pim)
 				package_group_installer 'plain' 'kde-pim'
+				repeat='true'
+				;;
+			lxde)
+				package_group_installer 'plain' 'lxde'
+				repeat='true'
+				;;
+			base-plus-lxde)
+				package_group_installer 'plain' 'base-plus-lxde'
+				package_group_installer 'plain' 'system-utilities'
+				package_group_installer 'plain' 'base-light-packages'
+				repeat='true'
+				;;
+			lxde-extras)
+				package_group_installer 'plain' 'lxde-extras'
 				repeat='true'
 				;;
 			select-display-manager)
