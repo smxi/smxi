@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.18
-####  Date: May 14 2009
+####  version: 8.11.19
+####  Date: August 7 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -2734,7 +2734,7 @@ print_lib_info()
 print_version()
 {
 	eval $LOGUS
-	local distroThanks='crust devil dutchy kelmo latino locsmif paleoflatus piper slh trash80 x-un-i webera zulu9'
+	local distroThanks='crust craigevil damentz dutchy iotaka latino poptarts trash80 wilberfan zulu9'
 	local extraMessage="...and welcome Debian users, hope you enjoy $SCRIPT_NAME..."
 	local item=''
 	# only for -v option printout
@@ -2745,12 +2745,11 @@ print_version()
 
 	case $DISTRO in
 		sidux)
-			distroThanks='and to the warning crew: crust drb hubi latino piper zulu9'
-			#distroThanks='crust devil dutchy etorix kelmo latino locsmif piper slh webera x-un-i zulu9'
-			extraMessage='...and of course, to RazberrieTart, the official sidux fan girl!'
+			distroThanks='warning crew: crust drb hubi iotaka latino zulu9; kernels: damentz'
+			extraMessage='...and to RazberrieTart, who tried, but had to give up in the end...'
 			;;
 		antix)
-			distroThanks='anticapitalista crust dutchy eriefisher masinick trash80'
+			distroThanks='anticapitalista crust damentz dutchy eriefisher masinick trash80'
 			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
 			;;
 		mepis*)
