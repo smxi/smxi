@@ -357,7 +357,7 @@ select_install_type()
 	echo
 	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, rbxi, and more."
 	echo
-	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal."
+	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal, Lxde."
 	echo
 	echo "${C}5${S} - ${C}servers${S} Install Samba, NFS, and Apache2 (+MySql,PHP) server components."
 	echo
