@@ -380,7 +380,7 @@ move_files_to_directories()
 	mv -f *2.6-${kernelType}*i386.deb 32-meta
 	mv -f *2.6-${kernelType}*amd64.deb 64-meta
 	cp -f $gzDir*${KERNEL_MAIN}*.gz 32
-	mv -f $gzDir*$KERNEL_MAIN*.gz 64
+	cp -f $gzDir*$KERNEL_MAIN*.gz 64
 	cp -f *linux-support*.deb 32
 	cp -f *linux-support*.deb 64
 	mv -f *${KERNEL_MAIN}*i386.deb 32
