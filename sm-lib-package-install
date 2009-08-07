@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.2.3
-####  Date: August 5 2009
+####  version: 3.2.4
+####  Date: August 7 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -117,7 +117,7 @@ package_group_installer()
 	# standard groups
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
-	local baseLightPackages="$consoleBrowsers $consoleTools aterm leafpad mc pcmanfm sudo vim xchat xchat-common xterm $pdfLight"
+	local baseLightPackages="$consoleBrowsers $consoleTools aterm gpicview leafpad mc pcmanfm sudo vim xarchiver xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
 	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
