@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.15
-####  Date: June 2 2009
+####  version: 1.1.16
+####  Date: August 8 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -42,6 +42,7 @@ run_2009_fixes()
 			acroread_fix_1
 			kdm_3_to_4_fix_1
 			kdenlive_fix_1
+			libuniconf_fix_1
 		fi
 		if [ "$DISTRO_LEVEL" -lt 15 ];then
 			cups_driver_fix_1
@@ -57,6 +58,29 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+libuniconf_fix_1()
+{
+	local prefId='libuniconf-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'libuniconf4.4' )
+	local isInstalled2=$( package_tester 'wvdial' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+		local isInstalled2=$( package_tester 'wvdial' )
+		echo $LINE
+		echo "${S}Updating ${C}libuniconf4.4${S} to ${C}libuniconf4.6${S}...${N}"
+		if [ -n "$isInstalled2" ];then
+			package_remover 'wvdial' 'purge'
+		fi
+		package_remover 'libuniconf4.4' 'purge'
+		package_installer 'libuniconf4.6' 'install-missing'
+		if [ -n "$isInstalled2" ];then
+			package_installer 'wvdial' 'install-missing'
+		fi
+		set_sticky_prefs $prefId
+	fi
+}
 
 ed_fix_1()
 {
