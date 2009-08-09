@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.16
-####  Date: August 8 2009
+####  version: 1.1.17
+####  Date: August 9 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -64,9 +64,10 @@ libuniconf_fix_1()
 	local prefId='libuniconf-fix-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'libuniconf4.4' )
+	local isAvailable=$( check_package_status 'libuniconf4.6' 'c' )
 	local isInstalled2=$( package_tester 'wvdial' )
 	
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a -n "$isAvailable" ];then
 		local isInstalled2=$( package_tester 'wvdial' )
 		echo $LINE
 		echo "${S}Updating ${C}libuniconf4.4${S} to ${C}libuniconf4.6${S}...${N}"
