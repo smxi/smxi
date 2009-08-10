@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes-t
-####  version: 1.1.17
-####  Date: August 9 2009
+####  version: 1.1.18
+####  Date: August 10 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -72,7 +72,7 @@ libuniconf_fix_1()
 		echo $LINE
 		echo "${S}Updating ${C}libuniconf4.4${S} to ${C}libuniconf4.6${S}...${N}"
 		if [ -n "$isInstalled2" ];then
-			package_remover 'wvdial' 'purge'
+			package_remover 'wvdial' 
 		fi
 		package_remover 'libuniconf4.4' 'purge'
 		package_installer 'libuniconf4.6' 'install-missing'
