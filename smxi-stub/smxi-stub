@@ -3,10 +3,10 @@
 ####  Script Name: smxi-stub
 ####  stub installer for smxi scripts
 ####  Only supports true Debian based distros.
-####  version: 2.8
-####  Date: 21 November 2008
+####  version: 2.9
+####  Date: 20 August 2009
 ########################################################################
-####  Copyright (C) Harald Hope, sidux team members 2007-2008
+####  Copyright (C) Harald Hope, sidux team members 2007-2009
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
@@ -45,6 +45,9 @@ DOWNLOAD_URL_SMXI='http://smxi.org/sm/'
 DOWNLOAD_URL_SVMI='http://smxi.org/sv/'
 # Do  not create temp file here. It will create masses of temp files over time.
 FILE_TEMP_NAME='' # will handle failed downloads
+# this is the tester for ##**EOF**## endings present in scripts, change this
+# if you want to extend this stub to other scripts, smxi/svmi/inxi/sgfxi all use this
+SCRIPT_EOF='##\*\*EOF\*\*##'
 
 # args: $1 - error number; $2 - extra data
 error_handler()
@@ -69,6 +72,8 @@ error_handler()
 				rm -f "$PREFIX$SCRIPT"
 			fi
 			;;
+		8)	message='Failed to download script properly. The file is corrupted!'
+			;;
 		*)	message='Unknown error, exiting now.'
 			;;
 	esac
@@ -80,7 +85,7 @@ error_handler()
 	exit $1
 }
 
-# set the SCRIPT/DOWNLOAD_URL values
+# set the SCRIPT/DOWNLOAD_URL/SCRIPT_EOFvalues
 case $CALLER in
 	sgfxi)
 		SCRIPT="$CALLER"
@@ -133,7 +138,9 @@ else
 	if [ ! -f "$PREFIX$SCRIPT" ];then
 		wget -q -O "$FILE_TEMP_NAME" "$DOWNLOAD_URL$SCRIPT" || error_handler 4 "$?"
 	fi
-
+	
+	# the primary test is to test for file corruption, if the new file doesn't have
+	# the EOF value, it is by definition corrupted. After that some simple tests.
 	#  -s is prefered over -f because sometimes downloads fail and leave null size file
 	# we're taking the temp file, testing it for null, then mv to correct file. Please do
 	# not mess with these tests at all unless you can make them even more robust. No -f
@@ -142,9 +149,12 @@ else
 	# wget is so buggy I simply cannot predict its failure behaviors at all.
 	if [ ! -e "$FILE_TEMP_NAME" ];then
 		error_handler 6
-	# if exists and not null
 	elif [ ! -s "$FILE_TEMP_NAME" ];then
-		error_handler 2
+ 		error_handler 2
+ 	# then test for eof marker in files, this is basically foolproof
+	elif [ -z "$( grep -si "$SCRIPT_EOF" $FILE_TEMP_NAME )" ];then
+		error_handler 8
+# 	# if exists and not null
 	# I'm being extra careful here, there have been too many problems with this simple
 	# stuff... wget needs to be fixed to handle failed downloads better... what is  missing
 	# is a null file test, as opposed to exists AND null.
