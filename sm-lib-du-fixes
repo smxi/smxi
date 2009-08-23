@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.7
-####  Date: July 23 2009
+####  version: 1.3.8
+####  Date: August 23 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -509,12 +509,16 @@ libc6_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local kernelMessage=' with your new kernel'
 	local firmwareLinux='firmware-linux' firmwareLinuxText='firmware-linux/'
-	
+	local gccVersions=$( add_gcc_versions ) gccText=''
 	# package is not in stable branches yet
 	if [ -z "$( check_package_status 'firmware-linux' 'c' )" ];then
 		firmwareLinux=''
 		firmwareLinuxText=''
 	fi
+	if [ -n "$gccVersions" ];then
+		 gccText='gcc/'
+	fi
+	
 	
 	case $1 in
 		pre-du)
@@ -530,14 +534,14 @@ libc6_fix_1()
 
  	if [ "$smPref" -eq 0 -o "$1" == 'kernel' ];then
 		echo $LINE
-		echo "${S}Updating ${C}${firmwareLinuxText}libc6/initramfs-tools/locales/tzdata${S} packages to make sure"
+		echo "${S}Updating ${C}${firmwareLinuxText}${gccText}libc6/initramfs-tools/locales/tzdata${S} packages to make sure"
 		echo "your system will work right$kernelMessage...${N}"
 		#echo
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
 		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
 		# temp removal of locales
-		package_installer "$firmwareLinux initramfs-tools libc6 libc6-dev locales tzdata util-linux" 'force-always'
+		package_installer "$firmwareLinux $gccVersions initramfs-tools libc6 libc6-dev locales tzdata util-linux" 'force-always'
 		# let's only set this if needed
  		if [ "$smPref" -eq 0 ];then
  			set_sticky_prefs $prefId
@@ -560,6 +564,22 @@ add_firmware_linux()
 		package_installer "$1" 'install-missing'
 		set_sticky_prefs $prefId
 	fi
+}
+add_gcc_versions()
+{
+	local isAvailable3=$( check_package_status 'gcc-4.3' 'c' )
+	local isAvailable4=$( check_package_status 'gcc-4.4' 'c' )
+	local isInstalled3=$( package_tester 'gcc-4.3' )
+	local isInstalled4=$( package_tester 'gcc-4.4' )
+	local packageAdd=''
+	
+	if [ -n "$isAvailable3" -a -z "$isInstalled3" ];then
+		packageAdd='gcc-4.3'
+	fi
+	if [ -n "$isAvailable4" -a -z "$isInstalled4" ];then
+		packageAdd="$packageAdd gcc-4.4"
+	fi
+	echo "$packageAdd"
 }
 
 busybox_fix_1()
