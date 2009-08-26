@@ -89,8 +89,7 @@ clean_up()
 	echo "${C}4${S} - Runs ${C}remove-kernel-modules${S}. This removes any kernel module you want."
 
 	echo "${C}5${S} - Runs ${C}clean-old-backups${S}. This will remove all the backup files $SCRIPT_NAME has created over time."
-	echo "    Will show you which files it will remove and let you decide whether to remove"
-	echo "    them all or not."
+	echo "    Shows you which files it will remove before you decide whether to remove them all or not."
 
 	echo "${C}6${S} - Runs ${C}debian-orphans${S}. This will search your system for orphaned Debian"
 	echo "    packages and print out a list of them. It will not remove them, because that's"
