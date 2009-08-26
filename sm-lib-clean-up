@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.9.0
+####  version: 2.9.1
 ####  Date: August 25 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
@@ -100,9 +100,9 @@ clean_up()
 	echo "    You will be presented with a list of modules not currently used, and you can"
 	echo "    keep whichever you want, and remove the rest."
 
-	echo "${C}8${S} - ${C}clean-cruft${S} will remove any parts of packages you removed via"
-	echo "    ${C}$APT_TYPE remove${S} without using ${C}dpkg --purge${S}. Has option to simulate first"
-	echo "    so you can see what would happen first. These packages are found via ${C}dpkg -l | grep ^rc${S}"
+	echo "${C}8${S} - ${C}clean-cruft${S} will remove any parts of packages you removed via ${C}$APT_TYPE remove${S}"
+	echo "    without using ${C}dpkg --purge${S}. Has option to simulate first so you can see what"
+	echo "    will happen. These packages are found via ${C}dpkg -l | grep ^rc${S}"
 
 	eval $advanced
 	echo
