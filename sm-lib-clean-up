@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.8.3
-####  Date: April 15 2009
+####  version: 2.9.0
+####  Date: August 25 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -172,39 +172,69 @@ clean_cruft()
 {
 	eval $LOGPS
 	local toRemove=$( package_tester '' rc-all )
-	local package='' response='' action='' doIt='' repeat=''
+	local opt='' options=''
+	local package='' action='' doIt='' repeat='' actionText='' removeAll=''
 	toRemove=$( echo $toRemove ) # dump line breaks
 
 	echo $LINE
-	echo "${S}Uses ${C}dpkg --purge${S} to remove the following cruft left-overs from your system:"
-	echo "${C}$toRemove${N}"
-	echo "${Q}Do you want to purge all these left over package items?"
-	echo -e "${S}(Hit ${C}s${S} to show a simulation of the removal instead)$YNE"
-	read response
-
-	case $response in
-		y)
-			doIt='true'
-			;;
-		s)
-			doIt='true'
-			action='--simulate'
-			repeat='true'
-			;;
-		n)	echo "${S}Ok, going back to the main menu now...${N}"
-			;;
-		*)	print_error yno 's'
-			repeat='true'
-			;;
-	esac
-
-	if [ "$doIt" == 'true' ];then
-		log_function_data "toRemove: $toRemove"
-		for package in $toRemove
+	if [ -n "$toRemove" ];then
+		echo "${S}Uses ${C}dpkg --purge${S} to remove the following cruft left-overs from your system:"
+		echo "${C}$toRemove${N}"
+		echo $LINE
+		echo "${Q}Do you want to purge all these left over package items?"
+		echo $LINE
+		echo "${C}1 - yes-remove-one-by-one${S} - Will ask you for each package if you want to remove it completely."
+		echo "${C}2 - yes-remove-all${S} - Will ask to remove entire list at once."
+		echo "${C}3 - simulate-remove-all${S} - Simulate the removal of all packages."
+		echo "${C}4 - return-main-menu${S} - Go back to main menu, skip removals."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="yes-remove-one-by-one yes-remove-all simulate-remove-all return-main-menu"
+		select opt in $options
 		do
-			echo "${S}Purging ${C}$package${S} now...${N}"
-			dpkg --purge $action $package
+			case $opt in
+				yes-remove-one-by-one)
+					doIt='true'
+					;;
+				yes-remove-all)
+					doIt='true'
+					removeAll='true'
+					;;
+				simulate-remove-all)
+					doIt='true'
+					action='--simulate'
+					actionText=' (simulation)'
+					removeAll='true'
+					repeat='true'
+					;;
+				return-main-menu)	echo "${S}Ok, going back to the main menu now...${N}"
+					;;
+				*)	print_error 'opt3'
+					repeat='true'
+					;;
+			esac
+			break
 		done
+	
+		if [ "$doIt" == 'true' ];then
+			log_function_data "toRemove: $toRemove"
+			echo $LINE
+			if [ "$removeAll" != 'true' ];then
+				for package in $toRemove
+				do
+					echo "${S}Purging$actionText ${C}$package${S} now...${N}"
+					dpkg --purge $action $package
+				done
+			else
+				echo "${S}Purging$actionText these packages now:"
+				echo "${C}$package${N}"
+				dpkg --purge $action $toRemove
+			fi
+		fi
+	else
+		echo "${M}No packages found to be purged.${N}"
+		print_hec
 	fi
 	eval $LOGPE
 	if [ "$repeat" == 'true' ];then
@@ -232,27 +262,45 @@ apt_clean()
 remove_backup_files()
 {
 	eval $LOGPS
-	local file='' response=''
+	local backupFile='' repeat='' opt='' options=''
 
 	echo $LINE
-	echo -e "${Q}Are you sure you want to delete all your script backup files?$YNE"
-	read response
-	case $response in
-		y)	echo "${S}Removing all backup files...${N}"
-			log_function_data "removeList: $removeList"
-			for file in $removeList
-			do
-				rm -fv $file
-			done
-			echo "${S}Backup files removed.${N}"
-			;;
-		n)	echo "${S}Continuing without deleting backup files.${N}"
-			;;
-		*)	print_error yn
-			remove_backup_files
-			;;
-	esac
-	print_hec
+	echo -e "${Q}Are you sure you want to delete all these script backup files?"
+	echo "${C}$removeList"
+	echo $LINE
+	echo "${C}1 - yes-delete-backup-files${S} - Delete all $SCRIPT_NAME generated backup files."
+	echo "${C}2 - return-main-menu${S} - Go back to main menu, skip deletions."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="yes-delete-backup-files return-main-menu"
+	select opt in $options
+	do
+		case $opt in
+			yes-delete-backup-files)	
+				echo "${S}Removing all backup files...${N}"
+				log_function_data "removeList: $removeList"
+				for backupFile in $removeList
+				do
+					rm -fv $backupFile
+				done
+				echo "${S}Backup files removed.${N}"
+				;;
+			return-main-menu)	
+				echo "${S}Continuing without deleting backup files.${N}"
+				;;
+			*)	print_error 'opt'
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$repeat" == 'true' ];then
+		remove_backup_files
+	else
+		print_hec
+	fi
 	eval $LOGPE
 }
 
