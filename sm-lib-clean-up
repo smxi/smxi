@@ -89,8 +89,7 @@ clean_up()
 	echo "${C}4${S} - Runs ${C}remove-kernel-modules${S}. This removes any kernel module you want."
 
 	echo "${C}5${S} - Runs ${C}clean-old-backups${S}. This will remove all the backup files"
-	echo "    this script has created over time. The following backup files will be removed:"
-	echo -e "    ${C}$removeList${S}"
+	echo "    this script has created over time."
 	echo "    ${W}Please do not use this unless you are sure you don't need those backup files anymore!!${S}"
 
 	echo "${C}6${S} - Runs ${C}debian-orphans${S}. This will search your system for orphaned Debian"
