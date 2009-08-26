@@ -227,7 +227,7 @@ clean_cruft()
 				done
 			else
 				echo "${S}Purging$actionText these packages now:"
-				echo "${C}$package${N}"
+				echo "${C}$toRemove${N}"
 				dpkg --purge $action $toRemove
 			fi
 		fi
