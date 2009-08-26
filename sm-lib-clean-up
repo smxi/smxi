@@ -183,7 +183,8 @@ clean_cruft()
 		echo $LINE
 		echo "${Q}Do you want to purge all these left over package items?"
 		echo $LINE
-		echo "${C}1 - yes-remove-one-by-one${S} - Will ask you for each package if you want to remove it completely."
+		echo "${C}1 - yes-remove-one-by-one${S} - Will ask you for each package if you want to"
+		echo "    remove it completely."
 		echo "${C}2 - yes-remove-all${S} - Will ask to remove entire list at once."
 		echo "${C}3 - simulate-remove-all${S} - Simulate the removal of all packages."
 		echo "${C}4 - return-main-menu${S} - Go back to main menu, skip removals."
