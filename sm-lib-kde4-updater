@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.32
-####  Date: May 5 2009
+####  version: 0.7.33
+####  Date: August 27 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -94,7 +94,7 @@ kde3_log_and_removal()
 	echo "${S}Preparing and procesing your ${C}KDE 3${S} to ${C}KDE 4${S} package data, please wait...${N}"
 	
 	echo "${S}Calculating and logging installed dpkg kde data (cleaned for processing lists)...${N}"
-	dpkgKdePackagesAll="$( dpkg -l | grep -i 'kde' | awk '$1 ~ /(hi|ii)/ {print $2}'  )"
+	dpkgKdePackagesAll="$( dpkg -l | grep -Ei '(kde|konversation)' | awk '$1 ~ /(hi|ii)/ {print $2}'  )"
 	# this doesn't get enough of the packages
 	# dpkgKdePackagesAll="$( package_tester 'kde' 'wild-full' ) kde-i18n-zhcn"
 	
