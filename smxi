@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.20
-####  Date: August 21 2009
+####  version: 8.11.21
+####  Date: August 28 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -2569,12 +2569,14 @@ nonfree_driver_reinstall()
 	local isNvidia=$( egrep -sio 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
 	local isFglrx=$( egrep -sio 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
 	local driverIs='' xorgMessage='' kernelMessage='' reinstallMessage='' message=''
+	local extraMessage=''
 
 	if [ -n "$isNvidia" ];then
 		driverIs='nVidia'
 	fi
 	if [ -n "$isFglrx" ];then
 		driverIs='ATI/fglrx'
+		extraMessage="\n${M}FGLRX Drivers can now only be installed to the currently running kernel.\nYou must reboot in order to reinstall your fglrx driver if you use fglrx. Sorry.\n$MLINE\n"
 	fi
 
 	log_function_data "Non-Free driver data: $driverIs"
@@ -2589,7 +2591,7 @@ nonfree_driver_reinstall()
 				;;
 			kernel)
 				if [ -n "$KERNEL_INSTALL_TO" ];then
-					message="$kernelMessage$reinstallMessage"
+					message="$kernelMessage$reinstallMessage$extraMessage"
 				fi
 				;;
 			xorg)
@@ -2600,7 +2602,7 @@ nonfree_driver_reinstall()
 				;;
 			kernel-xorg)
 				if [ -n "$KERNEL_INSTALL_TO" ];then
-					message="$kernelMessage"
+					message="$kernelMessage$extraMessage"
 				fi
 				test_xorg_version 'post' # make sure it's set properly no matter what
 				if [ "$X_VERSIONS_PRE" != "$X_VERSIONS_POST" ];then
