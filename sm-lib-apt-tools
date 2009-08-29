@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.5
-####  Date: August 23 2009
+####  version: 1.22.6
+####  Date: August 28 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -950,6 +950,7 @@ change_debian_mirrors()
 	au:Australia
 	bg:Bulgaria
 	br:Brazil
+	ca:Canada
 	ch:Switzerland
 	cl:Chile
 	cz:Czech-Republic
