@@ -385,7 +385,8 @@ process_rbxi()
 	# all files are copied to rbxi/rbxi so tar it
 	echo "rbxi data is: $localVersion:$localDate"
 	echo "Tar/bzipping now..."
-	tar vcjf rbxi.tar.bz2 rbxi
+	cd rbxi
+	tar vcjf rbxi.tar.bz2 rbxi*
 	echo "Moving to: $RBXI_ZIPS"
 	mv rbxi.tar.bz2 $RBXI_ZIPS
 	echo "Creating backup bzip file now..."
