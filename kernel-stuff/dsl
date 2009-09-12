@@ -145,10 +145,12 @@ get_options()
 				;;
 			h)
 				echo "Useage:
--e Use exp.main data
+-e Use exp.main data (sidux only)
+-f Use future data (liquorix only)
 -g Use alternate GCC values. Syntax: -g [3-4].[0-9]
 -k Kernel to download. Requires -k <2.6.26-8.lqx.2> type syntax
    NOTE: -k <kernel> is required to run dsl always
+-p Use past data (liquorix only)
 -r Redo zip without downloading again.
 -s Switch to using sidux as default kernel type.
 -z Download only, no zip creation
