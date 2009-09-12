@@ -34,7 +34,7 @@ KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
 KERNEL_INSTALLER_DIR="$KERNEL_DIR/kernel-installer"
 
 # script values
-ALT_PATH=''
+POOL_TYPE='main'
 GCC_ALT=''
 KERNEL_TYPE='liquorix' # default to this
 KERNEL_MAIN=''
@@ -95,7 +95,7 @@ error_handler()
 			message="Unsupported GCC -g data: $2"
 			;;
 		12)
-			message="You have failed to set non default kernel -l flag"
+			message="You have failed to set non default kernel -s flag"
 			;;
 		13)
 			message="-e is only for sidux kernels."
@@ -123,9 +123,9 @@ get_options()
 	do
 		case $opt in
 			# sidux only
-			e)	ALT_PATH='exp.main'
+			e)	POOL_TYPE='exp.main'
 				;;
-			f)	ALT_PATH='future'
+			f)	POOL_TYPE='future'
 				;;
 			g) if [ -n "$( grep -Es '[3-4]\.[0-9]' <<< $OPTARG )" ];then
 					GCC_ALT=$OPTARG
@@ -135,7 +135,7 @@ get_options()
 				;;
 			k)	KERNEL_WORKING=$OPTARG
 				;;
-			p)	ALT_PATH='past'
+			p)	POOL_TYPE='past'
 				;;
 			r)	B_REDO='true'
 				;;
@@ -163,7 +163,7 @@ get_options()
 		esac
 	done
 	
-	if [ "$ALT_PATH" == 'exp.main' -a "$KERNEL_TYPE" != 'sidux' ];then
+	if [ "$POOL_TYPE" == 'exp.main' -a "$KERNEL_TYPE" != 'sidux' ];then
 		error_handler 13
 	fi
 	if [ "$B_REDO" == 'true' -a "$B_SKIP_ZIP" == 'true' ];then
@@ -173,7 +173,7 @@ get_options()
 		error_handler 3
 	fi
 	# avoid careless errors
-	if [ -n "$( grep 'lqx' <<< $KERNEL_WORKING )" -a "$KERNEL_TYPE" != 'liquorix' ];then
+	if [ -n "$( grep 'slh' <<< $KERNEL_WORKING )" -a "$KERNEL_TYPE" != 'sidux' ];then
 		error_handler 12
 	fi
 }
@@ -184,13 +184,13 @@ set_values()
 
 	case $KERNEL_TYPE in
 		liquorix)
-			repoPre="http://liquorix.net/debian/pool/${ALT_PATH}/l/"
+			repoPre="http://liquorix.net/debian/pool/${POOL_TYPE}/l/"
 			repoMain='linux-liquorix-2.6/'
 			repoModules='linux-modules-liquorix-main-2.6/'
 			repoExtra=''
 			;;
 		sidux)
-			repoPre="http://sidux.com/debian/pool/${ALT_PATH}/l/"
+			repoPre="http://sidux.com/debian/pool/${POOL_TYPE}/l/"
 			repoMain='linux-sidux-2.6/'
 			repoModules='linux-modules-sidux-main-2.6/'
 			repoExtra='linux-kbuild-2.6/'
