@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.3
-####  Date: August 7 2009
+####  version: 2.3.4
+####  Date: September 11 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -36,7 +36,7 @@ KERNEL_INSTALLER_DIR="$KERNEL_DIR/kernel-installer"
 # script values
 ALT_PATH=''
 GCC_ALT=''
-KERNEL_TYPE='sidux' # default to this
+KERNEL_TYPE='liquorix' # default to this
 KERNEL_MAIN=''
 KERNEL_WORKING=''
 MIRROR_MAIN=''
@@ -45,7 +45,6 @@ MIRROR_EXTRA=''
 NEW_KERNEL_DIRECTORY=''
 
 # boolean switches
-B_EXP=''
 B_REDO=''
 B_SKIP_ZIP=''
 
@@ -98,6 +97,9 @@ error_handler()
 		12)
 			message="You have failed to set non default kernel -l flag"
 			;;
+		13)
+			message="-e is only for sidux kernels."
+			;;
 	esac
 	echo $LINE
 	echo -e $message
@@ -117,11 +119,13 @@ get_options()
 		error_handler 8 "Option: $1 used but must start with a: -"
 	fi
 
-	while getopts :eg:hk:lrz opt
+	while getopts :efg:hk:lprsz opt
 	do
 		case $opt in
-			e)	B_EXP='true'
-				ALT_PATH='exp.'
+			# sidux only
+			e)	ALT_PATH='exp.main'
+				;;
+			f)	ALT_PATH='future'
 				;;
 			g) if [ -n "$( grep -Es '[3-4]\.[0-9]' <<< $OPTARG )" ];then
 					GCC_ALT=$OPTARG
@@ -131,9 +135,11 @@ get_options()
 				;;
 			k)	KERNEL_WORKING=$OPTARG
 				;;
-			l)	KERNEL_TYPE='liquorix'
+			p)	ALT_PATH='past'
 				;;
 			r)	B_REDO='true'
+				;;
+			s)	KERNEL_TYPE='sidux'
 				;;
 			z)	B_SKIP_ZIP='true'
 				;;
@@ -144,6 +150,7 @@ get_options()
 -k Kernel to download. Requires -k <2.6.26-8.lqx.2> type syntax
    NOTE: -k <kernel> is required to run dsl always
 -r Redo zip without downloading again.
+-s Switch to using sidux as default kernel type.
 -z Download only, no zip creation
 "
 				exit 0
@@ -153,7 +160,10 @@ get_options()
 				;;
 		esac
 	done
-
+	
+	if [ "$ALT_PATH" == 'exp.main' -a "$KERNEL_TYPE" != 'sidux' ];then
+		error_handler 13
+	fi
 	if [ "$B_REDO" == 'true' -a "$B_SKIP_ZIP" == 'true' ];then
 		error_handler 10
 	fi
@@ -172,13 +182,13 @@ set_values()
 
 	case $KERNEL_TYPE in
 		liquorix)
-			repoPre="http://liquorix.net/debian/pool/${ALT_PATH}main/l/"
+			repoPre="http://liquorix.net/debian/pool/${ALT_PATH}/l/"
 			repoMain='linux-liquorix-2.6/'
 			repoModules='linux-modules-liquorix-main-2.6/'
 			repoExtra=''
 			;;
 		sidux)
-			repoPre="http://sidux.com/debian/pool/${ALT_PATH}main/l/"
+			repoPre="http://sidux.com/debian/pool/${ALT_PATH}/l/"
 			repoMain='linux-sidux-2.6/'
 			repoModules='linux-modules-sidux-main-2.6/'
 			repoExtra='linux-kbuild-2.6/'
