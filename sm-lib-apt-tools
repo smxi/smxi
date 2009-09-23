@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.6
-####  Date: August 28 2009
+####  version: 1.22.7
+####  Date: September 22 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -774,13 +774,13 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 			tempTwo=$tempOne
 			case $versionGroup in
 				# full version strings for picky package groups
-				evolution|transmission|wesnoth|xfce4)
+				evolution|transmission|wesnoth)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
 				# I'm adding in the + test to handle those beta versions and some other odd
 				# syntaxes: 2.8.4+2.8.4-1;
-				gimp|gnome-1|gnome-2|gnome-3|gnome-ruby|gnome-vfs|hplip|vegastrike|xpdf)
+				gimp|gnome-1|gnome-2|gnome-3|gnome-ruby|gnome-vfs|hplip|vegastrike|xfce4|xpdf)
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases. sun java: 6-14-1
