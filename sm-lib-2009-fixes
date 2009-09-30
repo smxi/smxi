@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.18
-####  Date: September 11 2009
+####  version: 1.1.19
+####  Date: September 29 2009
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -45,6 +45,7 @@ run_2009_fixes()
 			kdenlive_fix_1
 			libuniconf_fix_1
 			xfs_fix_1
+			perl_fix_1
 		fi
 		if [ "$DISTRO_LEVEL" -lt 16 ];then
 			kdm_3_to_4_fix_1
@@ -63,6 +64,20 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+perl_fix_1()
+{
+	local prefId='perl-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'perl' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+		echo $LINE
+		echo "${S}Updating ${C}perl${S} now...${N}"
+		package_installer 'perl' 'install-always' ' -o APT::Immediate-Configure=0'
+		set_sticky_prefs $prefId
+	fi
+}
 
 xfs_fix_1()
 {
