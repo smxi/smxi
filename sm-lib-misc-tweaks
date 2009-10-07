@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.7
-####  Date: July 21 2009
+####  version: 1.22.8
+####  Date: October 7 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -574,7 +574,7 @@ main_graphics_installer()
 	fi
 	echo
 	echo "${C}$grubOptNu - grub-gfx-options${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics"
-	echo "    from Cathbard, original black/red sidux, and a few new Debian themed ones by h2."
+	echo "    from Cathbard, original black/red sidux, a few Debian themed ones by h2 (${M}GRUB 1 only${S})."
 	echo
 	echo "${C}$contOptNu - continue${S} - Returns to main menu."
 	echo $LINE
@@ -731,8 +731,15 @@ grub_gfx_selector()
 	fi
 	options="grub-gfx-cathbard-1 grub-gfx-sidux-1 grub-gfx-debian-1 grub-gfx-debian-sidux grub-gfx-debian-smxi grub-gfx-restore $grubReOpt continue"
 	returnNu=$( wc -w <<< $options )
-
-	if [ "$SYSTEM_BASE" != 'etch' -a "$SYSTEM_BASE" != 'stable' ] || [ "$B_OVERRIDE_GRUB_GFX" == 'true' ];then
+	
+	if [ "$B_GRUB_2" == 'true' ];then
+		echo $MLINE
+		echo "${M}This feature is only available for ${C}Grub 1${M}. ${C}Grub 2${M} is NOT supported, sorry."
+		if [ -f /boot/grub/menu.lst ];then
+			echo "${C}$SCRIPT_NAME${S} cannot handle cases where both ${C}Grub 1${S} and ${C}2${S} are installed.${N}"
+		fi
+		print_hec
+	elif [ "$SYSTEM_BASE" != 'etch' -a "$SYSTEM_BASE" != 'stable' ] || [ "$B_OVERRIDE_GRUB_GFX" == 'true' ];then
 		grub_gfxboot_question
 		if [ "$?" -eq 0 ];then
 			echo $LINE

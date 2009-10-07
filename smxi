@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.23
-####  Date: September 2 2009
+####  version: 8.11.24
+####  Date: September 7 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -84,14 +84,17 @@ EASMS='/etc/apt/sources.list.d/mirror.sidux.com.list'
 EASDL='/etc/apt/sources.list.d/debian.list'
 EASSL='/etc/apt/sources.list.d/sidux.list'
 EDD='/etc/default/distro'
-GRUB_PATH='/boot/grub/menu.lst'
-B_GRUB_2=false
-# handle grub 2 paths
+# this is always going to preference grub 2 even if grub 1 is present
 if [ -f /boot/grub/grub.cfg ];then
 	GRUB_PATH='/boot/grub/grub.cfg'
+	GRUB_BU_PATH=''
 	B_GRUB_2=true
+else 
+	GRUB_PATH='/boot/grub/menu.lst'
+	GRUB_BU_PATH=$GRUB_PATH'-bu-'$(date +%y-%m-%d)
+	B_GRUB_2=false
 fi
-GRUB_BU_PATH=$GRUB_PATH'-bu-'$(date +%y-%m-%d)
+
 EAX='/etc/antix-version'
 EDV='/etc/debian_version'
 EKV='/etc/kanotix-version'
@@ -494,7 +497,7 @@ error_handler()
 			errorCode=3
 			errorMessage="The $errorExtra distro is not supported by $SCRIPT_NAME, sorry."
 			;;
-		no-menu-lst)
+		no-grub-config)
 			errorCode=7
 			errorMessage="Your system does not have a mounted $GRUB_PATH, unable to continue."
 			;;
@@ -1407,7 +1410,7 @@ set_distro_data()
 	if [ -f $EAX ];then
 		DEFAULT_KERNEL='no-kernel'
 		# this will help to debug debian kernel issues
-		if [ "$B_TESTING_1" != 'true' -a -z "$bgUuidLabel" ];then
+		if [ "$B_GRUB_2" != 'true' -a "$B_TESTING_1" != 'true' -a -z "$bgUuidLabel" ];then
 			USE_DEBIAN_KERNEL='false'
 		else
 			USE_DEBIAN_KERNEL='true'
@@ -1421,7 +1424,7 @@ set_distro_data()
 	if [ -n "$mepisSources" ];then
 		MEPIS_SOURCES='true'
 		DEFAULT_KERNEL='no-kernel'
-		if [ -n "$bgUuidLabel" ];then
+		if [ "$B_GRUB_2" == 'true' -o -n "$bgUuidLabel" ];then
 			USE_DEBIAN_KERNEL='true'
 		fi
 	fi
@@ -2094,7 +2097,7 @@ start_up_tests()
 	fi
 	
 	if [ ! -e $GRUB_PATH ];then
-		error_handler 'no-menu-lst' $FUNCNAME ''
+		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
 
 }

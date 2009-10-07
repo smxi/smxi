@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.50
-####  Date: September 21 2009
+####  version: 2.5.51
+####  Date: October 7 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -213,9 +213,11 @@ kernel_question()
 			echo "${C}smxi -kwid${S} (to skip to the post ${C}$DU_UPGRADE${S} options menu)"
 		fi
 	fi
-	echo $MLINE
-	echo "${S}Please note, if you install a kernel, a backup copy of your grub configuration file"
-	echo "${C}menu.lst${S}, will be created here: ${C}$GRUB_BU_PATH${S}."
+	if [ "$B_GRUB_2" != 'true' ];then
+		echo $MLINE
+		echo "${S}Please note, if you install a kernel, a backup copy of your grub configuration file"
+		echo "${C}menu.lst${S}, will be created here: ${C}$GRUB_BU_PATH${S}."
+	fi
 	echo $MLINE
 	eval "$kernelsNotEqual"
 	echo "${C}$installModules${S} - Install kernel modules. Offers list of modules, install one by one (${M}if currently available in apt${S})."
