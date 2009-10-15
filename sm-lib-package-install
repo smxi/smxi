@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.0
-####  Date: August 7 2009
+####  version: 3.3.1
+####  Date: October 15 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -39,7 +39,7 @@ DEFAULT_DM=''
 package_group_installer()
 {
 	eval $LOGUS
-	local itemName=$2 packageName=''
+	local itemName=$2 packageName='' package='' packages=''
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
@@ -277,7 +277,29 @@ package_group_installer()
 		eval $3 # this removes stuff, or does other operations, first
 	fi
 	update_sources $1
-	package_installer "$packageName" 'install-user-ok'
+	# now to make sure no missing packages are attempted, we'll check
+	# and only install ones in user system apt. This also future proofs and
+	# avoids install errors.
+	log_function_data "Raw packageName list to install:\n$packageName"
+	echo $LINE
+	echo "${S}Checking install package list for availability now...${N}"
+	for package in $packageName
+	do
+		if [ -n "$( check_package_status $package 'c' )" ];then
+			echo "${S}Adding ${C}$package${S} to install group.${N}"
+			packages="$packages$package "
+		else
+			echo "${M}Sorry, ${C}$package${M} is not available in ${C}Debian $SYSTEM_BASE${M}!${N}"
+		fi
+	done
+	log_function_data "Tested package list to install:\n$packages"
+	if [ -n "$packages" ];then
+		echo "${S}Installing package list:"
+		echo "${C}$packages${N}"
+		package_installer "$packages" 'install-user-ok'
+	else
+		echo "${E}Sorry, no packages from your requested group: ${C}$itemName${E} are available for installation.${N}"
+	fi
 	eval $LOGUE
 }
 
