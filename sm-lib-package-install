@@ -294,8 +294,6 @@ package_group_installer()
 	done
 	log_function_data "Tested package list to install:\n$packages"
 	if [ -n "$packages" ];then
-		echo "${S}Installing package list:"
-		echo "${C}$packages${N}"
 		package_installer "$packages" 'install-user-ok'
 	else
 		echo "${E}Sorry, no packages from your requested group: ${C}$itemName${E} are available for installation.${N}"
