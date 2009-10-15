@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.8
-####  Date: October 9 2009
+####  version: 1.22.9
+####  Date: October 15 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1209,8 +1209,9 @@ update_sources()
 			fi
 			;;
 	esac
-
-	create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData" "$searchIdentifier"
+	if [ "$1" != 'plain' ];then
+		create_apt_source_item "$grepSearch" "$sourceFile" "$sourcesData" "$searchIdentifier"
+	fi
 	# if we have to add in any sources to sources.list, we'll need to do a new update
 	# we have to set the update flag to null here or the main updater
 	# won't update the stuff
