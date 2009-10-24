@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.11
-####  Date: October 23 2009
+####  version: 1.22.12
+####  Date: October 24 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -512,6 +512,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'kde-workspace'
 			advanced_broken_dependency_handler 'ooo'
+			advanced_broken_dependency_handler 'samba'
 			advanced_broken_dependency_handler 'sun-java'
 			advanced_broken_dependency_handler 'transmission'
 			advanced_broken_dependency_handler 'vegastrike'
@@ -714,7 +715,7 @@ $( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data|hplip-gui)' )
 			packageGroup='hplip'
 			;;
 		kde-workspace)
-packages="
+			packages="
 $( package_tester '(kdebase-workspace|kdebase-workspace-data|kdebase-workspace-bin)' )
 "
 			packageGroup='kde-workspace'
@@ -727,6 +728,12 @@ $(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-gno
 $(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-filter-)' 'wild-full')
 "
 			packageGroup='OpenOffice.org'
+			;;
+		samba)
+			packages="
+$( package_tester '(samba|samba-common|samba-common-bin|libsmbclient|smbclient|smbfs)' )
+"
+			packageGroup='samba'
 			;;
 		sun-java)
 			packages="
@@ -791,7 +798,7 @@ $( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases. sun java: 6-14-1
-				amarok|gnokii|kde-workspace|ooo|sun-java)
+				amarok|gnokii|kde-workspace|ooo|samba|sun-java)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					tempOne=$( check_package_status "$package" | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
