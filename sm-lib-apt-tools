@@ -651,124 +651,129 @@ advanced_broken_dependency_handler()
 	# note: can't use wildcard searches because they might allow in packages with
 	# different group numbers, ie: openoffice.org-thesaurus etc
 	case $versionGroup in
-				amarok)
+		amarok)
 			# note: removed these from sid:
 			#  |amarok-engine-xine|amarok-engine-yauap|amarok-engines|amarok-konqsidebar
 			packages="
-$( package_tester '(amarok|amarok-common)' )
-"
+			$( package_tester '(amarok|amarok-common)' )
+			"
 			packageGroup='Amarok'
 			;;
 		# evolution works better with wildcards: evolution-data-server libebook1.2-9
 		# libecal1.2-7 libedata-cal1
 		evolution)
 			packages="
-$( package_tester '(evolution|evolution-data-server|evolution-data-server-common|evolution-exchange)' )
-"
+			$( package_tester '(evolution|evolution-data-server|evolution-data-server-common|evolution-exchange)' )
+			"
 			packageGroup='Evolution'
 			;;
 		gimp)
 			packages="
-$( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
-"
+			$( package_tester '(gimp|gimp-data|gimp-libcurl|libgimp2.0|gimp-python)' )
+			"
 			packageGroup='Gimp'
 			;;
 		gnokii)
 			packages="
-$( package_tester '(libgnokii5|gnokii-common)' )
-"
+			$( package_tester '(libgnokii5|gnokii-common)' )
+			"
 			packageGroup='Gnokii'
 			;;
 			# libgksu2-0
 		gnome-1) # 2.22.0-1
 			packages="
-			$( package_tester '(gconf2|libgconf2-[0-9])' 'wild' )"
+			$( package_tester '(gconf2|libgconf2-[0-9])' 'wild' )
+			"
 			packageGroup='Gnome Group 1'
 			;;
 		gnome-2) # 2.20.1.1-2
 		# note: libgnomeui32 does NOT have the same versioning numbers
 		# so we need to test for libgnomeui- instead
 			packages="
-			$( package_tester '(libgnome2|libgnome2-common|libgnomeui-*)'  )"
+			$( package_tester '(libgnome2|libgnome2-common|libgnomeui-*)'  )
+			"
 			packageGroup='Gnome Group 2'
 			;;
 		gnome-3)
 			packages="
-			$( package_tester '(libbonoboui2)' 'wild' )"
+			$( package_tester '(libbonoboui2)' 'wild' )
+			"
 			packageGroup='Gnome Group 3'
 			;;
 		# unused for now
 		gnome-ruby)
 			packages="
-			$( package_tester '(libgconf2-ruby|libgnome2-ruby)' 'wild' )"
+			$( package_tester '(libgconf2-ruby|libgnome2-ruby)' 'wild' )
+			"
 			packageGroup='Gnome Ruby'
 			;;
 		gnome-vfs) # 1:2.22.0-5
 			packages="
-			$( package_tester '(libgnomevfs2)' 'wild' )"
+			$( package_tester '(libgnomevfs2)' 'wild' )
+			"
 			packageGroup='Gnome VFS'
 			;;
 		hplip)
 			packages="
-$( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data|hplip-gui)' )
-"
+			$( package_tester '(hpijs|hpijs-ppds|hplip|hplip-data|hplip-gui)' )
+			"
 			packageGroup='hplip'
 			;;
 		kde-workspace)
 			packages="
-$( package_tester '(kdebase-workspace|kdebase-workspace-data|kdebase-workspace-bin)' )
-"
+			$( package_tester '(kdebase-workspace|kdebase-workspace-data|kdebase-workspace-bin)' )
+			"
 			packageGroup='kde-workspace'
 			;;
 		# note: can't use full wildcard because of thesaurus using different numbering
 		ooo)
 			packages="
-$( package_tester '(openoffice.org-base|openoffice.org-base-core|openoffice.org-common|openoffice.org-java-common|openoffice.org-core|python-uno)' )
-$(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-gnome|openoffice.org-writer|openoffice.org-math)' )
-$(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-filter-)' 'wild-full')
-"
+			$( package_tester '(openoffice.org-base|openoffice.org-base-core|openoffice.org-common|openoffice.org-java-common|openoffice.org-core|python-uno)' )
+			$(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-gnome|openoffice.org-writer|openoffice.org-math)' )
+			$(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-filter-)' 'wild-full')
+			"
 			packageGroup='OpenOffice.org'
 			;;
 		samba)
 			packages="
-$( package_tester '(samba|samba-common|samba-common-bin|libsmbclient|smbclient|smbfs)' )
-"
+			$( package_tester '(samba|samba-common|samba-common-bin|libsmbclient|smbclient|smbfs)' )
+			"
 			packageGroup='samba'
 			;;
 		sun-java)
 			packages="
-$( package_tester '(sun-java6-bin|sun-java6-jre|sun-java6-plugin)' )
-"
+			$( package_tester '(sun-java6-bin|sun-java6-jre|sun-java6-plugin)' )
+			"
 			packageGroup='Sun Java'
 			;;
 		vegastrike)
 			packages="
-$( package_tester 'vegastrike' 'wild-full' )
-"
+			$( package_tester 'vegastrike' 'wild-full' )
+			"
 			packageGroup='Vegastrike'
 			;;
 		wesnoth)
 			packages="
-$( package_tester 'wesnoth' 'wild-full' )
-"
+			$( package_tester 'wesnoth' 'wild-full' )
+			"
 			packageGroup='Wesnoth'
 			;;
 		transmission)
 			packages="
-$( package_tester '(transmission|transmission-common|transmission-cli|transmission-daemon|transmission-gtk)' )
-"
+			$( package_tester '(transmission|transmission-common|transmission-cli|transmission-daemon|transmission-gtk)' )
+			"
 			packageGroup='Transmission'
 			;;
 		xfce4)
 			packages="
-$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-settings|xfce4-session|xfwm4|xfce4-panel|xfconf)' )
-"
+			$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-settings|xfce4-session|xfwm4|xfce4-panel|xfconf)' )
+			"
 			packageGroup='Xfce4'
 			;;
 		xpdf)
 			packages="
-$( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
-"
+			$( package_tester '(xpdf|xpdf-common|xpdf-reader|xpdf-utils)' )
+			"
 			packageGroup='Xpdf'
 			;;
 		*)
