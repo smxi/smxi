@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.1
-####  Date: October 15 2009
+####  version: 3.3.2
+####  Date: October 28 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -523,31 +523,38 @@ non_free_installer()
 	echo "${C}1${S} - ${C}Opera${S} One of the better Non Free packages here. Web browser."
 	echo "    Will add opera.com sources to your ${C}$EAS${S}."
 	echo
-	echo "${C}2${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
+	echo "${C}2${S} - ${C}update-opera-keyrings${S} Update to latest keyrings from Opera."
+	echo
+	echo "${C}3${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
 	echo "    Check out the new FSF gnash player for the Free Software version flash player."
 	echo
-	echo "${C}3${S} - ${C}java-plugin${S} Installs the Sun Java plugin and jre, for use by all browsers."
+	echo "${C}4${S} - ${C}java-plugin${S} Installs the Sun Java plugin and jre, for use by all browsers."
 	echo
-	echo "${C}4${S} - ${C}msttcore-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
+	echo "${C}5${S} - ${C}msttcore-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
 	echo
-	echo "${C}5${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
+	echo "${C}6${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
 	echo
-	echo -e "${C}6${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
+	echo -e "${C}7${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
 	echo "    ${M}NOTE: This is working again in at least Debian Sid, installs latest and it starts."
 	echo
-	echo "${C}7${S} - ${C}back-to-install-menu${S}"
+	echo "${C}8${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="opera flash-plugin java-plugin msttcore-fonts skype google-earth back-to-install-menu"
+	options="opera update-opera-keyrings flash-plugin java-plugin msttcore-fonts skype google-earth back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
 			opera)
 				# sources update is called in following function
 				package_group_installer opera opera
+				repeat='true'
+				;;
+			update-opera-keyrings)
+				echo "${S}Updating Opera keyrings..."${N}
+				wget -O - http://deb.opera.com/archive.key | apt-key add -
 				repeat='true'
 				;;
 			flash-plugin)

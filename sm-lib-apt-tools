@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.12
-####  Date: October 24 2009
+####  version: 1.22.13
+####  Date: October 28 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1204,7 +1204,8 @@ update_sources()
 			;;
 		opera)
 			# opera keyrings
-			extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
+			# extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
+			extraFunctions='wget -O - http://deb.opera.com/archive.key | apt-key add - '
 			grepSearch='(opera|deb-op)'
 			searchIdentifier='Opera'
 			sourceFile=$operaApt
