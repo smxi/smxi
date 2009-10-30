@@ -260,7 +260,7 @@ xorg_1_6_fix_1()
 				fi
 				echo "${S}Done with ${C}Xorg >= 1.6 xorg.conf${S} update, continuing.${N}"
 			else
-				echo "${E}No ${C}$X_ORG_PATH${S} found. Unable to modify ${C}xorg.conf${S} data.${N}"
+				echo "${E}No ${C}$X_ORG_PATH${E} found. Unable to modify ${C}xorg.conf${E} data.${N}"
 			fi
 		fi
 		# check the mouse stuff too, this is an aptitude fix mainly, which does the upgrade wrong
