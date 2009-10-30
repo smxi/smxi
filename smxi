@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.24
-####  Date: September 7 2009
+####  version: 8.11.25
+####  Date: October 30 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -195,6 +195,10 @@ SCRIPT_DOWNLOAD_BRANCH_1='http://smxi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://smxi.googlecode.com/svn/branches/two/'
 
 # xorg stuff
+X_VERSION=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
+if [ -z "$X_VERSION" ];then
+	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
+fi
 X_VERSIONS_PRE=''
 X_VERSIONS_POST=''
 CLEAN_X_ORG_LOG='/var/log/sm_clean_xorg_modules.log'
@@ -2096,7 +2100,7 @@ start_up_tests()
 		error_handler 'unidentified-distro' $FUNCNAME ''
 	fi
 	
-	if [ ! -e $GRUB_PATH ];then
+	if [ ! -e $GRUB_PATH -a "$IS_LIVE" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
 
