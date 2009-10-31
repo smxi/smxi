@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.8
-####  Date: August 23 2009
+####  version: 1.3.9
+####  Date: October 30 2009
 
 ####  Copyright (C) Harald Hope 2005-2009
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -34,18 +34,26 @@
 ### du utilities
 ###---------------------------------------------------------------------
 
+# the hasXX have been set in the caller
 check_services()
 {
 	eval $LOGUS
 	local rcconfFeature=0
-
-	if [ -z "$( package_tester 'rcconf' )" ];then
-		install_missing_apps 'rcconf' 'feature'
-		rcconfFeature=$?
-	fi
-	if [ "$rcconfFeature" -eq 0 ];then
-		# update-rcconf-guide && rcconf
-		rcconf
+	
+	if [ -z "$hasInsserv" ];then
+		if [ -z "$( package_tester 'rcconf' )" ];then
+			install_missing_apps 'rcconf' 'feature'
+			rcconfFeature=$?
+		fi
+		if [ "$rcconfFeature" -eq 0 ];then
+			# update-rcconf-guide && rcconf
+			rcconf
+		fi
+	elif [ -n "$hasInsserv" -a -n "$hasSysvRcConf"  ];then
+		sysv-rc-conf
+	else
+		echo "${M}This feature not yet available for ${C}insserv${M} running systems without ${C}sysv-rc-conf${M}.${N}"
+		print_hec
 	fi
 	eval $LOGUE
 }
@@ -228,6 +236,14 @@ main_upgrade_engine()
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f $DU_UPGRADE-again check-services continue "
+	# these will be passed to the sysv update function
+	local hasInsserv=$( check_package_status 'insserv' 'i' )
+	local hasSysvRcConf=$( check_package_status 'sysv-rc-conf' 'i' )
+	local sysvUpdate='rccconf'
+	
+	if [ -n "$hasInsserv" -a -n "$hasSysvRcConf" ];then
+		sysvUpdate='sysv-rc-conf'
+	fi
 
 	# set the trap here
 	trap 'du_trap_handler $FUNCNAME' INT TERM
@@ -316,7 +332,7 @@ main_upgrade_engine()
 	echo "${C}1 - use-install-f${S} Use this to try to resolve error in $DU_UPGRADE."
 	echo "${C}2 - $DU_UPGRADE-again${S} Run this after correcting an error with ${C}1${S}."
 	echo
-	echo "${C}3 - check-services${S} Runs ${C}rcconf${S} to let you turn back off any services that might "
+	echo "${C}3 - check-services${S} Runs ${C}$sysvUpdate${S} to let you turn back off any services that might "
 	echo "    have been turned on during the ${C}$DU_UPGRADE${S} (more options in the future)."
 	echo
 	echo "${C}4 - continue${S} Continue on with script, do this when $DU_UPGRADE is successful."
