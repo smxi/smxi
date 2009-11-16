@@ -49,7 +49,7 @@ run_2009_fixes()
 		fi
 	elif [ "$1" == 'post' ];then
 		if [ "$DISTRO_LEVEL" -lt 17 ];then
-			xorg_1_6_fix_1
+			#xorg_1_6_fix_1
 			vbox_qt_fix_1
 		fi
 	fi
