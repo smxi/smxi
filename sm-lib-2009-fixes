@@ -80,13 +80,21 @@ libvdpau1_fix_1()
 		
 		# case 1, older mplayer install, just update the stuff
 		if [ -z "$isInstalled" -a -n "$isInstalledList" ];then
+			echo $LINE
+			echo "${S}Running ${C}mplayer/libvdpau1${S} fix now...${N}"
 			package_installer "$isInstalledList" 'install-always'
+		# case 2, midrange install,with legacy package and mplayer
 		elif [ -n "$isInstalled" -a -n  "$isInstalledList" ];then
 			echo $LINE
 			echo "${S}Running ${C}mplayer/libvdpau1${S} fix now...${N}"
 			package_remover "$isInstalledList" 'group' 
 			package_remover "nvidia-libvdpau1"
 			package_installer "$isInstalledList" 'install-always' 
+		elif [ -n "$isInstalled" -a -z "$isInstalledList" ];then
+			echo $LINE
+			echo "${S}Running ${C}libvdpau1${S} fix now...${N}"
+			package_remover "nvidia-libvdpau1"
+			package_installer "nvidia-libvdpau1-driver" 'install-always' 
 		fi
 		set_sticky_prefs $prefId
 	fi
