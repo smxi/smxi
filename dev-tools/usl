@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.12
-####  Date: April 7 2009
+####  version: 2.4.13
+####  Date: December 2 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -128,7 +128,7 @@ get_options()
 				;;
 			v)
 				WORKING_SVN_DIR=$SVMI_SVN
-				UPDATE_TYPE='g'
+				UPDATE_TYPE='v'
 				;;
 			''|s)
 				UPDATE_TYPE='s'
