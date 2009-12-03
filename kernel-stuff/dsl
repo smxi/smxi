@@ -314,21 +314,21 @@ download_kernel_files()
 	echo
 	## download kernels and all related debs
 	echo "Getting module debs now..."
-	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-deb
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off # || error_handler 3 $MIRROR_MODULES-deb
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	# grab source zips/debs for modules
 	echo "Getting module tar.gz data now..."
-	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-tar.gz
+	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off # || error_handler 3 $MIRROR_MODULES-tar.gz
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	# grab source zips/debs for modules
 	echo "Getting module diff.gz data now..."
-	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MODULES -e robots=off || error_handler 3 $MIRROR_MODULES-tar.gz
+	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MODULES -e robots=off # || error_handler 3 $MIRROR_MODULES-tar.gz
 	echo $LINE
 	echo $LINE
 	echo
@@ -346,7 +346,7 @@ download_kernel_files()
 			cd src-gz
 			;;
 	esac
-	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-diff.gz
+	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off # || error_handler 3 $MIRROR_MAIN-diff.gz
 	case $KERNEL_TYPE in
 		liquorix)
 			cd ../
@@ -359,13 +359,13 @@ download_kernel_files()
 
 	if [ -n "$MIRROR_EXTRA" ];then
 		echo "Getting kbuild debs now..."
-		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
+		wget -r -l3 -Nc -nd -np -A.deb $MIRROR_EXTRA -e robots=off # || error_handler 3 $MIRROR_EXTRA
 		echo $LINE
 		echo $LINE
 		echo
 		sleep $sleepTime
 		echo "Getting kbuild gx data now..."
-		wget -r -l3 -Nc -nd -np -A.gz $MIRROR_EXTRA -e robots=off || error_handler 3 $MIRROR_EXTRA
+		wget -r -l3 -Nc -nd -np -A.gz $MIRROR_EXTRA -e robots=off # || error_handler 3 $MIRROR_EXTRA
 		echo $LINE
 		echo $LINE
 		echo
