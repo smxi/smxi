@@ -1078,16 +1078,7 @@ download_test_file()
 	if [ -f "$fileNameTemp" ];then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
 	fi
-	if [ -n "$( grep 'smxi.org/' <<< $downloadLocation )" ];then
-		case $downloadFile in
-			$LIB_WARNING) 
-				ua="$ua.$DISTRO_F"
-				;;
-			$MOD_GFX)
-				ua="$ua.sm.$DISTRO_F"
-				;;
-		esac
-	fi
+
 	if [ "$downloadFile" == "$USER_SCRIPT_URL" ];then
 		downloadLocation=$USER_SCRIPT_URL
 		downloadFile=''
@@ -1096,8 +1087,12 @@ download_test_file()
 
 	# this handles the new urls:
 	case $1 in
+		$LIB_WARNING) 
+			ua="$ua.$DISTRO_F"
+			;;
 		$MOD_GFX)
 			downloadLocation=$SCRIPT_DOWNLOAD_SG
+			ua="$ua.sm.$DISTRO_F"
 			;;
 		$MOD_VM)
 			downloadLocation=$SCRIPT_DOWNLOAD_SV
@@ -1107,6 +1102,9 @@ download_test_file()
 			messageString='echo -e "$LINE\n${S}Updating ${C}$MOD_INXI${S} to latest version now...${N}"'
 			;;
 	esac
+	if [ -n "$( grep 'smxi.org/' <<< $downloadLocation )" ];then
+		ua=''
+	fi
 
 	eval $messageString
 	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
