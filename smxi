@@ -1102,7 +1102,7 @@ download_test_file()
 			messageString='echo -e "$LINE\n${S}Updating ${C}$MOD_INXI${S} to latest version now...${N}"'
 			;;
 	esac
-	if [ -n "$( grep 'smxi.org/' <<< $downloadLocation )" ];then
+	if [ -z "$( grep 'smxi.org/' <<< $downloadLocation )" ];then
 		ua=''
 	fi
 
