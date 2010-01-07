@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.3
-####  Date: December 18 2009
+####  version: 3.3.4
+####  Date: January 7 2010
 
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -616,7 +616,6 @@ non_free_installer()
 				repeat='true'
 				;;
 			google-earth)
-				package_group_installer plain google-earth 'update_to_nonfree_sources'
 				install_google_earth
 				repeat='true'
 				;;
@@ -1202,16 +1201,21 @@ reinstall_skype()
 install_google_earth()
 {
 	eval $LOGPS
-	local goog='Google Earth'
+	local goog='Google Earth' uninstallPackage=''
 	echo $LINE
 	echo "${S}Starting ${C}$goog${S} installer."
 	echo
-	echo "Downloading installer file and creating ${C}$goog${S} deb...${N}"
+	echo "Adding ${C}$goog${S} installer file and creating ${C}$goog${S} deb...${N}"
+	package_group_installer plain google-earth 'update_to_nonfree_sources'
 	cd /var/cache/apt/archives
 	# force required to build as root
 	make-googleearth-package --force 2>>$LOG_FILE 2>&1
 	
 	if [ -n "$( ls googleearth*.deb 2>/dev/null )" ];then
+		uninstallPackage="$( package_tester '(googleearth)' )"
+		if [ -n "$uninstallPackage" ];then
+			package_remover "$uninstallPackage" 'purge' 'group'
+		fi
 		echo "${S}Installing ${C}$goog${S} deb...${N}"
 		dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
 		if [ "$APT_TYPE" == 'aptitude' ];then
