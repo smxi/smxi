@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.4
-####  Date: January 7 2010
+####  version: 3.3.5
+####  Date: January 19 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -59,6 +59,15 @@ package_group_installer()
 	fi
 	if [ -z "$( check_package_status "$mlocate" )" ];then
 		mlocate=''
+	fi
+	if [ "$2" == 'ms-core-fonts' ];then
+		if [ -n "$( check_package_status 'ttf-mscorefonts-installer' 'c' )" ];then
+			itemName='ttf-mscorefonts-installer'
+		elif [ -n "$( check_package_status 'msttcorefonts' 'c' )" ];then
+			itemName='msttcorefonts'
+		else
+			itemName='NA'
+		fi
 	fi
 	# handle incoming changes to kde as well
 	if [ -n "$( grep -i 'kde' <<< $2 )" ];then
@@ -299,31 +308,35 @@ package_group_installer()
 			packageName=$itemName
 			;;
 	esac
-
-	if [ -n "$3" ];then
-		eval $3 # this removes stuff, or does other operations, first
-	fi
-	update_sources $1
-	# now to make sure no missing packages are attempted, we'll check
-	# and only install ones in user system apt. This also future proofs and
-	# avoids install errors.
-	log_function_data "Raw packageName list to install:\n$packageName"
-	echo $LINE
-	echo "${S}Checking install package list for availability now...${N}"
-	for package in $packageName
-	do
-		if [ -n "$( check_package_status $package 'c' )" ];then
-			echo "${S}Adding ${C}$package${S} to install group.${N}"
-			packages="$packages$package "
-		else
-			echo "${M}Sorry, ${C}$package${M} is not available in ${C}Debian $SYSTEM_BASE${M}!${N}"
+	
+	if [ "$packageName" != 'NA' ];then
+		if [ -n "$3" ];then
+			eval $3 # this removes stuff, or does other operations, first
 		fi
-	done
-	log_function_data "Tested package list to install:\n$packages"
-	if [ -n "$packages" ];then
-		package_installer "$packages" 'install-user-ok'
+		update_sources $1
+		# now to make sure no missing packages are attempted, we'll check
+		# and only install ones in user system apt. This also future proofs and
+		# avoids install errors.
+		log_function_data "Raw packageName list to install:\n$packageName"
+		echo $LINE
+		echo "${S}Checking install package list for availability now...${N}"
+		for package in $packageName
+		do
+			if [ -n "$( check_package_status $package 'c' )" ];then
+				echo "${S}Adding ${C}$package${S} to install group.${N}"
+				packages="$packages$package "
+			else
+				echo "${M}Sorry, ${C}$package${M} is not available in ${C}Debian $SYSTEM_BASE${M}!${N}"
+			fi
+		done
+		log_function_data "Tested package list to install:\n$packages"
+		if [ -n "$packages" ];then
+			package_installer "$packages" 'install-user-ok'
+		else
+			echo "${E}Sorry, no packages from your requested group: ${C}$itemName${E} are available for installation.${N}"
+		fi
 	else
-		echo "${E}Sorry, no packages from your requested group: ${C}$itemName${E} are available for installation.${N}"
+		echo "${E}Sorry, no packages from your requested group: ${C}$2${E} are available for installation.${N}"
 	fi
 	eval $LOGUE
 }
@@ -400,7 +413,7 @@ select_install_type()
 	echo "${C}1${S} - ${C}office${S} Features OpenOffice.org installer. Language pack selector."
 	echo "    Now also offers OpenOffice hold/install/update option as well."
 	echo
-	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, msttcorefonts, Opera, Skype, Google Earth."
+	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, MS core fonts, Opera, Skype, Google Earth."
 	echo
 	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, rbxi, and more."
 	echo
@@ -557,7 +570,7 @@ non_free_installer()
 	echo
 	echo "${C}4${S} - ${C}java-plugin${S} Installs the Sun Java plugin and jre, for use by all browsers."
 	echo
-	echo "${C}5${S} - ${C}msttcore-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
+	echo "${C}5${S} - ${C}ms-core-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
 	echo
 	echo "${C}6${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
 	echo
@@ -570,7 +583,7 @@ non_free_installer()
 	echo -e $SLE
 	echo $LINE
 
-	options="opera update-opera-keyrings flash-plugin java-plugin msttcore-fonts skype google-earth back-to-install-menu"
+	options="opera update-opera-keyrings flash-plugin java-plugin ms-core-fonts skype google-earth back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -607,8 +620,8 @@ non_free_installer()
 				update-alternatives --config java
 				repeat='true'
 				;;
-			msttcore-fonts)
-				package_group_installer plain msttcorefonts 'update_to_nonfree_sources'
+			ms-core-fonts)
+				package_group_installer plain ms-core-fonts 'update_to_nonfree_sources'
 				repeat='true'
 				;;
 			skype)
