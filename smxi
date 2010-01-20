@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.27
-####  Date: December 5 2009
+####  version: 8.11.28
+####  Date: January 20 2010
 ########################################################################
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1073,7 +1073,7 @@ download_test_file()
 	eval $LOGUS
 	local fileName=$1 fileNameTemp='' messageString=''
 	local downloadLocation=$SCRIPT_DOWNLOAD downloadFile=$1 downloadUrl=''
-	local isGood='' wgetError=0 ua="-U s-tools/$downloadFile"
+	local isGood='' wgetError=0 ua="-U s-tools/$downloadFile" routerRedirect=''
 
 	if [ -f "$fileNameTemp" ];then
 		rm -f $fileNameTemp # remove the temp file, should never fire, but why not?
@@ -1112,13 +1112,19 @@ download_test_file()
 	log_function_data "download url: $downloadUrl"
 	# always using -O here because -Nc is really buggy over time lines and fast file changes
 	wget $ua -T$TIME_OUT -t 2 -q -O$fileNameTemp $downloadUrl &>/dev/null || wgetError="$?"
+	
 	if [ "$wgetError" -gt 0 ];then
  		file_download_error "$fileName" 'server-problem' "$wgetTest"
 	else
 		# all smxi files have this string as last line, so if it's there, the file should usually
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
 		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
-		if [ -n "$isGood" -o "$1" == "$USER_SCRIPT_URL" ];then
+		# this overcomes a small issue with some cisco routers that might add in ddos 
+		# two request from IP required via refresh filters
+		if [ -z "$isGood" ];then
+			routerRedirect=$( grep -i '<META HTTP-EQUIV="Refresh"' $fileNameTemp )
+		fi
+		if [ -n "$isGood" ] || [ -z "$routerRedirect" -a "$1" == "$USER_SCRIPT_URL" ];then
 			mv -f $fileNameTemp $fileName
 			# I'm not sure why this changed, but I've been seeing some 700 and 704 here
 			# so this is going to be done explicitly now instead.
