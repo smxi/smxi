@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.8
-####  Date: October 7 2009
+####  version: 1.22.9
+####  Date: October 7 2010
 
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -475,7 +475,7 @@ tweak_gecko_prefs()
 	local mozBrowserProds='firefox mozilla/firefox mozilla/iceweasel mozilla-firefox iceweasel iceape seamonkey swiftfox'
 
 	#  defaults now
-	local prefsPairs="browser.backspace_action:0 browser.search.suggest.enabled:false browser.sessionhistory.max_entries:10 browser.sessionhistory.max_total_viewers:1 browser.tabs.closeButtons:3 browser.tabs.tabMinWidth:5 browser.urlbar.hideGoButton:true layout.css.dpi:0 network.cookie.cookieBehavior:1 network.prefetch-next:false print.printer_PostScript/default.print_command:kprinter ui.allow_platform_file_picker:false"
+	local prefsPairs="browser.backspace_action:0 browser.search.suggest.enabled:false browser.sessionhistory.max_entries:10 browser.sessionhistory.max_total_viewers:1 browser.tabs.closeButtons:3 browser.tabs.tabMinWidth:5 browser.urlbar.hideGoButton:true geo.enabled:false layout.css.dpi:0 network.cookie.cookieBehavior:1 network.prefetch-next:false print.printer_PostScript/default.print_command:kprinter ui.allow_platform_file_picker:false"
 
 	echo $LINE
 	echo "${S}Now the script will edit your browser user prefs to more reliable settings."
