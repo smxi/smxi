@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.33
-####  Date: August 27 2009
+####  version: 0.7.34
+####  Date: January 27 2010
 
-####  Copyright (C) Harald Hope 2009
+####  Copyright (C) Harald Hope 2010
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -264,7 +264,22 @@ install_kde4()
 	eval $LOGUE
 	# double check kdm runlevels and fix if required
 	kdm_3_to_4_fix_1
+	post_kde4_install_fixes
 	print_kde4_message
+}
+
+post_kde4_install_fixes()
+{
+	echo $LINE
+	echo "${S}Checking post ${C}kde4${S} install and updating anything that needs fixing...${N}"
+	# this searches for and deletes: /home/*/.kde/share/config/knemorc
+	# presence of this file makes the new knemo taskbar icon not
+	# show the the screen icon, presumably due to a changed icon path
+	if [ -n "$( ls /home/*/.kde/share/config/knemorc 2>/dev/null )" ];then
+		echo "${S}Removing legacy ${C}knemorc${S} files that will not work properly with new version...${N}"
+		rm -f /home/*/.kde/share/config/knemorc
+	fi
+	echo "${S}Post ${C}kde4${S} install check completed...${N}"
 }
 
 print_kde4_message()
