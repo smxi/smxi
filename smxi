@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.28
-####  Date: January 20 2010
+####  version: 8.11.29
+####  Date: January 27 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -101,6 +101,7 @@ EKV='/etc/kanotix-version'
 ESV='/etc/sidux-version'
 EDI='/etc/issue'
 ELR='/etc/lsb-release'
+EUKU='/etc/udev/kernel-upgrade'
 SMDV='/etc/s-distro-version'
 SMDL='/etc/s-distro-level'
 
@@ -274,6 +275,8 @@ B_OVERRIDE_GRUB_GFX=''
 B_SKIP_KDE4=''
 B_TESTING_1=''
 B_TESTING_2=''
+B_UDEV_KERNEL26='false'
+B_UDEV_KERNEL26_DU='false'
 CHANGE_KERNEL_MIRROR=''
 CHANGE_MIRRORS=''
 DEFAULT_KERNEL=''
@@ -2581,13 +2584,27 @@ check_dpkg_update()
 	eval $LOGUE
 }
 
+# args: $1 - nvidia/fglrx
+get_gfx_driver_info()
+{
+	eval $LOGUS
+	local driverVersion='' 
+	
+	# set to lower always to make sure it's consistent
+	driverVersion=$( egrep -sio "Driver.*\"$1\"" $X_ORG_PATH | cut -d '"' -f 2 )
+	driverVersion=$( tr '[A-Z]' '[a-z]' <<< $driverVersion )
+	
+	echo $driverVersion
+	eval $LOGUE
+}
+
 # returns driver or null if no nonfree used
 # args: $1 - kernel-install/xorg/kernel
 nonfree_driver_reinstall()
 {
 	eval $LOGUS
-	local isNvidia=$( egrep -sio 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2 )
-	local isFglrx=$( egrep -sio 'Driver.*"fglrx"' $X_ORG_PATH | cut -d '"' -f 2 )
+	local isNvidia=$( get_gfx_driver_info 'nvidia' )
+	local isFglrx=$( get_gfx_driver_info 'fglrx' )
 	local driverIs='' xorgMessage='' kernelMessage='' reinstallMessage='' message=''
 	local extraMessage=''
 
@@ -3669,7 +3686,7 @@ run_script_components()
 
 	# this will set the last used date-time of the script
 	set_sticky_prefs 's'
-
+	udev_kernel26_update_handler
 	# runs main kernel question installer sequence also, checks kernel version for du first
 	if [ "$SKIP_CONNECTIONS" != 'true' -a "$IS_LIVE" != 'true' ];then
 		if [ "$SKIP_KERNEL" != 'true' -a "$DEFAULT_KERNEL" != 'no-kernel' ];then

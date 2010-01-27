@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.3.9
-####  Date: October 30 2009
+####  version: 1.4.0
+####  Date: January 27 2010
 
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
 ####  msg_on msg_off list_modules remove_the_kernel
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -65,6 +65,9 @@ du_trap_handler()
 	echo ''
 	echo $WLINE
 	echo "${W}You exited with ctrl+c or kill, removing holds if needed.${N}"
+	if [ -f "$EUKU" ];then
+		rm -f $EUKU
+	fi
 	set_hold_install install
 	error_handler 'user-killed-du' "$1"
 }
@@ -376,12 +379,20 @@ main_upgrade_engine()
 				continue='true'
 				;;
 			reboot)
+				# this is the old/new udev tool for lenny -> squeeze update
+				if [ "$B_UDEV_KERNEL26_DU" == 'true' ];then
+					udev_kernel_show_post "reboot"
+				fi
 				set_hold_install install # in case of reboot, make sure to lift hold
 				set_sticky_prefs 'd'
 				run_script_import $LIB_KERNEL_INSTALL
 				reboot_now_question $CURRENT_APT_KERNEL
 				;;
 			exit)
+				# this is the old/new udev tool for lenny -> squeeze update
+				if [ "$B_UDEV_KERNEL26_DU" == 'true' ];then
+					udev_kernel_show_post
+				fi
 				set_hold_install install # in case of exit, make sure to lift hold
 				set_sticky_prefs 'd'
 				print_quit
@@ -440,6 +451,10 @@ post_du_tasks()
 		trap - INT TERM
 		## take the package(s) off hold if they were set
 		set_hold_install install
+		# this is the old/new udev tool for lenny -> squeeze update
+		if [ "$B_UDEV_KERNEL26_DU" == 'true' ];then
+			udev_kernel_show_post
+		fi
 	fi
 	eval $LOGME
 }
@@ -610,6 +625,140 @@ busybox_fix_1()
 		package_installer 'busybox' 'install-always'
 		set_sticky_prefs $prefId
 	fi
+	eval $LOGUE
+}
+
+# test for udev 0.125 / 14x/15x, if present and kernel < 29, start the procedure
+# this tool is for lenny -> squeeze updates
+udev_kernel26_update_handler()
+{
+	eval $LOGUS
+	local prefId='udev-kernel26-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+
+	# this needs an off switch for current squeeze and newer since they already have this fine
+	if [ "$smPref" -eq 0 ];then
+		# lenny: 0.125-23 / squeeze-sid: 150-2, adding : test in case they change it, again...
+		local udevVersionCan=$( check_package_status 'udev' 'c' | cut -d ':' -f 2 | sed 's/0\.//' | cut -d '-' -f 1 )
+		local udevVersionInst=$( check_package_status 'udev' 'i' | cut -d ':' -f 2 | sed 's/0\.//' | cut -d '-' -f 1 )
+		
+		## validate
+		if [ -z "$udevVersionCan" ];then
+			udevVersionCan=0
+		fi
+		if [ -z "$udevVersionInst" ];then
+			udevVersionInst=0
+		fi
+		
+		log_function_data "udevVersionCan: $udevVersionCan\nudevVersionInst: $udevVersionInst"
+		# don't run this if no udev is installed, then this doesn't matter
+		if [ "$KERNEL_THIRD" -lt 30 -a "$udevVersionCan" -gt 140 -a "$udevVersionInst" -lt 130 -a "$udevVersionInst" -gt 0 ];then
+			udev_kernel_updater_main
+		fi
+		# this should always run until the safe udev + new kernel is installed
+		if [ "$KERNEL_THIRD" -gt 28 -a "$udevVersionInst" -gt 140 ];then
+			set_sticky_prefs $prefId
+		fi
+	fi
+	eval $LOGUE
+}
+
+udev_kernel_updater_main()
+{
+	eval $LOGUS
+	
+	local options="continue-kernel-install-$DU_UPGRADE continue-kernel-install-reboot quit" 
+	local opt='' repeat=''
+	local etcUdevKU='/etc/udev/kernel-upgrade'
+	
+	echo $MLINE
+	echo "${M}ALERT: The new ${C}udev${M} version ${C}$udevVersionCan${M} requires special handling, "
+	echo "when you are running kernel ${C}2.6.$KERNEL_THIRD${M}. ${C}$SCRIPT_NAME${M} can handle most"
+	echo "of the process for you, but you must do the following:"
+	
+	echo $LINE
+	echo "${C}1${S} - Install a new kernel > 2.6.30${S} in the following kernel install section."
+	echo "${C}2${S} - Run the complete ${C}$DU_UPGRADE${S} all the way to the end."
+	echo "${C}3${S} - Reinstall your non free video driver if required (only nvidia supports installing to new kernel)."
+	echo "${C}4${S} - Reboot. This is very important. The new ${C}udev $udevVersionCan${S} will NOT work with your old kernel."
+	echo
+	echo "If you want to do this procedure differently, you can also do it this way:"
+	echo "${C}1${S} - Install a new kernel > ${C}2.6.30${S} in the following kernel install section."
+	echo "${C}2${S} - Reboot, then do your ${C}$DU_UPGRADE${S} (make sure you are using full-upgrade/dist-upgrade here."
+	if [ "$DEFAULT_KERNEL" == 'no-kernel' ];then
+		echo "${M}ALERT: You have manually set your kernel type to ${C}no-kernel${M}: Please"
+		echo "Update your kernel manually before continuing or you will have upgrade problems."
+	fi
+	echo $LINE
+	echo "${C}1 - continue-kernel-install-$DU_UPGRADE${S} Continue, install new kernel, run ${C}$DU_UPGRADE${S}, then reboot."
+	echo
+	echo "${C}2 - continue-kernel-install-reboot${S} Continue, install new kernel, reboot, then do the ${C}$DU_UPGRADE${S}."
+	eval "$rebootText"
+
+	echo "${C}3 - quit${S} I want to handle this manually, or get more information."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		eval $LOGUE
+		log_function_data "$opt"
+		case $opt in
+			continue-kernel-install-$DU_UPGRADE)
+				# set global test flag to true, this enables kernel installer and other tests/fixes
+				B_UDEV_KERNEL26='true'
+				B_UDEV_KERNEL26_DU='true'
+				SKIP_KERNEL='false'
+				if [ ! -f "$EUKU" ];then
+					touch $EUKU
+				fi
+				;;
+			continue-kernel-install-reboot)
+				# set global test flag to true, this enables kernel installer and other tests/fixes
+				B_UDEV_KERNEL26='true'
+				SKIP_KERNEL='false'
+				;;
+			quit)
+				print_quit
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+
+	if [ "$repeat" == 'true' ];then
+		udev_kernel_updater_main
+	fi
+}
+
+# args: $1 - reboot (optional)
+udev_kernel_show_post()
+{
+	eval $LOGUS
+
+	local isNvidia=$( get_gfx_driver_info 'nvidia' )
+	
+	# remove this first in case of user ctrl c exit, also found in du trap handler
+	if [ -f "$EUKU" ];then
+		rm -f $EUKU
+	fi
+	if [ "$1" != 'reboot' ];then
+		echo $WLINE
+		echo "${M}Remember, you MUST reboot after you have finished with ${C}$SCRIPT_NAME${M}!!"
+		if [ -n "$isNvidia" ];then
+			echo "${S}Proceed to graphics driver install if you need to re-install your"
+			echo "nVidia driver, then reboot.${N}"
+		fi
+		echo
+		echo "${M}Failure to reboot after you are finished will make your system inoperable!!${N}"
+		B_UDEV_KERNEL26_DU='false'
+		print_hec
+	fi
+
 	eval $LOGUE
 }
 

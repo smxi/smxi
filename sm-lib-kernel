@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.60
-####  Date: January 10 2010
+####  version: 2.5.61
+####  Date: January 27 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -101,7 +101,7 @@ check_kernel()
 			# the first condition handles cases where the latest install kernel requires a du first
 			# the first case will now never happen, needs to be dumped
 			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$KERNEL_EQUAL_INSTALL" != 'true' ]
-			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' ];then
+			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$B_UDEV_KERNEL26" != 'true' ];then
 				echo "${M}Your kernel version ${C}$KERNEL_VERSION${M} requires that you first run"
 				echo "a ${C}$DU_UPGRADE${M} before you install a new kernel. The option to install"
 				echo "the new kernels is in the ${C}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES${M} menu.${N}"
