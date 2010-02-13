@@ -2,10 +2,10 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.4
-####  Date: September 11 2009
+####  version: 2.3.5
+####  Date: February 12 2010
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2009
+####  Copyright (C) Harald Hope 2007-2010
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
@@ -347,6 +347,12 @@ download_kernel_files()
 			;;
 	esac
 	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off # || error_handler 3 $MIRROR_MAIN-diff.gz
+	echo $LINE
+	echo $LINE
+	echo
+	sleep $sleepTime
+	echo "Getting kernel debian.tar.gz data now..."
+	wget -r -l3 -Nc -nd -np -A.debian.tar.gz $MIRROR_MAIN -e robots=off # || error_handler 3
 	case $KERNEL_TYPE in
 		liquorix)
 			cd ../
