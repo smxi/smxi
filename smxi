@@ -1907,8 +1907,14 @@ start_stop_default_dm()
 	local success=''
 	local dmList='entrance gdm kdm slim wdm xdm' dm=''
 	local noHup='nohup' xActionString=''  finalXKill=''
+	local serviceControl='/etc/init.d/'
+	
 	if [ -z "$DISPLAY" -a "$2" == 'stop' ];then
 		noHup=''
+	fi
+	# note that init.d does not take a space, but service does,for the first parameter like kdm
+	if [ -n "$( type -P service )" ];then
+		serviceControl='service '
 	fi
 
 	case $1 in
@@ -1919,7 +1925,7 @@ start_stop_default_dm()
 					if [ -x /etc/init.d/$dm ];then
 						echo "${S}Attempting to ${C}$2${S} display manager $dm now... ${N}"
 						# nohup is required to make sure dm is fully stopped, and pids removed
-						xActionString="$noHup /etc/init.d/$dm $2 && success='true'"
+						xActionString="$noHup $serviceControl$dm $2 && success='true'"
 						eval $xActionString
 						if [ -z "$noHup" ];then
 							if [ "$success" == 'true' ];then
@@ -1936,7 +1942,7 @@ start_stop_default_dm()
 				if [ -x /etc/init.d/$displayManager ];then
 					echo "${S}Attempting to ${C}$2${S} default display manager $displayManager now... ${N}"
 					# nohup is required to make sure dm is fully stopped, and pids removed
-					xActionString="$noHup /etc/init.d/$displayManager $2 && success='true'"
+					xActionString="$noHup $serviceControl$displayManager $2 && success='true'"
 					eval $xActionString
 					if [ -z "$noHup" ];then
 						if [ "$success" == 'true' ];then
