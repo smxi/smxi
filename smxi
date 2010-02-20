@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.30
-####  Date: February 14 2010
+####  version: 8.11.31
+####  Date: February 19 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1550,7 +1550,8 @@ set_graphics_data()
 cleanup_extra_files()
 {
 	eval $LOGPS
-	local script_names="sgfxi sm smxi du-fixes-h2.sh svmi" i="" all_files=""
+	local script_names='sgfxi sm smxi du-fixes-h2.sh svmi' i='' all_files=''
+	local sourceFile=''
 
 	for i in $script_names
 	do
@@ -1591,13 +1592,23 @@ cleanup_extra_files()
 		mv -f /etc/sm.conf /etc/smxi.conf
 	fi
 	# clean up a mistake I made with new apt installer logic
-	if [ -n "$( grep 'no-set' $SM_CONFIG_FILE )" ];then
-		sed -i 's/no-set//' $SM_CONFIG_FILE
-	fi
+# 	if [ -n "$( grep 'no-set' $SM_CONFIG_FILE )" ];then
+# 		sed -i 's/no-set//' $SM_CONFIG_FILE
+# 	fi
 	# this fixes the bad permissions and lets people run the stuff as user again, or view it
 	chmod 604 sm-lib-* &>/dev/null
 	chmod 705 sgfxi svmi smxi &>/dev/null
-
+	# update to updated non-free in string
+	for sourceFile in $EAS $EAS.d/*.list
+	do
+		if [ -f $sourceFile ];then
+			if [ -n "$( grep -Eis 'deb.*ebian-multimedi' $sourceFile )" ];then
+				if [ -z "$( grep -Eis 'deb.*ebian-multimedi.*non-free' $sourceFile )" ];then
+					sed -i -r 's%(deb.*ebian-multimedi.*main.*)%\1 non-free%' $sourceFile
+				fi
+			fi
+		fi
+	done
 	eval $LOGPE
 }
 
