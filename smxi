@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.32
-####  Date: February 20 2010
+####  version: 8.11.33
+####  Date: February 22 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -343,6 +343,7 @@ REMOTE_DATE=''
 SET_KERNEL_DATA=''
 SIDUX_SOURCES=''
 SKIP_CONNECTION_RETRY=''
+SM_CONFIGS_STATIC='' # static version of prefs data
 SYSTEM_BASE=''
 UPDATED=''
 USE_DEBIAN_KERNEL=''
@@ -1751,13 +1752,15 @@ test_kernel_strings()
 ###---------------------------------------------------------------------
 ### sticky script preferences:: preference file located: /etc/smxi.conf
 ###---------------------------------------------------------------------
+
+## This section is using minimal logging to reduce amount of hard disk I/O
 sticky_prefs()
 {
-	eval $LOGUS
 	local prefId='RememberResponses'
 	local smPref=$( sm_pref_tester $prefId )
 
 	if [ "$smPref" -eq 0 ];then
+		eval $LOGUS
 		echo $MLINE
 		echo "${M}Creating your initial ${C}$SCRIPT_NAME${M} sticky preferences."
 		echo "${C}$SCRIPT_NAME${S} remembers certain options that have been run"
@@ -1768,68 +1771,83 @@ sticky_prefs()
 		echo "or delete the line of the item you want ${C}$SCRIPT_NAME${S} to run again.${N}"
 		set_sticky_prefs $prefId
 		print_hec
+		eval $LOGUE
 	fi
-	eval $LOGUE
 }
 
 # args: $1, s/d, set the du data, or standard, set the sticky string in /etc/smxi.conf
 set_sticky_prefs()
 {
-	eval $LOGUS
 	check_sm_pref_file
 	local currentDate=$( date +%Y-%m-%d-%H:%M )
 
 	case $1 in
 		s)	set_sm_pref_values "script-last-used" "$currentDate"
+			log_function_data "${LOG_INDENT}Function: set_sticky_prefs: updated: script-last-used: $currentDate"
 			;;
 		d)	set_sm_pref_values "script-last-du-complete" "$currentDate"
+			log_function_data "${LOG_INDENT}Function: set_sticky_prefs: updated: script-last-du-complete: $currentDate"
 			;;
-		*)	echo $1 >> $SM_CONFIG_FILE
+		*)	# concatenate to sm config static value
+			SM_CONFIGS_STATIC="$SM_CONFIGS_STATIC
+$1"
+			log_function_data "${SPACER}Function: set_sticky_prefs: added: $1"
 			sort_sticky_prefs
 			;;
 	esac
-	eval $LOGUE
+	set_static_sm_prefs
 }
 
 sort_sticky_prefs()
 {
 	local tempFile='/etc/ljsdflsjf5848sljf4'
 
-	# sort the file, test/clean for unique entries, then mv to smxi.conf
-	# note; you cannot write the file to itself in a one liner, it becomes null
-	sort -f -b $SM_CONFIG_FILE | uniq > $tempFile
-	mv -f $tempFile $SM_CONFIG_FILE
+	# sort the data, test/clean for unique entries
+	# this is simpler and fewer disk accesses than writing to file at this point
+	SM_CONFIGS_STATIC=$( sort -u -f -b <<< "$SM_CONFIGS_STATIC" )
 }
 
 # args: $1 - pref name; $2 - pref value, eg: <name>=<value>
 set_sm_pref_values()
 {
-	eval $LOGUS
 	check_sm_pref_file
 	local prefId="$1"
 	local smPref=$( sm_pref_tester $prefId )
 
 	if [ "$smPref" -eq 0 ];then
-		echo "$1=$2" >> $SM_CONFIG_FILE
+		# concatenate to static data
+		SM_CONFIGS_STATIC="$SM_CONFIGS_STATIC
+$1=$2"
+		log_function_data "${SPACER}Function: set_sm_pref_values: added smPref: $1=$2"
+		sort_sticky_prefs # only need to sort for new item added
 	else
-		sed -i "s%$1=.*%$1=$2%" $SM_CONFIG_FILE
+		SM_CONFIGS_STATIC=$( sed "s%$1=.*%$1=$2%" <<< "$SM_CONFIGS_STATIC" )
+		log_function_data "${SPACER}Function: set_sm_pref_values: updated smPref: $1 - to value: $2"
 	fi
-	sort_sticky_prefs
-	eval $LOGUE
+	set_static_sm_prefs
+}
+
+set_static_sm_prefs()
+{
+	echo "$SM_CONFIGS_STATIC" > $SM_CONFIG_FILE
 }
 
 check_sm_pref_file()
 {
-	# make config fileif required
+	# make config file if required
 	if [ ! -f $SM_CONFIG_FILE ];then
 		touch $SM_CONFIG_FILE
+	# set the initial content here
+	else
+		if [ -z "$SM_CONFIGS_STATIC" ];then
+			SM_CONFIGS_STATIC="$( cat $SM_CONFIG_FILE )"
+		fi
 	fi
 }
 # args: $1 string to be tested for, returns 0 or > 0
 # $2 - optional: custom test; default standard; equal slice out after =
 sm_pref_tester()
 {
-	eval $LOGUS
 	check_sm_pref_file
 	local smPref='' testType='standard'
 
@@ -1840,10 +1858,10 @@ sm_pref_tester()
 	if [ -n "$1" ];then
 		case $testType in
 			equal) # return the string value, if present, after the =
-				smPref=$( grep $1 $SM_CONFIG_FILE | cut -d '=' -f 2-8 )
+				smPref=$( grep $1 <<< "$SM_CONFIGS_STATIC" | cut -d '=' -f 2-8 )
 				;;
 			standard)
-				smPref=$( grep -c $1 $SM_CONFIG_FILE )
+				smPref=$( grep -c $1 <<< "$SM_CONFIGS_STATIC" )
 				;;
 			*)
 				error_handler 'value-bad' $FUNCNAME "$testType"
@@ -1851,11 +1869,10 @@ sm_pref_tester()
 		esac
 
 		echo $smPref
-		log_function_data "smPref: $smPref"
+		log_function_data "${SPACER}Function: sm_pref_tester: smPref: $1; \$2: $2; value: $smPref"
 	else
 		error_handler 'value-null' $FUNCNAME '$1'
 	fi
-	eval $LOGUE
 }
 #sm_pref_tester smxi-kernel-mirror equal;exit
 
