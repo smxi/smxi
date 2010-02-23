@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.33
+####  version: 8.11.34
 ####  Date: February 22 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -344,6 +344,7 @@ SET_KERNEL_DATA=''
 SIDUX_SOURCES=''
 SKIP_CONNECTION_RETRY=''
 SM_CONFIGS_STATIC='' # static version of prefs data
+SM_VERSIONS_STATIC='' # static file versions data
 SYSTEM_BASE=''
 UPDATED=''
 USE_DEBIAN_KERNEL=''
@@ -918,8 +919,8 @@ test_version_info()
 	LocalVersion=$( grep -m 1 -o -G "version:\ [0-9]*.[0-9]*.[0-9]*" $SCRIPT_HOME/$1 | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	# I'm being careful with globals, I want to make sure no unset global error occurs
 	# reset the global value for remote version now
-	remoteVersion=$( grep -e "$1=.*" $VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 1 )
-	remoteDate=$( grep -e "$1=.*" $VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 2 )
+	remoteVersion=$( grep -e "$1=.*" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
+	remoteDate=$( grep -e "$1=.*" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 2 )
 	# now set the globals
 	REMOTE_VERSION=$remoteVersion
 	REMOTE_DATE=$remoteDate
@@ -1075,7 +1076,7 @@ update_all_scripts()
 download_test_file()
 {
 	eval $LOGUS
-	local fileName=$1 fileNameTemp='' messageString=''
+	local fileName=$1 messageString='' fileDataHolderTemp=''
 	local downloadLocation=$SCRIPT_DOWNLOAD downloadFile=$1 downloadUrl=''
 	local isGood='' wgetError=0 ua="-U s-tools/$downloadFile" routerRedirect=''
 
@@ -1111,38 +1112,44 @@ download_test_file()
 	fi
 
 	eval $messageString
-	fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
+	
 	downloadUrl="$downloadLocation$downloadFile"
 	log_function_data "download url: $downloadUrl"
+	
+	# fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $fileName.XXXXXXXXXX )"
 	# always using -O here because -Nc is really buggy over time lines and fast file changes
-	wget $ua -T$TIME_OUT -t 2 -q -O$fileNameTemp $downloadUrl &>/dev/null || wgetError="$?"
+	# no writing to disk until validated as good and non-corrupted
+	fileDataHolderTemp="$( wget $ua -T$TIME_OUT -t 2 -q -O - $downloadUrl 2>/dev/null )" || wgetError="$?"
 	
 	if [ "$wgetError" -gt 0 ];then
  		file_download_error "$fileName" 'server-problem' "$wgetTest"
 	else
 		# all smxi files have this string as last line, so if it's there, the file should usually
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
-		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
+		isGood=$( grep '##\*\*EOF\*\*##' <<< "$fileDataHolderTemp" )
 		# this overcomes a small issue with some cisco routers that might add in ddos 
 		# two request from IP required via refresh filters
 		if [ -z "$isGood" ];then
-			routerRedirect=$( grep -i '<META HTTP-EQUIV="Refresh"' $fileNameTemp )
+			routerRedirect=$( grep -i '<META HTTP-EQUIV="Refresh"' <<< "$fileDataHolderTemp" )
 		fi
 		if [ -n "$isGood" ] || [ -z "$routerRedirect" -a "$1" == "$USER_SCRIPT_URL" ];then
-			mv -f $fileNameTemp $fileName
 			# I'm not sure why this changed, but I've been seeing some 700 and 704 here
 			# so this is going to be done explicitly now instead.
+			echo "$fileDataHolderTemp" > $fileName
 			if [ "$2" == 'chm' ];then
 				chmod 705 $fileName
 			else
 				chmod 604 $fileName
 			fi
+			# set the sm_versions global
+			if [ "$fileName" == "$VERSION_INFO" ];then
+				SM_VERSIONS_STATIC="$fileDataHolderTemp"
+			fi
 			eval $LOGUE
 			return 0
 		else
 			# dump the bad file
-			rm -f $fileNameTemp
-
+# 			rm -f $fileNameTemp
 			if [ "$3" != 'repeat' ];then
 				# let's try this once again to make sure it wasn't just a temp problem
 				echo "${E}The file ${C}$fileName${E} did not download correctly, retrying download now...${N}"
@@ -1157,6 +1164,7 @@ download_test_file()
 
 	eval $LOGUE
 }
+
 # args: $1 - file name; $2 - error type
 file_download_error()
 {
@@ -2796,8 +2804,8 @@ print_lib_info()
 			scriptText=$SCRIPT_NAME
 			moduleText='Version'
 			printIt='true'
-			scriptVersion=$( grep -e "sm-main-version=" $SCRIPT_HOME/$VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 1 )
-			scriptDate=$( grep -e "sm-main-version=" $SCRIPT_HOME/$VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 2 )
+			scriptVersion=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
+			scriptDate=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 2 )
 			;;
 		*)
 			error_handler 'value-bad' $FUNCNAME "$1"
