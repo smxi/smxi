@@ -1122,6 +1122,7 @@ download_test_file()
 	fileDataHolderTemp="$( wget $ua -T$TIME_OUT -t 2 -q -O - $downloadUrl 2>/dev/null )" || wgetError="$?"
 	
 	if [ "$wgetError" -gt 0 ];then
+		fileDataHolderTemp=''
  		file_download_error "$fileName" 'server-problem' "$wgetTest"
 	else
 		# all smxi files have this string as last line, so if it's there, the file should usually
@@ -1145,11 +1146,12 @@ download_test_file()
 			if [ "$fileName" == "$VERSION_INFO" ];then
 				SM_VERSIONS_STATIC="$fileDataHolderTemp"
 			fi
+			fileDataHolderTemp=''
 			eval $LOGUE
 			return 0
 		else
 			# dump the bad file
-# 			rm -f $fileNameTemp
+			fileDataHolderTemp=''
 			if [ "$3" != 'repeat' ];then
 				# let's try this once again to make sure it wasn't just a temp problem
 				echo "${E}The file ${C}$fileName${E} did not download correctly, retrying download now...${N}"
