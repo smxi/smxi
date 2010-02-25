@@ -59,7 +59,7 @@ error_handler()
 			;;
 		3)	message='Failed to download script properly. The file data is corrupted or incomplete!'
 			;;
-		4)	message="$PREFIX$SCRIPT exec command failed with error number: $2\nPlease try again."
+		4)	message="The $PREFIX$SCRIPT exec command failed with error number: $2\nPlease try again, and make sure you are using supported options."
 			;;
 		5)	message="$PREFIX$SCRIPT not executable!"
 			;;
