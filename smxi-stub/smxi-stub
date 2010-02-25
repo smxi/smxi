@@ -117,7 +117,7 @@ else
 		# now that the data is tested and not corrupted move to real file
 		echo "$FILE_DATA_TEMP" > $PREFIX$SCRIPT
 		# make new file executable
-		chmod +x "$PREFIX$SCRIPT"
+		chmod 705 "$PREFIX$SCRIPT"
 		# then run it with an error handler for unknown weirdness which I'm sure will appear.
 		if [ -x "$PREFIX$SCRIPT" ];then
 			# If for some reason it errors on script execution, exit here, but that could be
