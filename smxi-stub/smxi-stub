@@ -44,6 +44,7 @@ DOWNLOAD_URL_SGFXI='http://smxi.org/sg/'
 DOWNLOAD_URL_SMXI='http://smxi.org/sm/'
 DOWNLOAD_URL_SVMI='http://smxi.org/sv/'
 FILE_DATA_TEMP='' # will handle failed downloads
+IS_GOOD=''
 # this is the tester for ##**EOF**## endings present in scripts, change this
 # if you want to extend this stub to other scripts, smxi/svmi/inxi/sgfxi all use this
 SCRIPT_EOF='##\*\*EOF\*\*##'
@@ -59,7 +60,7 @@ error_handler()
 			;;
 		3)	message='Failed to download script properly. The file data is corrupted or incomplete!'
 			;;
-		4)	message="The $PREFIX$SCRIPT exec command failed with error number: $2\nPlease try again, and make sure you are using supported options."
+		4)	message="$PREFIX$SCRIPT exec command failed with error number: $2\nPlease try again."
 			;;
 		5)	message="$PREFIX$SCRIPT not executable!"
 			;;
@@ -108,9 +109,9 @@ else
 	fi
 	# downloading to overwrite existing file, but to temp variable, which we then test
 	FILE_DATA_TEMP="$( wget -q -O - $DOWNLOAD_URL$SCRIPT )" || error_handler 2 "$?"
-	
+	IS_GOOD=$( grep -si "$SCRIPT_EOF" <<< "$FILE_DATA_TEMP" )
 	# test to make sure downloaded data has EOF marker, if yes, it's complete
-	if [ -z "$( grep -si "$SCRIPT_EOF" <<< "$FILE_DATA_TEMP" )" ];then
+	if [ -z "$IS_GOOD" ];then
 		error_handler 3
 	else
 		# now that the data is tested and not corrupted move to real file
