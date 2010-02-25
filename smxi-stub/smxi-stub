@@ -99,7 +99,7 @@ esac
 # be run first because they kill the -h help function
 if [ -x "$PREFIX$SCRIPT" ];then
 	# I'm just going to put a test for basically everything that can go wrong
-	exec "$PREFIX$SCRIPT" "$@" || error_handler 7 "$?"
+	exec "$PREFIX$SCRIPT" "$@" || error_handler 4 "$?"
 else
 	# only in case of requirement to download script do root test, and just exit
 	# if not root, anything else is counterintuitive I think for users.
