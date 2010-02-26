@@ -1602,9 +1602,6 @@ cleanup_extra_files()
 	if [ -f /etc/sm.conf ];then
 		mv -f /etc/sm.conf /etc/smxi.conf
 	fi
-	if [ -d /usr/src/kernel-downloads ];then
-		mv -f /usr/src/kernel-downloads $KERNEL_DIRECTORY
-	fi
 	# clean up a mistake I made with new apt installer logic
 # 	if [ -n "$( grep 'no-set' $SM_CONFIG_FILE )" ];then
 # 		sed -i 's/no-set//' $SM_CONFIG_FILE
@@ -1631,7 +1628,14 @@ create_script_files()
 {
 	eval $LOGPS
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
-
+	
+	if [ ! -d $KERNEL_DIRECTORY  ];then
+		if [ -d /usr/src/kernel-downloads ];then
+			mv -f /usr/src/kernel-downloads $KERNEL_DIRECTORY
+		else
+			mkdir $KERNEL_DIRECTORY
+		fi
+	fi
 	# make config file / log dir if required
 	check_sm_pref_file
 	# move old xorg clean up log if present
