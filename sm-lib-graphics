@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.2
-####  Date: August 28 2009
+####  version: 2.4.3
+####  Date: February 28 2010
 
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -409,7 +409,7 @@ final_graphics_install()
 		nvc)
 			installMess="${S}installing nVidia driver ${C}$2${S} with -c option now...${N}"
 			if [ "$2" == 'debian-nvidia' ];then
-				extraArgs=' -s '
+				extraArgs=' -d '
 			fi
 			extraArgs=" $kernelInstallTo -c $extraArgs"
 			installDriver='true'
@@ -430,7 +430,7 @@ final_graphics_install()
 			fi
 			# this will force, for ati, debian sid package install instead of ati junk
 			if [ "$2" == 'debian-fglrx' ];then
-				extraArgs=' -s '
+				extraArgs=' -d '
 			fi
 			installMess="${S}installing ATI/fglrx driver ${C}$2${S} now...${N}"
 			extraArgs=" $extraArgs $FglrxFlag"
@@ -476,8 +476,8 @@ final_graphics_install()
 		echo $installMess
 		# note: DX and sgfxi Args need to be joined for -
 		# note: -j x will override the D color setting, so D needs to be last
-		log_function_data "gfx command string: $GFX_INSTALLER $extraArgs -DX$sgfxiArgs"
-		./$GFX_INSTALLER $extraArgs -DX$sgfxiArgs -P $APT_TYPE
+		log_function_data "gfx command string: $GFX_INSTALLER $extraArgs -! 120 -X$sgfxiArgs"
+		./$GFX_INSTALLER $extraArgs -! 120 -X$sgfxiArgs -P $APT_TYPE
 		# kill root pid on success. We don't want to kill pid on reboot here of sgfxi
 		# so sgfxi exits on quit/reboot with 100
 		if [ "$?" -eq 0 ];then
