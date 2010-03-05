@@ -874,8 +874,8 @@ run_script_import()
 			runScript=$1
 			;;
 		$MOD_VM)
-			# note: -j x will override the D color setting, so D needs to be last
-			options="-j $SCRIPT_COLORS -D -P $APT_TYPE"
+			# note: -j x will override the -! 120 color setting, so -! 120 needs to be last
+			options="-j $SCRIPT_COLORS -! 120 -P $APT_TYPE"
 			runIt='true'
 			runScript=$1
 			;;
