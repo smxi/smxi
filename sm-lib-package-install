@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.5
-####  Date: January 19 2010
+####  version: 3.3.6
+####  Date: March 11 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -611,13 +611,7 @@ non_free_installer()
 				repeat='true'
 				;;
 			java-plugin)
-				if [ "$BITS" == 32 ];then
-					package_group_installer plain sun-java6-plugin 'update_to_nonfree_sources'
-				else
-					package_group_installer plain java-gcj-compat-plugin
-				fi
-				echo "${S}Now checking for older versions of Java to update system..."${N}
-				update-alternatives --config java
+				java_plugin_installer
 				repeat='true'
 				;;
 			ms-core-fonts)
@@ -1177,6 +1171,32 @@ install_openoffice()
 ###---------------------------------------------------------------------
 ### package install stuff -  non free
 ###---------------------------------------------------------------------
+
+java_plugin_installer()
+{
+	eval $LOGPS
+	
+	local sunJava=$( check_package_status 'sun-java6-plugin' 'c' )
+	local installed=''
+	
+	echo $LINE
+	echo "${S}Checking for ${C}Java Plugin${S} installation candidates...${N}"
+	if [ -n "$sunJava" ];then
+		package_group_installer plain sun-java6-plugin 'update_to_nonfree_sources'
+		installed='true'
+	elif [ -n "$( check_package_status 'java-gcj-compat-plugin' 'c' )" ];then
+		package_group_installer plain java-gcj-compat-plugin
+		installed='true'
+	else
+		echo "${M}No ${C}Java plugin${M} available in your ${C}$BITS bit $SYSTEM_BASE${M} install."
+		echo "${S}Sometimes the package names change, let the ${C}$SCRIPT_NAME${S} maintainer know.${N}"
+	fi
+	if [ "$installed" == 'true' ];then
+		echo "${S}Now checking for older versions of ${C}Java{S} to update system...${N}"
+		update-alternatives --config java
+	fi
+	eval $LOGPE
+}
 
 # grabs the latest skype deb from the skype site and installs it
 reinstall_skype()
