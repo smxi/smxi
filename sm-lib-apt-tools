@@ -1359,7 +1359,7 @@ set_apt_type()
 			echo $MLINE
 			echo "${M}Only use ${C}aptitude${M} if you have not already used ${C}apt-get${M}, or if you have set up your"
 			echo "system to use ${C}aptitude${M}. If you have used ${C}apt-get${M}, ${C}aptitude${M} may want to remove some" 
-			echo "${C}apt-get${M} installed packages unless you manually take care of that before running this."
+			echo "${C}apt-get${M} installed packages unless you manually take care of that before running ${C}$SCRIPT_NAME${M}."
 			echo $MLINE
 			echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S} will use that"
 			echo "for all its operations. If you are in doubt, maybe exit here to learn more"
