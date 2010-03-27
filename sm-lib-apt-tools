@@ -1357,12 +1357,12 @@ set_apt_type()
 			echo $LINE
 			echo "${S}Set ${C}$SCRIPT_NAME${S} to use package manager ${C}apt-get${S} or ${C}aptitude${S}."
 			echo $MLINE
-			echo "${M}Only use ${C}aptitude${M} if you have not already used ${C}apt-get${M}, or if you have"
-			echo "set up your system to use ${C}aptitude${M}. If you have used ${C}apt-get${M}, ${C}aptitude${M} may want to remove"
-			echo "some ${C}apt-get${M} installed packages unless you manually take care of that before running this."
+			echo "${M}Only use ${C}aptitude${M} if you have not already used ${C}apt-get${M}, or if you have set up your"
+			echo "system to use ${C}aptitude${M}. If you have used ${C}apt-get${M}, ${C}aptitude${M} may want to remove some ${C}apt-get${M}" 
+			echo "installed packages unless you manually take care of that before running this."
 			echo $MLINE
-			echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S}"
-			echo "will use that for all its operations. If you are in doubt, maybe exit here to learn more"
+			echo "${S}If you already know which you want to use, just select it and ${C}$SCRIPT_NAME${S} will use that"
+			echo "for all its operations. If you are in doubt, maybe exit here to learn more"
 			echo "about the pros and cons of each method."
 			echo
 			echo "Your current setting is: ${C}$aptTypeSetting"
