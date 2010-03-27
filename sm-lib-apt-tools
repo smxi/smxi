@@ -1328,7 +1328,7 @@ check_add_remove_sources()
 	eval $LOGUE
 }
 
-# args: $1 - optional, conversion, first-run
+# args: $1 - conversion, first-run, tweaks
 set_apt_type()
 {
 	eval $LOGPS
@@ -1339,7 +1339,7 @@ set_apt_type()
 	local exitOpt='4' contOpt='continue'
 	
 	# case 1, first run and already set, do nothing
-	if [ -n "$aptType" -a "$1" == 'first-run' ];then
+	if [ -n "$aptType" -a "$1" != 'tweaks' ];then
 		:
 	else
 		# no point in showing this option if aptitude isn't even installed
@@ -1353,7 +1353,7 @@ set_apt_type()
 				exitOpt='3'
 				contOpt=''
 			fi
-			options="apt-get aptitude $contOpt exit"
+			
 			echo $LINE
 			echo "${S}Set ${C}$SCRIPT_NAME${S} to use package manager ${C}apt-get${S} or ${C}aptitude${S}."
 			echo $MLINE
@@ -1377,7 +1377,8 @@ set_apt_type()
 			echo $LINE
 			echo $SLE
 			echo $LINE
-	
+			
+			options="apt-get aptitude $contOpt exit"
 			select opt in $options
 			do
 				case $opt in
@@ -1405,7 +1406,7 @@ set_apt_type()
 			done
 		else
 			set_sm_pref_values "$smPref" "apt-get"
-			if [ "$1" != 'conversion' -a  "$1" != 'first-run' ];then
+			if [ "$1" == 'tweaks' ];then
 				echo "${C}aptitude${M} is not installed on your system, so there is nothing to set.${N}"
 				print_hec
 			fi

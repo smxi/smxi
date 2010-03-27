@@ -185,7 +185,7 @@ advanced_tweaks()
 	do
 		case $opt in
 			apt-type)
-				set_apt_type
+				set_apt_type 'tweaks'
 				repeat='true'
 				;;
 			change-debian-mirrors)
