@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.6
-####  Date: March 11 2010
+####  version: 3.3.7
+####  Date: March 29 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -690,7 +690,7 @@ utilities_installer()
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
 	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a good command line tool to setup wired and wireless networking."
-	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S}, a fork of ${C}infobash${S}. Bigger, better, more features!"
+	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S} + all dependencies/recommends. Feature rich CLI sys info tool."
 	echo "     If ${C}Konversation${S} is present, also creats link so you can run inxi directly: ${C}/inxi${S}"
 	echo "     Runs once with full (${C}-F${S}) options when you install it. See ${C}inxi -h${S} for all options."
 	echo "${C}11${S} - ${C}rbxi${S} Download/install ${C}rbxi package${S}, the new rysnc/rdiff-backup tool."
@@ -1277,14 +1277,25 @@ inxi_installer()
 {
 	local konviPath='/usr/share/apps/konversation/scripts/'
 	local konviKde4Path='/usr/share/kde4/apps/konversation/scripts/'
-	local netTools='net-tools' isAvailable=''
+	local isAvailable=''
 
 	echo $LINE
-	# install ifconfig utility for full inxi functionality
-	if [ -z "$( which ifconfig )" -a -n "$( check_package_status $netTools )" ];then
-		package_installer $netTools 'install-missing'
+	# install core depends just in case
+	echo "${S}Installing ${C}inxi${S} and its dependencies/recommends..."
+	echo "Checking/installing core dependency packages...${N}"
+	package_installer 'coreutils gawk grep hostname pciutils free procps' 'install-missing'
+	echo $LINE
+
+	# install x tools if x is installed
+	if [ -n "$( check_package_status 'xserver-xorg-core' 'i' )" ];then
+		echo "${S}Checking/installing graphics recommended packages...${N}"
+		package_installer 'mesa-utils X11-utils x11-xserver-utils' 'install-missing'
 		echo $LINE
 	fi
+	# install dependencies
+	echo "${S}Checking/installing utility recommended packages...${N}"
+	package_installer 'file hddtemp lm-sensors module-init-tools net-tools sysvinit usbutils' 'install-missing'
+	echo $LINE
 
 	echo "${S}Installing and running ${C}inxi -F${S} now...${N}"
 	run_script_import $MOD_INXI
@@ -1296,9 +1307,9 @@ inxi_installer()
 		echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
 		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviKde4Path}$MOD_INXI
 	fi
-	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options in sidux irc!!!"
+	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options unless requested in IRC."
 	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-d${S} or ${C}-v3${S}"
-	echo "See ${C}inxi -h${S} for the full list of supported output options, and please don't flood ${C}#sidux irc${S}!!!${N}"
+	echo "See ${C}inxi -h${S} for the full list of supported output options.${N}"
 	print_hec
 }
 

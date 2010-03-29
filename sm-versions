@@ -8,7 +8,7 @@ sm-lib-kde4-updater=0.7.34:January 27 2010
 sm-lib-kernel=2.5.63:March 16 2010
 sm-lib-kernel-install=2.11.7:December 19 2009
 sm-lib-misc-tweaks=1.22.10:March 27 2010
-sm-lib-package-install=3.3.6:March 11 2010
+sm-lib-package-install=3.3.7:March 29 2010
 sm-lib-package-removal=1.4.1:December 2 2009
 sm-lib-warning=2.0.2:April 15 2009
 sm-lib-2006-fixes=1.2.2:June 8 2008
@@ -23,6 +23,6 @@ sgfxi=4.13.24:March 25 2010
 svmi=2.5.17:March 26 2010
 inxi=1.4.8:March 5 2010
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.29.15:March 27 2010
+sm-main-version=8.29.16:March 29 2010
 
 ###**EOF**###
