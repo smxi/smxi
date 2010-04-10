@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.18
-####  Date: March 27 2010
+####  version: 1.22.19
+####  Date: April 9 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -735,8 +735,9 @@ advanced_broken_dependency_handler()
 			packageGroup='OpenOffice.org'
 			;;
 		samba)
+			# |smbfs non-critical but chronic version mismatch, removed from list
 			packages="
-			$( package_tester '(samba|samba-common|samba-common-bin|libsmbclient|smbclient|smbfs)' )
+			$( package_tester '(samba|samba-common|samba-common-bin|libsmbclient|smbclient)' )
 			"
 			packageGroup='samba'
 			;;
@@ -765,8 +766,9 @@ advanced_broken_dependency_handler()
 			packageGroup='Transmission'
 			;;
 		xfce4)
+			# note: xfce4-settings|xfce4-panel are chronically version mismatched now, sigh...
 			packages="
-			$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-settings|xfce4-session|xfwm4|xfce4-panel|xfconf)' )
+			$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-session|xfwm4|xfconf)' )
 			"
 			packageGroup='Xfce4'
 			;;
