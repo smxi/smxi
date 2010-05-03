@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.9.2
-####  Date: February 26 2010
+####  version: 2.9.3
+####  Date: May 2 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -514,7 +514,8 @@ remove_the_kernel()
 	local removeList="$( package_tester "$kernelToRemove" 'wild-full' )"
 
 	if [ "$kernelToRemove" != "$kernelCleaned" ];then
-		removeList="$removeList $( package_tester "$kernelCleaned-common" 'wild-full' )"
+		# saw a weird glitch where apt-get recieves a -all package that doesn't exist, dpkg must show it
+		removeList="$removeList $( package_tester "$kernelCleaned-common" 'wild-full' | grep -v '\-all' )"
 		removeList="$removeList $( package_tester "linux-support-$kernelCleaned" 'wild-full' )"
 	fi
 	removeList="$removeList $metaHeadersPackage $metaImagePackage"
