@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.21
-####  Date: December 2 2009
+####  version: 1.1.22
+####  Date: May 15 2010
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,6 +28,7 @@
 #### 6 chaos, 7 tartaros, 8 gaia, 9 eros - 2007-01/4
 #### 10, 11, 12, 13 - 2008-01/4
 #### 14, 15, 16, 17 - 2009-01/4
+#### 18, 19, 20, 21 - 2010-01/4
 ########################################################################
 
 ###---------------------------------------------------------------------
@@ -55,6 +56,9 @@ run_2009_fixes()
 			cups_driver_fix_1
 		fi
 	elif [ "$1" == 'post' ];then
+		if [ "$DISTRO_LEVEL" -lt 18 ];then
+			sysvinit_fix_1
+		fi
 		if [ "$DISTRO_LEVEL" -lt 17 ];then
 			#xorg_1_6_fix_1
 			vbox_qt_fix_1
@@ -65,6 +69,24 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
+
+sysvinit_fix_1()
+{
+	local prefId='sysvinit-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'perl' )
+	
+	if [ "$smPref" -eq 0 ];then
+		if [ "$SIDUX_SOURCES" != 'true' ];then # fixed package in sidux repos
+			if [ -f /etc/default/rcS ];then
+				echo $LINE
+				echo "${S}Patching ${C}sysvinit${S} now...${N}"
+				sed -i "/^CONCURRENCY\=/d" /etc/default/rcS
+			fi
+		fi
+		set_sticky_prefs $prefId
+	fi
+}
 
 libvdpau1_fix_1()
 {
