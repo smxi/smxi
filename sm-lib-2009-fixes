@@ -69,7 +69,8 @@ run_2009_fixes()
 ###---------------------------------------------------------------------
 ### specific du fixes
 ###---------------------------------------------------------------------
-
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=581704
+# http://forums.debian.net/viewtopic.php?f=20&t=51996
 sysvinit_fix_1()
 {
 	local prefId='sysvinit-fix-1'
