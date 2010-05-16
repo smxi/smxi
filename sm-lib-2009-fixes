@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.23
-####  Date: May 15 2010
+####  version: 1.1.24
+####  Date: May 16 2010
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -57,7 +57,8 @@ run_2009_fixes()
 		fi
 	elif [ "$1" == 'post' ];then
 		if [ "$DISTRO_LEVEL" -lt 20 ];then
-			sysvinit_fix_1
+# 			sysvinit_fix_1 # fix added to Sid 2010-05-15 pm
+			:
 		fi
 		if [ "$DISTRO_LEVEL" -lt 17 ];then
 			#xorg_1_6_fix_1
