@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.22
+####  version: 1.1.23
 ####  Date: May 15 2010
 
 ####  Copyright (C) Harald Hope 2009
@@ -56,7 +56,7 @@ run_2009_fixes()
 			cups_driver_fix_1
 		fi
 	elif [ "$1" == 'post' ];then
-		if [ "$DISTRO_LEVEL" -lt 18 ];then
+		if [ "$DISTRO_LEVEL" -lt 20 ];then
 			sysvinit_fix_1
 		fi
 		if [ "$DISTRO_LEVEL" -lt 17 ];then
