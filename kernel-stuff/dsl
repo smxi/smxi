@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.5
-####  Date: February 12 2010
+####  version: 2.3.6
+####  Date: May 19 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####
@@ -353,6 +353,12 @@ download_kernel_files()
 	sleep $sleepTime
 	echo "Getting kernel debian.tar.gz data now..."
 	wget -r -l3 -Nc -nd -np -A.debian.tar.gz $MIRROR_MAIN -e robots=off # || error_handler 3
+	echo $LINE
+	echo $LINE
+	echo
+	sleep $sleepTime
+	echo "Getting kernel debian.tar.bz2 data now..."
+	wget -r -l3 -Nc -nd -np -A.debian.tar.bz2 $MIRROR_MAIN -e robots=off # || error_handler 3
 	case $KERNEL_TYPE in
 		liquorix)
 			cd ../
