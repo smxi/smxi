@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.7
-####  Date: March 29 2010
+####  version: 3.3.8
+####  Date: May 20 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -74,12 +74,12 @@ package_group_installer()
 		if [ "$dmUse" == 'kdm' ];then
 			dmUse=''
 		fi
-		if [ -n "$( check_package_status 'kde-minimal' )" ];then
+		if [ -n "$( check_package_status 'kde-plasma-desktop' )" ];then
 			karm='ktimetracker'
 			katePlugins=''
 			kcolor='kcolorchooser'
 			kdeAddonsKfile=''
-			kdeBase='kde-minimal kaboom'
+			kdeBase='kde-plasma-desktop kaboom'
 			kdeMultimediaKfile=''
 			khelp='khelpcenter4'
 			kickerApplets=''
