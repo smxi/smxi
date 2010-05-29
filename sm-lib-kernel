@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.68
+####  version: 2.5.69
 ####  Date: May 19 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -28,11 +28,11 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists 
-KERNEL_LIST_32='2.6.33-4.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686 2.6.31-11.dmz.1-liquorix-686 2.6.30-7.dmz.1-liquorix-686 2.6.29-4.dmz.4-liquorix-686 2.6.28-8.lqx.1-liquorix-686  2.6.26-6.slh.4-sidux-686'
+KERNEL_LIST_32='2.6.33-5.dmz.1-liquorix-686 2.6.32-12.dmz.1-liquorix-686 2.6.31-11.dmz.1-liquorix-686 2.6.30-7.dmz.1-liquorix-686 2.6.29-4.dmz.4-liquorix-686 2.6.28-8.lqx.1-liquorix-686  2.6.26-6.slh.4-sidux-686'
 KERNEL_ADVANCED_LIST_32=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
-KERNEL_LIST_64='2.6.33-4.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64 2.6.31-11.dmz.1-liquorix-amd64 2.6.30-7.dmz.1-liquorix-amd64 2.6.29-4.dmz.4-liquorix-amd64 2.6.28-8.lqx.1-liquorix-amd64 2.6.26-6.slh.4-sidux-amd64'
+KERNEL_LIST_64='2.6.33-5.dmz.1-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64 2.6.31-11.dmz.1-liquorix-amd64 2.6.30-7.dmz.1-liquorix-amd64 2.6.29-4.dmz.4-liquorix-amd64 2.6.28-8.lqx.1-liquorix-amd64 2.6.26-6.slh.4-sidux-amd64'
 KERNEL_ADVANCED_LIST_64=''
 TESTING_KERNEL_64=''
 
