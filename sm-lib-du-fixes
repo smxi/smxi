@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.0
-####  Date: January 27 2010
+####  version: 1.4.1
+####  Date: June 23 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -283,7 +283,10 @@ main_upgrade_engine()
 			echo $LINE
 		fi
 		print_hec
-
+		# all tests already run, so if it's supported and requested, use it
+		if [ "$B_USE_DEBDELTA" == 'true' ];then
+			debdelta-upgrade || error_handler 'debdelta-error' "$?"
+		fi
 		$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
 		apt_error_handling du-1 $exitStatus
@@ -360,6 +363,10 @@ main_upgrade_engine()
 				repeat='true'
 				;;
 			$DU_UPGRADE-again)
+				# all tests already run, so if it's supported and requested, use it
+				if [ "$B_USE_DEBDELTA" == 'true' ];then
+					debdelta-upgrade || error_handler 'debdelta-error' "$?"
+				fi
 				$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
 				apt_error_handling du-2 $exitStatus

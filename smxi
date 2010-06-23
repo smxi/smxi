@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.39
+####  version: 8.11.40
 ####  Date: June 23 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -280,6 +280,7 @@ B_TESTING_1=''
 B_TESTING_2=''
 B_UDEV_KERNEL26='false'
 B_UDEV_KERNEL26_DU='false'
+B_USE_DEBDELTA='false'
 CHANGE_KERNEL_MIRROR=''
 CHANGE_MIRRORS=''
 DEFAULT_KERNEL=''
@@ -495,6 +496,14 @@ error_handler()
 	case $errorId in
 		# general system checks - 2-100: fatal - exit
 		# note: I'm leaving 1 as a default script wide as I move to this error handler
+		debdelta-missing)
+			errorCode=28
+			errorMessage="You do not appear to have debdelta installed but used -! 32 option.\nThis option is only for Debian, and you must have that package installed first."
+			;;
+		debdelta-error)
+			errorCode=27
+			errorMessage="debdelta returned error $errorExtra\n$SCRIPT_NAME cannot safely continue, sorry. Please debug the error."
+			;;
 		force-update-failed)
 			errorCode=4
 			errorMessage="The forced update of $SCRIPT_NAME failed. Returned error code: $errorExtra"
@@ -529,7 +538,7 @@ error_handler()
 			errorMessage="Kernel zip file failed to download or is absent. The smxi.org kernel server\n${LOG_INDENT}may be temporarily down. Please try again at a later time."
 			;;
 		kernel-zip-corrupted)
-			errorCode=33
+			errorCode=29
 			errorMessage="Kernel zip file cyclic redundancy test failed. The downloaded zip file was probably\n${LOG_INDENT}not fully downloaded, or got corrupted in some other way. Delete it and try again.\n${LOG_INDENT}This is the damaged file: $errorExtra"
 			;;
 		kernel-zip-install-failed)
@@ -2654,6 +2663,19 @@ check_dpkg_update()
 	eval $LOGUE
 }
 
+# note, this is also in ubuntu, so no real need to check if debian.
+check_debdelta()
+{
+	eval $LOGUS
+	echo "${S}checking for ${C}debdelta${S} now.......${N}"
+	if [ -n "$( check_package_status 'debdelta' 'i' )" ];then
+		echo "${C}debdelta${S} present, continuing.......${N}"
+	else
+		error_handler 'debdelta-missing'
+	fi
+	eval $LOGUE
+}
+
 # args: $1 - nvidia/fglrx
 get_gfx_driver_info()
 {
@@ -3451,6 +3473,7 @@ print_usage()
 	echo "    The script will show as an additional option in the Post upgrade section."
 	echo "${C}-! 20${S} - Triggers update of ALL ${C}$SCRIPT_NAME${S} components, including ${C}$MOD_GFX${S}, ${C}$MOD_VM${S}, and ${C}$MOD_INXI${S}."
 	echo "${C}-! 21${S} - Downloads and installs ${C}rbxi${S} package to ${C}$SCRIPT_HOME."
+	echo "${C}-! 40${S} - Runs ${C}debdelta-upgrade${S} prior to running system upgrade command (requires ${C}debdelta${S} package)."
 	echo
 	echo "${S}The following can be run in X/kde:"
 	echo "${C}-h${S} Prints this ${C}h${S}elp menu."
@@ -3647,6 +3670,9 @@ get_options()
 						31)
 							B_SKIP_KDE4='true'
 							;;
+						40)
+							B_USE_DEBDELTA='true'
+							;;
 						*)	error_handler 'unsupported-option' 'option-handler' "-$opt $OPTARG\nDevelopers: see $SCRIPT_NAME -H for advanced testing options."
 							;;
 					esac
@@ -3729,6 +3755,10 @@ run_script_components()
 	test_required_startup_apps
 	# must be set after check_distro_version to set SIDUX_SOURCES global
 	set_distro_data
+	# just for -! 32 debdelta option, must happen after apt tools is loaded
+	if [ "$B_USE_DEBDELTA" == 'true' ];then
+		check_debdelta 
+	fi
 	# this sets card id
 	set_graphics_data
 	# checks for first run or -m option to run change_debian_mirrors
