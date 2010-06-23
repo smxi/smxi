@@ -498,7 +498,7 @@ error_handler()
 		# note: I'm leaving 1 as a default script wide as I move to this error handler
 		debdelta-missing)
 			errorCode=28
-			errorMessage="You do not appear to have debdelta installed but used -! 32 option.\nThis option is only for Debian, and you must have that package installed first."
+			errorMessage="You do not appear to have debdelta installed but used -! 40 option.\nThis option is only for Debian, and you must have that package installed first."
 			;;
 		debdelta-error)
 			errorCode=27
