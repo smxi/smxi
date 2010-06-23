@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.1
+####  version: 1.4.2
 ####  Date: June 23 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -285,7 +285,7 @@ main_upgrade_engine()
 		print_hec
 		# all tests already run, so if it's supported and requested, use it
 		if [ "$B_USE_DEBDELTA" == 'true' ];then
-			debdelta-upgrade || error_handler 'debdelta-error' "$?"
+			debdelta-upgrade || error_handler 'debdelta-error' "$FUNCNAME" "$?"
 		fi
 		$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
@@ -365,7 +365,7 @@ main_upgrade_engine()
 			$DU_UPGRADE-again)
 				# all tests already run, so if it's supported and requested, use it
 				if [ "$B_USE_DEBDELTA" == 'true' ];then
-					debdelta-upgrade || error_handler 'debdelta-error' "$?"
+					debdelta-upgrade || error_handler 'debdelta-error' "$FUNCNAME" "$?"
 				fi
 				$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
