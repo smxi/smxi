@@ -571,7 +571,6 @@ libc6_fix_1()
 		#echo "${M}If ${C}tzdata${M} won't let you pick your right time zone, don't worry,"
 		#echo "just select any city if this happens, then the script will let you reconfigure"
 		#echo "it after your ${C}$DU_UPGRADE${M} is done. This works fine.${N}"
-		# temp removal of locales
 		package_installer "$firmwareLinux $gccVersions initramfs-tools libc6 libc6-dev locales tzdata util-linux" 'force-always'
 		# let's only set this if needed
  		if [ "$smPref" -eq 0 ];then

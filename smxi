@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.11.38
-####  Date: March 27 2010
+####  version: 8.11.39
+####  Date: June 23 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -70,6 +70,9 @@
 ########################################################################
 
 # script global data
+# trigger to turn off libc6 pre installs in sm-kernel-install because libc6 breaks at times
+B_LIBC6_BORKED='false'
+
 NON_DEBIAN_PATTERN='(deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
 
 # system paths etc
