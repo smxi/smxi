@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.2
-####  Date: June 23 2010
+####  version: 1.4.3
+####  Date: June 25 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i) and the sidux project:
@@ -285,7 +285,7 @@ main_upgrade_engine()
 		print_hec
 		# all tests already run, so if it's supported and requested, use it
 		if [ "$B_USE_DEBDELTA" == 'true' ];then
-			debdelta-upgrade || error_handler 'debdelta-error' "$FUNCNAME" "$?"
+			run_debdelta
 		fi
 		$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 		exitStatus=${PIPESTATUS[0]}
@@ -365,7 +365,7 @@ main_upgrade_engine()
 			$DU_UPGRADE-again)
 				# all tests already run, so if it's supported and requested, use it
 				if [ "$B_USE_DEBDELTA" == 'true' ];then
-					debdelta-upgrade || error_handler 'debdelta-error' "$FUNCNAME" "$?"
+					run_debdelta
 				fi
 				$APT_TYPE $WITHOUT_RECOMMENDS $DU_UPGRADE 2>>$LOG_FILE 2>&1
 				exitStatus=${PIPESTATUS[0]}
@@ -420,6 +420,23 @@ main_upgrade_engine()
 	elif [ "$continue" == 'true' ];then
 		post_du_tasks
 	fi
+}
+
+run_debdelta()
+{
+	local exitStatus=0
+	
+	eval $LOGUS
+	echo "${S}Running ${C}debdelta-upgrade${S} now...${N}"
+	debdelta-upgrade
+	exitStatus="$?"
+	#note: exit status 0 is success, but 1 and 2 are ok to have happen
+	if [ "$exitStatus" -gt 2 ];then
+		error_handler 'debdelta-error' "$FUNCNAME" "$exitStatus"
+	else
+		echo "${C}debdelta-upgrade${S} appears to have executed successfully. Continuing.${N}"
+	fi
+	eval $LOGUE
 }
 
 
