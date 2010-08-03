@@ -1,5 +1,5 @@
 smxi=8.11.41:June 23 2010
-sm-lib-apt-tools=1.22.20:June 26 2010
+sm-lib-apt-tools=1.22.21:August 2 2010
 sm-lib-clean-up=2.9.3:May 2 2010
 sm-lib-distro-conversion=3.2.13:March 29 2009
 sm-lib-du-fixes=1.4.3:June 25 2010
@@ -23,6 +23,6 @@ sgfxi=4.13.59:July 30 2010
 svmi=2.5.25:June 29 2010
 inxi=1.4.12:July 24 2010
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.29.36:August 02 2010
+sm-main-version=8.29.37:August 02 2010
 
 ###**EOF**###

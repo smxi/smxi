@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.20
-####  Date: June 26 2010
+####  version: 1.22.21
+####  Date: August 2 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1782,10 +1782,15 @@ list_bad_sidux_mirrors()
 {
 	eval $LOGUS
 	# these are currently either dead or defective:
+	# note that internap is just a temp offline thing, no need to do the
+	# bad mirror fix, just pull it for new users and include it for mirror
+	# switcher
 	local badMirrors='
 core-eu-4:http://ftp.spline.de/pub/sidux/debian/
 usa-2:http://lug01.eecs.wsu.edu/sidux/
 usa-1:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/
+alt-usa-1:http://ftp-mirror.internap.com/pub/sidux/debian/
+alt-usa-2:ftp://ftp-mirror.internap.com/pub/sidux/debian/
 alt-usa-3:ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/
 new-zealand-1:ftp://debian.co.nz/Sidux/debian/
 '
@@ -1816,8 +1821,6 @@ alt-eu-1:http://www.mirrorservice.org/sites/sidux.com/sidux/debian/
 alt-eu-2:ftp://ftp.mirrorservice.org/sites/sidux.com/sidux/debian/
 alt-eu-3:http://ftp.heanet.ie/pub/sidux/debian/
 alt-eu-4:ftp://ftp.heanet.ie/pub/sidux/debian/
-alt-usa-1:http://ftp-mirror.internap.com/pub/sidux/debian/
-alt-usa-2:ftp://ftp-mirror.internap.com/pub/sidux/debian/
 alt-usa-3:http://mira.sunsite.utk.edu/sidux/debian/
 "
 
