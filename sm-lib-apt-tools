@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.21
-####  Date: August 2 2010
+####  version: 1.22.22
+####  Date: September 7 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1341,7 +1341,7 @@ set_apt_type()
 	local exitOpt='4' contOpt='continue'
 	
 	# case 1, first run and already set, do nothing
-	if [ -n "$aptType" -a "$1" != 'tweaks' ];then
+	if [ -n "$aptType" -a "$1" == 'first-run' ];then
 		:
 	else
 		# no point in showing this option if aptitude isn't even installed

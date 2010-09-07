@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.13
-####  Date: March 29 2009
+####  version: 3.2.14
+####  Date: September 7 2010
 
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -55,7 +55,8 @@ check_debian()
 				;;
 		esac
 		conversionOptions=''
-		altText1="${M}It is not safe to run sidux sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
+		#altText1="${M}It is not safe to run sidux sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
+		altText1=""
 		optionSet='stable'
 	fi
 	if [ "$DISTRO" == 'antix' ];then
