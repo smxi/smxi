@@ -87,15 +87,24 @@ EASMS='/etc/apt/sources.list.d/mirror.sidux.com.list'
 EASDL='/etc/apt/sources.list.d/debian.list'
 EASSL='/etc/apt/sources.list.d/sidux.list'
 EDD='/etc/default/distro'
+
 # this is always going to preference grub 2 even if grub 1 is present
 if [ -f /boot/grub/grub.cfg ];then
 	GRUB_PATH='/boot/grub/grub.cfg'
 	GRUB_BU_PATH=''
 	B_GRUB_2=true
-else 
+elif [ -f /boot/grub/menu.lst ];then
 	GRUB_PATH='/boot/grub/menu.lst'
 	GRUB_BU_PATH=$GRUB_PATH'-bu-'$(date +%y-%m-%d)
 	B_GRUB_2=false
+# elif [ -f /etc/lilo.conf ];then
+# 	GRUB_PATH='/trigger-false-file-found-test'
+# 	GRUB_BU_PATH=''
+# 	B_GRUB_2=false
+else
+	GRUB_PATH='/trigger-false-file-found-test'
+	B_GRUB_2=false
+	GRUB_BU_PATH=''
 fi
 
 EAX='/etc/antix-version'
