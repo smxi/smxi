@@ -539,7 +539,7 @@ error_handler()
 			;;
 		no-grub-config)
 			errorCode=7
-			errorMessage="Your system does not have a mounted $GRUB_PATH, unable to continue. $SCRIPT_NAME requires\ngrub in /boot. It does not support lilo or unmounted /boot partitions."
+			errorMessage="$SCRIPT_NAME cannot locate any /boot/grub/ config files. Unable to continue.\n$SCRIPT_NAME requires grub config files: /boot/grub/menu.lst or /boot/grub/grub.cfg\n$SCRIPT_NAME does not support lilo or unmounted /boot partitions."
 			;;
 		# kernel section errors
 		kernel-download-failed)
