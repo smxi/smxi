@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.0
+####  version: 3.3.1
 ####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -423,16 +423,20 @@ distro_number_calculator()
 	local distroYear='' distroMonth='' distroLevel='' item='' assembled=''
 	# assume system is reasonably up to date for fixes
 	local distroLevels='
-	2008:09:12
-	2008:12:13
-	2009:03:14
-	2009:06:15
-	2009:09:16
-	2009:12:17
-	2010:03:18
-	2010:06:19
 	2010:09:20
 	2010:12:21
+	2011:03:22
+	2011:06:23
+	2011:09:24
+	2011:12:25
+	2012:03:26
+	2012:06:27
+	2012:09:28
+	2012:12:29
+	2013:03:30
+	2013:06:31
+	2013:09:32
+	2013:12:33
 	'
 
 	if [ ! -f $SMDL ];then
@@ -481,8 +485,7 @@ update_to_new_sources()
 			grepSearch='(aptosid.*[[:space:]](sid|unstable)|deb-sdx)'
 			searchIdentifier='aptosid'
 			sourceFile='aptosid.list'
-			sourcesData='deb http://aptosid.com/debian/ sid main fix.main
- contrib non-free fix.contrib fix.non-free\n#deb-src http://aptosid.com/debian/ sid main fix.main'
+			sourcesData='deb http://aptosid.com/debian/ sid main fix.main\n#deb-src http://aptosid.com/debian/ sid main fix.main'
 			whichUpdate='aptosid'
 			;;
 		debian-sid)

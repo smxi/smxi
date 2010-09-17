@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.25
+####  version: 1.22.26
 ####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -1152,10 +1152,7 @@ update_to_nonfree_sources()
 							if [ -f "$i" ];then
 								echo "${S}Updating your ${C}$i${S} now...${N}"
 								# these are both updated to handle sidux mirrors as well
-								sed -i -r 's%(#?deb.*(debian\.org|aptosid\.com|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
-								# the second test requires the results of the first to work
-								# note that spaces are required for this to work more reliably for most patterns
-								sed -i -r 's%(#?deb.*(sidux\.com|sidux\.net|aptosid\.com|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|ftp-mirror\.internap\.com|ftp\.tw.debian\.org|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\snon-free)%\1 firmware fix.contrib fix.non-free %' $i
+								sed -i -r 's%(#?deb.*(debian\.org|mirrors\.kernel\.org).*\s(main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
 							fi
 						done
 						echo "${C}apt sources${S} have been updated, please check them to make sure they are right.${N}"
@@ -1315,7 +1312,7 @@ check_add_remove_sources()
 
 	case $1 in
 		aptosid)
-			sourceData='deb ftp://ftp.spline.de/pub/aptosid/debian/ sid main fix.main'
+			sourceData='deb http://aptosid.com/debian/ sid main fix.main'
 			;;
 		cathbard)
 			sourceData=''
