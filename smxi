@@ -3426,7 +3426,7 @@ print_usage()
 	echo "   -j 1 (default); -j 2 (pale); -j 3 (earthy); -j 4 (dark - for light console background)"
 	echo "${C}-L${S} Runs the option to reconfigure ${C}L${S}ocales prior to system upgrade."
 	echo "${C}-m${S} Runs the option to change debian ${C}m${S}irrors in ${C}$EAS${S}"
-# 	echo "${C}-M${S} Runs the option to change default sidux-apt/kernel ${C}M${S}irrors"
+# 	echo "${C}-M${S} Runs the option to change default aptosid-apt/kernel ${C}M${S}irrors"
 	echo "${C}-N${S} Runs the option to change ker${C}N${S}el metapackage status prior to $DU_UPGRADE."
 
 	echo "${C}-p${S} Runs $APT_TYPE update without using ${C}p${S}diffs. Good for fast connections."
