@@ -1686,7 +1686,7 @@ update_to_aptosid()
 			fi
 		done
 		echo "${S}Adding working sidux apt repo entry now for updating...${N}"
-		echo -e "# Added by smxi conversion tool:\ndeb http://sidux.com/debian main fix.main\n\n" > $EASSL
+		echo -e "# Added by smxi conversion tool:\ndeb http://sidux.com/debian main\n\n" > $EASSL
 		echo "${S}Added safe repo for conversion...${N}"
 		echo $LINE
 		echo "${M}Sending you on to dist-upgrade now. You must not exit until the dist-upgrade is completed!"
