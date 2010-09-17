@@ -1681,6 +1681,7 @@ update_to_aptosid()
 			if [ -f $sourceFile ];then
 				if [ -n "$( grep -Eis 'sidux' $sourceFile )" ];then
 					sed -i '/sidux/d' $sourceFile
+					sed -i '/Sidux/d' $sourceFile
 				fi
 			fi
 		done
