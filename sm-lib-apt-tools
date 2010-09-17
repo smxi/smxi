@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.24
+####  version: 1.22.25
 ####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -1069,7 +1069,7 @@ change_debian_mirrors()
 		if [ "$found" == 'true' ];then
 			echo $LINE
 			if [ "$skip" != 'true' ];then
-				for i in $EAS $EASDL $EASSL
+				for i in $EAS $EASDL
 				do
 					if [ -e "$i" ];then
 						sed -i "s%ftp[.a-z]*\.debian\.org%ftp\.$countryId\.debian\.org%g" $i && updateSuccess='true'
