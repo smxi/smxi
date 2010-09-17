@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.00
+####  version: 8.12.01
 ####  Date: September 16 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -84,7 +84,6 @@ EF='/etc/fstab'
 EAA='/etc/apt/apt.conf'
 EAS='/etc/apt/sources.list'
 EASDL='/etc/apt/sources.list.d/debian.list'
-EASSL='/etc/apt/sources.list.d/sidux.list'
 EDD='/etc/default/distro'
 
 # this is always going to preference grub 2 even if grub 1 is present
@@ -1687,7 +1686,7 @@ update_to_aptosid()
 			fi
 		done
 		echo "${S}Adding working sidux apt repo entry now for updating...${N}"
-		echo -e "# Added by smxi conversion tool:\ndeb http://sidux.com/debian sid main\n\n" > $EASSL
+		echo -e "# Added by smxi conversion tool:\ndeb http://sidux.com/debian sid main\n\n" > /etc/apt/sources.list.d/sidux.list
 		echo "${S}Added safe repo for conversion...${N}"
 		echo $LINE
 		echo "${M}Sending you on to dist-upgrade now. You must not exit until the dist-upgrade is completed!"
