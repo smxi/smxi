@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.1
-####  Date: September 16 2010
+####  version: 8.12.2
+####  Date: September 17 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1690,9 +1690,10 @@ update_to_aptosid()
 		echo "${S}Added safe repo for conversion...${N}"
 		echo $LINE
 		echo "${M}Sending you on to dist-upgrade now. You must not exit until the dist-upgrade is completed!"
-		echo "PLEASE DO NOT INSTALL THE KERNEL, PROCEED TO THE DIST-UPGRADE AND RUN IT THROUGH ONCE NOW!${N}"
+		echo "PLEASE PROCEED TO THE DIST-UPGRADE AND RUN IT THROUGH ONCE NOW!${N}"
 		echo $LINE
 		echo "${S}I don't want to spend much time on this conversion utility, sorry, so please follow this advice!${N}"
+		SKIP_KERNEL='true'
 		B_SKIP_A_S='true'
 		print_hec
 	fi
