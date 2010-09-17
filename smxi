@@ -285,6 +285,7 @@ B_DEBUG=''
 B_LOCALES=''
 B_OVERRIDE_GRUB_GFX=''
 B_SKIP_KDE4=''
+B_SKIP_A_S='false'
 B_TESTING_1=''
 B_TESTING_2=''
 B_UDEV_KERNEL26='false'
@@ -1693,6 +1694,7 @@ update_to_aptosid()
 		echo "PLEASE DO NOT INSTALL THE KERNEL, PROCEED TO THE DIST-UPGRADE AND RUN IT THROUGH ONCE NOW!${N}"
 		echo $LINE
 		echo "${S}I don't want to spend much time on this conversion utility, sorry, so please follow this advice!${N}"
+		B_SKIP_A_S='true'
 		print_hec
 	fi
 	
