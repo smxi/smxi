@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.22
-####  Date: September 7 2010
+####  version: 1.22.23
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,7 +28,7 @@
 # temp for sid volatile period:
 TEMP_HOLDS='p7zip-rar:p7zip-full '
 CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data kdenlive:kdenlive-data k3b:k3b-data ktorrent:ktorrent-data pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
-#egrep -o -m1 "^(deb|deb-src)\s*http://sidux.com/debian/" /etc/apt/sources.list
+
 ###---------------------------------------------------------------------
 ### core apt utilities, test / install / remove / error handler
 ###---------------------------------------------------------------------
@@ -406,18 +406,18 @@ apt_error_handling()
 			echo "${C}1 - $APT_TYPE update-no-pdiffs${S} ${M}Recommended${S} Runs update again without pdiffs."
 			echo "    This will fix most update errors except for apt repository offline stuff."
 			echo "${C}2 - $APT_TYPE update${S} Runs update again using your current choices."
-			echo "${C}3 - change-debian-mirror${S} If the mirror that is failing is a debian mirror (will not say"
-			echo "    ${C}sidux${S} in mirror), change to another debian mirror."
-			echo "${C}4 - change-sidux-mirror${S} If the mirror that is failing is a ${C}sidux${S} mirror,"
-			echo "    change to another sidux mirror."
+			echo "${C}3 - change-debian-mirror${S} If the mirror that is failing is a Debian mirror,"
+			echo "    change to another debian mirror."
+# 			echo "${C}4 - change-aptosid-mirror${S} If the mirror that is failing is a ${C}sidux${S} mirror,"
+# 			echo "    change to another aptosid mirror."
 			echo
-			echo "${C}5 - continue${S} Continue without fixing the error, trust that it will be ok."
-			echo "${C}6 - quit${S} Exit the script now, try to figure it out yourself."
+			echo "${C}4 - continue${S} Continue without fixing the error, trust that it will be ok."
+			echo "${C}5 - quit${S} Exit the script now, try to figure it out yourself."
 			echo $LINE
 			echo $SLE
 			echo $LINE
 
-			options='update-no-pdiffs update change-debian-mirror change-sidux-mirror continue quit'
+			options='update-no-pdiffs update change-debian-mirror continue quit'
 			select opt in $options
 			do
 				eval $LOGUE
@@ -434,7 +434,7 @@ apt_error_handling()
 					change-debian-mirror)
 						change_debian_mirrors
 						;;
-					change-sidux-mirror)
+					change-aptosid-mirror)
 						change_kernel_mirrors
 						;;
 					continue)
@@ -892,7 +892,7 @@ apt_update_handler()
 	esac
 
 	if [ "$UPDATED" != 'true' -o "$forceUpdate" == 'true' ];then
-		# give users the option to add non free sources to debian and sidux
+		# give users the option to add non free sources to debian / other distros
 		update_to_nonfree_sources
 
 		# then start the update for real
@@ -917,16 +917,16 @@ apt_update_handler()
 install_keyrings()
 {
 	eval $LOGUS
-	local prefId='keyrings-sidux-1'
+	local prefId='keyrings-aptosid-1'
 	local smPref=$( sm_pref_tester $prefId )
 
-	# this handles case where sources have now been updated to sidux only
-	if [ "$smPref" -eq 0 -a "$SIDUX_SOURCES" == 'true' ];then
+	# this handles case where sources have now been updated to aptosid only
+	if [ "$smPref" -eq 0 -a "$APTOSID_SOURCES" == 'true' ];then
 		echo $LINE
 		# this handles first load cases, and also errors on first du
 		#update_gpg ## add gpg first to stop some errors.
-		package_installer 'sidux-keyrings' 'install-always' '--allow-unauthenticated'
-		package_installer 'sidux-archive-keyring' 'install-always' '--allow-unauthenticated'
+		package_installer 'aptosid-keyrings' 'install-always' '--allow-unauthenticated'
+		package_installer 'aptosid-archive-keyring' 'install-always' '--allow-unauthenticated'
 		# and no need to run this more than once, so we won't
 		set_sticky_prefs $prefId
 	fi
@@ -1108,7 +1108,8 @@ update_to_nonfree_sources()
 	local prefId='update-nonfree-1'
 	local smPref=$( sm_pref_tester $prefId )
 	local response='' i='' counter=''
-	local isFree=0
+	local isFree=0 repeat='false'
+	local opt='' options='yes-add-non-free do-not-add-non-free'
 
 	# loop through possible files to update
 	for i in $EAS $EASDL $EASSL
@@ -1135,46 +1136,49 @@ update_to_nonfree_sources()
 			echo "${S}It does not appear that you have the non-free/contrib options set up in your ${C}apt sources${S}"
 			echo "non-free / contrib let you install things like flash player, msttcorefonts, firmware, etc."
 			echo
-			echo "If you answer ${C}y${S} a copy of your ${C}apt sources${S} will be made"
+			echo "If you answer ${C}yes-add-non-free${S} a copy of your ${C}apt sources${S} will be made"
 			echo
 			echo $LINE
-			echo -e "${Q}Do you want to update your ${C}apt sources${Q} to add nonfree / contrib now?$YNE"
+			echo -e "${Q}Do you want to update your ${C}apt sources${Q} to add nonfree / contrib now?"
 			echo $LINE
-			read response
-
-			case $response in
-				y)
-					for i in $EAS $EASDL $EASSL
-					do
-						if [ -f "$i" ];then
-							# this is overkill, dumping the backup for now
-							# cp $i $i-bu-$(date +%y-%m-%d)
-							echo "${S}Updating your ${C}$i${S} now...${N}"
-							# these are both updated to handle sidux mirrors as well
-							sed -i -r 's%(#?deb.*(debian\.org|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
-							# the second test requires the results of the first to work
-							# note that spaces are required for this to work more reliably for most patterns
-							sed -i -r 's%(#?deb.*(sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|ftp-mirror\.internap\.com|ftp\.tw.debian\.org|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\snon-free)%\1 firmware fix.contrib fix.non-free %' $i
-						fi
-					done
-					echo "${C}apt sources${S} have been updated, please check them to make sure they are right.${N}"
-					set_sticky_prefs $prefId
-					print_hec
-					eval $LOGUE
-					;;
-				n)	echo "${S}Ok, continuing without updating them, you'll have to do that manually"
-					echo "if you change your mind later and decide you want to use non-free or contrib.${N}"
-					echo
-					set_sticky_prefs $prefId
-					eval $LOGUE
-					;;
-				*)	print_error yn
-					eval $LOGUE
-					update_to_nonfree_sources
-					;;
-			esac
+			echo $SLE
 			echo $LINE
-			echo
+			select opt in $options
+			do
+				case $opt in
+					yes-add-non-free)
+						for i in $EAS $EASDL $EASSL
+						do
+							if [ -f "$i" ];then
+								echo "${S}Updating your ${C}$i${S} now...${N}"
+								# these are both updated to handle sidux mirrors as well
+								sed -i -r 's%(#?deb.*(debian\.org|aptosid\.com|sidux\.com|sidux\.net|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\s(main|fix\.main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
+								# the second test requires the results of the first to work
+								# note that spaces are required for this to work more reliably for most patterns
+								sed -i -r 's%(#?deb.*(sidux\.com|sidux\.net|aptosid\.com|debian\.tu-bs\.de|mirrorservice\.org|heanet\.ie|spline\.de|sunsite\.utk\.edu|ftp-mirror\.internap\.com|ftp\.tw.debian\.org|leg\.uct\.ac\.za|mirror\.aarnet\.edu\.au).*\snon-free)%\1 firmware fix.contrib fix.non-free %' $i
+							fi
+						done
+						echo "${C}apt sources${S} have been updated, please check them to make sure they are right.${N}"
+						set_sticky_prefs $prefId
+						print_hec
+						;;
+					do-not-add-non-free)	
+						echo "${S}Ok, continuing without updating them, you'll have to do that manually"
+						echo "if you change your mind later and decide you want to use non-free or contrib.${N}"
+						echo
+						set_sticky_prefs $prefId
+						;;
+					*)	
+						print_error opt
+						repeat='true'
+						;;
+				esac
+				break
+			done
+			eval $LOGUE
+			if [ "$repeat" == 'true' ];then
+				update_to_nonfree_sources
+			fi
 		fi
 	fi
 }
@@ -1188,6 +1192,8 @@ update_sources()
 {
 	eval $LOGUS
 	local op='' dmz='' multi='' doUpdate='' plain='' skyp='' swift=''
+	local aptosidSources='deb ftp://ftp.spline.de/pub/aptosid/debian/ sid main fix.main
+'	local aptosidApt="$EAS.d/aptosid.list"
 	local liquorixSources='deb http://liquorix.net/debian/ sid main'
 	local liquorixApt="$EAS.d/liquorix.list"
 	local operaSources='deb http://deb.opera.com/opera sid non-free'
@@ -1200,6 +1206,12 @@ update_sources()
 	local updateReturn=1
 
 	case $1 in
+		aptosid)
+			grepSearch='(aptosid|deb-ats)'
+			searchIdentifier='Aptosid'
+			sourceFile=$aptosidApt
+			sourcesData=$aptosidSources
+			;;
 		liquorix)
 			grepSearch='(liquorix|deb-lqx)'
 			searchIdentifier='Liquorix'
@@ -1302,8 +1314,8 @@ check_add_remove_sources()
 	local sourcePresent=$( egrep -ils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
 
 	case $1 in
-		sidux)
-			sourceData='deb http://sidux.com/debian/ sid main'
+		aptosid)
+			sourceData='deb ftp://ftp.spline.de/pub/aptosid/debian/ sid main fix.main'
 			;;
 		cathbard)
 			sourceData=''
@@ -1443,14 +1455,14 @@ force_kernel_mirror_change()
 
 	if [ -n "$isBorked" -a "$smPref" -eq 0 ];then
 		echo $MLINE
-		echo "${M}SMXI sidux-apt Kernel / Sources Mirror Update"
+		echo "${M}SMXI aptosid-apt Kernel / Sources Mirror Update"
 		echo $MLINE
-		echo "${S}Your current sidux-apt/kernel mirror: ${C}$borkedMirror${S}"
-		echo "has been changed. You will need to update your sidux mirrors to use the new (kernel)"
+		echo "${S}Your current aptosid-apt/kernel mirror: ${C}$borkedMirror${S}"
+		echo "has been changed. You will need to update your aptosid mirrors to use the new (kernel)"
 		echo "mirror location. Please continue in order to change that bad mirror to a good one."
 		if [ "$B_APT_PROX" == 'true' ];then
 			echo $MLINE
-			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian/sidux "
+			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your apt "
 			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
 			echo "have to update your ${C}$EAS${M} apt proxy config data manually.${N}"
 			log_function_data "Apt proxy :9999 format/syntax for kernel mirror forced Debian apt mirror sources"
@@ -1462,7 +1474,7 @@ force_kernel_mirror_change()
 			echo
 			echo -e "${Q}Would you like to reset your mirror now?$YNE"
 			echo $LINE
-			echo "${C}1 - yes-reset-mirror${S} - Launch sidux mirror selector."
+			echo "${C}1 - yes-reset-mirror${S} - Launch aptosid mirror selector."
 			echo "${C}2 - no-change-to-mirror${S} - Leave current setup as is for now."
 			echo $LINE
 			echo -e $SLE
@@ -1502,12 +1514,12 @@ force_kernel_mirror_change()
 change_kernel_mirrors()
 {
 	eval $LOGPS
-	if [ -n "$SIDUX_SOURCES" ];then
+	if [ -n "$APTOSID_SOURCES" ];then
 		echo $MBAR
 		echo "${M} SMXI KERNEL MIRROR SELECTION"
 		echo $MLINE
 		if [ "$B_APT_PROX" == 'true' ];then
-			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your Debian/sidux "
+			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your apt "
 			echo "mirrors in ${C}$EAS${M} that this script cannot work with. You will"
 			echo "have to update your ${C}$EAS${M} sources manually.${N}"
 			log_function_data "Apt proxy :9999 format/syntax for kernel mirror Debian apt mirror sources"
@@ -1537,12 +1549,12 @@ change_kernel_mirrors()
 			if [ "$1" == 'prefs' ];then
 				prefMess='echo -e "\n${M}You will only see this Kernel Mirror Selection option the first time you run\nthe script. To reset your kernel mirrors in the future, use the ${C}-M${M} option.${S}"'
 			fi
-			echo "${S}Welcome to the sidux apt/kernel mirror selector. Please take a moment to read this"
-			echo "before proceeding. Your current sidux-apt/kernel mirror$plural1 $plural2:"
+			echo "${S}Welcome to the aptosid apt/kernel mirror selector. Please take a moment to read this"
+			echo "before proceeding. Your current aptosid-apt/kernel mirror$plural1 $plural2:"
 			echo "${SPACER}${C}$currentMirrorText${S}"
 			echo
 			echo "There are two types of mirrors: ${C}core${S} (required), and ${C}alternate${S} (optional)."
-			echo "The following are the ${C}core${S} sidux mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
+			echo "The following are the ${C}core${S} aptosid mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
 			echo "${S}You will always use one of these. Picking a core will modify the core mirror always."
 			echo
 			echo "Alternate mirrors are localized, and often provide much faster downloads, but do not sync"
@@ -1833,7 +1845,7 @@ alt-usa-3:http://mira.sunsite.utk.edu/sidux/debian/
 ###---------------------------------------------------------------------
 
 # check apt for latest kernel version
-# args: $1 - debian/debian-486/liquorix/mepis (no metapackage)/sidux - optional,
+# args: $1 - debian/debian-486/liquorix/mepis (no metapackage)/aptosid - optional,
 # to get current sid kernel version if needed
 get_current_apt_kernel()
 {
@@ -1854,6 +1866,13 @@ get_current_apt_kernel()
 		fi
 
 		case $defaultKernel in
+			aptosid)
+				kernelStringExtra='-aptosid'
+				distro='Aptosid'
+				if [ "$BITS" == '32' ];then
+					platform='686'
+				fi
+				;;
 			debian)
 				distro='Debian'
 				;;
@@ -1867,7 +1886,7 @@ get_current_apt_kernel()
 				;;
 			liquorix)
 				kernelStringExtra='-liquorix'
-				distro='liquorix'
+				distro='Liquorix'
 				if [ "$BITS" == '32' ];then
 					platform='686'
 				fi
@@ -1881,18 +1900,11 @@ get_current_apt_kernel()
 				distro='Mepis'
 				platform='smp'
 				;;
-			sidux)
-				kernelStringExtra='-sidux'
-				distro='sidux'
-				if [ "$BITS" == '32' ];then
-					platform='686'
-				fi
-				;;
 		esac
 		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra"
 
 		# little trick here to present just debian kernels if not distro
-		if [ "$SIDUX_SOURCES" != 'true' -a "$LIQUORIX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
+		if [ "$APTOSID_SOURCES" != 'true' -a "$LIQUORIX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
 			kernelStringExtra=''
 			distro='Debian'
 			defaultKernel='debian'
@@ -1941,9 +1953,9 @@ get_current_apt_kernel()
 				CURRENT_MEPIS_KERNEL=$currentKernel
 				log_function_data "CURRENT_MEPIS_KERNEL: $CURRENT_MEPIS_KERNEL"
 				;;
-			sidux)
-				CURRENT_SIDUX_KERNEL=$currentKernel
-				log_function_data "CURRENT_SIDUX_KERNEL: $CURRENT_SIDUX_KERNEL"
+			aptosid)
+				CURRENT_APTOSID_KERNEL=$currentKernel
+				log_function_data "CURRENT_APTOSID_KERNEL: $CURRENT_APTOSID_KERNEL"
 				;;
 		esac
 

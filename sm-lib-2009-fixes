@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2009-fixes
-####  version: 1.1.24
-####  Date: May 16 2010
+####  version: 1.1.25
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -79,7 +79,7 @@ sysvinit_fix_1()
 	local isInstalled=$( package_tester 'perl' )
 	
 	if [ "$smPref" -eq 0 ];then
-		if [ "$SIDUX_SOURCES" != 'true' ];then # fixed package in sidux repos
+		if [ "$APTOSID_SOURCES" != 'true' ];then # fixed package in sidux repos
 			if [ -f /etc/default/rcS ];then
 				echo $LINE
 				echo "${S}Patching ${C}sysvinit${S} now...${N}"

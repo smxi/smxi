@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.2.14
-####  Date: September 7 2010
+####  version: 3.3.0
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -19,10 +19,12 @@
 ####  Script Author: Harald Hope
 ####  This is a library file for smxi and cannot be run independently
 
-####  Script URL: http://smxi.org/sm/sm-lib-sidux-packages
+####  Script URL: http://smxi.org/sm/sm-lib-distro-conversion
 ####  Script SVN: http://code.google.com/p/smxi
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
+
+OFFER_LIQUORIX_KERNELS='false'
 
 # will remove flag files if user exits early
 # args: $1 - FUNCNAME
@@ -43,11 +45,11 @@ check_debian()
 	eval $LOGMS
 	trap 'conversion_trap_handler $FUNCNAME' INT TERM EXIT
 	local opt='' options='' repeat='' optionSet='debian'
-	local conversionOptions='sidux-sources sidux-packages'
-	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run sidux kernels."
-	local mepisId=''
+	local conversionOptions='aptosid-sources'
+	local quitNu='' altText1="Options ${C}2${S} and ${C}3${S} let you run aptosid kernels."
+	local mepisId='' 
 
-	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'etch' ];then
+	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'lenny' -o "$SYSTEM_BASE" == 'etch' ];then
 		# have to use this for wild card mepis string, mepis-8.x...
 		case $DISTRO in
 			mepis*)
@@ -55,14 +57,20 @@ check_debian()
 				;;
 		esac
 		conversionOptions=''
-		#altText1="${M}It is not safe to run sidux sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
+		#altText1="${M}It is not safe to run aptosid sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
 		altText1=""
 		optionSet='stable'
+	else
+		OFFER_LIQUORIX_KERNELS='true'
 	fi
 	if [ "$DISTRO" == 'antix' ];then
-		conversionOptions='antix-sid antix-sid-sidux antix-sidux-packages'
+		conversionOptions='antix-sid antix-sid-aptosid'
 		altText1="${M}Here are your options for your Anti-X system:"
 		optionSet='antix'
+	elif [ "$DISTRO" == 'aptosid' ];then
+		conversionOptions=''
+		altText1=''
+		optionSet='aptosid'
 	fi
 	options="continue-no-change $conversionOptions quit"
 	quitNu=$( wc -w <<< $options )
@@ -72,27 +80,34 @@ check_debian()
 	echo "${M}You appear to be using Debian or a Debian derived distro based on ${C}Debian $SYSTEM_BASE${S}."
 	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
 	echo
-	echo "${W}There are no guarantees, support for all the options is a work in progress.${S}"
+	echo "${W}There are no guarantees, as usual with the text of the GPL, but your results should be fine.${S}"
 	echo -e "$altText1"
 	echo $LINE
 	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
 	echo "    Only ${C}$SCRIPT_NAME${S} fixes will run, and you can use the other script options too."
 
 	case "$optionSet" in
-		debian)
-			echo "${C}2${S} - ${C}sidux-sources${S} Adds sidux sources to your apt repos, otherwise no change."
-			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-			echo "${C}3${S} - ${C}sidux-packages${S} Will add sidux sources and install core sidux packages."
-			echo "    ${M}NOTE: This will not ${C}convert${M} your system to sidux, just install some packages."
-			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
-			;;
 		antix)
 			echo "${C}2${S} - ${C}antix-sid${S} Adds sid sources to your apt repos, otherwise no change."
-			echo "    This lets you for example run Debian Sid with sidux fixes and kernels."
-			echo "${C}3${S} - ${C}antix-sid-sidux${S} Adds sid sources and sidux sources, no sidux package installs."
-			echo "${C}4${S} - ${C}antix-sidux-packages${S} Adds sid sources/sidux sources, installs core sidux packages."
-			echo "    ${M}NOTE: This will not ${C}convert${M} your system to sidux, just install some packages."
-			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
+			echo "    This lets you for example run Debian Sid with aptosid fixes and kernels."
+			echo "${C}3${S} - ${C}antix-sid-aptosid${S} Adds sid sources and aptosid sources, no aptosid package installs."
+# 			echo "${C}4${S} - ${C}antix-aptosid-packages${S} Adds sid sources/aptosid sources, installs core aptosid packages."
+# 			echo "    ${M}NOTE: This will not ${C}convert${M} your system to aptosid, just install some packages."
+# 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
+			;;
+		aptosid)
+			echo "    ${M}Please note: ${C}Aptosid${M} users: ${C}$SCRIPT_NAME${M} now will treat"
+			echo "    Aptosid as a standard Debian derived distro."
+			echo
+			echo "    Not all the old distro specific features will be working the way they used"
+			echo "    to when ${C}sidux${M} existed."
+			;;
+		debian)
+			echo "${C}2${S} - ${C}aptosid-sources${S} Adds aptosid sources to your apt repos, otherwise no change."
+			echo "    This lets you for example run Debian Sid with aptosid fixes and kernels."
+# 			echo "${C}3${S} - ${C}aptosid-packages${S} Will add aptosid sources and install core aptosid packages."
+# 			echo "    ${M}NOTE: This will not ${C}convert${M} your system to aptosid, just install some packages."
+# 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
 			;;
 	esac
 
@@ -118,21 +133,21 @@ check_debian()
 				antix_fix_1
 				trap - INT TERM EXIT
 				;;
-			antix-sid-sidux)
+			antix-sid-aptosid)
 				update_smxi_data
 				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
-				update_to_new_sources 'sidux'
+				update_to_new_sources 'aptosid'
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				antix_fix_1
 				trap - INT TERM EXIT
 				;;
-			antix-sidux-packages)
+			antix-aptosid-packages)
 				update_smxi_data
 				tweak_antix_sources
 				update_to_new_sources 'debian-sid'
-				update_to_new_sources 'sidux'
+				update_to_new_sources 'aptosid'
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				antix_fix_1
@@ -140,16 +155,16 @@ check_debian()
 				CON_DEB='true'
 				trap - INT TERM EXIT
 				;;
-			sidux-sources)
+			aptosid-sources)
 				update_smxi_data
-				update_to_new_sources 'sidux'
+				update_to_new_sources 'aptosid'
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				trap - INT TERM EXIT
 				;;
-			sidux-packages)
+			aptosid-packages)
 				update_smxi_data
-				update_to_new_sources 'sidux'
+				update_to_new_sources 'aptosid'
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				print_conversion_information
@@ -177,7 +192,7 @@ print_conversion_information()
 	eval $LOGUS
 	echo $MLINE
 	echo "${C}$SCRIPT_NAME${M} will now proceed to the $DU_UPGRADE, which will update your system to current."
-	echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE sidux package"
+	echo "Do not quit the script until the $DU_UPGRADE and post $DU_UPGRADE aptosid package"
 	echo "install is completed!"
 	echo ""
 	print_hec
@@ -190,21 +205,21 @@ install_window_manager()
 	echo $MBAR
 	echo "${M}Window manager install process"
 	echo $LINE
-	echo "${S}After the sidux components are installed, please continue on to the"
+	echo "${S}After the aptosid components are installed, please continue on to the"
 	echo "${C}Package Install${S} section which will come next, in ${C}Post $DU_UPGRADE${S}."
 	echo "Choose the ${C}display manager${S} option, then first install xorg, then your preferred."
 	echo "display manager. For older installs I recommend ${C}xfce${S} or ${C}fvwm crystal${S}.${N}"
 	print_hec
-	set_sticky_prefs debian-to-sidux-wm-1
+	set_sticky_prefs debian-to-aptosid-wm-1
 	eval $LOGUE
 }
 
-install_sidux_components()
+install_aptosid_components()
 {
 	eval $LOGPS
-	local prefId='install-sidux-packages-1'
+	local prefId='install-aptosid-packages-1'
 	local smPref=$( sm_pref_tester $prefId )
-	local siduxPackages='apt-conf-sidux configure-cups configure-dsl configure-ndiswrapper ceni deborphan distro-defaults gfxboot-theme-sidux gpm sidux-irc sidux-kernelhacking sidux-keyrings sidux-scripts udev-config-sidux wodim'
+	local aptosidPackages='apt-conf-aptosid configure-cups configure-dsl configure-ndiswrapper ceni deborphan distro-defaults gfxboot-theme-aptosid gpm aptosid-irc aptosid-kernelhacking aptosid-keyrings aptosid-scripts udev-config-aptosid wodim'
 	# grub-gfxboot
 	local i='' installedPackage=''
 
@@ -213,48 +228,48 @@ install_sidux_components()
 		echo "${M}SIDUX PACKAGE INSTALL"
 		echo $LINE
 		echo "${S}This will double check your system to make sure you have the main"
-		echo "${C}sidux${S} packages that you need for basic sidux functionality."
+		echo "${C}aptosid${S} packages that you need for basic aptosid functionality."
 		echo
 		echo "Please read each item and tell ${C}apt${S} if you want it or not by"
 		echo "answering ${C}y${S} or ${C}n${S} to $APT_TYPE install questions. For example, "
 		echo "if you don't use ${C}ndiswrapper${S} or ${C}dsl${S}, answer ${C}n${S} to those packages.${N}"
 
 		print_hec
-		echo "${S}Checking for and installing missing ${C}sidux${S} packages now...${N}"
-		for i in $siduxPackages
+		echo "${S}Checking for and installing missing ${C}aptosid${S} packages now...${N}"
+		for i in $aptosidPackages
 		do
 			package_installer "$1" 'install-missing'
 		done
-		echo "${S}Finished installing ${C}sidux${S} packages.${N}"
+		echo "${S}Finished installing ${C}aptosid${S} packages.${N}"
 		set_sticky_prefs $prefId
 	fi
 	eval $LOGPE
 }
 
 # this one needs work, not currently functioning
-sidux_graphics()
+aptosid_graphics()
 {
 	:
 }
-sidux_graphics_legacy()
+aptosid_graphics_legacy()
 {
-	local prefId='sidux-graphics-2'
+	local prefId='aptosid-graphics-2'
 	local smPref=$( sm_pref_tester $prefId ) #$GRUB_PATH
 	local OldGrub=$( awk -F= '/^# groot/{print $2}' /boot/grub/menu.lst | sed -r 's/\((.*)\)/\1/' )
 	local bm='/boot/message'
 
 	if [ "$1" == 'grub1' -a "$smPref" -eq 0 ];then
 		echo $LINE
-		echo "${S}Running ${C}sidux grub${S} fix...${N}"
+		echo "${S}Running ${C}aptosid grub${S} fix...${N}"
 		# make a copy of old penguin graphic
 		if [ -f $bm.hd -a "$DISTRO_LEVEL" -lt 5 ];then
 			cp $bm.hd $bm.hd-bu
 		fi
 		# check for old physical file, move to renamed
 		if [ -f $bm ];then
-			mv -f $bm $bm.presidux
+			mv -f $bm $bm.preaptosid
 		fi
-		# package_installer 'sidux-graphics sidux-graphics-common' 'install-always' '--reinstall'
+		# package_installer 'aptosid-graphics aptosid-graphics-common' 'install-always' '--reinstall'
 
 		# force link to file
 		if [ -L $bm -o ! -e $bm ];then
@@ -266,7 +281,7 @@ sidux_graphics_legacy()
 		grub-install --recheck --no-floppy $OldGrub
 		echo "${S}Running  ${C}grub-install${S} again...${N}"
 		grub-install --recheck --no-floppy $OldGrub
-		echo "${S}Finished with ${C}sidux grub${S} update and graphics reinstall.${N}"
+		echo "${S}Finished with ${C}aptosid grub${S} update and graphics reinstall.${N}"
 		set_sticky_prefs $prefId
 	fi
 }
@@ -275,10 +290,56 @@ sidux_graphics_legacy()
 ### conversion utilities
 ###---------------------------------------------------------------------
 
+offer_liquorix_kernel()
+{
+	eval $LOGUS
+	local opt='' options='yes-add-liquorix-sources continue-without-adding-liquorix'
+	local repeat='false'
+	
+	echo $MLINE
+	echo "${M}Add ${C}Liquorix${M} Kernel Sources?"
+	echo $MLINE
+	echo "${S}Selecting ${C}yes-add-liquorix-sources${M} will add ${C}Liquorix${M} kernel apt repositories"
+	echo " to your system, after which you will be able to install them in ${C}Advanced Kernel Install${S} options, "
+	echo "or make it your system default in ${C}Miscellaneous Tweaks${M}."
+	echo 
+	echo "${C}Liquorix${S} kernels${S} are popular desktop optimized performance kernels."
+	echo $LINE
+	echo $SLE
+	echo $LINE
+	select opt in $options
+	do
+		case $opt in
+			yes-add-liquorix-sources)
+				run_script_import $LIB_APT_TOOLS
+				run_script_import $LIB_KERNEL_INSTALL
+				add_liquorix_kernels
+				run_script_import $LIB_MISC_TWEAKS
+				set_default_system_kernel 'conversion'
+				;;
+			continue-without-adding-liquorix)
+				echo "${S}OK, moving along without adding Liquorix sources...${N}"
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	eval $LOGUE
+	if [ "$repeat" == 'true' ];then
+		offer_liquorix_kernel
+	fi
+}
+
 update_smxi_data()
 {
 	eval $LOGPS
 	run_script_import $LIB_MISC_TWEAKS
+	if [ "$OFFER_LIQUORIX_KERNELS" == 'true' ];then
+		offer_liquorix_kernel
+	fi
 	# this tests for presence of aptitude, and only offers itself if user has aptitude installed
 	set_apt_type 'conversion'
 	set_upgrade_type 'conversion'
@@ -416,12 +477,13 @@ update_to_new_sources()
 	local doUpdate=''
 
 	case $1 in
-		sidux)
-			grepSearch='(sidux.*[[:space:]](sid|unstable)|deb-sdx)'
-			searchIdentifier='sidux'
-			sourceFile='sidux.list'
-			sourcesData='deb http://sidux.com/debian/ sid main contrib non-free fix.main fix.contrib fix.non-free\n#deb-src http://sidux.com/debian/ sid main fix.main'
-			whichUpdate='sidux'
+		aptosid)
+			grepSearch='(aptosid.*[[:space:]](sid|unstable)|deb-sdx)'
+			searchIdentifier='aptosid'
+			sourceFile='aptosid.list'
+			sourcesData='deb http://aptosid.com/debian/ sid main fix.main
+ contrib non-free fix.contrib fix.non-free\n#deb-src http://aptosid.com/debian/ sid main fix.main'
+			whichUpdate='aptosid'
 			;;
 		debian-sid)
 			grepSearch='debian\.org.*[[:space:]](sid|unstable)'
@@ -443,7 +505,7 @@ update_to_new_sources()
 	fi
 	update_completion_handler "$doUpdate" $whichUpdate
 
-	# we need to set the SIDUX_SOURCES global now to make sure it's correct
+	# we need to set the APTOSID_SOURCES global now to make sure it's correct
 	set_distro_data
 	eval $LOGUE
 }

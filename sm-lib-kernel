@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.74
-####  Date: August 8 2010
+####  version: 2.5.75
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,11 +28,11 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists 
-KERNEL_LIST_32='2.6.34-2.dmz.3-liquorix-686 2.6.33-5.dmz.2-liquorix-686 2.6.32-12.dmz.1-liquorix-686 2.6.31-11.dmz.1-liquorix-686 2.6.30-7.dmz.1-liquorix-686 2.6.29-4.dmz.4-liquorix-686 2.6.28-8.lqx.1-liquorix-686  2.6.26-6.slh.4-sidux-686'
+KERNEL_LIST_32='2.6.34-2.dmz.3-liquorix-686 2.6.33-5.dmz.2-liquorix-686 2.6.32-12.dmz.1-liquorix-686 2.6.31-11.dmz.1-liquorix-686 2.6.30-7.dmz.1-liquorix-686 2.6.29-4.dmz.4-liquorix-686 2.6.28-8.lqx.1-liquorix-686'
 KERNEL_ADVANCED_LIST_32=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
-KERNEL_LIST_64='2.6.34-2.dmz.3-liquorix-amd64 2.6.33-5.dmz.2-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64 2.6.31-11.dmz.1-liquorix-amd64 2.6.30-7.dmz.1-liquorix-amd64 2.6.29-4.dmz.4-liquorix-amd64 2.6.28-8.lqx.1-liquorix-amd64 2.6.26-6.slh.4-sidux-amd64'
+KERNEL_LIST_64='2.6.34-2.dmz.3-liquorix-amd64 2.6.33-5.dmz.2-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64 2.6.31-11.dmz.1-liquorix-amd64 2.6.30-7.dmz.1-liquorix-amd64 2.6.29-4.dmz.4-liquorix-amd64 2.6.28-8.lqx.1-liquorix-amd64'
 KERNEL_ADVANCED_LIST_64=''
 TESTING_KERNEL_64=''
 
@@ -64,8 +64,8 @@ check_kernel()
 		# first need to normalize data for comparison
 		if [ -n "$KERNEL_ADVANCED_LIST" ];then
 			local kalNormal=$( echo "$KERNEL_ADVANCED_LIST" | cut -d ' ' -f 1  )
-			kalNormal=$( normalize_kernel_string $kalNormal )
-			local ckNormal=$( normalize_kernel_string $CURRENT_KERNEL )
+			kalNormal=$kalNormal
+			local ckNormal=$CURRENT_KERNEL
 			advancedKernel=$( echo $kalNormal | grep -o $ckNormal )
 			if [ -n "$advancedKernel" ];then
 				KERNEL_EQUAL_INSTALL='true'
@@ -188,7 +188,7 @@ kernel_question()
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 	fi
-	if [ -n "$SIDUX_SOURCES" -o -n "$MEPIS_SOURCES" -o -n "$LIQUORIX_SOURCES" -o "$USE_DEBIAN_KERNEL" == 'true' ];then
+	if [ -n "$APTOSID_SOURCES" -o -n "$MEPIS_SOURCES" -o -n "$LIQUORIX_SOURCES" -o "$USE_DEBIAN_KERNEL" == 'true' ];then
 		altKernelOption='echo "    ${C}*${S} Any supported current apt kernel install(s) for your ${C}$DISTRO${S} system, with module installer automated."'
 	fi
 
@@ -307,7 +307,7 @@ kernel_module_installer()
 	local options="$availableModules continue"
 	local contCount=$( wc -w <<< $options )
 	local moduleCount=$(( $contCount - 1 ))
-	local isMeta=$( package_tester "linux-image-2.6-(sidux-|liquorix-|)(486|686|amd64)" '' )
+	local isMeta=$( package_tester "linux-image-2.6-(aptosid-|liquorix-|)(486|686|amd64)" '' )
 
 	if [ -n "$isMeta" ];then
 		metaText='echo "Since you are using kernel metapackages, the script will install the module metapackage."'
@@ -375,7 +375,7 @@ kernel_module_installer()
 remove_kernel_modules()
 {
 	eval $LOGPS
-	local installedModules="$( package_tester 'modules-.*(sidux-|)' 'wild-full' )"
+	local installedModules="$( package_tester 'modules-.*(aptosid-|sidux-|)' 'wild-full' )"
 	local moduleStoreTemp='' store='' store2=''
 	# we need to dump the multi modules first:
 	for store in $installedModules
@@ -541,9 +541,9 @@ install_wireless_modules()
 install_the_module()
 {
 	eval $LOGUS
-	local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+
 	# $1 is module
-	local WifiModule=$KERNEL_DIRECTORY/$normalizedCurrentKernel/$1'*.deb'
+	local WifiModule=$KERNEL_DIRECTORY/$CURRENT_KERNEL/$1'*.deb'
 	# WifiModule='/var/local/kernel-current/'$1'*.deb'
 
 	if [ -f $WifiModule -o "$1" == 'madwifi' ];then

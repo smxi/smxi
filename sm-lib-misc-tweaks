@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.10
-####  Date: March 27 2010
+####  version: 1.22.11
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -49,16 +49,14 @@ misc_hacks()
 	echo "    tweak_gecko_prefs: create more sane user defaults in prefs.js"
 	echo "    swiftfox-plugins creates symbolic link to iceweasel plugins from swiftfox."
 
-# 	echo "${C}2${S} - ${C}install-graphics${S} Options to install sidux ${C}s${S} taskbar icon,"
-# 	echo "    sidux ${C}kmenu${S} sidebar graphics, and various grub graphics images."
 	echo "${C}2${S} - ${C}install-graphics${S} Options to install various grub graphics images."
 
 	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
-	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors, change-sidux-mirrors"
-	echo "    ${M}NEW!${S} ${C}1.${S} Crust fix: change ${M}hit enter to continue${S} to what you want ${C}2.${S} Set default system kernel"
+	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors"
+	echo "    ${C}1.${S} Crust fix: change ${M}hit enter to continue${S} to what you want ${C}2.${S} Set default system kernel"
 
 	echo "${C}4${S} - ${C}legacy-tweaks${S} More or less obsolete tweaks for things no longer actively"
-	echo "    supported or required by modern sidux systems. But might be useful to older installs."
+	echo "    supported or required by modern Debian systems. But might be useful to older installs."
 
 	echo "${C}5${S} - ${C}openoffice-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to latest if"
 	echo "    ${C}openoffice.org${S} is already installed."
@@ -125,7 +123,7 @@ advanced_tweaks()
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
 
-	options="change-debian-mirrors change-sidux-mirrors update-bashrc update-locales set-default-runlevel alternate-print-hec default-system-kernel "
+	options="change-debian-mirrors update-bashrc update-locales set-default-runlevel alternate-print-hec default-system-kernel "
 
 	# catch the count up again for options
 	tempCount=$( echo $options | wc -w )
@@ -159,20 +157,20 @@ advanced_tweaks()
 	echo $LINE
 	echo "${C}1${S} - ${C}change-debian-mirrors${S} Change your default debian mirrors. "
 
-	echo "${C}2${S} - ${C}change-sidux-mirrors${S} Change your default sidux mirrors."
+# 	echo "${C}2${S} - ${C}change-aptosid-mirrors${S} Change your default aptosid mirrors."
 
-	echo "${C}3${S} - ${C}update-bashrc${S} Updates your root ${C}/root/.bashrc${S} file to enable things like bash autocompletion."
+	echo "${C}2${S} - ${C}update-bashrc${S} Updates your root ${C}/root/.bashrc${S} file to enable things like bash autocompletion."
 
-	echo "${C}4${S} - ${C}update-locales${S} Get rid of all those extra languages and locales"
+	echo "${C}3${S} - ${C}update-locales${S} Get rid of all those extra languages and locales"
 	echo "    you don't need and that slow down your $DU_UPGRADE. Includes instructions on what to do."
 
-	echo "${C}5${S} - ${C}set-default-runlevel${S} Set default display manager (ie, kdm) start / stop runlevel."
+	echo "${C}4${S} - ${C}set-default-runlevel${S} Set default display manager (ie, kdm) start / stop runlevel."
 
-	echo "${C}6${S} - ${C}alternate-print-hec${S} Change default  ${C}$SCRIPT_NAME${M} hit enter to continue"
+	echo "${C}5${S} - ${C}alternate-print-hec${S} Change default  ${C}$SCRIPT_NAME${M} hit enter to continue"
 	echo "    ${S}option to either hit any, or custom, key to continue. A great ${C}Crust${S} snippet."
 
-	echo "${C}7${S} - ${C}default-system-kernel${S} Change default ${C}$SCRIPT_NAME${S} system kernel type."
-	echo "    Depending on your base system, this will either be only one, or a list, like sidux or debian."
+	echo "${C}6${S} - ${C}default-system-kernel${S} Change default ${C}$SCRIPT_NAME${S} system kernel type."
+	echo "    Depending on your base system, this will either be only one, or a list, like Liquorix or Debian."
 	eval $advanced1Text
 	eval $aptText
 	eval $duText
@@ -192,7 +190,7 @@ advanced_tweaks()
 				change_debian_mirrors
 				repeat='true'
 				;;
-			change-sidux-mirrors)
+			change-aptosid-mirrors)
 				change_kernel_mirrors
 				repeat='true'
 				;;
@@ -552,27 +550,7 @@ main_graphics_installer()
 
 	echo "${S}Grub gfx lets you change your default grub image you see when you first start"
 	echo "your computer, and also has an option to let you switch back to your original default."
-	echo
-	if [ "$B_TESING_2" == 'true' ];then
-		echo "${S}Also features basic graphics installer options are for kde eye candy."
-		echo "In kmenu items, you have three main choices, and the kmenu sidebar will give"
-		echo "you the choice of 3 separate images to install, all are pretty nice by the way."
-		echo
-		echo "To be clear: the kmenu sidebar graphic is the image on the left side of your"
-		echo "kmenu that you get to by clicking on the k button on your taskbar."
-		echo $LINE
-		echo "${C}1${S} - Installs ${C}sidux 's' kmenu icon${S}. This will replace your current"
-		echo "    ${C}k${S} on your taskbar with the sidux ${C}s${S}. Also creates backups for "
-		echo "    your old kmenu default graphic icons."
-		echo
-		echo "${C}2${S} - Will give you a choice of 3 different kmenu side bars to install, then"
-		echo "    will install them for you."
-	else
-		echo "${M}The kde graphics options are deprecated until KDE4 is stable and the methods"
-		echo "have been updated to be Debian compatible."
-		echo $LINE
-	fi
-	echo
+	echo $LINE
 	echo "${C}$grubOptNu - grub-gfx-options${S} - ${C}grub-gfx-options${S} Select/Install/Restore grub graphics"
 	echo "    from Cathbard, original black/red sidux, a few Debian themed ones by h2 (${M}GRUB 1 only${S})."
 	echo
@@ -890,7 +868,7 @@ grub_gfxboot_question()
 	if [ -z "$hasGrubGfx" ];then
 		echo $LINE
 		echo "${S}You need to install grub-gfxboot to use this feature. It will replace your current grub."
-		echo "This feature only works in Testing and Sid. The package will be installed from sidux repos,"
+		echo "This feature only works in Testing and Sid. The package will be installed from aptosid repos,"
 		echo "by temporarily adding, updating, installing, then removing repos after the install."
 		echo $LINE
 		echo "${C}1${S} - ${C}yes-install-grub-gfxboot${S} Install missing grub-gfxboot to replace default grub first."
@@ -931,10 +909,10 @@ install_grub_gfxboot()
 	local grubGfxInstalled='' returnValue=1
 
 	# this adds, updates, then removes temp repo
-	check_add_remove_sources 'sidux' 'add'
+	check_add_remove_sources 'aptosid' 'add'
 	package_installer 'grub-gfxboot' 'install-always' '--allow-unauthenticated'
 	# make sure to not keep temp repo data
-	check_add_remove_sources 'sidux' 'remove'
+	check_add_remove_sources 'aptosid' 'remove'
 	if [ "$1" != 'reinstall' ];then
 		check_gfxboot_in_menu
 		check_message_debian
@@ -1132,8 +1110,8 @@ set_default_system_kernel()
 	if [ -n "$LIQUORIX_SOURCES" ];then
 		options="$options liquorix"
 	fi
-	if [ -n "$SIDUX_SOURCES" ];then
-		options="$options sidux"
+	if [ -n "$APTOSID_SOURCES" ];then
+		options="$options aptosid"
 	fi
 	options="$options continue"
 	contCount=$( wc -w <<< $options )
@@ -1170,13 +1148,13 @@ set_default_system_kernel()
 	select opt in $options
 	do
 		case $opt in
-			debian|no-kernel|liquorix|sidux)
+			debian|no-kernel|liquorix|aptosid)
 				echo $LINE
 				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default kernel option: ${C}$opt${N}"
 				set_sm_pref_values "$smPref" "$opt"
 				set_distro_data # have to reset globals now
 				case $opt in
-					debian|liquorix|sidux)
+					debian|liquorix|aptosid)
 						if [ "$SKIP_CONNECTIONS" != 'true' ];then
 							get_current_apt_kernel $DEFAULT_KERNEL
 						fi
@@ -1387,7 +1365,7 @@ update_locales()
 	
 	# only some distros have lots of locales added
 	case $DISTRO in
-		antix|mepis*|sidux)
+		antix|mepis*|aptosid)
 			distroTest='true'
 			;;
 	esac
@@ -1503,8 +1481,8 @@ set_default_runlevels()
 		defaultDm='entranced'
 	fi
 	case $DISTRO in
-		sidux)
-			defaultOpt='sidux-default'
+		aptosid)
+			defaultOpt='aptosid-default'
 			;;
 		debian)
 			defaultOpt='debian-default'
@@ -1556,7 +1534,7 @@ set_default_runlevels()
 					set_default_inittab 2
 					repeat='true'
 					;;
-				sidux-default|antix-default|mepis-default)
+				aptosid-default|antix-default|mepis-default)
 					echo "${S}Updating to use ${C}$opt${S}...${N}"
 					update-rc.d -f $defaultDm remove
 					update-rc.d $defaultDm start 99 5 . stop 01 0 1 2 3 4 6 .
@@ -1618,9 +1596,9 @@ misc_legacy_tweaks()
 	echo "${C}1${S} - ${C}alsaconf${S} - for your alsa sound configuration."
 	echo "    ${M}Alert: ${C}alsaconf${M} has been deprecated and should not be required any longer.${S}"
 	echo
-	echo "${W}WARNING: Splashy is NOT supported in sidux. It is garbage, and causes nothing but PROBLEMS."
+	echo "${W}WARNING: Splashy is NOT supported in aptosid. It is garbage, and causes nothing but PROBLEMS."
 	echo "${C}2${S} - ${C}start-splashy${S} Starts the sidux splash in ${C}init-d${S}."
-	echo "    Please note: default sidux installations will not start splashy by themselves."
+	echo "    Please note: default aptosid installations will not start splashy by themselves."
 	echo "    ${M}There is no current sidux splashy theme in apt, nor will there ever be, hopefully."
 
 	echo "${C}3${S} - ${C}turn-off-splashy${S} Removes the splashy startup/stop option with ${C}update-rc.d${S}."
@@ -1629,7 +1607,7 @@ misc_legacy_tweaks()
 	echo "    answered 'n' [keep old ${C}initscripts${S}] instead of 'y' [replace with new] during $DU_UPGRADE."
 
 	echo "${C}5${S} - ${C}clean-kanotix-transitional${S} - This will clean up the transitional kanotix"
-	echo "     packages left over after your first $DU_UPGRADE after switching to ${C}sidux${S}."
+	echo "     packages left over after your first $DU_UPGRADE after switching to ${C}aptosid${S}."
 
 	echo "${C}6${S} - ${C}clean-kanotix-packages${S} - This will clean up any legacy kanotix"
 	echo "    packages left over after your ${C}sidux${S} conversion."

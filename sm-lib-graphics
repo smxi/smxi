@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.3
-####  Date: February 28 2010
+####  version: 2.4.4
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -360,15 +360,7 @@ final_graphics_install()
 	if [ -n "$KERNEL_INSTALL_TO" ];then
 		kernelInstallTo=" -K $KERNEL_INSTALL_TO"
 	fi
-
-# 	# handle temp new syntax
-# 	if [ -n "$( echo $KERNEL_VERSION | grep 'slh.' )" ]
-# 	then
-# 		# handle this syntax: 2.6.24-2.6.24.1.slh.3-sidux-amd64
-# 		kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 2 | cut -d '.' -f 3 )
-# 	else
-# 		kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '.' -f 3 )
-# 	fi
+	
 	# for user set defaults for gfx
 	local sgfxiArgs=$( sm_pref_tester 'sgfxi' equal )
 

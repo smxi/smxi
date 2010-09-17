@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.35
-####  Date: May 20 2010
+####  version: 0.7.36
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -41,7 +41,7 @@ kde3_to_kde4_updater_main()
 	print_lib_info $LIB_KDE4_UPDATER
 	echo $MLINE
 	echo "${S}Beginning the kde 3 to kde 4 conversion process. This is still fresh, be careful."
-	echo "Please report, with ${C}$LOG_FILE${S}, any issues to sidux or techpatterns.com/smxi forums."
+	echo "Please report, with ${C}$LOG_FILE${S}, any issues to techpatterns.com/smxi forums."
 	echo 
 	echo "Your user configuration data in ${C}/home/<user>${S} will not be removed when the old KDE packages get"
 	echo "removed, and ${C}Kaboom KDE 3 -> 4${S} import tool will import as much as it can to ${C}KDE 4${S} from ${C}KDE 3${S}."

@@ -1,12 +1,13 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.11.9
-####  Date: June 23 2010
+####  version: 2.11.10
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
-####  The following functions use core logic by Kel Modderman (kelmo) and the sidux project:
-####  extra_module_installer update_kernel_links install_the_apt_kernel_module install_apt_kernel_modules
+####  The following functions use core logic by Kel Modderman (kelmo)
+####  extra_module_installer update_kernel_links install_the_apt_kernel_module
+####  install_apt_kernel_modules
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -79,9 +80,9 @@ advanced_kernel_install()
 	optionList="$optionList $altKernelOption5"
 	altKernOpt5=$( wc -w <<< $optionList )
 
-	if [ -n "$SIDUX_SOURCES" ];then
-		altKernelOption2='install-sidux-kernel'
-		altKernelText2='sidux'
+	if [ -n "$APTOSID_SOURCES" ];then
+		altKernelOption2='install-aptosid-kernel'
+		altKernelText2='aptosid'
 	fi
 	optionList="$optionList $altKernelOption2"
 	altKernOpt2=$( wc -w <<< $optionList )
@@ -113,7 +114,7 @@ advanced_kernel_install()
 	echo "${M}NOTE: The listed kernels are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
 	echo "For current, standard apt kernel install, RETURN TO MAIN MENU!!"
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
-	echo "       ${C}slh${S} marked kernels: sidux kernels - 2.6.25 to 2.6.31: no fglrx support"
+	echo "       ${C}slh${S} marked kernels: aptosid kernels - 2.6.25 to 2.6.31: no fglrx support"
 # 	if [ "$B_TESTING_1" == 'true' ];then
 		echo "       ${C}liquorix${S} kernels: zen kernel sources; made by damentz; fglrx support."
 # 	fi
@@ -146,7 +147,7 @@ advanced_kernel_install()
 						# KERNEL_FILE_RESET is set in set_32_64_bit
 						KERNEL_FILE=$KERNEL_FILE_RESET
 						;;
-					install-debian-kernel|install-debian-486-kernel|install-debian-686-kernel|install-liquorix-kernel|install-mepis-kernel|install-sidux-kernel)
+					install-debian-kernel|install-debian-486-kernel|install-debian-686-kernel|install-liquorix-kernel|install-mepis-kernel|install-aptosid-kernel)
 						:
 						;;
 					super-advanced-options)
@@ -193,9 +194,9 @@ advanced_kernel_install()
 			get_current_apt_kernel mepis
 			double_check_kernel apt-mepis
 			;;
-		install-sidux-kernel)
-			get_current_apt_kernel sidux
-			double_check_kernel apt-sidux
+		install-aptosid-kernel)
+			get_current_apt_kernel aptosid
+			double_check_kernel apt-aptosid
 			;;
 		super-advanced-options)
 			super_advanced_kernel_options
@@ -242,14 +243,7 @@ super_advanced_kernel_options()
 		log_function_data "opt selected: $opt"
 		case $opt in
 			add-liquorix-sources)
-				if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
-					update_sources 'liquorix'
-					authentication_handler 'liquorix' # add keyrings
-					set_distro_data # have to reset globals now
-				else
-					echo "${E}It is not safe to run these kernels on Debian Stable based distros."
-					echo "${S}If your system is running Sid or Testing base, please let me know.${N}"
-				fi
+				add_liquorix_kernels
 				repeat='true'
 				;;
 			change-$SCRIPT_NAME-default-kernel)
@@ -274,6 +268,18 @@ super_advanced_kernel_options()
 	eval $LOGPE
 	if [ "$repeat" == 'true' ];then
 		super_advanced_kernel_options
+	fi
+}
+
+add_liquorix_kernels()
+{
+	if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
+		update_sources 'liquorix'
+		authentication_handler 'liquorix' # add keyrings
+		set_distro_data # have to reset globals now
+	else
+		echo "${E}It is not safe to run these kernels on Debian Stable based distros."
+		echo "${S}If your system is running Sid or Testing base, please let me know.${N}"
 	fi
 }
 
@@ -330,9 +336,9 @@ double_check_kernel()
 			kernelFile="$CURRENT_MEPIS_KERNEL"
 			extraText='current Mepis'
 			;;
-		apt-sidux)
-			kernelFile="$CURRENT_SIDUX_KERNEL"
-			extraText='current sidux'
+		apt-aptosid)
+			kernelFile="$CURRENT_APTOSID_KERNEL"
+			extraText='current aptosid'
 			;;
 		advanced)
 			kernelFile=$KERNEL_FILE
@@ -375,8 +381,8 @@ double_check_kernel()
 						apt-mepis)
 							install_apt_kernel mepis
 							;;
-						apt-sidux)
-							install_apt_kernel sidux
+						apt-aptosid)
+							install_apt_kernel aptosid
 							;;
 						advanced)
 							install_kernel_zip
@@ -415,7 +421,7 @@ double_check_kernel()
 kernel_return_location()
 {
 	case $1 in
-		advanced|apt-debian|apt-debian-686|apt-debian-486|apt-liquorix|apt-mepis|apt-sidux)
+		advanced|apt-debian|apt-debian-686|apt-debian-486|apt-liquorix|apt-mepis|apt-aptosid)
 			advanced_kernel_install
 			;;
 		*)
@@ -437,7 +443,7 @@ kernel_meta_package_handler()
 
 	local metaDebianExists=$( package_tester 'linux-image-2.6-(686|486|amd64)' )
 	local metaLiquorixExists=$( package_tester 'linux-image-2.6-liquorix-(686|486|amd64)' )
-	local metaSiduxExists=$( package_tester 'linux-image-2.6-sidux-(686|amd64)' )
+	local metaSiduxExists=$( package_tester 'linux-image-2.6-aptosid-(686|amd64)' )
 	local repeat='' kernelArch='686' startType='standard' userSelection=''
 	local linuxSiduxImage='' linuxSiduxHeaders=''
 	if [ -n "$1" ];then
@@ -452,9 +458,9 @@ kernel_meta_package_handler()
 	local defaultAction='manual' kiState='on'
 	
 	# not using this one yet: install-kernel-metapackages-full
-	if [ -n "$SIDUX_SOURCES" ];then
-		linuxSiduxImage="linux-image-2.6-sidux-$kernelArch"
-		linuxSiduxHeaders="linux-headers-2.6-sidux-$kernelArch"
+	if [ -n "$APTOSID_SOURCES" ];then
+		linuxSiduxImage="linux-image-2.6-aptosid-$kernelArch"
+		linuxSiduxHeaders="linux-headers-2.6-aptosid-$kernelArch"
 	fi
 
 	if [ -n "$metaSiduxExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
@@ -464,7 +470,7 @@ kernel_meta_package_handler()
 		kiState='off'
 	fi
 
-	local opt='' options="remove-kernel-metapackages install-kernel-metapackages-custom-sidux install-current-apt-kernel $continueOption"
+	local opt='' options="remove-kernel-metapackages install-kernel-metapackages-custom-aptosid install-current-apt-kernel $continueOption"
 
 	echo $MLINE
 	echo "${M}Kernel Meta-Package Options${N}"
@@ -479,7 +485,7 @@ kernel_meta_package_handler()
 	echo "you prefer for your style."
 	echo $MLINE
 	echo "${C}Kernel metapackages:  ${M}Advantage:${S} Latest kernels and modules installed via ${C}$DU_UPGRADE"
-	echo "${M}Negatives:${S} ${C}1.${S} Some distros, like ${C}sidux${S}, release kernels often, sometimes 1 or more a day."
+	echo "${M}Negatives:${S} ${C}1.${S} Some distros, like ${C}aptosid${S}, release kernels often, sometimes 1 or more a day."
 	echo "Usually you do not need new subversions of kernels, like ${C}2.6.26-2.slh.11${S} to ${C}2.6.26-2.slh.12${S}"
 	echo "${C}2.${S} Needing to reboot after the $DU_UPGRADE ${C}3.${S} Slow servers slowing $DU_UPGRADE"
 	echo "${C}4.${S} Possible unexpected kernel / hardware issues, kernel regressions, etc."
@@ -503,8 +509,8 @@ kernel_meta_package_handler()
 	echo "${M}You current kernel is: ${C}$CURRENT_KERNEL"
 	echo $LINE
 	echo "${C}1 - remove-kernel-metapackages${S} Restore manual control of kernel install."
-	echo "${C}2 - install-kernel-metapackages-custom-sidux${S} For automatic, no user control, install of"
-	echo "    new sidux kernels and modules. (${M}must have sidux apt sources installed${S})"
+	echo "${C}2 - install-kernel-metapackages-custom-aptosid${S} For automatic, no user control, install of"
+	echo "    new aptosid kernels and modules. (${M}must have aptosid apt sources installed${S})"
 	echo "${C}3 - install-current-apt-kernel${S} Install the current ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL"
 	echo "    ${S}Will also remove metapackages if they are installed automatically."
 	echo "${C}4 - $continueOption${S} Sets default ${C}$SCRIPT_NAME${S} to: ${C}$defaultAction${S} ($kiAction kernel install question)"
@@ -521,20 +527,20 @@ kernel_meta_package_handler()
 				remove_kernel_metapackages
 				repeat='true'
 				;;
-			install-kernel-metapackages-custom-sidux)
-				if [ -n "$SIDUX_SOURCES" ];then
+			install-kernel-metapackages-custom-aptosid)
+				if [ -n "$APTOSID_SOURCES" ];then
 					set_metapackage_prefs
 					set_metapackage_selections 'automatic'
 					package_installer "$linuxSiduxHeaders $linuxSiduxImage" 'install-user'
 					update_kernel_links $CURRENT_APT_KERNEL # must run prior to update_grub
 					update_grub
-					install_apt_kernel_modules 'meta-sidux'
+					install_apt_kernel_modules 'meta-aptosid'
 					extra_module_installer $CURRENT_APT_KERNEL 'madwifi'
 					post_install_messages
 					reboot_now_question $CURRENT_APT_KERNEL
 				else
 					echo $MLINE
-					echo "${M}This feature is currently only available for systems with ${C}sidux${M} sources present.${N}"
+					echo "${M}This feature is currently only available for systems with ${C}aptosid${M} sources present.${N}"
 					print_hec
 				fi
 				;;
@@ -572,7 +578,7 @@ kernel_meta_package_handler()
 remove_kernel_metapackages()
 {
 	eval $LOGUS
-	local metaPackageList=$( package_tester '2.6-(sidux-|liquorix-|)(686|486|amd64)' 'wild-full' )
+	local metaPackageList=$( package_tester '2.6-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
 
 	if [ -n "$metaPackageList" ];then
 		package_remover "$metaPackageList" 'purge -y'
@@ -624,7 +630,7 @@ authentication_handler()
 }
 
 # master apt kernel installer function
-# args: $1 debian/sidux
+# args: $1 debian/aptosid
 install_apt_kernel()
 {
 	eval $LOGPS
@@ -641,8 +647,8 @@ install_apt_kernel()
 		mepis)
 			currentAptKernel=$CURRENT_MEPIS_KERNEL
 			;;
-		sidux)
-			currentAptKernel=$CURRENT_SIDUX_KERNEL
+		aptosid)
+			currentAptKernel=$CURRENT_APTOSID_KERNEL
 			libata_devicemap_fix_1
 			;;
 	esac
@@ -665,7 +671,7 @@ install_apt_kernel()
 			;;
 	esac
 	case "$1" in
-		debian|mepis|sidux)
+		debian|mepis|aptosid)
 			extra_module_installer $currentAptKernel 'madwifi'
 			;;
 	esac
@@ -725,8 +731,8 @@ install_apt_kernel_modules()
 			moduleType="2.6-liquorix-$kernelArch"
 			extraModuleText=' meta package'
 			;;
-		meta-sidux)
-			moduleType="2.6-sidux-$kernelArch"
+		meta-aptosid)
+			moduleType="2.6-aptosid-$kernelArch"
 			extraModuleText=' meta package'
 			;;
 		meta-debian)
@@ -803,7 +809,7 @@ install_the_apt_kernel_module()
 	eval $LOGUE
 }
 
-# this will sync the kernel download directory module debs with the sidux ones.
+# this will sync the kernel download directory module debs with the aptosid ones.
 # to come: using the user set mirror?
 # args: $1 - kernel name
 download_remaining_module_debs()
@@ -816,7 +822,7 @@ download_remaining_module_debs()
 	authentication_handler $1
 
 	echo $LINE
-	echo "${S}Downloading missing modules from sidux repos to kernel install directory (can take a few seconds)...${N}"
+	echo "${S}Downloading missing modules from aptosid repos to kernel install directory (can take a few seconds)...${N}"
 
 	for module in $availableModules
 	do
@@ -873,7 +879,6 @@ install_kernel_zip()
 	local installKernelLegacy='install-kernel-sidux.sh'
 	local kernelFailed='' download3Failed='' kernelBase='' kbuildKernel=''
 
-	# the kernel file string is normalized in the directory function
 	create_kernel_install_directory $KERNEL_FILE
 	proceedNormally="$?" # 0 for mv/rm, 1 for use, 2 for use no unzip
 	if [ "$proceedNormally" -gt 0 ];then
@@ -1248,7 +1253,7 @@ create_kernel_install_directory()
 	eval $LOGUS
 	local directoryAction=0
 
-	KERNEL_INSTALL_DIRECTORY=$( normalize_kernel_string $1 )
+	KERNEL_INSTALL_DIRECTORY=$1
 	log_function_data "KERNEL_INSTALL_DIRECTORY: $KERNEL_INSTALL_DIRECTORY"
 	echo $LINE
 	echo "${S}Please note!! The kernel install directory will be located here:"

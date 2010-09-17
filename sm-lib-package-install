@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.8
-####  Date: May 20 2010
+####  version: 3.3.9
+####  Date: September 16 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1488,7 +1488,7 @@ install_ntfs_3g()
 	eval $LOGPS
 	echo $LINE
 	echo "${S}For more information on how to setup ntfs-3g, please read ${C}/usr/share/doc/ntfs-3g/README.gz${S}"
-	echo "or use the ${C}sidux-irc${S} factoid ${C}!ntfs-3g${S}."
+	echo "or use the ${C}aptosid-irc${S} factoid ${C}!ntfs-3g${S}."
 	echo "Here is a sample new line in your ${C}/etc/fstab${S} to give you an idea:"
 	echo "${C}/dev/hda1       /media/hda1     ntfs-3g silent,umask=0,no_def_opts,allow_other 0 0"
 	print_hec
