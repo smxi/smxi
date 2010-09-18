@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.10
-####  Date: September 16 2010
+####  version: 3.3.11
+####  Date: September 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -168,6 +168,8 @@ package_group_installer()
 	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
 	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
+	local gnomeExtras="gnome-backgrounds gnome-extra-icons gnome-system-monitor gnome-netstatus-applet"
+	local gnomePackages="gnome-core openbox"
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config"
 	local kdePackages="$kdeBase konqueror konversation $kpdf $ksvg $dmUse kdm"
@@ -176,8 +178,8 @@ package_group_installer()
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
 	local lxdePackages="$lxdeLMC lxappearance lxde-core lxde-settings-daemon $lxdeMD lxrandr $lxdeSE lxterminal"
 	local lxdeExtras="$lxdeIP lxlauncher $lxdeM lxnm"
-
 	local mozillaGroup="$iceDove iceweasel"
+	local openboxPackages="openbox obconf obmenu openbox-themes"
 	local rsyncGroup="rsync $rdiff"
 	local streamTuner='streamtuner streamripper'
 	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
@@ -252,6 +254,15 @@ package_group_installer()
 		base-plus-fvwm-crystal)
 			packageName="$fvwmCrystal $xorgPackages $dmUse"
 			;;
+		gnome)
+			packageName="$gmomePackages $dmUse"
+			;;
+		base-plus-gnome)
+			packageName="$gnomePackages $xorgPackages $dmUse"
+			;;
+		gnome-extras)
+			packageName="$gnomeExtras"
+			;;
 		kde)
 			packageName="$kdePackages $dmUse"
 			;;
@@ -281,6 +292,9 @@ package_group_installer()
 			;;
 		mozilla-group)
 			packageName="$mozillaGroup"
+			;;
+		openbox)
+			packageName="$openboxPackages"
 			;;
 		rsync-group)
 			packageName="$rsyncGroup"
@@ -417,7 +431,7 @@ select_install_type()
 	echo
 	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, rbxi, and more."
 	echo
-	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Kde, Xfce, fVwm Crystal, Lxde."
+	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Gnome, Kde, Xfce, fVwm Crystal, Lxde."
 	echo
 	echo "${C}5${S} - ${C}servers${S} Install Samba, NFS, and Apache2 (+MySql,PHP) server components."
 	echo
@@ -814,26 +828,31 @@ display_manager_installer()
 	echo "${C}3${S} - ${C}system-utilities${S} Make sure you have it in: hal/udev alsa gpm."
 	echo "${C}4${S} - ${C}xorg${S} All the xorg pieces you need to get up and running."
 	echo "${C}5${S} - ${C}base-plus-xorg${S} xorg + system-utilities + wdm if kdm/gdm not present."
-	echo "${C}6${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
-	echo "${C}7${S} - ${C}base-plus-xfce${S} xfce + xorg + system utitilies/base light packages + wdm if kdm/gdm not present."
-	echo "${C}8${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
-	echo "${C}9${S} - ${C}base-plus-kde${S} kde + xorg + system utitilies + kdm."
-	echo "${C}10${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
-	echo "${C}11${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
-	echo "${C}12${S} - ${C}fluxbox${S} Installs lightweight window manager.  Good for old hardware."
-	echo "${C}13${S} - ${C}base-plus-fluxbox${S} fluxbox + xorg + system utitilies/base light packages + display manager."
-	echo "${C}14${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
-	echo "${C}15${S} - ${C}base-plus-fvwm-crystal${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
-	echo "${C}16${S} - ${C}lxde${S} Installs popular new lightweight window manager.  Good for old hardware."
-	echo "${C}17${S} - ${C}base-plus-lxde${S} lxde + xorg + system utitilies/base light packages + display manager."
-	echo "${C}18${S} - ${C}lxde-extras${S} Installs extras like lxnm, lxlauncher, lxmusic, etc (if available)."
-	echo "${C}19${S} - ${C}back-to-install-menu${S}"
+	echo "${C}6${S} - ${C}fluxbox${S} Installs lightweight window manager.  Good for old hardware."
+	echo "${C}7${S} - ${C}base-plus-fluxbox${S} fluxbox + xorg + system utitilies/base light packages + display manager."
+	echo "${C}8${S} - ${C}fvwm-crystal${S} Installs lightweight window manager."
+	echo "${C}9${S} - ${C}base-plus-fvwm-crystal${S} fvwm-crystal + xorg + system utitilies/base light packages + display manager."
+	echo "${C}10${S} - ${C}gnome${S} Base packages for gnome desktop + gnome-applets, konversation, konqueror."
+	echo "${C}11${S} - ${C}base-plus-gnome${S} gnome + xorg + system utitilies + gdm (if no dm installed)."
+	echo "${C}12${S} - ${C}gnome-extras${S} Installs extras like gnome-backgrounds, gnome-extra-icons, etc."
+	echo "${C}13${S} - ${C}kde${S} Base packages for kde desktop + kpdf/okular, konversation, konqueror."
+	echo "${C}14${S} - ${C}base-plus-kde${S} kde + xorg + system utitilies + kdm (if no dm installed)."
+	echo "${C}15${S} - ${C}kde-extras${S} Installs extras like konq-plugins, color picker, ark, knemo, kmix, etc."
+	echo "${C}16${S} - ${C}kde-pim${S} akregator, karm/ktimetracker, kontact, korganizer, kalarm."
+	echo "${C}17${S} - ${C}lxde${S} Installs popular new lightweight window manager. Good for old hardware."
+	echo "${C}18${S} - ${C}base-plus-lxde${S} lxde + xorg + system utitilies/base light packages + display manager."
+	echo "${C}19${S} - ${C}lxde-extras${S} Installs extras like lxnm, lxlauncher, lxmusic, etc (if available)."
+	echo "${C}20${S} - ${C}openbox${S} Installs lightweight window manager. Also adds openbox/kde or "
+	echo "     openbox/gnome option in gdm/kdm which lets you run a lighter weight version of those desktops."
+	echo "${C}21${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo "${C}22${S} - ${C}base-plus-xfce${S} xfce + xorg + system utitilies/base light packages + wdm if kdm/gdm not present."
+	echo "${C}23${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="select-display-manager base-light-packages system-utilities xorg base-plus-xorg xfce base-plus-xfce kde base-plus-kde kde-extras kde-pim fluxbox base-plus-fluxbox fvwm-crystal base-plus-fvwm-crystal lxde base-plus-lxde lxde-extras back-to-install-menu"
+	options="select-display-manager base-light-packages system-utilities xorg base-plus-xorg fluxbox base-plus-fluxbox fvwm-crystal base-plus-fvwm-crystal gnome base-plus-gnome gnome-extras kde base-plus-kde kde-extras kde-pim lxde base-plus-lxde lxde-extras openbox xfce base-plus-xfce back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -859,6 +878,19 @@ display_manager_installer()
 				package_group_installer 'plain' 'base-plus-fvwm-crystal'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
+				repeat='true'
+				;;
+			gnome)
+				package_group_installer 'plain' 'gnome'
+				repeat='true'
+				;;
+			base-plus-gnome)
+				package_group_installer 'plain' 'base-plus-gnome'
+				package_group_installer 'plain' 'system-utilities'
+				repeat='true'
+				;;
+			gnome-extras)
+				package_group_installer 'plain' 'gnome-extras'
 				repeat='true'
 				;;
 			kde)
@@ -892,20 +924,15 @@ display_manager_installer()
 				package_group_installer 'plain' 'lxde-extras'
 				repeat='true'
 				;;
+			openbox)
+				package_group_installer 'plain' 'open'
+				repeat='true'
+				;;
 			select-display-manager)
 				select_display_manager
 				repeat='true'
 				;;
 			system-utilities)
-				package_group_installer 'plain' 'system-utilities'
-				repeat='true'
-				;;
-			xorg)
-				package_group_installer 'plain' 'xorg'
-				repeat='true'
-				;;
-			base-plus-xorg)
-				package_group_installer 'plain' 'xorg'
 				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
@@ -917,6 +944,15 @@ display_manager_installer()
 				package_group_installer 'plain' 'base-plus-xfce'
 				package_group_installer 'plain' 'system-utilities'
 				package_group_installer 'plain' 'base-light-packages'
+				repeat='true'
+				;;
+			xorg)
+				package_group_installer 'plain' 'xorg'
+				repeat='true'
+				;;
+			base-plus-xorg)
+				package_group_installer 'plain' 'xorg'
+				package_group_installer 'plain' 'system-utilities'
 				repeat='true'
 				;;
 			back-to-install-menu)
@@ -1015,7 +1051,7 @@ assign_display_manager()
 				kde|base-plus-kde)
 					displayManager='kdm'
 					;;
-				gnome|gnome-full)
+				gnome|base-plus-gnome)
 					displayManager='gdm'
 					;;
 				*)
