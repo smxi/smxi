@@ -255,7 +255,7 @@ package_group_installer()
 			packageName="$fvwmCrystal $xorgPackages $dmUse"
 			;;
 		gnome)
-			packageName="$gmomePackages $dmUse"
+			packageName="$gnomePackages $dmUse"
 			;;
 		base-plus-gnome)
 			packageName="$gnomePackages $xorgPackages $dmUse"
