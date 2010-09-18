@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.11
+####  version: 3.3.12
 ####  Date: September 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -925,7 +925,7 @@ display_manager_installer()
 				repeat='true'
 				;;
 			openbox)
-				package_group_installer 'plain' 'open'
+				package_group_installer 'plain' 'openbox'
 				repeat='true'
 				;;
 			select-display-manager)
