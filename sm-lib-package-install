@@ -169,7 +169,7 @@ package_group_installer()
 	local fluxPackages="fluxbox fluxconf"
 	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local gnomeExtras="gnome-backgrounds gnome-extra-icons gnome-system-monitor gnome-netstatus-applet"
-	local gnomePackages="gnome-core openbox"
+	local gnomePackages="gnome-core"
 	local googleEarth='googleearth-package fakeroot'
 	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config"
 	local kdePackages="$kdeBase konqueror konversation $kpdf $ksvg $dmUse kdm"
