@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.7
+####  version: 8.12.8
 ####  Date: September 18 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -2171,7 +2171,7 @@ start_up_tests()
 		error_handler 'unidentified-distro' $FUNCNAME ''
 	fi
 	
-	if [ ! -e $GRUB_PATH -a "$IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" !='true' ];then
+	if [ ! -e $GRUB_PATH -a "$IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
 
