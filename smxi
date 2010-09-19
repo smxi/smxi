@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.2
-####  Date: September 17 2010
+####  version: 8.12.3
+####  Date: September 18 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -249,10 +249,14 @@ MOD_GFX='sgfxi'
 MOD_VM='svmi'
 
 # full updater
-UPDATE_ALL="$SCRIPT_NAME $LIB_APT_TOOLS $LIB_CLEAN_UP $LIB_DISTRO_CONVERSIO
+UPDATE_ALL="$SCRIPT_NAME $LIB_APT_TOOLS $LIB_CLEAN_UP $LIB_DISTRO_CONVERSION
 $LIB_DU_FIXES $LIB_GRAPHICS $LIB_KDE4_UPDATER $LIB_KERNEL $LIB_KERNEL_INSTALL $LIB_MISC_TWEAKS
 $LIB_PACKAGE_INSTALL $LIB_PACKAGE_REMOVAL $LIB_WARNING $LIB_2007_FIXES
-$LIB_2008_FIXES_STATIC ${LIB_2008_FIXES_STATIC}-t $LIB_2009_FIXES_STATIC ${LIB_2009_FIXES_STATIC}-t $MOD_GFX $MOD_VM $MOD_INXI"
+$LIB_2008_FIXES_STATIC ${LIB_2008_FIXES_STATIC}-t  $LIB_2009_FIXES_STATIC ${LIB_2009_FIXES_STATIC}-t $MOD_GFX $MOD_VM $MOD_INXI"
+# remove list
+REMOVE_LIST="$VERSION_INFO* $WARNING_STATUS* $WARNING_BODY* $ALERT_BODY* $CONFIGS_BODY* $HOLD_INSTALL* $LIB_APT_TOOLS* $LIB_CLEAN_UP* $LIB_DISTRO_CONVERSION* $LIB_DU_FIXES* $LIB_GRAPHICS* $LIB_KDE4_UPDATER* $LIB_KERNEL* $LIB_KERNEL_INSTALL* $LIB_MISC_TWEAKS*
+$LIB_PACKAGE_INSTALL* $LIB_PACKAGE_REMOVAL* $LIB_WARNING* $LIB_2007_FIXES*
+$LIB_2008_FIXES_STATIC* $LIB_2009_FIXES_STATIC* $MOD_GFX* $MOD_VM* $SCRIPT_NAME*"
 
 # optional user set scripts/download locations
 USER_SCRIPT=''
@@ -3285,7 +3289,7 @@ post_du_options()
 	echo "${C}3${S} - ${C}clean-up-stuff${S} This feature has a variety of clean up options:"
 	echo "    1: $APT_TYPE clean; 2: $APT_TYPE autoclean, clean up only non-current deb files;"
 	echo "    3: kernel removal options, remove all non-current kernels; 4: kernel module remover;"
-	echo "    5: backup file cleanup; 6: clean kanotix conversion packages; 7: clean unused xorg modules"
+	echo "    5: $SCRIPT_NAME data file cleanup; 6: clean kanotix conversion packages; 7: clean unused xorg modules"
 
 	echo "${C}4${S} - ${C}miscellaneous-tweaks${S} Current options are: mozilla-tweaks,"
 	echo "    which gets rid of gtk filehandlers and other annoyances in Mozilla products;"

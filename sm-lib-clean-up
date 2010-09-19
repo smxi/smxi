@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.9.4
-####  Date: September 16 2010
+####  version: 2.10.0
+####  Date: September 18 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i):
@@ -40,7 +40,7 @@ clean_up()
 	local repeat='' opt='' currentKernelsPrint='' advanced='' xOption='' cont=''
 	#local currentKernels=$(dpkg -l | grep headers-2 | cut -d " " -f 3 | cut -d '-' -f 3-9 )
 	local currentKernels="$( package_tester 'linux-image-2' 'wild' | sed 's/linux-image-//g' )"
-	local options="apt-clean apt-autoclean kernel-remover remove-kernel-modules clean-old-backups debian-orphans remove-xorg-modules clean-cruft "
+	local options="apt-clean apt-autoclean kernel-remover remove-kernel-modules clean-smxi-stuff debian-orphans remove-xorg-modules clean-cruft "
 
 	local tempCount=$( echo $options | wc -w )
 
@@ -61,7 +61,6 @@ clean_up()
 	if [ -z "$currentKernels" ];then
 		currentKernels=$CURRENT_KERNEL
 	fi
-	local removeList='/boot/grub/menu.lst-bu* /etc/apt/sources.list-bu* /etc/apt/sources.list.d/*.list-bu* /etc/kde3/kdm/kdmrc.bu /etc/fstab.old \n /etc/X11/xorg.conf.1st* /etc/X11/xorg.conf-bu* /usr/share/services/kded/mediamanager.desktop-bu*'
 
 	for x in $currentKernels
 	do
@@ -88,8 +87,8 @@ clean_up()
 
 	echo "${C}4${S} - Runs ${C}remove-kernel-modules${S}. This removes any kernel module you want."
 
-	echo "${C}5${S} - Runs ${C}clean-old-backups${S}. This will remove all the backup files $SCRIPT_NAME has created over time."
-	echo "    Shows you which files it will remove before you decide whether to remove them all or not."
+	echo "${C}5${S} - Runs ${C}clean-smxi-stuff${S}. Clean various parts that $SCRIPT_NAME has created over time,"
+	echo "    including backup files, kernel/graphics driver downloads, and configuration files."
 
 	echo "${C}6${S} - Runs ${C}debian-orphans${S}. This will search your system for orphaned Debian"
 	echo "    packages and print out a list of them. It will not remove them, because that's"
@@ -130,8 +129,8 @@ clean_up()
 				remove_kernel_modules
 				repeat='true'
 				;;
-			clean-old-backups)
-				remove_backup_files
+			clean-smxi-stuff)
+				clean_smxi_stuff
 				repeat='true'
 				;;
 			debian-orphans)
@@ -254,52 +253,6 @@ apt_clean()
 	echo "${C}$APT_TYPE $aptcommand${S} will remove all the$text1 archived deb files in ${C}/var/cache/apt/archives${S}${N}"
 	$APT_TYPE $aptcommand
 	echo "${S}Your apt archives have been cleaned in the way you requested.${N}"
-	eval $LOGPE
-}
-
-# uses variable from calling function, removeList
-remove_backup_files()
-{
-	eval $LOGPS
-	local backupFile='' repeat='' opt='' options=''
-
-	echo $LINE
-	echo -e "${Q}Are you sure you want to delete all these script backup files?"
-	echo "${C}$removeList"
-	echo $LINE
-	echo "${C}1 - yes-delete-backup-files${S} - Delete all $SCRIPT_NAME generated backup files."
-	echo "${C}2 - return-main-menu${S} - Go back to main menu, skip deletions."
-	echo $LINE
-	echo -e $SLE
-	echo $LINE
-	options="yes-delete-backup-files return-main-menu"
-	select opt in $options
-	do
-		case $opt in
-			yes-delete-backup-files)	
-				echo "${S}Removing all backup files...${N}"
-				log_function_data "removeList: $removeList"
-				for backupFile in $removeList
-				do
-					rm -fv $backupFile
-				done
-				echo "${S}Backup files removed.${N}"
-				;;
-			return-main-menu)	
-				echo "${S}Continuing without deleting backup files.${N}"
-				;;
-			*)	print_error 'opt'
-				repeat='true'
-				;;
-		esac
-		break
-	done
-	
-	if [ "$repeat" == 'true' ];then
-		remove_backup_files
-	else
-		print_hec
-	fi
 	eval $LOGPE
 }
 
@@ -871,5 +824,235 @@ write_xorg_remove_log()
 	eval $LOGUE
 }
 #remove_xorg_modules
+
+###---------------------------------------------------------------------
+### clean smxi data/backups section
+###---------------------------------------------------------------------
+
+clean_smxi_stuff()
+{
+	local repeat='' opt='' 
+	local options='remove-backup-files remove-kernel-downloads remove-video-driver-downloads remove-virtual-machine-downloads remove-log-files remove-script-configuration-files uninstall-all-smxi return-main-menu'
+
+	echo $MLINE
+	echo "${M}$SCRIPT_NAME cleanup tool"
+	echo $MLINE
+	
+	echo "${S}Each cleanup item will ask you to confirm your choice before deleting the requested"
+	echo "files, and will show you what it will delete to make sure you don't accidentally"
+	echo "remove something you wanted to keep."
+	
+	echo $LINE
+	echo "${C}1 - remove-backup-files${S} - Delete all $SCRIPT_NAME generated backup files."
+	echo "    This can be useful to run now and then since some tasks tend to collect backup files."
+	echo "${C}2 - remove-kernel-downloads${S} - Remove the kernel downloads directory."
+	echo "${C}3 - remove-video-driver-downloads${S} - Remove the video driver downloads directory."
+	echo "${C}4 - remove-virtual-machine-downloads${S} - Remove virtual machine download directory."
+	echo "${C}5 - remove-log-files${S} - Delete all $SCRIPT_NAME, svmi, and sgfxi log files."
+	echo "${C}6 - remove-script-configuration-files${S} - Remove all script configuration files."
+	echo "    Not recommended since then if you run the script again you have to run throught the"
+	echo "    setup routine all over again."
+	echo "${C}7 - uninstall-all-smxi${S} - Yep, here it is, will run all the above, then remove"
+	echo "    all connected files from $SCRIPT_HOME"
+	echo "${C}8 - return-main-menu${S} - Go back to main menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	select opt in $options
+	do
+		case $opt in
+			remove-backup-files)
+				remove_data_files_check $opt
+				repeat='true'
+				;;
+			remove-kernel-downloads)
+				remove_data_files_check $opt
+				repeat='true'
+				;;
+			remove-video-driver-downloads)
+				remove_data_files_check $opt
+				repeat='true'
+				;;
+			remove-virtual-machine-downloads)
+				remove_data_files_check $opt
+				repeat='true'
+				;;
+			remove-log-files)
+				remove_data_files_check $opt
+				repeat='true'
+				;;
+			remove-script-configuration-files)
+				remove_data_files_check $opt
+				repeat='true'
+				;;
+			uninstall-all-smxi)
+				remove_data_files_check $opt
+				echo "${S}Ok, the pieces are all gone, thanks for checking ${C}$SCRIPT_NAME${S} out!${N}"
+				;;
+			return-main-menu)	
+				echo "${S}Returning to main menu.${N}"
+				;;
+			*)	print_error 'opt'
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$repeat" == 'true' ];then
+		clean_smxi_stuff
+	else
+		print_hec
+	fi
+}
+
+# args: $1 - which type to remove; $2 - no-question, just do it
+remove_data_files_check()
+{
+	local repeat='' opt='' options=''
+	
+	local backupFileList='/boot/grub/menu.lst-bu* /etc/apt/sources.list-bu* /etc/apt/sources.list.d/*.list-bu* /etc/kde3/kdm/kdmrc.bu* /etc/fstab.old  /etc/X11/xorg.conf.1st* /etc/X11/xorg.conf-bu* /usr/share/services/kded/mediamanager.desktop-bu*'
+	local configFileList="/etc/smxi.conf $SMDV $SMDL"
+	local logFilesList="$SCRIPT_ROTATE* $CLEAN_X_ORG_LOG* $LOG_FILE* /var/log/sgfxi/sgfxi.log* /var/log/svmi.log*"
+
+	local removeList='' removeFile='' extraText=''
+	local removedSize=''
+	local removedCount=''
+	local videoDownloads='/usr/src/sgfxi-downloads'
+	local vmDownloads='/usr/src/svmi-downloads'
+	
+	case $1 in
+		remove-backup-files)
+			for removeFile in $backupFileList
+			do
+				removeList="$removeList $( ls $removeFile 2>/dev/null )"
+			done
+			extraText='delete '
+			;;
+		remove-kernel-downloads)
+			if [ -d $KERNEL_DIRECTORY ];then
+				removeList=$KERNEL_DIRECTORY
+				removedSize=$( du -ch $KERNEL_DIRECTORY 2>/dev/null | grep 'total' )
+				removedSize=$( echo $removedSize )
+				extraText='delete '
+			fi
+			;;
+		remove-video-driver-downloads)
+			if [ -d $videoDownloads ];then
+				removeList=$videoDownloads
+				removedSize=$( du -ch $videoDownloads 2>/dev/null | grep 'total' )
+				removedSize=$( echo $removedSize )
+				extraText='delete '
+			fi
+			;;
+		remove-virtual-machine-downloads)
+			 if [ -d $vmDownloads ];then
+			 	removeList=$vmDownloads
+				removedSize=$( du -ch $vmDownloads 2>/dev/null | grep 'total' )
+				removedSize=$( echo $removedSize )
+				extraText='delete '
+			fi
+			;;
+		remove-log-files)
+			for removeFile in $logFilesList
+			do
+				removeList="$removeList $( ls $removeFile 2>/dev/null )"
+			done
+			if [ -d /var/log/sgfxi ];then
+				removeList="$removeList /var/log/sgfxi/"
+			fi
+			extraText='delete '
+			;;
+		remove-script-configuration-files)
+			for removeFile in $configFileList
+			do
+				if [ -e $removeFile ];then
+					removeList="$removeList $removeFile"
+				fi
+			done
+			extraText='delete '
+			;;
+		uninstall-all-smxi)
+			for removeFile in $REMOVE_LIST
+			do
+				removeList="$removeList $( ls $SCRIPT_HOME/$removeFile 2>/dev/null )"
+			done
+			;;
+	esac
+	# straighten the remove list out
+	if [ -n "$removeList" ];then
+		removeList=$( echo $removeList )
+		removedCount="$( wc -w <<< $removeList )"
+	fi
+	# dump the data for full cleanup without interaction after first approval is given
+	if [ "$2" == 'no-question' ];then
+		if [ -n "$removeList" ];then
+			echo "${S}Carrying out requested action: ${C}$1${S} now...${N}"
+			rm -rf $removeList
+			echo "${S}Files/Directories removed.${N}"
+		else
+			echo "${M}There is no data to remove for requested action: ${C}$1"
+		fi
+	fi
+
+	if [ -z "$removeList" ];then
+		echo $MLINE
+		echo "${M}There is no data to remove for requested action: ${C}$1"
+	elif [ "$2" != 'no-question' ];then
+		echo $LINE
+		echo "${S}Requested action: ${C}$1"
+		echo $LINE
+		if [ "$1" == 'uninstall-all-smxi' ];then
+			echo -e "${Q}Are you sure you want to remove all of ${C}$SCRIPT_NAME${Q} as well as all of its associated files,"
+			echo "directories, logs, configs, and data? Doing so will also remove ${C}$MOD_GFX${Q} and ${C}$MOD_VM${Q}."
+		else
+			echo -e "${Q}Are you sure you want to $extraText${C}$removedCount${Q} files/directories?"
+			if [ -n "$removeList" ];then
+				echo "${C}$removeList"
+			fi
+			if [ -n "$removedSize" ];then
+				echo $LINE
+				echo "${S}Removing this data will free up ${C}$removedSize${S} in your system${N}"
+			fi
+		fi
+		echo $LINE
+		echo "${C}1 - yes-delete-data${S} - Delete the data."
+		echo "${C}2 - return-main-menu${S} - Go back to main menu, skip deletions."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="yes-delete-data return-main-menu"
+		select opt in $options
+		do
+			case $opt in
+				yes-delete-data)
+					if [ "$1" == 'uninstall-all-smxi' ];then
+						remove_data_files_check 'remove-backup-files' 'no-question'
+						remove_data_files_check 'remove-kernel-downloads' 'no-question'
+						remove_data_files_check 'remove-video-driver-downloads' 'no-question'
+						remove_data_files_check 'remove-virtual-machine-downloads' 'no-question'
+						remove_data_files_check 'remove-log-files' 'no-question'
+						remove_data_files_check 'remove-script-configuration-files' 'no-question'
+					fi
+					echo $LINE
+					echo "${S}Carrying out requeasted action: ${C}$1${S}...${N}"
+					rm -rf $removeList
+					echo "${S}Files/Directories removed.${N}"
+					;;
+				return-main-menu)	
+					echo "${S}Continuing without deleting backup files.${N}"
+					;;
+				*)	print_error 'opt'
+					repeat='true'
+					;;
+			esac
+			break
+		done
+		eval $LOGUE
+		if [ "$repeat" == 'true' ];then
+			remove_data_files_check
+		fi
+	fi
+}
 
 ###**EOF**###
