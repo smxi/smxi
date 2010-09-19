@@ -1965,7 +1965,6 @@ get_current_apt_kernel()
 			KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
 			log_function_data "KERNEL_FORCE_DU: $KERNEL_FORCE_DU"
 			# global will handle alert to metapackage users to reboot post du
-			# global will handle alert to metapackage users to reboot post du
 			CURRENT_APT_KERNEL_GRUB=$( grep -is -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 			log_function_data "CURRENT_APT_KERNEL_GRUB: $CURRENT_APT_KERNEL_GRUB"
 		fi
