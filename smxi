@@ -544,7 +544,7 @@ error_handler()
 			;;
 		no-grub-config)
 			errorCode=7
-			errorMessage="$SCRIPT_NAME cannot locate any /boot/grub/ config files. Unable to continue.\n$SCRIPT_NAME requires grub config files: /boot/grub/menu.lst or /boot/grub/grub.cfg\n$SCRIPT_NAME does not support lilo or unmounted /boot partitions."
+			errorMessage="$SCRIPT_NAME cannot locate any /boot/grub/ config files. Unable to continue.\n$SCRIPT_NAME requires grub config files: /boot/grub/menu.lst or /boot/grub/grub.cfg\n$SCRIPT_NAME does not support lilo or unmounted /boot partitions.\nYou can start $SCRIPT_NAME with option: -! 32 to override this at your own risk!!"
 			;;
 		# kernel section errors
 		kernel-download-failed)
