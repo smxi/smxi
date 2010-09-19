@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.6
+####  version: 8.12.7
 ####  Date: September 18 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -2581,6 +2581,7 @@ check_force_update()
 	if [ "$FORCE_UPDATE" == 'true' ];then
 		echo $EBAR
 		echo "${E}Updating script now...${N}"
+		update_scripts $VERSION_INFO # this just so -v has the recent number
 		update_scripts $SCRIPT_NAME 'chm'
 		if [ "$?" -eq 0 ];then
 			echo "${E}Restarting script...${N}"
@@ -2827,8 +2828,14 @@ print_lib_info()
 			scriptText=$SCRIPT_NAME
 			moduleText='Version'
 			printIt='true'
-			scriptVersion=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
-			scriptDate=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 2 )
+
+			if [ "$PRINT_VERSION" != 'true' ];then
+				scriptVersion=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
+				scriptDate=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 2 )
+			else
+				scriptVersion=$( grep -s "sm-main-version=" $SCRIPT_HOME/$VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 1 )
+				scriptDate=$( grep -s "sm-main-version=" $SCRIPT_HOME/$VERSION_INFO | cut -d '=' -f 2 | cut -d ':' -f 2 )
+			fi
 			;;
 		*)
 			error_handler 'value-bad' $FUNCNAME "$1"
