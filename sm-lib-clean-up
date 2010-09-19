@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.2
+####  version: 2.10.3
 ####  Date: September 18 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -829,10 +829,18 @@ write_xorg_remove_log()
 ### clean smxi data/backups section
 ###---------------------------------------------------------------------
 
+# args: $1 - y-option (optional)
 clean_smxi_stuff()
 {
-	local repeat='' opt='' 
-	local options='remove-backup-files remove-kernel-downloads remove-video-driver-downloads remove-virtual-machine-downloads remove-log-files remove-script-configuration-files uninstall-all-smxi return-main-menu'
+	local repeat='' opt='' lastOption='return-main-menu' 
+	local lastOptionText='Go back to main menu.'
+	local lastOptionExit='Returning to main menu.'
+	if [ "$1" == 'y-option' ];then
+		lastOption='quit-cleanup'
+		lastOptionText='Exit cleanup.'
+		lastOptionExit='Exiting cleanup.'
+	fi
+	local options="remove-backup-files remove-kernel-downloads remove-video-driver-downloads remove-virtual-machine-downloads remove-log-files remove-script-configuration-files uninstall-all-smxi $lastOption"
 
 	echo $MLINE
 	echo "${M}$SCRIPT_NAME cleanup tool"
@@ -854,7 +862,7 @@ clean_smxi_stuff()
 	echo "    setup routine all over again."
 	echo "${C}7 - uninstall-all-smxi${S} - Yep, here it is, will run all the above, then remove"
 	echo "    all connected files from $SCRIPT_HOME"
-	echo "${C}8 - return-main-menu${S} - Go back to main menu."
+	echo "${C}8 - $lastOption${S} - $lastOptionText"
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
@@ -892,8 +900,11 @@ clean_smxi_stuff()
 				echo "Exiting ${C}$SCRIPT_NAME${S} now since there are no pieces to operate the script any longer ;-)${N}"
 				exit 0
 				;;
-			return-main-menu)	
-				echo "${S}Returning to main menu.${N}"
+			$lastOption)	
+				echo "${S}$lastOptionExit${N}"
+				if [ "$1" == 'y-option' ];then
+					exit 0
+				fi
 				;;
 			*)	print_error 'opt'
 				repeat='true'
