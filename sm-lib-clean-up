@@ -887,7 +887,10 @@ clean_smxi_stuff()
 				;;
 			uninstall-all-smxi)
 				remove_data_files_check $opt
-				echo "${S}Ok, the pieces are all gone, thanks for checking ${C}$SCRIPT_NAME${S} out!${N}"
+				echo $LINE
+				echo "${S}Ok, the pieces are all gone, thanks for checking ${C}$SCRIPT_NAME${S} out!"
+				echo "Exiting ${C}$SCRIPT_NAME${S} now since there are no pieces to operate the script any longer ;-)${N}"
+				exit 0
 				;;
 			return-main-menu)	
 				echo "${S}Returning to main menu.${N}"
