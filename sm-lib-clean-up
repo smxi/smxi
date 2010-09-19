@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.3
-####  Date: September 18 2010
+####  version: 2.10.4
+####  Date: September 19 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i):
@@ -915,8 +915,6 @@ clean_smxi_stuff()
 	
 	if [ "$repeat" == 'true' ];then
 		clean_smxi_stuff
-	else
-		print_hec
 	fi
 }
 
@@ -1065,7 +1063,7 @@ remove_data_files_check()
 			esac
 			break
 		done
-		eval $LOGUE
+
 		if [ "$repeat" == 'true' ];then
 			remove_data_files_check
 		fi
