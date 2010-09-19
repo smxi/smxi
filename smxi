@@ -371,7 +371,7 @@ VIDEO_SUPPORT_NVIDIA=''
 WITHOUT_RECOMMENDS=''
 
 # miscellaneous settings
-MAX_AGE=300 # due to 'fewer' script changes, no need to be as careful
+MAX_AGE=500 # due to 'fewer' script changes, no need to be as careful
 TIME_OUT=25
 
 # allow user set globals to override script globals
