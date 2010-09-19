@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.4
+####  version: 8.12.5
 ####  Date: September 18 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -256,7 +256,7 @@ $LIB_2008_FIXES_STATIC ${LIB_2008_FIXES_STATIC}-t  $LIB_2009_FIXES_STATIC ${LIB_
 # remove list
 REMOVE_LIST="$VERSION_INFO* $WARNING_STATUS* $WARNING_BODY* $ALERT_BODY* $CONFIGS_BODY* $HOLD_INSTALL* $LIB_APT_TOOLS* $LIB_CLEAN_UP* $LIB_DISTRO_CONVERSION* $LIB_DU_FIXES* $LIB_GRAPHICS* $LIB_KDE4_UPDATER* $LIB_KERNEL* $LIB_KERNEL_INSTALL* $LIB_MISC_TWEAKS*
 $LIB_PACKAGE_INSTALL* $LIB_PACKAGE_REMOVAL* $LIB_WARNING* $LIB_2007_FIXES*
-$LIB_2008_FIXES_STATIC* $LIB_2009_FIXES_STATIC* $MOD_GFX* $MOD_VM* $SCRIPT_NAME*"
+$LIB_2008_FIXES_STATIC* $LIB_2009_FIXES_STATIC* $MOD_GFX* $MOD_VM* $SCRIPT_NAME* $VIDEO_DATA_FGLRX* $VIDEO_DATA_NVIDIA*"
 
 # optional user set scripts/download locations
 USER_SCRIPT=''
