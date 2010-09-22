@@ -1031,13 +1031,13 @@ remove_data_files_check()
 			rm $removeType $removeList
 			echo "${C}$removedCount${S} Files/Directories removed.${N}"
 		else
-			echo "${M}There is no data to remove for requested action: ${C}$1"
+			echo "${M}There is no data to remove for requested action: ${C}$1${N}"
 		fi
 	else
 		# need to be careful here since we don't want to do rm -rf
 		if [ -z "$removeList" -o "$( wc -w <<< $removeList )" -eq 0 ];then
 			echo $MLINE
-			echo "${M}There is no data to remove for requested action: ${C}$1"
+			echo "${M}There is no data to remove for requested action: ${C}$1${N}"
 		else
 			echo $LINE
 			echo "${S}Requested action: ${C}$1"
