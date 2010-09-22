@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.7
+####  version: 2.10.8
 ####  Date: September 22 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -1042,9 +1042,12 @@ remove_data_files_check()
 			echo $LINE
 			echo "${S}Requested action: ${C}$1"
 			echo $LINE
-			if [ "$1" == 'uninstall-smxi' ];then
-				echo -e "${Q}Are you sure you want to remove all of ${C}$SCRIPT_NAME${Q} as well as all of its associated files,"
-				echo "directories, logs, configs, and data? Doing so will also remove ${C}$MOD_GFX${Q} and ${C}$MOD_VM${Q}."
+			if [ "$1" == 'uninstall-all-smxi-scripts' ];then
+				echo -e "${Q}Are you sure you want to remove ${C}$SCRIPT_NAME${Q} as well as all of its associated files,"
+				echo "directories, logs, configs, and data? Doing so will also remove all ${C}$MOD_GFX${Q} and ${C}$MOD_VM${Q} components."
+			elif [ "$1" == 'uninstall-smxi' ];then
+				echo -e "${Q}Are you sure you want to remove ${C}$SCRIPT_NAME${Q} as well as all of its associated files,"
+				echo "directories, logs, configs, and data?${Q}."
 			else
 				echo -e "${Q}Are you sure you want to $extraText${C}$removedCount${Q} files/directories?"
 				if [ "$1" != 'remove-xorg.conf-backup-files' ];then
