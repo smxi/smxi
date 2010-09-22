@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.6
+####  version: 2.10.7
 ####  Date: September 22 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -840,7 +840,7 @@ clean_smxi_stuff()
 		lastOptionText='Exit cleanup.'
 		lastOptionExit='Exiting cleanup.'
 	fi
-	local options="remove-backup-files remove-xorg.conf-backup-files remove-kernel-downloads remove-video-driver-downloads remove-virtual-machine-downloads remove-log-files remove-script-configuration-files uninstall-all-smxi $lastOption"
+	local options="remove-backup-files remove-xorg.conf-backup-files remove-kernel-downloads remove-video-driver-downloads remove-virtual-machine-downloads remove-log-files remove-script-configuration-files uninstall-smxi uninstall-all-smxi-scripts $lastOption"
 
 	echo $MLINE
 	echo "${M}$SCRIPT_NAME cleanup tool"
@@ -861,9 +861,10 @@ clean_smxi_stuff()
 	echo "${C}7 - remove-script-configuration-files${S} - Remove all script configuration files."
 	echo "    Not recommended since then if you run the script again you have to run throught the"
 	echo "    setup routine all over again."
-	echo "${C}8 - uninstall-all-smxi${S} - Yep, here it is, will run all the above, then remove"
+	echo "${C}8 - uninstall-smxi${S} - Uninstalls $SCRIPT_NAME, then removes"
 	echo "    all connected files from $SCRIPT_HOME"
-	echo "${C}9 - $lastOption${S} - $lastOptionText"
+	echo "${C}9 - uninstall-all-smxi-scripts${S} - Will run all the above, as well as removing sgfxi and svmi components"
+	echo "${C}10 - $lastOption${S} - $lastOptionText"
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
@@ -898,10 +899,17 @@ clean_smxi_stuff()
 				remove_data_files_check $opt
 				repeat='true'
 				;;
-			uninstall-all-smxi)
+			uninstall-smxi)
 				remove_data_files_check $opt
 				echo $LINE
-				echo "${S}Ok, the pieces are all gone, thanks for checking ${C}$SCRIPT_NAME${S} out!"
+				echo "${S}Ok, ${C}$SCRIPT_NAME${S} is gone, thanks for checking it out!"
+				echo "Exiting ${C}$SCRIPT_NAME${S} now since there are no pieces to operate the script any longer ;-)${N}"
+				exit 0
+				;;
+			uninstall-all-smxi-scripts)
+				remove_data_files_check $opt
+				echo $LINE
+				echo "${S}Ok, ${C}$SCRIPT_NAME${S}, ${C}sgfxi${S}, and ${C}svmi${S} are all gone, thanks for checking them out!"
 				echo "Exiting ${C}$SCRIPT_NAME${S} now since there are no pieces to operate the script any longer ;-)${N}"
 				exit 0
 				;;
@@ -994,14 +1002,21 @@ remove_data_files_check()
 			done
 			extraText='delete '
 			;;
-		uninstall-all-smxi)
-			for removeFile in $REMOVE_LIST
+		uninstall-all-smxi-scripts)
+			for removeFile in $REMOVE_LIST_SM $REMOVE_LIST_SV $REMOVE_LIST_SG
 			do
 				removeList="$removeList $( ls $SCRIPT_HOME/$removeFile 2>/dev/null )"
-				removeList="$removeList $( ls $SCRIPT_ROTATE* 2>/dev/null )"
-				removeList="$removeList $( ls /etc/logrotate.d/sgfxi* 2>/dev/null )"
-				removeList="$removeList $( ls /etc/logrotate.d/svmi* 2>/dev/null )"
 			done
+			removeList="$removeList $( ls $SCRIPT_ROTATE* 2>/dev/null )"
+			removeList="$removeList $( ls /etc/logrotate.d/sgfxi* 2>/dev/null )"
+			removeList="$removeList $( ls /etc/logrotate.d/svmi* 2>/dev/null )"
+			;;
+		uninstall-smxi)
+			for removeFile in $REMOVE_LIST_SM
+			do
+				removeList="$removeList $( ls $SCRIPT_HOME/$removeFile 2>/dev/null )"
+			done
+			removeList="$removeList $( ls $SCRIPT_ROTATE* 2>/dev/null )"
 			;;
 	esac
 	# straighten the remove list 
@@ -1027,7 +1042,7 @@ remove_data_files_check()
 			echo $LINE
 			echo "${S}Requested action: ${C}$1"
 			echo $LINE
-			if [ "$1" == 'uninstall-all-smxi' ];then
+			if [ "$1" == 'uninstall-smxi' ];then
 				echo -e "${Q}Are you sure you want to remove all of ${C}$SCRIPT_NAME${Q} as well as all of its associated files,"
 				echo "directories, logs, configs, and data? Doing so will also remove ${C}$MOD_GFX${Q} and ${C}$MOD_VM${Q}."
 			else
@@ -1052,17 +1067,25 @@ remove_data_files_check()
 			do
 				case $opt in
 					yes-delete-data)
-						if [ "$1" == 'uninstall-all-smxi' ];then
-							remove_data_files_check 'remove-backup-files' 'no-question'
-							remove_data_files_check 'remove-xorg.conf-backup-files' 'no-question'
-							remove_data_files_check 'remove-kernel-downloads' 'no-question'
-							remove_data_files_check 'remove-video-driver-downloads' 'no-question'
-							remove_data_files_check 'remove-virtual-machine-downloads' 'no-question'
-							remove_data_files_check 'remove-log-files' 'no-question'
-							remove_data_files_check 'remove-script-configuration-files' 'no-question'
-						fi
+						case $1 in
+							uninstall-smxi)
+								remove_data_files_check 'remove-backup-files' 'no-question'
+								remove_data_files_check 'remove-kernel-downloads' 'no-question'
+								remove_data_files_check 'remove-log-files' 'no-question'
+								remove_data_files_check 'remove-script-configuration-files' 'no-question'
+								;;
+							uninstall-all-smxi-scripts)
+								remove_data_files_check 'remove-backup-files' 'no-question'
+								remove_data_files_check 'remove-xorg.conf-backup-files' 'no-question'
+								remove_data_files_check 'remove-kernel-downloads' 'no-question'
+								remove_data_files_check 'remove-video-driver-downloads' 'no-question'
+								remove_data_files_check 'remove-virtual-machine-downloads' 'no-question'
+								remove_data_files_check 'remove-log-files' 'no-question'
+								remove_data_files_check 'remove-script-configuration-files' 'no-question'
+								;;
+						esac
 						echo $LINE
-						echo "${S}Carrying out requeasted action: ${C}$1${S}...${N}"
+						echo "${S}Carrying out requested action: ${C}$1${S}...${N}"
 						rm $removeType $removeList
 						echo "${C}$removedCount${S} Files/Directories removed.${N}"
 						;;
