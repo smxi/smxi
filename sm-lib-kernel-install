@@ -116,7 +116,7 @@ advanced_kernel_install()
 	echo "${C}1-$kernelCount - Archived kernel zip files${S} Will install the kernel you select."
 # 	echo "       ${C}slh${S} marked kernels: aptosid kernels - 2.6.25 to 2.6.31: no fglrx support"
 # 	if [ "$B_TESTING_1" == 'true' ];then
-		echo "       ${C}liquorix${S} kernels: zen kernel sources; made by damentz; fglrx support."
+		echo "       ${C}liquorix${S} kernels: zen kernel sources; desktop performance by damentz."
 # 	fi
 	echo
 	print_alt_kernel_option "$altKernelOption1" "$altKernOpt1" "$altKernelText1"
