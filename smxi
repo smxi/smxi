@@ -1672,7 +1672,6 @@ cleanup_extra_files()
 		fi
 	done
 	
-	update_to_aptosid
 	eval $LOGPE
 }
 
@@ -3768,7 +3767,6 @@ run_script_components()
 	if [ "$SKIP_CONNECTIONS" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECTION_TEST" != 'true' ];then
 		check_connection
 	fi
-
 	# there's a minor problem here, if first run, there will be no kernel lib file, so if
 	# user continues, there will be an error.
 	update_scripts $VERSION_INFO # get the version info data file
@@ -3777,6 +3775,7 @@ run_script_components()
 	if [ "$SKIP_RESTART" != "true" -a "$SKIP_CONNECTIONS" != 'true' ];then
 		check_version
 	fi
+	update_to_aptosid
 	# tests for supported version. Nothing older than sidux pre release 5 is supported
 	check_distro_version
 	# check date to make sure the script is not out of date after being updated
