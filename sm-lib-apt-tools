@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.31
+####  version: 1.22.32
 ####  Date: September 23 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -1260,7 +1260,11 @@ update_sources()
 		apt_update_handler 'package-install'
 	fi
 	# these will install keyrings if required after the update happens
-	eval $extraFunctions2
+	if [ -n "$extraFunctions2" ];then
+		eval $extraFunctions2
+		UPDATED=''
+		apt_update_handler 'package-install'
+	fi
 	
 	eval $LOGUE
 }
