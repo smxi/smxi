@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.29
+####  version: 1.22.30
 ####  Date: September 23 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -1208,7 +1208,7 @@ update_sources()
 			searchIdentifier='Aptosid'
 			sourceFile=$aptosidApt
 			sourcesData=$aptosidSources
-			extraFunctions='install_keyrings'
+			extraFunctions='package_installer aptosid-archive-keyring install-always --allow-unauthenticated'
 			;;
 		liquorix)
 			grepSearch='(liquorix|deb-lqx)'
