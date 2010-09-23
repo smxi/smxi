@@ -1758,7 +1758,8 @@ update_to_aptosid()
 			update_to_aptosid
 		else
 			echo $LINE
-			echo "${S}I don't want to spend much time on this conversion utility, sorry, so please follow the advice!${N}"
+			echo "${S}I don't want to spend much time on this conversion utility, sorry,"
+			echo "so please follow the advice!${N}"
 			print_hec
 		fi
 	fi
