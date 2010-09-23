@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.10
-####  Date: September 22 2010
+####  version: 8.12.11
+####  Date: September 23 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1680,10 +1680,12 @@ update_to_aptosid()
 {
 	eval $LOGPE
 	
-	local sourceFile='' foundSidux=''
+	local sourceFile='' foundSidux='' repeat='false' opt='' options=''
 	
 	if [ -n "$( grep -si 'sidux' $EAS $EAS.d/*.list )" ];then
-		echo $LINE
+		echo $MLINE
+		echo "${M}Update To Aptosid Utility"
+		echo $MLINE
 		echo "${S}Starting the conversion of your system to use ${C}aptosid${S} sources...${N}"
 		if [ -f $SM_CONFIG_FILE -a -n "$( grep 'distro-kernel=sidux' $SM_CONFIG_FILE )" ];then
 			echo $LINE
@@ -1702,20 +1704,65 @@ update_to_aptosid()
 				fi
 			fi
 		done
-		echo "${S}Adding working sidux apt repo entry now for updating...${N}"
-		echo -e "# Added by smxi conversion tool:\ndeb http://sidux.com/debian sid main\n\n" > /etc/apt/sources.list.d/sidux.list
-		echo "${S}Added safe repo for conversion...${N}"
 		echo $LINE
-		echo "${M}Sending you on to dist-upgrade now. You must not exit until the dist-upgrade is completed!"
-		echo "PLEASE PROCEED TO THE DIST-UPGRADE AND RUN IT THROUGH ONCE NOW!${N}"
+		echo "${S}You have the following options available to you:"
 		echo $LINE
-		echo "${S}I don't want to spend much time on this conversion utility, sorry, so please follow this advice!${N}"
-		SKIP_KERNEL='true'
-		B_SKIP_A_S='true'
-		print_hec
+		echo "${C}1 - do-full-conversion${S} - Proceed to full conversion to ${C}Aptosid${S}. Note that if you are"
+		echo "    seeing this update feature every time you run ${C}$SCRIPT_NAME${S}, you should probably"
+		echo "    run option ${C}2${S} since you conversion doesn't seem to have worked right,"
+		echo "    or you are only using the repositories for kernels/Sid hot fixes."
+		echo "${C}2 - only-update-sources${S} - If you are not running sidux but were using the repos only"
+		echo "    for kernels or Sid hot fixes, and don't have other sidux packages like ${C}distro-defaults"
+		echo "    installed, you probably want to pick option ${C}2${S}."
+		echo "${C}3 - quit${S} - Exit now to figure out what to do."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="do-full-conversion only-update-sources quit"
+		select opt in $options
+		do
+			case $opt in
+				do-full-conversion)
+					echo "${S}Adding working sidux apt repo entry now for updating...${N}"
+					echo -e "# Added by smxi conversion tool:\ndeb http://sidux.com/debian sid main\n\n" > /etc/apt/sources.list.d/sidux.list
+					echo "${S}Added safe repo for conversion...${N}"
+					echo $LINE
+					echo "${M}Sending you on to dist-upgrade now. You must not exit until the dist-upgrade is completed!"
+					echo "PLEASE PROCEED TO THE DIST-UPGRADE AND RUN IT THROUGH ONCE NOW!${N}"
+					SKIP_KERNEL='true'
+					B_SKIP_A_S='true'
+					;;
+				only-update-sources)
+					echo $LINE
+					echo "${S}Removing sidux repos and adding Aptosid repos...${N}"
+					rm -f /etc/apt/sources.list.d/sidux.list
+					if [ "$SKIP_CONNECTIONS" != 'true' ];then
+						run_script_import $LIB_APT_TOOLS
+					else
+						run_script_import $LIB_APT_TOOLS 'no-download'
+					fi
+					update_sources 'aptosid'
+					;;
+				quit)
+					echo "${S}Ok, figure it out then try ${C}$SCRIPT_NAME${S} again.${N}"
+					exit 0
+					;;
+				*)	print_error 'opt'
+					repeat='true'
+					;;
+			esac
+			break
+		done
+		
+		eval $LOGPE
+		if [ "$repeat" == 'true' ];then
+			update_to_aptosid
+		else
+			echo $LINE
+			echo "${S}I don't want to spend much time on this conversion utility, sorry, so please follow the advice!${N}"
+			print_hec
+		fi
 	fi
-	
-	eval $LOGPE
 }
 
 # creates / tests for required script data files and logs etc
