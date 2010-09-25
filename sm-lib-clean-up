@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.8
-####  Date: September 22 2010
+####  version: 2.10.9
+####  Date: September 24 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i):
@@ -1010,6 +1010,7 @@ remove_data_files_check()
 			removeList="$removeList $( ls $SCRIPT_ROTATE* 2>/dev/null )"
 			removeList="$removeList $( ls /etc/logrotate.d/sgfxi* 2>/dev/null )"
 			removeList="$removeList $( ls /etc/logrotate.d/svmi* 2>/dev/null )"
+			removeList="$removeList $( ls /etc/modprobe.d/kms-sg-blacklist.conf 2>/dev/null )"
 			;;
 		uninstall-smxi)
 			for removeFile in $REMOVE_LIST_SM
