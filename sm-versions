@@ -1,7 +1,7 @@
-smxi=8.12.12:September 23 2010
+smxi=8.12.13:September 28 2010
 sm-lib-apt-tools=1.22.32:September 23 2010
 sm-lib-clean-up=2.10.9:September 24 2010
-sm-lib-distro-conversion=3.3.1:September 16 2010
+sm-lib-distro-conversion=3.3.2:September 28 2010
 sm-lib-du-fixes=1.4.4:September 27 2010
 sm-lib-graphics=2.4.4:September 16 2010
 sm-lib-kde4-updater=0.7.36:September 16 2010
@@ -23,6 +23,6 @@ sgfxi=4.15.8:September 27 2010
 svmi=2.7.3:September 22 2010
 inxi=1.4.16:September 26 2010
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.31.20:September 28 2010
+sm-main-version=8.31.21:September 28 2010
 
 ###**EOF**###
