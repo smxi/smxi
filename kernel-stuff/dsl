@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.6
-####  Date: May 19 2010
+####  version: 2.3.7
+####  Date: September 29 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####
@@ -98,7 +98,7 @@ error_handler()
 			message="You have failed to set non default kernel -s flag"
 			;;
 		13)
-			message="-e is only for sidux kernels."
+			message="-e is only for aptosid kernels."
 			;;
 	esac
 	echo $LINE
@@ -122,7 +122,9 @@ get_options()
 	while getopts :efg:hk:lprsz opt
 	do
 		case $opt in
-			# sidux only
+			a)	KERNEL_TYPE='aptosid'
+				;;
+			# aptosid only
 			e)	POOL_TYPE='exp.main'
 				;;
 			f)	POOL_TYPE='future'
@@ -139,20 +141,20 @@ get_options()
 				;;
 			r)	B_REDO='true'
 				;;
-			s)	KERNEL_TYPE='sidux'
-				;;
+			
 			z)	B_SKIP_ZIP='true'
 				;;
 			h)
 				echo "Useage:
--e Use exp.main data (sidux only)
+-a Switch to using aptosid as default kernel type.
+-e Use exp.main data (aptosid only)
 -f Use future data (liquorix only)
 -g Use alternate GCC values. Syntax: -g [3-4].[0-9]
 -k Kernel to download. Requires -k <2.6.26-8.lqx.2> type syntax
    NOTE: -k <kernel> is required to run dsl always
 -p Use past data (liquorix only)
 -r Redo zip without downloading again.
--s Switch to using sidux as default kernel type.
+
 -z Download only, no zip creation
 "
 				exit 0
@@ -163,7 +165,7 @@ get_options()
 		esac
 	done
 	
-	if [ "$POOL_TYPE" == 'exp.main' -a "$KERNEL_TYPE" != 'sidux' ];then
+	if [ "$POOL_TYPE" == 'exp.main' -a "$KERNEL_TYPE" != 'aptosid' ];then
 		error_handler 13
 	fi
 	if [ "$B_REDO" == 'true' -a "$B_SKIP_ZIP" == 'true' ];then
@@ -173,7 +175,7 @@ get_options()
 		error_handler 3
 	fi
 	# avoid careless errors
-	if [ -n "$( grep 'slh' <<< $KERNEL_WORKING )" -a "$KERNEL_TYPE" != 'sidux' ];then
+	if [ -n "$( grep 'slh' <<< $KERNEL_WORKING )" -a "$KERNEL_TYPE" != 'aptosid' ];then
 		error_handler 12
 	fi
 }
@@ -183,17 +185,17 @@ set_values()
 	local repoPre='' repoMain='' repoModules='' repoExtra=''
 
 	case $KERNEL_TYPE in
+		aptosid)
+			repoPre="http://aptosid.com/debian/pool/${POOL_TYPE}/l/"
+			repoMain='linux-aptosid-2.6/'
+			repoModules='linux-modules-aptosid-main-2.6/'
+			repoExtra='linux-kbuild-2.6/'
+			;;
 		liquorix)
 			repoPre="http://liquorix.net/debian/pool/${POOL_TYPE}/l/"
 			repoMain='linux-liquorix-2.6/'
 			repoModules='linux-modules-liquorix-main-2.6/'
 			repoExtra=''
-			;;
-		sidux)
-			repoPre="http://sidux.com/debian/pool/${POOL_TYPE}/l/"
-			repoMain='linux-sidux-2.6/'
-			repoModules='linux-modules-sidux-main-2.6/'
-			repoExtra='linux-kbuild-2.6/'
 			;;
 	esac
 
@@ -282,11 +284,11 @@ check_kernel_exists()
 	local kernelId=''
 
 	case $KERNEL_TYPE in
+		aptosid)
+			kernelId="linux-image-$KERNEL_WORKING-aptosid-686"
+			;;
 		liquorix)
 			kernelId="linux-image-$KERNEL_WORKING-liquorix-686"
-			;;
-		sidux)
-			kernelId="linux-image-$KERNEL_WORKING-sidux-686"
 			;;
 	esac
 
@@ -340,7 +342,7 @@ download_kernel_files()
 	echo
 	sleep $sleepTime
 	echo "Getting kernel diff.gz data now..."
-	# might as well include this for sidux kernels because the src gz is small
+	# might as well include this for aptosid kernels because the src gz is small
 	case $KERNEL_TYPE in
 		liquorix)
 			cd src-gz
@@ -391,12 +393,12 @@ move_files_to_directories()
 	local kernelType='' gzDir=''
 
 	case $KERNEL_TYPE in
+		aptosid)
+			kernelType='aptosid'
+			;;
 		liquorix)
 			kernelType='liquorix'
 			gzDir='src-gz/'
-			;;
-		sidux)
-			kernelType='sidux'
 			;;
 	esac
 
@@ -421,13 +423,13 @@ add_update_installer_files()
 	local fullKernelString32='' fullKernelString64=''
 
 	case $KERNEL_TYPE in
+		aptosid)
+			fullKernelString32="$KERNEL_WORKING-aptosid-686"
+			fullKernelString64="$KERNEL_WORKING-aptosid-amd64"
+			;;
 		liquorix)
 			fullKernelString32="$KERNEL_WORKING-liquorix-686"
 			fullKernelString64="$KERNEL_WORKING-liquorix-amd64"
-			;;
-		sidux)
-			fullKernelString32="$KERNEL_WORKING-sidux-686"
-			fullKernelString64="$KERNEL_WORKING-sidux-amd64"
 			;;
 	esac
 
@@ -452,13 +454,13 @@ make_zip_files()
 	local kernel32Zip='' kernel64Zip=''
 
 	case $KERNEL_TYPE in
+		aptosid)
+			kernel32Zip="$KERNEL_WORKING-aptosid-686.zip"
+			kernel64Zip="$KERNEL_WORKING-aptosid-amd64.zip"
+			;;
 		liquorix)
 			kernel32Zip="$KERNEL_WORKING-liquorix-686.zip"
 			kernel64Zip="$KERNEL_WORKING-liquorix-amd64.zip"
-			;;
-		sidux)
-			kernel32Zip="$KERNEL_WORKING-sidux-686.zip"
-			kernel64Zip="$KERNEL_WORKING-sidux-amd64.zip"
 			;;
 	esac
 
