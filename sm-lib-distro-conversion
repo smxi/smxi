@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.2
-####  Date: September 28 2010
+####  version: 3.3.3
+####  Date: October 1 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -80,7 +80,8 @@ check_debian()
 	echo "${M}You appear to be using Debian or a Debian derived distro based on ${C}Debian $SYSTEM_BASE${S}."
 	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
 	echo
-	echo "${W}There are no guarantees, as usual with the text of the GPL, but your results should be fine.${S}"
+	echo "${W}There are no guarantees, as is the case with all ${C}GPL${W} code."
+	echo "${S}However, based on most user's experience, your results should be fine.${S}"
 	echo -e "$altText1"
 	echo $LINE
 	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
@@ -299,9 +300,10 @@ offer_liquorix_kernel()
 	echo $MLINE
 	echo "${M}Add ${C}Liquorix${M} Kernel Sources?"
 	echo $MLINE
-	echo "${S}Selecting ${C}yes-add-liquorix-sources${M} will add ${C}Liquorix${M} kernel apt repositories"
-	echo " to your system, after which you will be able to install them in ${C}Advanced Kernel Install${S} options, "
-	echo "or make it your system default in ${C}Miscellaneous Tweaks${M}."
+	echo "${S}Selecting ${C}yes-add-liquorix-sources${S} will add ${C}Liquorix${S} kernel apt repositories"
+	echo "to your system, after which you will be able to install them in ${C}$SCRIPT_NAME${S}'s"
+	echo "${C}Advanced Kernel Install${S} options, or make it your system default in the"
+	echo "${C}Miscellaneous Tweaks${S} section."
 	echo 
 	echo "${C}Liquorix${S} kernels${S} are popular desktop optimized performance kernels."
 	echo $LINE
