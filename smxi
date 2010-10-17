@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.15
+####  version: 8.12.16
 ####  Date: October 17 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
@@ -3015,7 +3015,12 @@ print_install_information()
 	echo "in your terminal window by hitting ${C}Shift + Page Up${S} or ${C}Page Down${S}.${N}"
 	if [ "$B_GUI_MODE" == 'true' ];then
 		echo $LINE
-		echo "${S}You are running ${C}$SCRIPT_NAME${S} in ${C}X/Gui${S} mode! The ${C}$APT_TYPE $DU_UPGRADE${S} section is turned off.${N}"
+		echo "${S}You are running ${C}$SCRIPT_NAME${S} in ${C}X/Gui${S} mode! The ${C}$APT_TYPE $DU_UPGRADE${S} and ${C}video driver install${S}"
+		echo "sections are turned ${C}OFF${S} to avoid possible errors or problems.${N}"
+		echo
+		# note no colors here to make sure everyone can read it in light background console
+		echo "If you have a hard time reading this information output, restart $SCRIPT_NAME with -j 4 option."
+		echo "This will change the color scheme for a light background, like so: smxi -G -j 4"
 	fi
 	log_function_data "Operating system: $BITS bit"
 	log_function_data "CPU: $CPU_NAME"
@@ -3343,12 +3348,18 @@ post_du_options()
 	qui=$tempCount
 
 	echo $MBAR
-	echo "${M}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES"
+	if [ "$B_GUI_MODE" != 'true' ];then
+		echo "${M}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES"
+		echo $MLINE
+		echo "${S}This is a list of various things you can do at this point to"
+		echo "handle some loose ends after doing a ${C}$DU_UPGRADE${S}."
+	else
+		echo "${M}MAIN OPTION SELECTOR :: $( tr [a-z] [A-Z] <<< $SCRIPT_NAME ) X/GUI MODE"
+	fi
 	echo $MLINE
-	echo "${S}This is a list of various things you can do at this point to"
-	echo "handle some loose ends after doing a ${C}$DU_UPGRADE${S}."
-	echo $MLINE
-	nonfree_driver_reinstall 'kernel-xorg'
+	if [ "$B_GUI_MODE" != 'true' ];then
+		nonfree_driver_reinstall 'kernel-xorg'
+	fi
 # 	echo "${C}1${S} - ${C}fixfonts${S} gives you some font fix options. Run this after ${C}$DU_UPGRADE${S} if the upgrade "
 # 	echo "    was really big, or if you haven't run it recently. This can fix some kde display issues."
 # 	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
