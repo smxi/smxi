@@ -2920,7 +2920,7 @@ print_version()
 			;;
 		sidux)
 			distroThanks='warnings: crust drb hubi iotaka latino wilberfan zulu9; kernels: damentz'
-			extraMessage='...and to RazberrieTart, who tried, but had to give up in the end...'
+			extraMessage='...and to RazberrieTart, for her ongoing support...'
 			;;
 		antix)
 			distroThanks='anticapitalista crust damentz dutchy eriefisher masinick trash80'
