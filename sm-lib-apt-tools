@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.33
+####  version: 1.22.34
 ####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -921,7 +921,7 @@ install_keyrings()
 	local smPref=$( sm_pref_tester $prefId )
 
 	# this handles case where sources have now been updated to aptosid only
-	if [ "$smPref" -eq 0 -a "$APTOSID_SOURCES" == 'true' ];then
+	if [ "$smPref" -eq 0 -a "$B_APTOSID_SOURCES" == 'true' ];then
 		echo $LINE
 		# this handles first load cases, and also errors on first du
 		#update_gpg ## add gpg first to stop some errors.
@@ -1519,7 +1519,7 @@ force_kernel_mirror_change()
 change_distro_mirrors()
 {
 	eval $LOGPS
-	if [ "$APTOSID_SOURCES" == 'true' ];then
+	if [ "$B_APTOSID_SOURCES" == 'true' ];then
 		echo $MBAR
 		echo "${M} SMXI DISTRO MIRROR SELECTION"
 		echo $MLINE
@@ -1909,7 +1909,7 @@ get_current_apt_kernel()
 		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra"
 
 		# little trick here to present just debian kernels if not distro
-		if [ "$APTOSID_SOURCES" != 'true' -a "$LIQUORIX_SOURCES" != 'true' -a "$MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
+		if [ "$B_APTOSID_SOURCES" != 'true' -a "$B_LIQUORIX_SOURCES" != 'true' -a "$B_MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
 			kernelStringExtra=''
 			distro='Debian'
 			defaultKernel='debian'

@@ -217,6 +217,7 @@ B_DEBUG='false'
 B_DEV_FLAG='false'
 B_FORCE_DOWNLOAD='false'
 B_FORCE_UPDATE='false'
+B_GUI_MODE='false'
 # simple live test, this will be used to turn off some script features
 B_IS_LIVE=''
 if [ -s $EDD ];then
@@ -2258,9 +2259,6 @@ check_display_and_x()
 	# this checks for pid files for known display managers
 	do_display_manager_pid_test && wmRunning='true'
 
-	# forces update of script and restarts it
-	check_force_update
-
 	# this should handle most cases, now supports Debian default start of gdm/kdm in init 2
 	if [ "$wmRunning" == 'true' -o -n "$DISPLAY" ] && [ "$facts" != 'true' ];then
 		if [ -n "$DISPLAY" ];then
@@ -2914,21 +2912,21 @@ print_version()
 	local distroId=$( print_distro_id )
 
 	case $DISTRO in
-		aptosid)
-			distroThanks='warnings: crust drb hubi iotaka latino wilberfan zulu9; kernels: damentz'
-			extraMessage='...onward and downward bound... as we sail the seas of... what?...'
-			;;
-		sidux)
-			distroThanks='warnings: crust drb hubi iotaka latino wilberfan zulu9; kernels: damentz'
-			extraMessage='...and to RazberrieTart, for her ongoing support...'
-			;;
 		antix)
 			distroThanks='anticapitalista crust damentz dutchy eriefisher masinick trash80'
 			extraMessage='...and a welcome to AntiX users. Hope the script works for you as expected...'
 			;;
+		aptosid)
+			distroThanks='warnings: craigevil crust drb iotaka latino wilberfan zulu9; kernels: damentz'
+			extraMessage='...onward and downward bound... as we sail the seas of... what?...'
+			;;
 		mepis*)
 			distroThanks='anticapitalista eriefisher masinick and the helpers from mepislovers forums'
 			extraMessage='...and welcome to Mepis users. Hope the scripts work for you as expected...'
+			;;
+		sidux)
+			distroThanks='warnings: crust drb hubi iotaka latino wilberfan zulu9; kernels: damentz'
+			extraMessage='...and to RazberrieTart, for her ongoing support...'
 			;;
 	esac
 # 	distroThanks='...and to Mr. Blue, who contributed endless joy, song, curiousity, and orneriness to smxi...'
@@ -3328,8 +3326,12 @@ post_du_options()
 		advanced2='echo -e "${C}'$tempCount'${S} - ${C}$advanced2Option${S} Download and start the script: ${C}$USER_SCRIPT${S}"'
 		tempCount=''
 	fi
+	# this means it's running in X, so  no need to restart X etc
+	if [ "$B_GUI_MODE" == 'true' ];then
+		noXOptions=''
+	fi
 	options="$options $advanced2Option $noXOptions quit"
-
+	
 	tempCount=$( echo $options | wc -w )
 
 	cont=$(( $tempCount - 2 ))
@@ -3373,8 +3375,10 @@ post_du_options()
 	eval $advanced1
 	eval $advanced2
 	echo
-	echo "${C}$cont${S} - Continue to graphics driver installation."
-	echo "${C}$initX${S} - Restart desktop/X (skip graphics (re)install)."
+	if [ "$B_GUI_MODE" != 'true' ];then
+		echo "${C}$cont${S} - Continue to graphics driver installation."
+		echo "${C}$initX${S} - Restart desktop/X (skip graphics (re)install)."
+	fi
 	echo "${C}$qui${S} - Exits the script."
 	echo $LINE
 	echo -e $SLE
@@ -3518,6 +3522,9 @@ print_usage()
 	echo "${C}-! 40${S} - Runs ${C}debdelta-upgrade${S} prior to running system upgrade command (requires ${C}debdelta${S} package)."
 	echo
 	echo "${S}The following can be run in X/kde:"
+	echo "${C}-G${S} Runs ${C}$SCRIPT_NAME${S} in ${C}G${S}raphics/Gui mode. Skips upgrade/warning section."
+	echo "    Can be run in X/Desktop, lets' you run the post upgrade options like cleanup,"
+	echo "    kernel install, package install, and so on."
 	echo "${C}-h${S} Prints this ${C}h${S}elp menu."
 	echo "${C}-v${S} Prints ${C}v${S}ersion and system information, including distro version,"
 	echo "   current kernel, apt update and $DU_UPGRADE last used, and last use of smxi."
@@ -3559,7 +3566,7 @@ get_options()
 
 	# no point in running this if nothing to do
 	if [ -n "$1" ];then
-		while getopts :dehHgij:kKlLmNpP:sStvwW:frRuUxX:YZ:@!: opt
+		while getopts :dehHgGij:kKlLmNpP:sStvwW:frRuUxX:YZ:@!: opt
 		do
 			case $opt in
 				h)	print_usage
@@ -3575,6 +3582,16 @@ get_options()
 					;;
 				g)	B_SKIP_GRAPHICS='true'
 					START_OPTIONS="$START_OPTIONS -g"
+					;;
+				G)	if [ -n "$DISPLAY" ];then
+						B_GUI_MODE='true'
+						B_SKIP_KERNEL='true'
+						B_SKIP_UPGRADE='true'
+						B_SKIP_WARNING='true'
+					else
+						echo "${M}The ${C}-G${M} option is only useful when running in X.${N}"
+					fi
+					START_OPTIONS="$START_OPTIONS -G"
 					;;
 				i)	B_SKIP_INFO='true'
 					START_OPTIONS="$START_OPTIONS -i"
@@ -3761,7 +3778,11 @@ run_script_components()
 {
 	start_up_tests
 	create_log
-	check_display_and_x
+	# forces update of script and restarts it
+	check_force_update
+	if [ "$B_GUI_MODE" != 'true' ];then
+		check_display_and_x
+	fi
 	create_script_files
 	# clean up old and temp files if required
 	cleanup_extra_files
