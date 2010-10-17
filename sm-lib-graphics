@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.4
-####  Date: September 16 2010
+####  version: 2.4.5
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -353,7 +353,6 @@ final_graphics_install()
 {
 	eval $LOGPS
 	local completed='' FglrxFlag='' installDriver='' extraArgs='' installMess=''
-	local kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 )
 	local kernelInstallTo=''
 
 	# I'm going to trust that data is correct here and let sgfxi test for kernel exists
@@ -417,7 +416,7 @@ final_graphics_install()
 		#the -r removes modelines from xorg which cause out of sync errors
 		fglrx)
 			# only do if newer kernel
-			if [ "$kernelMajorInstalled" -ge 17 ];then
+			if [ "$KERNEL_THIRD" -ge 17 ];then
 				FglrxFlag=' -r '
 			fi
 			# this will force, for ati, debian sid package install instead of ati junk
@@ -431,7 +430,7 @@ final_graphics_install()
 			;;
 		fglrx-o)
 			# only do if newer kernel
-			if [ "$kernelMajorInstalled" -ge 17 ];then
+			if [ "$KERNEL_THIRD" -ge 17 ];then
 				FglrxFlag=' -r '
 			fi
 			installMess="${S}installing ATI/fglrx driver ${C}$2${S} now...${N}"
@@ -441,7 +440,7 @@ final_graphics_install()
 			;;
 		fglrx-l)
 			# only do if newer kernel
-			if [ "$kernelMajorInstalled" -ge 17 ];then
+			if [ "$KERNEL_THIRD" -ge 17 ];then
 				FglrxFlag=' -r '
 			fi
 			installMess="${S}installing latest ATI/fglrx driver ${C}$2${S} now...${N}"

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.4
-####  Date: September 27 2010
+####  version: 1.4.5
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 
@@ -270,7 +270,7 @@ main_upgrade_engine()
 		echo $MLINE
 		eval $ConnectionDropped
 		# note: because the file may not be current or loaded, do not run this if if no warning
-		if [ "$SKIP_WARNING" != 'true' ];then
+		if [ "$B_SKIP_WARNING" != 'true' ];then
 			get_configs # print out any keep config stuff
 		fi
 		upgrade_package_remove_warning
@@ -278,7 +278,7 @@ main_upgrade_engine()
 		echo "through without errors, and of course, always check for packages to be removed."
 
 		# small cosmetic, to avoid printing double line with print-hec
-		if [ "$SKIP_ENTER" == 'true' ];then
+		if [ "$B_SKIP_ENTER" == 'true' ];then
 			echo $LINE
 		fi
 		print_hec
@@ -452,7 +452,7 @@ post_du_tasks()
 		trap 'du_trap_handler $FUNCNAME' INT TERM
 
 		# this is all just debian conversion stuff
-		if [ "$CON_DEB" == 'true' ];then
+		if [ "$B_CON_DEB" == 'true' ];then
 			run_script_import $LIB_DISTRO_CONVERSION
 			install_window_manager
 			install_sidux_components # test to make sure all sidux stuff is installed
@@ -731,7 +731,7 @@ udev_kernel_updater_main()
 				# set global test flag to true, this enables kernel installer and other tests/fixes
 				B_UDEV_KERNEL26='true'
 				B_UDEV_KERNEL26_DU='true'
-				SKIP_KERNEL='false'
+				B_SKIP_KERNEL='false'
 				if [ ! -f "$EUKU" ];then
 					touch $EUKU
 				fi
@@ -739,7 +739,7 @@ udev_kernel_updater_main()
 			continue-kernel-install-reboot)
 				# set global test flag to true, this enables kernel installer and other tests/fixes
 				B_UDEV_KERNEL26='true'
-				SKIP_KERNEL='false'
+				B_SKIP_KERNEL='false'
 				;;
 			quit)
 				print_quit

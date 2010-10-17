@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.11.10
-####  Date: September 16 2010
+####  version: 2.11.11
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Kel Modderman (kelmo)
@@ -53,14 +53,14 @@ advanced_kernel_install()
 	# set to use proper advanced kernel data 64 / 32 bit
 	# no need to load this data more than once per run through.
 
-	if [ "$SET_KERNEL_DATA" != 'true' ];then
+	if [ "$B_KERNEL_DATA_SET" != 'true' ];then
 		set_kernel_data
-		SET_KERNEL_DATA='true'
+		B_KERNEL_DATA_SET='true'
 	fi
 	# add the list closer items
 	kernelCount=$( wc -w <<< $KERNEL_LIST )
 	optionList="$KERNEL_LIST "
-	if [ "$USE_DEBIAN_KERNEL" == 'true' ];then
+	if [ "$B_USE_DEBIAN_KERNEL" == 'true' ];then
 		altKernelOption1='install-debian-kernel'
 		altKernelText1='Debian'
 		if [ "$BITS" == '32' ];then
@@ -80,7 +80,7 @@ advanced_kernel_install()
 	optionList="$optionList $altKernelOption5"
 	altKernOpt5=$( wc -w <<< $optionList )
 
-	if [ -n "$APTOSID_SOURCES" ];then
+	if [ "$B_APTOSID_SOURCES" == 'true' ];then
 		altKernelOption2='install-aptosid-kernel'
 		altKernelText2='aptosid'
 	fi
@@ -88,14 +88,14 @@ advanced_kernel_install()
 	altKernOpt2=$( wc -w <<< $optionList )
 
 	# this works but mepis has no kernel metapackage to test so will always fail
-	if [ -n "$MEPIS_SOURCES" ];then
+	if [ "$B_MEPIS_SOURCES" == 'true' ];then
 		altKernelOption3='install-mepis-kernel'
 		altKernelText3='Mepis'
 	fi
 	optionList="$optionList $altKernelOption3"
 	altKernOpt3=$( wc -w <<< $optionList )
 
-	if [ -n "$LIQUORIX_SOURCES" ];then
+	if [ "$B_LIQUORIX_SOURCES" == 'true' ];then
 		altKernelOption6='install-liquorix-kernel'
 		altKernelText6='Liquorix'
 	fi
@@ -458,7 +458,7 @@ kernel_meta_package_handler()
 	local defaultAction='manual' kiState='on'
 	
 	# not using this one yet: install-kernel-metapackages-full
-	if [ -n "$APTOSID_SOURCES" ];then
+	if [ -n "$B_APTOSID_SOURCES" ];then
 		linuxSiduxImage="linux-image-2.6-aptosid-$kernelArch"
 		linuxSiduxHeaders="linux-headers-2.6-aptosid-$kernelArch"
 	fi
@@ -528,7 +528,7 @@ kernel_meta_package_handler()
 				repeat='true'
 				;;
 			install-kernel-metapackages-custom-aptosid)
-				if [ -n "$APTOSID_SOURCES" ];then
+				if [ -n "$B_APTOSID_SOURCES" ];then
 					set_metapackage_prefs
 					set_metapackage_selections 'automatic'
 					package_installer "$linuxSiduxHeaders $linuxSiduxImage" 'install-user'
@@ -858,7 +858,7 @@ copy_debs_to_install_directory()
 	eval $LOGUS
 	# this handles both 2.6.24-2.6.24-3 and 2.6.25-3 syntax
 	local kernelBase=$( echo $1 | cut -d '-' -f 1-2 )
-	local installDirectory="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY"
+	local installDirectory="$SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY"
 
 	echo $LINE
 	echo "${S}Transfering kernel/module debs to kernel install directory: ${C}$installDirectory${N}"
@@ -1007,10 +1007,10 @@ get_real_kernel_version()
 	local installKernel='install-kernel.sh'
 	local installKernelLegacy='install-kernel-sidux.sh'
 	local installFile=''
-	if [ -f $KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernel ];then
-		installFile="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernel"
-	elif [ -f $KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernelLegacy ];then
-		installFile="$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernelLegacy"
+	if [ -f $SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernel ];then
+		installFile="$SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernel"
+	elif [ -f $SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernelLegacy ];then
+		installFile="$SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY/$installKernelLegacy"
 	fi
 	local kTest1=$( grep '^K_UPSTREAM=' $installFile | cut -d '"' -f 2 )
 	local kTest2=$( grep '^K_ABINAME=' $installFile | cut -d '"' -f 2 )
@@ -1184,15 +1184,15 @@ reboot_now_question()
 	local repeat='' options="reboot-now $continueOpt quit"
 
 	cd $SCRIPT_HOME # needed to make sure user is back in correct directory
-	# sets KERNEL_EQUAL_INSTALL
+	# sets B_KERNEL_EQUAL_INSTALL
 	test_kernel_strings $1 'set-ke'
 
 	echo $MLINE
 	echo "${M}KERNEL INSTALL COMPLETE"
 	echo $MLINE
-	log_function_data "KERNEL_EQUAL_INSTALL: $KERNEL_EQUAL_INSTALL"
+	log_function_data "B_KERNEL_EQUAL_INSTALL: $B_KERNEL_EQUAL_INSTALL"
 
-	if [ "$KERNEL_EQUAL_INSTALL" != 'true' ];then
+	if [ "$B_KERNEL_EQUAL_INSTALL" != 'true' ];then
 		eval $altText2
 		echo "${S}If you're all done, and just want to start your new kernel, then just reboot now."
 		eval $nonfreeText
@@ -1257,12 +1257,12 @@ create_kernel_install_directory()
 	log_function_data "KERNEL_INSTALL_DIRECTORY: $KERNEL_INSTALL_DIRECTORY"
 	echo $LINE
 	echo "${S}Please note!! The kernel install directory will be located here:"
-	echo "${C}$KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY${N}"
+	echo "${C}$SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY${N}"
 	# create and move to the primary storage directory for kernel downloads
-	if [ ! -d $KERNEL_DIRECTORY ];then
-		mkdir $KERNEL_DIRECTORY
+	if [ ! -d $SM_KERNEL_DOWNLOAD_DIRECTORY ];then
+		mkdir $SM_KERNEL_DOWNLOAD_DIRECTORY
 	fi
-	cd $KERNEL_DIRECTORY
+	cd $SM_KERNEL_DOWNLOAD_DIRECTORY
 	# here the script wil create a directory named with the current kernel name
 	if [ ! -d $KERNEL_INSTALL_DIRECTORY ];then
 		mkdir $KERNEL_INSTALL_DIRECTORY
@@ -1271,7 +1271,7 @@ create_kernel_install_directory()
 		handle_preexisting_install_directory $KERNEL_INSTALL_DIRECTORY
 		directoryAction="$?" # 0 for mv/rm, 1 for use, 2 for use no unzip
 	fi
-	cd $KERNEL_DIRECTORY/$KERNEL_INSTALL_DIRECTORY
+	cd $SM_KERNEL_DOWNLOAD_DIRECTORY/$KERNEL_INSTALL_DIRECTORY
 	eval $LOGUE
 	return $directoryAction
 }
@@ -1281,7 +1281,7 @@ handle_preexisting_install_directory()
 {
 	eval $LOGUS
 	local opt=''
-	local olddirectory=$KERNEL_DIRECTORY/$1
+	local olddirectory=$SM_KERNEL_DOWNLOAD_DIRECTORY/$1
 	local newdirectory="$olddirectory-$(date +%y-%m-%d)"
 	local options='delete-directory rename-directory use-directory use-directory-no-unzip quit'
 	echo $ELINE

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.75
-####  Date: September 16 2010
+####  version: 2.5.76
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -55,9 +55,9 @@ check_kernel()
 		# no need to load this data more than once per run through.
 		# only need this data in the single case of -K option startup
 		# otherwise it loads in advanced kernel install
-		if [ "$SET_KERNEL_DATA" != 'true' -a "$ADVANCED_KERNEL" == 'true' ];then
+		if [ "$B_KERNEL_DATA_SET" != 'true' -a "$B_ADVANCED_KERNEL" == 'true' ];then
 			set_kernel_data
-			SET_KERNEL_DATA='true'
+			B_KERNEL_DATA_SET='true'
 		fi
 
 		# test for advanced kernels too for the comparison, no need to test for null strings
@@ -68,23 +68,22 @@ check_kernel()
 			local ckNormal=$CURRENT_KERNEL
 			advancedKernel=$( echo $kalNormal | grep -o $ckNormal )
 			if [ -n "$advancedKernel" ];then
-				KERNEL_EQUAL_INSTALL='true'
+				B_KERNEL_EQUAL_INSTALL='true'
 			fi
 		fi
-		# sets KERNEL_EQUAL_INSTALL
+		# sets B_KERNEL_EQUAL_INSTALL
 		test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
 
 		# this is for comparing say 23/25 (2.6.23/2.6.25) with arithmetic, sometimes
 		# need to force du prior to kernel install to avoid errors
-		local kernelMajorInstalled=$( echo $KERNEL_VERSION | cut -d '-' -f 1 | cut -d '.' -f 3 )
 		local kernelMajorCurrent=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -o -G "2.6.[0-9]*" | cut -d '.' -f 3 )
-		local kernelCompare=$(( $kernelMajorCurrent - $kernelMajorInstalled ))
+		local kernelCompare=$(( $kernelMajorCurrent - $KERNEL_THIRD ))
 
 		# set this data if required for debian type kernels
 		check_debian_kernel_version
 
 		# test to see if same kernel or newer is available
-		if [ "$KERNEL_EQUAL_INSTALL" == 'true' ];then
+		if [ "$B_KERNEL_EQUAL_INSTALL" == 'true' ];then
 			if [ -n "$advancedKernel" ];then
 				kernelFile=$advancedKernel
 			elif [ "$CURRENT_APT_KERNEL" == "$CURRENT_KERNEL" ];then
@@ -95,17 +94,17 @@ check_kernel()
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 		# check for too old kernel version
-		if [ "$KERNEL_EQUAL_INSTALL" != 'true' ];then
+		if [ "$B_KERNEL_EQUAL_INSTALL" != 'true' ];then
 			# this is now a real, dynamic compare, if user kernel is > 2 major versions behind
 			# go to dist-upgrade first, and kernel install will come after. Only run first time
 			# the first condition handles cases where the latest install kernel requires a du first
 			# the first case will now never happen, needs to be dumped
-			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$KERNEL_EQUAL_INSTALL" != 'true' ]
-			if [ "$kernelCompare" -gt 1 -a "$KERNEL_POST_DU_INSTALL" != 'true' -a "$B_UDEV_KERNEL26" != 'true' ];then
+			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$B_KERNEL_POST_DU_INSTALL" != 'true' -a "$B_KERNEL_EQUAL_INSTALL" != 'true' ]
+			if [ "$kernelCompare" -gt 1 -a "$B_KERNEL_POST_DU_INSTALL" != 'true' -a "$B_UDEV_KERNEL26" != 'true' ];then
 				echo "${M}Your kernel version ${C}$KERNEL_VERSION${M} requires that you first run"
 				echo "a ${C}$DU_UPGRADE${M} before you install a new kernel. The option to install"
 				echo "the new kernels is in the ${C}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES${M} menu.${N}"
-				KERNEL_POST_DU_INSTALL='true'
+				B_KERNEL_POST_DU_INSTALL='true'
 				print_hec
 				eval $LOGME
 			else
@@ -135,7 +134,7 @@ check_debian_kernel_version()
 
 	local debKernCandidate='' debKernInstalled=''
 	# only getting subversions if debian and appears the same
-	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$KERNEL_EQUAL_INSTALL" == 'true' ];then
+	if [ -n "$CURRENT_DEBIAN_KERNEL" -a "$B_KERNEL_EQUAL_INSTALL" == 'true' ];then
 		debKernInstalled=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'installed' )
 		debKernCandidate=$( check_package_status "linux-image-$CURRENT_DEBIAN_KERNEL" 'candidate' )
 		if [  -n "$debKernCandidate" ];then
@@ -145,7 +144,7 @@ check_debian_kernel_version()
 			DEBIAN_KERNEL_INSTALLED="-$( cut -d '-' -f 2 <<< $debKernInstalled )"
 		fi
 		if [ "$debKernInstalled" != "$debKernCandidate" ];then
-			KERNEL_EQUAL_INSTALL='false'
+			B_KERNEL_EQUAL_INSTALL='false'
 		fi
 	fi
 	eval $LOGUE
@@ -159,18 +158,18 @@ kernel_question()
 	local duText="Continue to $DU_UPGRADE" repeat='' removeModules='' installModules=''
 	local options=" install-kernel-modules remove-kernel-modules advanced-kernel-options"
 	local tempCount=$( echo $options | wc -w ) altKernelText1=''
-	# sets KERNEL_EQUAL_INSTALL
+	# sets B_KERNEL_EQUAL_INSTALL
 	test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
 	# set this data if required for debian type kernels
 	check_debian_kernel_version
 	# handle the switch of kernel install location text here
-	if [ "$KERNEL_POST_DU_INSTALL" == 'true' -o "$KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ];then
+	if [ "$B_KERNEL_POST_DU_INSTALL" == 'true' -o "$B_KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ];then
 		duText='Continue. Return to main menu'
 	fi
 
 	if [ "$DEFAULT_KERNEL" == 'no-kernel' ];then
 		kernelsNotEqual='echo -e "${M}There are no apt kernels available to install for your system.\n$MLINE"'
-	elif [ "$KERNEL_EQUAL_INSTALL" != 'true' ];then
+	elif [ "$B_KERNEL_EQUAL_INSTALL" != 'true' ];then
 		tempCount=$(( $tempCount + 1 ))
 		kernelsNotEqualOpt='install-apt-kernel'
 		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
@@ -188,7 +187,7 @@ kernel_question()
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 	fi
-	if [ -n "$APTOSID_SOURCES" -o -n "$MEPIS_SOURCES" -o -n "$LIQUORIX_SOURCES" -o "$USE_DEBIAN_KERNEL" == 'true' ];then
+	if [ "$B_APTOSID_SOURCES" == 'true' -o "$B_MEPIS_SOURCES" == 'true' -o "$B_LIQUORIX_SOURCES" == 'true' -o "$B_USE_DEBIAN_KERNEL" == 'true' ];then
 		altKernelOption='echo "    ${C}*${S} Any supported current apt kernel install(s) for your ${C}$DISTRO${S} system, with module installer automated."'
 	fi
 
@@ -495,7 +494,7 @@ install_wireless_modules()
 				;;
 			continue-no-wifi)
 				echo "${S}OK, continuing with script without installing a wifi module.${N}"
-				SKIP_CONNECTIONS='true'
+				B_SKIP_CONNECTIONS='true'
 				;;
 			quit)
 				print_quit
@@ -592,7 +591,7 @@ set_kernel_data()
 	KERNEL_BASE_FILE=$(echo $KERNEL_LIST | cut -f 1 -d ' ')
 
 	# add advanced kernels if any to llst
-	if [ "$ADVANCED_KERNEL" == 'true' ];then
+	if [ "$B_ADVANCED_KERNEL" == 'true' ];then
 		KERNEL_LIST="$KERNEL_ADVANCED_LIST $KERNEL_LIST"
 	fi
 

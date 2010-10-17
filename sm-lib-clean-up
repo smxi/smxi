@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.9
-####  Date: September 24 2010
+####  version: 2.10.10
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i):
@@ -499,12 +499,12 @@ clean_download_directories()
 	eval $LOGUS
 	local kernelRemoval=$1
 	local subDirectories='' directory=''
-	local subDirectories=$( ls $KERNEL_DIRECTORY 2>/dev/null )
+	local subDirectories=$( ls $SM_KERNEL_DOWNLOAD_DIRECTORY 2>/dev/null )
 	local kernelStringMatch=''
 
 	echo $LINE
 
-	if [ -d $KERNEL_DIRECTORY -a -n "$subDirectories" ];then
+	if [ -d $SM_KERNEL_DOWNLOAD_DIRECTORY -a -n "$subDirectories" ];then
 		case $kernelRemoval in
 			all)
 				for directory in $subDirectories
@@ -512,15 +512,15 @@ clean_download_directories()
 					# this handles new randomness in kernel naming conventions
 					kernelStringMatch=$( test_kernel_strings $directory )
 					if [ "$directory" != "$CURRENT_KERNEL" -a "$kernelStringMatch" != 'true' ];then
-						remove_the_directory $KERNEL_DIRECTORY $directory
+						remove_the_directory $SM_KERNEL_DOWNLOAD_DIRECTORY $directory
 					fi
 				done
 				;;
 			*)
-				if [ -d $KERNEL_DIRECTORY/$kernelRemoval ];then
-					remove_the_directory $KERNEL_DIRECTORY $kernelRemoval 'single'
+				if [ -d $SM_KERNEL_DOWNLOAD_DIRECTORY/$kernelRemoval ];then
+					remove_the_directory $SM_KERNEL_DOWNLOAD_DIRECTORY $kernelRemoval 'single'
 				else
-					echo "${M}Kernel directory: ${C}$KERNEL_DIRECTORY/$kernelRemoval${M} does not exist.${N}"
+					echo "${M}Kernel directory: ${C}$SM_KERNEL_DOWNLOAD_DIRECTORY/$kernelRemoval${M} does not exist.${N}"
 					log_function_data "Directory $kernelRemoval was not found so not removed."
 				fi
 				;;
@@ -962,8 +962,8 @@ remove_data_files_check()
 			extraText='delete '
 			;;
 		remove-kernel-downloads)
-			if [ -d $KERNEL_DIRECTORY ];then
-				removeList=$KERNEL_DIRECTORY
+			if [ -d $SM_KERNEL_DOWNLOAD_DIRECTORY ];then
+				removeList=$SM_KERNEL_DOWNLOAD_DIRECTORY
 				extraText='delete '
 				removeType='-rf'
 			fi

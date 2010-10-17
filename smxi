@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.13
-####  Date: September 28 2010
+####  version: 8.12.14
+####  Date: October 17 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -77,14 +77,15 @@ B_LIBC6_BORKED='false'
 NON_DEBIAN_PATTERN='(deb-ats|deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|aptosid|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
 
 # system paths etc
-X_ORG_PATH='/etc/X11/xorg.conf'
-X_ORG_BU_PATH=$X_ORG_PATH'-bu-'$(date +%y-%m-%d)
-KDMRC_PATH='/etc/kde3/kdm'
-EF='/etc/fstab'
 EAA='/etc/apt/apt.conf'
 EAS='/etc/apt/sources.list'
 EASDL='/etc/apt/sources.list.d/debian.list'
 EDD='/etc/default/distro'
+EF='/etc/fstab'
+EUKU='/etc/udev/kernel-upgrade'
+KDMRC_PATH='/etc/kde3/kdm'
+X_ORG_PATH='/etc/X11/xorg.conf'
+X_ORG_BU_PATH=$X_ORG_PATH'-bu-'$(date +%y-%m-%d)
 
 # this is always going to preference grub 2 even if grub 1 is present
 if [ -f /boot/grub/grub.cfg ];then
@@ -105,123 +106,46 @@ else
 	GRUB_BU_PATH=''
 fi
 
+# distro id files
 EAV='/etc/aptosid-version'
 EAX='/etc/antix-version'
+EDI='/etc/issue'
 EDV='/etc/debian_version'
 EKV='/etc/kanotix-version'
-ESV='/etc/sidux-version'
-EDI='/etc/issue'
 ELR='/etc/lsb-release'
-EUKU='/etc/udev/kernel-upgrade'
+ESV='/etc/sidux-version'
 SMDV='/etc/s-distro-version'
 SMDL='/etc/s-distro-level'
 
-# distro version info
-DISTRO_VERSION=''
-# this one is used for assigning fixes based on release versions, default is 0
-DISTRO_LEVEL=0
-# simple live test, this will be used to turn off some script features
-IS_LIVE=''
-if [ -s $EDD ];then
-	source $EDD
-	if [ "$FLL_DISTRO_MODE" == 'live' ];then
-		IS_LIVE='true'
-	fi
-fi
-
-# kernel info
-CURRENT_KERNEL=$(uname -r)
-CURRENT_APT_KERNEL=''
-CURRENT_APT_KERNEL_GRUB=''
-CURRENT_DEBIAN_KERNEL=''
-CURRENT_LIQUORIX_KERNEL=''
-CURRENT_MEPIS_KERNEL=''
-CURRENT_APTOSID_KERNEL=''
-# 2.6.24-2.6.24.2.makke.rt1.s4-sidux-686
-# handle this syntax: 2.6.24-2.6.24.1.slh.3-sidux-amd64
-# by slicing first part out using -, we should end up 2.6.24 in most cases
-KERNEL_VERSION=$( uname -r | cut -d '-' -f 1 | egrep -o "2\.6\.[0-9]{2,3}" )
-# for math kernel compares, eg, -gt 24
-KERNEL_THIRD=$( cut -d '.' -f 3 <<< $KERNEL_VERSION )
-KERNEL_FILE=''
-KERNEL_FILE_RESET=''
-# these 4 will be loaded in sm-lib-kernel
-KERNEL_LIST_32=''
-KERNEL_ADVANCED_LIST_32=''
-KERNEL_LIST_64=''
-KERNEL_ADVANCED_LIST_64=''
-# check for 64 bit first
-if [ -n "$( uname -m | grep -o 'x86_64' )" ];then
-	BITS="64"
-else
-	BITS="32"
-fi
-
-# set some core count dependent data
-CORE_COUNT=$( cat /proc/cpuinfo | grep -c '^processor' )
-LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= CPU_NAME=$( grep -i -m1 'model name' /proc/cpuinfo | cut -d ':' -f 2-5 )
-
-KERNEL_DIRECTORY='/usr/src/sm-kernel-downloads' # no / on end
-KERNEL_INSTALL_DIRECTORY=''
-KERNEL_LIST=''
-KERNEL_ADVANCED_LIST=''
-KERNEL_BASE_FILE=''
-LATEST_UP_KERNEL=''
-KZ='.zip'
-
-# this handles two cases: 1 where user logged in directly as 'root', and
-# 2, where user su to root.
-LOGIN_PID=$( ps | grep ' login' )
-if [ "$LOGIN_PID" == '' ];then
-	LOGIN_PID=$( ps | grep ' su' )
-fi
-LOGIN_PID=$( awk '{print $1}' <<< $LOGIN_PID | grep -Eo "^[0-9]+$" )
-
-# script paths
-SCRIPT_HOME='/usr/local/bin'
-SCRIPT_NAME=$( basename $0 )
-SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
-VERSION_INFO='sm-versions'
-WARNING_STATUS='status'
-WARNING_BODY='warning_message'
+# script paths/urls
 ALERT_BODY='alert_message'
+CLEAN_X_ORG_LOG='/var/log/sm_clean_xorg_modules.log'
 CONFIGS_BODY='configs'
 HOLD_INSTALL='holds'
-STATUS='danger' # set to danger level by default
-UPGRADE_DATA='upgrade-data/'
-VIDEO_DATA=''
-VIDEO_DATA_FGLRX='video_support_fglrx'
-VIDEO_DATA_NVIDIA='video_support_nvidia'
-# $SCRIPT_DOWNLOAD $SCRIPT_DOWNLOAD_KERNELS
+# dev urls:
+SCRIPT_DOWNLOAD_BRANCH_1='http://smxi.googlecode.com/svn/branches/one/'
+SCRIPT_DOWNLOAD_BRANCH_2='http://smxi.googlecode.com/svn/branches/two/'
+SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/dev/'
+# main download urls
 SCRIPT_DOWNLOAD='http://smxi.org/sm/'
 SCRIPT_DOWNLOAD_SG='http://smxi.org/sg/'
 SCRIPT_DOWNLOAD_SV='http://smxi.org/sv/'
 SCRIPT_DOWNLOAD_IN='http://inxi.googlecode.com/svn/trunk/'
 SCRIPT_DOWNLOAD_KERNELS='http://smxi.org/sm/kernels/'
+SCRIPT_HOME='/usr/local/bin'
+SCRIPT_NAME=$( basename $0 )
+SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
 SM_CONFIG_FILE='/etc/smxi.conf'
+SM_KERNEL_DOWNLOAD_DIRECTORY='/usr/src/sm-kernel-downloads' # no / on end
 # user set global variable values, mostly for hard coding options
 SM_VALUES='/usr/local/bin/smxi-values'
-# dev urls:
-SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/dev/'
-SCRIPT_DOWNLOAD_BRANCH_1='http://smxi.googlecode.com/svn/branches/one/'
-SCRIPT_DOWNLOAD_BRANCH_2='http://smxi.googlecode.com/svn/branches/two/'
-
-# xorg stuff
-X_VERSION=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
-if [ -z "$X_VERSION" ];then
-	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
-fi
-X_VERSIONS_PRE=''
-X_VERSIONS_POST=''
-CLEAN_X_ORG_LOG='/var/log/sm_clean_xorg_modules.log'
-X_ORG_SAVE_LIST=''
-X_ORG_LIST=''
-
-# video driver installer info
-GFX_INSTALLER=''
-ATI=''
-NVIDIA=''
-INTEL=''
+STATUS='danger' # set to danger level by default
+VERSION_INFO='sm-versions'
+WARNING_BODY='warning_message'
+WARNING_STATUS='status'
+UPGRADE_DATA='upgrade-data/'
+VIDEO_DATA_FGLRX='video_support_fglrx'
+VIDEO_DATA_NVIDIA='video_support_nvidia'
 
 # script library files:
 LIB_APT_TOOLS='sm-lib-apt-tools'
@@ -239,6 +163,7 @@ LIB_PACKAGE_REMOVAL='sm-lib-package-removal'
 LIB_WARNING='sm-lib-warning'
 LIB_2006_FIXES='sm-lib-2006-fixes'
 LIB_2007_FIXES='sm-lib-2007-fixes'
+# the actual file name is set in set_distro_data for 2008->
 LIB_2008_FIXES_STATIC='sm-lib-2008-fixes'
 LIB_2008_FIXES=''
 LIB_2009_FIXES_STATIC='sm-lib-2009-fixes'
@@ -260,121 +185,197 @@ $LIB_PACKAGE_INSTALL* $LIB_PACKAGE_REMOVAL* $LIB_WARNING* $LIB_2007_FIXES*
 $LIB_2008_FIXES_STATIC* $LIB_2009_FIXES_STATIC* $SCRIPT_NAME* * $VIDEO_DATA_NVIDIA*"
 REMOVE_LIST_SV="$MOD_VM* "
 
-# optional user set scripts/download locations
-USER_SCRIPT=''
-USER_SCRIPT_URL=''
+# boolean script import test values
+B_SET_APT_TOOLS='false'
+B_SET_CLEAN_UP='false'
+B_SET_DISTRO_CONV='false'
+B_SET_DU_FIXES='false'
+B_SET_GRAPHICS='false'
+B_SET_KDE4_UPDATER='false'
+B_SET_KERNEL='false'
+B_SET_KERNEL_INSTALL='false'
+B_SET_MISC_TWEAKS='false'
+B_SET_PACKAGE_INSTALL='false'
+B_SET_PACKAGE_REMOVAL='false'
+B_SET_WARNING='false'
+B_SET_VM='false'
+B_SET_2006_FIXES='false'
+B_SET_2007_FIXES='false'
+B_SET_2008_FIXES='false'
+B_SET_2009_FIXES='false'
 
-# script import test values
-SET_APT_TOOLS=''
-SET_CLEAN_UP=''
-SET_DU_FIXES=''
-SET_GRAPHICS=''
-SET_KDE4_UPDATER=''
-SET_KERNEL=''
-SET_KERNEL_INSTALL=''
-SET_MISC_TWEAKS=''
-SET_PACKAGE_INSTALL=''
-SET_PACKAGE_REMOVAL=''
-SET_SIDUX_CONV=''
-SET_WARNING=''
-SET_VM=''
-SET_2006_FIXES=''
-SET_2007_FIXES=''
-SET_2008_FIXES=''
-SET_2009_FIXES=''
-
-# defaults for prefs, options, etc
-ADVANCED_KERNEL=''
-B_APT_PROX=''
-B_DEBUG=''
-B_LOCALES=''
-B_OVERRIDE_GRUB_GFX=''
-B_SKIP_KDE4=''
-B_SKIP_A_S='false'
-B_SKIP_GRUB_TEST='false'
-B_TESTING_1=''
-B_TESTING_2=''
+# boolean defaults for prefs, options, etc
+B_ADVANCED_KERNEL='false'
+B_APT_PROX='false'
+B_CHANGE_DISTRO_MIRROR='false'
+B_CHANGE_MIRRORS='false'
+B_CON_DEB='false'
+B_CONNECTION_RETRY='false'
+B_DEBUG='false'
+# setting to 'true' turns off script self-updater. You must have ALL script components
+# in $SCRIPT_HOME (/usr/local/bin) here already to use this without having error occur.
+B_DEV_FLAG='false'
+B_FORCE_DOWNLOAD='false'
+B_FORCE_UPDATE='false'
+# simple live test, this will be used to turn off some script features
+B_IS_LIVE=''
+if [ -s $EDD ];then
+	source $EDD
+	if [ "$FLL_DISTRO_MODE" == 'live' ];then
+		B_IS_LIVE='true'
+	fi
+fi
+B_KERNEL_DATA_SET='false'
+B_KERNEL_EQUAL_INSTALL='false'
+B_KERNEL_METAPACKAGE='false'
+B_KERNEL_POST_DU_INSTALL='false'
+B_LOCALES='false'
+B_LOGGING_STARTED='false'
+B_OVERRIDE_GRUB_GFX='false'
+B_PRINT_VERSION='false'
+B_REPOS_UPDATED='false'
+B_SHOW_KERNEL_INSTALL_OPTION='false'
+B_SKIP_CONNECTION_RETRY='false'
 B_UDEV_KERNEL26='false'
 B_UDEV_KERNEL26_DU='false'
 B_USE_DEBDELTA='false'
-CHANGE_KERNEL_MIRROR=''
-CHANGE_MIRRORS=''
-DEFAULT_KERNEL=''
-DPKG_UPDATE=''
-EXTRA_OPTIONS=''
-FORCE_DOWNLOAD=''
-FORCE_UPDATE=''
-HEC_ALT=''
-KERNEL_METAPACKAGE=''
-SCRIPT_COLORS=1
-NO_PDIFFS=''
-NO_PDIFF_ARGS='-o Acquire::Pdiffs=false'
-SERVER_CLIENT=''
-START_OPTIONS=''
-SKIP_CONNECTIONS=''
-SKIP_CONNECTION_TEST=''
-SKIP_DIST_UPGRADE=''
-SKIP_ENTER=''
-SKIP_GRAPHICS=''
-SKIP_INFO=''
-SKIP_KERNEL=''
-SKIP_RESTART=''
-SKIP_TWEAKS=''
-SKIP_WARNING=''
-Z_SET=''
+B_USE_DEBIAN_KERNEL='false'
+B_TESTING_1='false'
+B_TESTING_2='false'
 
-# set function variables that will retain values: check hold is actually loaded top of
-# sm-lib-apt-tools
-APT_TYPE='apt-get'
-APTOSID_SOURCES=''
-CHECK_HOLD_PACKAGES=''
-CHECK_VERSION_TEXT=''
-CON_DEB=''
-CONNECTION_RETRY=''
-# setting to 'true' turns off script self-updater. You must have ALL script components
-# in $SCRIPT_HOME (/usr/local/bin) here already to use this without having error occur.
+# distro sources
+B_APTOSID_SOURCES='false'
+B_LINUXMINT_SOURCES='false'
+B_LIQUORIX_SOURCES='false'
+B_MEPIS_SOURCES='false'
+
+# section skip items booleans
+B_SKIP_A_S='false'
+B_SKIP_CONNECTIONS='false'
+B_SKIP_CONNECTION_TEST='false'
+B_SKIP_ENTER='false'
+B_SKIP_GRAPHICS='false'
+B_SKIP_GRUB_TEST='false'
+B_SKIP_INFO='false'
+B_SKIP_KDE4='false'
+B_SKIP_KERNEL='false'
+B_SKIP_RESTART='false'
+B_SKIP_TWEAKS='false'
+B_SKIP_UPGRADE='false'
+B_SKIP_WARNING='false'
+
+# cpu info: set some core count dependent data
+# check for 64 bit first
+if [ -n "$( uname -m | grep -o 'x86_64' )" ];then
+	BITS="64"
+else
+	BITS="32"
+fi
+CORE_COUNT=$( cat /proc/cpuinfo | grep -c '^processor' )
+LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= CPU_NAME=$( grep -i -m1 'model name' /proc/cpuinfo | cut -d ':' -f 2-5 )
+
+# kernel info
+CURRENT_KERNEL=$(uname -r)
+CURRENT_APT_KERNEL=''
+CURRENT_APT_KERNEL_GRUB=''
+CURRENT_DEBIAN_KERNEL=''
+CURRENT_LIQUORIX_KERNEL=''
+CURRENT_MEPIS_KERNEL=''
+CURRENT_APTOSID_KERNEL=''
 DEBIAN_KERNEL_INSTALLED=''
 DEBIAN_KERNEL_CANDIDATE=''
-DEV_FLAG=''
-DISTRO='debian'
-DISTRO_F=''
-HOLD_INSTALL_ITEMS='' # holds value for any hold/install required
-DU_UPGRADE='dist-upgrade'
-# we'll always use the system default in all cases
-INIT_LEVEL=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
-KERNEL_EQUAL_INSTALL=''
+DEFAULT_KERNEL=''
+# 2 dot: like: 2.6.32
+KERNEL_VERSION=$( uname -r | cut -d '-' -f 1 | egrep -o "2\.6\.[0-9]{2,3}" )
+# for math kernel compares, eg, -gt 24
+KERNEL_THIRD=$( cut -d '.' -f 3 <<< $KERNEL_VERSION )
+KERNEL_FILE=''
+KERNEL_FILE_RESET=''
 KERNEL_FORCE_DU=''
 KERNEL_INSTALL_TO='' # will be used to install to gfx driver if desired
-KERNEL_POST_DU_FLAG=''
-KERNEL_POST_DU_INSTALL=''
-LIQUORIX_SOURCES=''
+# these 4 will be loaded in sm-lib-kernel
+KERNEL_LIST_32=''
+KERNEL_ADVANCED_LIST_32=''
+KERNEL_LIST_64=''
+KERNEL_ADVANCED_LIST_64=''
+# kernel downloader / installer variables
+KERNEL_INSTALL_DIRECTORY=''
+KERNEL_LIST=''
+KERNEL_ADVANCED_LIST=''
+KERNEL_BASE_FILE=''
+LATEST_UP_KERNEL=''
+KZ='.zip'
+
+# this handles two cases: 1 where user logged in directly as 'root', and
+# 2, where user su to root.
+LOGIN_PID=$( ps | grep ' login' )
+if [ "$LOGIN_PID" == '' ];then
+	LOGIN_PID=$( ps | grep ' su' )
+fi
+LOGIN_PID=$( awk '{print $1}' <<< $LOGIN_PID | grep -Eo "^[0-9]+$" )
+
+# xorg stuff
+X_VERSION=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
+if [ -z "$X_VERSION" ];then
+	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
+fi
+X_VERSIONS_PRE=''
+X_VERSIONS_POST=''
+X_ORG_SAVE_LIST=''
+X_ORG_LIST=''
+
+# video driver installer info/video data
+ATI=''
+GFX_INSTALLER=''
+INTEL=''
+NVIDIA=''
+VIDEO_DATA=''
+VIDEO_SUPPORT_FGLRX=''
+VIDEO_SUPPORT_NVIDIA=''
+
+# set function variables that will retain string data values, and default values
+APT_TYPE='apt-get'
+# check hold is actually loaded top of sm-lib-apt-tools
+CHECK_HOLD_PACKAGES=''
+CHECK_VERSION_TEXT=''
+DISTRO='debian'
+DISTRO_F=''
+# this one is used for assigning fixes based on release versions, default is 0
+DISTRO_LEVEL=0
+# distro version info
+DISTRO_VERSION=''
+DPKG_UPDATE=''
+DU_UPGRADE='dist-upgrade'
+EXTRA_OPTIONS=''
+HEC_ALT=''
+HOLD_INSTALL_ITEMS='' # holds value for any hold/install required
+# we'll always use the system default in all cases
+INIT_LEVEL=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
 LOG_FILE='/var/log/smxi.log'
 LOG_INDENT=''
-LOGGING_STARTED=''
 LOGMS='log_function_data ms $FUNCNAME "$( echo $@ )"'
 LOGME='log_function_data me $FUNCNAME'
 LOGPS='log_function_data ps $FUNCNAME "$( echo $@ )"'
 LOGPE='log_function_data pe $FUNCNAME'
 LOGUS='log_function_data us $FUNCNAME "$( echo $@ )"'
 LOGUE='log_function_data ue $FUNCNAME'
-MEPIS_SOURCES=''
-PRINT_VERSION=''
+MAX_AGE=500 # due to 'fewer' script changes, no need to be as careful
+NO_PDIFFS=''
+NO_PDIFF_ARGS='-o Acquire::Pdiffs=false'
 REMOTE_VERSION=''
 REMOTE_DATE=''
-SET_KERNEL_DATA=''
-SKIP_CONNECTION_RETRY=''
+SCRIPT_COLORS=1
+SERVER_CLIENT=''
 SM_CONFIGS_STATIC='' # static version of prefs data
 SM_VERSIONS_STATIC='' # static file versions data
+START_OPTIONS=''
 SYSTEM_BASE=''
-UPDATED=''
-USE_DEBIAN_KERNEL=''
-VIDEO_SUPPORT_FGLRX=''
-VIDEO_SUPPORT_NVIDIA=''
+TIME_OUT=25 # for wget
+# optional user set scripts/download locations
+USER_SCRIPT=''
+USER_SCRIPT_URL=''
 WITHOUT_RECOMMENDS=''
-
-# miscellaneous settings
-MAX_AGE=500 # due to 'fewer' script changes, no need to be as careful
-TIME_OUT=25
+Z_SET=''
 
 # allow user set globals to override script globals
 if [ -f $SM_VALUES ];then
@@ -650,11 +651,11 @@ error_handler()
 
 	echo -e "$errorPrintMessage"
 
-	if [ -f $LOG_FILE -a "$LOGGING_STARTED" == 'true' ];then
+	if [ -f $LOG_FILE -a "$B_LOGGING_STARTED" == 'true' ];then
 		log_function_data "$LI\n${LOG_INDENT}$errorLogMessage\n${LOG_INDENT}$LI"
 	fi
 
-	if [ "$errorLevel" == 'fatal' -a "$LOGGING_STARTED" == 'true' ];then
+	if [ "$errorLevel" == 'fatal' -a "$B_LOGGING_STARTED" == 'true' ];then
 		echo
 		echo "${M}Error logs are located here: ${C}$LOG_FILE${N}"
 	fi
@@ -741,7 +742,7 @@ log_writer()
 {
 	# this handles first line indents, all other indents must be set in message data
 	# like so: message="some problem... \n${LOG_INDENT}more problem stuff..."
-	if [ "$LOGGING_STARTED" == 'true' ];then
+	if [ "$B_LOGGING_STARTED" == 'true' ];then
 		# strip out escape color code, if any. Method by dzz of sidux, thanks ;-)
 		echo -e "${LOG_INDENT}$1" | sed 's/\x1b\[[0-9]\{1,2\}\(;[0-9]\{1,2\}\)\{0,2\}m//g' >> $LOG_FILE
 	fi
@@ -773,7 +774,7 @@ create_log()
 	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 
-	LOGGING_STARTED='true'
+	B_LOGGING_STARTED='true'
 }
 
 
@@ -792,51 +793,51 @@ run_script_import()
 
 	case $1 in
 		$LIB_APT_TOOLS)
-			if [ "$SET_APT_TOOLS" != 'true' ];then
+			if [ "$B_SET_APT_TOOLS" != 'true' ];then
 				loadIt='true'
-				SET_APT_TOOLS='true'
+				B_SET_APT_TOOLS='true'
 			fi
 			;;
 		$LIB_CLEAN_UP)
-			if [ "$SET_CLEAN_UP" != 'true' ];then
+			if [ "$B_SET_CLEAN_UP" != 'true' ];then
 				loadIt='true'
-				SET_CLEAN_UP='true'
+				B_SET_CLEAN_UP='true'
 			fi
 			;;
 		$LIB_DISTRO_CONVERSION)
-			if [ "$SET_SIDUX_CONV" != 'true' ];then
+			if [ "$B_SET_DISTRO_CONV" != 'true' ];then
 				loadIt='true'
-				SET_SIDUX_CONV='true'
+				B_SET_DISTRO_CONV='true'
 			fi
 			;;
 		$LIB_DU_FIXES)
-			if [ "$SET_DU_FIXES" != 'true' ];then
+			if [ "$B_SET_DU_FIXES" != 'true' ];then
 				loadIt='true'
-				SET_DU_FIXES='true'
+				B_SET_DU_FIXES='true'
 			fi
 			;;
 		$LIB_GRAPHICS)
-			if [ "$SET_GRAPHICS" != 'true' ];then
+			if [ "$B_SET_GRAPHICS" != 'true' ];then
 				loadIt='true'
-				SET_GRAPHICS='true'
+				B_SET_GRAPHICS='true'
 			fi
 			;;
 		$LIB_KDE4_UPDATER)
-			if [ "$SET_KDE4_UPDATER" != 'true' ];then
+			if [ "$B_SET_KDE4_UPDATER" != 'true' ];then
 				loadIt='true'
-				SET_KDE4_UPDATER='true'
+				B_SET_KDE4_UPDATER='true'
 			fi
 			;;
 		$LIB_KERNEL)
-			if [ "$SET_KERNEL" != 'true' ];then
+			if [ "$B_SET_KERNEL" != 'true' ];then
 				loadIt='true'
-				SET_KERNEL='true'
+				B_SET_KERNEL='true'
 			fi
 			;;
 		$LIB_KERNEL_INSTALL)
-			if [ "$SET_KERNEL_INSTALL" != 'true' ];then
+			if [ "$B_SET_KERNEL_INSTALL" != 'true' ];then
 				loadIt='true'
-				SET_KERNEL_INSTALL='true'
+				B_SET_KERNEL_INSTALL='true'
 			fi
 			;;
 # 		$LIB_KERNELS)
@@ -844,51 +845,51 @@ run_script_import()
 # 			noTestDownloadOnly='true'
 # 			;;
 		$LIB_MISC_TWEAKS)
-			if [ "$SET_MISC_TWEAKS" != 'true' ];then
+			if [ "$B_SET_MISC_TWEAKS" != 'true' ];then
 				loadIt='true'
-				SET_MISC_TWEAKS='true'
+				B_SET_MISC_TWEAKS='true'
 			fi
 			;;
 		$LIB_PACKAGE_INSTALL)
-			if [ "$SET_PACKAGE_INSTALL" != 'true' ];then
+			if [ "$B_SET_PACKAGE_INSTALL" != 'true' ];then
 				loadIt='true'
-				SET_PACKAGE_INSTALL='true'
+				B_SET_PACKAGE_INSTALL='true'
 			fi
 			;;
 		$LIB_PACKAGE_REMOVAL)
-			if [ "$SET_PACKAGE_REMOVAL" != 'true' ];then
+			if [ "$B_SET_PACKAGE_REMOVAL" != 'true' ];then
 				loadIt='true'
-				SET_PACKAGE_REMOVAL='true'
+				B_SET_PACKAGE_REMOVAL='true'
 			fi
 			;;
 		$LIB_WARNING)
-			if [ "$SET_WARNING" != 'true' ];then
+			if [ "$B_SET_WARNING" != 'true' ];then
 				loadIt='true'
-				SET_WARNING='true'
+				B_SET_WARNING='true'
 			fi
 			;;
 		$LIB_2006_FIXES)
-			if [ "$SET_2006_FIXES" != 'true' ];then
+			if [ "$B_SET_2006_FIXES" != 'true' ];then
 				loadIt='true'
-				SET_2006_FIXES='true'
+				B_SET_2006_FIXES='true'
 			fi
 			;;
 		$LIB_2007_FIXES)
-			if [ "$SET_2007_FIXES" != 'true' ];then
+			if [ "$B_SET_2007_FIXES" != 'true' ];then
 				loadIt='true'
-				SET_2007_FIXES='true'
+				B_SET_2007_FIXES='true'
 			fi
 			;;
 		$LIB_2008_FIXES)
-			if [ "$SET_2008_FIXES" != 'true' ];then
+			if [ "$B_SET_2008_FIXES" != 'true' ];then
 				loadIt='true'
-				SET_2008_FIXES='true'
+				B_SET_2008_FIXES='true'
 			fi
 			;;
 		$LIB_2009_FIXES)
-			if [ "$SET_2009_FIXES" != 'true' ];then
+			if [ "$B_SET_2009_FIXES" != 'true' ];then
 				loadIt='true'
-				SET_2009_FIXES='true'
+				B_SET_2009_FIXES='true'
 			fi
 			;;
 		# the proper download urls for these are set in download_test_file case
@@ -985,7 +986,7 @@ update_scripts()
 
 	# for devs only, this switches off/on updates, so you can work
 	# on a local test version without overwrites happening
-	if [ "$DEV_FLAG" != 'true' ];then
+	if [ "$B_DEV_FLAG" != 'true' ];then
 		download_test_file "$1" "$2"
 		success="$?"
 	else
@@ -1321,20 +1322,20 @@ launch_function_trigger()
 	case $1 in
 		debian-mirrors)
 			prefId='debian-mirrors-1'
-			scriptOption=$CHANGE_MIRRORS
+			scriptOption=$B_CHANGE_MIRRORS
 			scriptFunction='change_debian_mirrors'
 			;;
 		kernel-mirrors)
 			prefId='smxi-kernel-mirror-2'
-			scriptFunction='change_kernel_mirrors'
+			scriptFunction='change_distro_mirrors'
 			# test to make sure it's not a dead mirror
 			force_kernel_mirror_change
 			# must come after since it's reset above if needed
-			scriptOption=$CHANGE_KERNEL_MIRROR
+			scriptOption=$B_CHANGE_DISTRO_MIRROR
 			;;
 		kernel-metapackage)
 			prefId='kernel-metapackage-1'
-			scriptOption=$KERNEL_METAPACKAGE
+			scriptOption=$B_KERNEL_METAPACKAGE
 			scriptFunction='metapackage_launcher'
 			setPrefs='false'
 			;;
@@ -1385,7 +1386,7 @@ metapackage_launcher()
 	# note: user initiates either by starting from kernel advanced, or -N
 	# the smPref is checked in launch_function_trigger and set in kernel_meta_package_handler
 	# this extra handling is required to deal with future additions to sidux defaults
-	if [ -n "$metaExists" -o "$KERNEL_METAPACKAGE" == 'true' ];then
+	if [ -n "$metaExists" -o "$B_KERNEL_METAPACKAGE" == 'true' ];then
 		# run_script_import $LIB_KERNEL # need a few libs out of this one
 		run_script_import $LIB_KERNEL_INSTALL
 		print_lib_info $LIB_KERNEL_INSTALL
@@ -1487,29 +1488,29 @@ set_distro_data()
 		DEFAULT_KERNEL='no-kernel'
 		# this will help to debug debian kernel issues
 		if [ "$B_GRUB_2" != 'true' -a "$B_TESTING_1" != 'true' -a -z "$bgUuidLabel" ];then
-			USE_DEBIAN_KERNEL='false'
+			B_USE_DEBIAN_KERNEL='false'
 		else
-			USE_DEBIAN_KERNEL='true'
+			B_USE_DEBIAN_KERNEL='true'
 		fi
 	else
 		DEFAULT_KERNEL='debian'
-		USE_DEBIAN_KERNEL='true'
+		B_USE_DEBIAN_KERNEL='true'
 	fi
 
 	# then tweak defaults if needed, this order is also important to get right defaults
 	if [ -n "$mepisSources" ];then
-		MEPIS_SOURCES='true'
+		B_MEPIS_SOURCES='true'
 		DEFAULT_KERNEL='no-kernel'
 		if [ "$B_GRUB_2" == 'true' -o -n "$bgUuidLabel" ];then
-			USE_DEBIAN_KERNEL='true'
+			B_USE_DEBIAN_KERNEL='true'
 		fi
 	fi
 	if [ -n "$aptosidSources" ];then 
-		APTOSID_SOURCES='true'
+		B_APTOSID_SOURCES='true'
 		DEFAULT_KERNEL='aptosid'
 	fi
 	if [ -n "$liquorixSources" ];then
-		LIQUORIX_SOURCES='true'
+		B_LIQUORIX_SOURCES='true'
 	fi
 	DISTRO_F="$DISTRO-$SYSTEM_BASE-$BITS"
 
@@ -1549,10 +1550,10 @@ set_distro_data()
 	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
 	log_function_data "DU_UPGRADE: $DU_UPGRADE"
 	log_function_data "DEFAULT_KERNEL: $DEFAULT_KERNEL"
-	log_function_data "USE_DEBIAN_KERNEL: $USE_DEBIAN_KERNEL"
+	log_function_data "B_USE_DEBIAN_KERNEL: $B_USE_DEBIAN_KERNEL"
 	log_function_data "DISTRO: $DISTRO"
 	log_function_data "DISTRO_F: $DISTRO_F"
-	log_function_data "APTOSID_SOURCES: $APTOSID_SOURCES"
+	log_function_data "B_APTOSID_SOURCES: $B_APTOSID_SOURCES"
 	eval $LOGPE
 }
 
@@ -1728,14 +1729,14 @@ update_to_aptosid()
 					echo $LINE
 					echo "${M}Sending you on to dist-upgrade now. You must not exit until the dist-upgrade is completed!"
 					echo "PLEASE PROCEED TO THE DIST-UPGRADE AND RUN IT THROUGH ONCE NOW!${N}"
-					SKIP_KERNEL='true'
+					B_SKIP_KERNEL='true'
 					B_SKIP_A_S='true'
 					;;
 				only-update-sources)
 					echo $LINE
 					echo "${S}Removing sidux repos and adding Aptosid repos...${N}"
 					rm -f /etc/apt/sources.list.d/sidux.list
-					if [ "$SKIP_CONNECTIONS" != 'true' ];then
+					if [ "$B_SKIP_CONNECTIONS" != 'true' ];then
 						run_script_import $LIB_APT_TOOLS
 					else
 						run_script_import $LIB_APT_TOOLS 'no-download'
@@ -1771,11 +1772,11 @@ create_script_files()
 	eval $LOGPS
 	local oldCleanXorgLog='/var/log/clean_xorg_modules.log'
 	
-	if [ ! -d $KERNEL_DIRECTORY  ];then
+	if [ ! -d $SM_KERNEL_DOWNLOAD_DIRECTORY  ];then
 		if [ -d /usr/src/kernel-downloads ];then
-			mv -f /usr/src/kernel-downloads $KERNEL_DIRECTORY
+			mv -f /usr/src/kernel-downloads $SM_KERNEL_DOWNLOAD_DIRECTORY
 		else
-			mkdir $KERNEL_DIRECTORY
+			mkdir $SM_KERNEL_DOWNLOAD_DIRECTORY
 		fi
 	fi
 	# make config file / log dir if required
@@ -1807,7 +1808,7 @@ test_kernel_strings()
 	# set the global, which will be used by various testing functions
 	# or just echo the status true/false for functions that use that
 	if [ "$2" == 'set-ke' ];then
-		KERNEL_EQUAL_INSTALL=$value
+		B_KERNEL_EQUAL_INSTALL=$value
 	else
 		echo $value
 	fi
@@ -2220,7 +2221,7 @@ start_up_tests()
 		error_handler 'unidentified-distro' $FUNCNAME ''
 	fi
 	
-	if [ ! -e $GRUB_PATH -a "$IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
+	if [ ! -e $GRUB_PATH -a "$B_IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
 
@@ -2497,7 +2498,7 @@ check_connection()
 	local repeat='' connection='' options='' opt=''
 	local UserAgent='Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1'
 
-	if [ "$SKIP_CONNECTION_RETRY" != 'true' ];then
+	if [ "$B_SKIP_CONNECTION_RETRY" != 'true' ];then
 		echo $BAR
 		echo "${S}Testing internet connection....${N}"
 		# ping is a problem when there is no connection, takes too long to time out
@@ -2521,7 +2522,7 @@ check_connection()
 
 	if [ "$connection" -eq 0 ];then
 		# restart connection just in case
-		if [ "$CONNECTION_RETRY" == '' ];then
+		if [ "$B_CONNECTION_RETRY" != 'true' ];then
 			restart_networking
 			repeat='true'
 		else
@@ -2554,7 +2555,7 @@ check_connection()
 						echo $LINE
 						echo "${E}Continuing without an internet connection."
 						echo "The script will skip the steps that require a connection.${N}"
-						SKIP_CONNECTIONS='true'
+						B_SKIP_CONNECTIONS='true'
 						TIME_OUT=1 # this avoids eternal time out waits which aren't required
 						;;
 					install-wireless-modules)
@@ -2607,19 +2608,19 @@ restart_networking()
 		y)	echo "${C}$RestartNetworking${S} is being run to make sure your connection just didn't drop.${N}"
 			/etc/init.d/networking restart
 			echo "${S}Test completed, now the script will test your connection again and run.${N}"
-			CONNECTION_RETRY='true'
+			B_CONNECTION_RETRY='true'
 			;;
 		n)	echo "${S}Ok, continuing without running ${C}$RestartNetworking${S}."
 			echo "This will take you to the wifi module install questions."
-			CONNECTION_RETRY='true'
-			SKIP_CONNECTION_RETRY='true'
+			B_CONNECTION_RETRY='true'
+			B_SKIP_CONNECTION_RETRY='true'
 			;;
 		*)	restart_networking
 			print_error yn
 			;;
 	esac
-	log_function_data "CONNECTION_RETRY: $CONNECTION_RETRY"
-	log_function_data "SKIP_CONNECTION_RETRY: $SKIP_CONNECTION_RETRY"
+	log_function_data "B_CONNECTION_RETRY: $B_CONNECTION_RETRY"
+	log_function_data "B_SKIP_CONNECTION_RETRY: $B_SKIP_CONNECTION_RETRY"
 	eval $LOGUE
 }
 ## DEBUGGER
@@ -2628,7 +2629,7 @@ restart_networking()
 # will force update of script
 check_force_update()
 {
-	if [ "$FORCE_UPDATE" == 'true' ];then
+	if [ "$B_FORCE_UPDATE" == 'true' ];then
 		echo $EBAR
 		echo "${E}Updating script now...${N}"
 		update_scripts $VERSION_INFO # this just so -v has the recent number
@@ -2658,12 +2659,12 @@ check_version()
 	CHECK_VERSION_TEXT="$LINE
 ${S}Checking for new script engine...${N}"
 
-	if [ "$REMOTE_VERSION" == "$LocalVersion" -a "$FORCE_DOWNLOAD" != 'true' ];then
+	if [ "$REMOTE_VERSION" == "$LocalVersion" -a "$B_FORCE_DOWNLOAD" != 'true' ];then
 		CHECK_VERSION_TEXT="$CHECK_VERSION_TEXT
 ${S}You are using the latest script engine.${N}"
-	elif [ "$existsNewer" -eq 0 -o "$FORCE_DOWNLOAD" == 'true' ];then
+	elif [ "$existsNewer" -eq 0 -o "$B_FORCE_DOWNLOAD" == 'true' ];then
 		echo "$CHECK_VERSION_TEXT"
-		if [ "$FORCE_DOWNLOAD" == 'true' ];then
+		if [ "$B_FORCE_DOWNLOAD" == 'true' ];then
 			echo "${M}Forcing reinstall of local script engine........${N}"
 			update_scripts $SCRIPT_NAME 'chm'
 		else
@@ -2879,7 +2880,7 @@ print_lib_info()
 			moduleText='Version'
 			printIt='true'
 
-			if [ "$PRINT_VERSION" != 'true' ];then
+			if [ "$B_PRINT_VERSION" != 'true' ];then
 				scriptVersion=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
 				scriptDate=$( grep -e "sm-main-version=" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 2 )
 			else
@@ -2933,7 +2934,7 @@ print_version()
 # 	distroThanks='...and to Mr. Blue, who contributed endless joy, song, curiousity, and orneriness to smxi...'
 # 	extraMessage='even though few saw your contributions, many appreciated them without knowing it... RIP'
 	print_lib_info $SCRIPT_NAME
-	if [ "$PRINT_VERSION" != 'true' ];then
+	if [ "$B_PRINT_VERSION" != 'true' ];then
 		echo $MLINE
 		echo "${S}Special thanks to the people who have helped with this script, in one way or another..."
 		sleep 0.1
@@ -3002,7 +3003,7 @@ print_install_information()
 	echo "${C}$rootHomeData"
 	echo $LINE
 	echo "${S}Your current kernel version is:       ${C}$currentKernel"
-	if [ "$PRINT_VERSION" != 'true' ];then
+	if [ "$B_PRINT_VERSION" != 'true' ];then
 		echo -e "${S}The latest kernel for your system is: ${C}$latestKernel${N}"
 	fi
 	print_video_data
@@ -3023,7 +3024,7 @@ print_install_information()
 	log_function_data "Last package install or upgrade: $dpkgInstall"
 	log_function_data "Last use of $SCRIPT_NAME: $ScriptLastRun"
 	log_function_data "Last $DU_UPGRADE using $SCRIPT_NAME: $ScriptLastDu"
-	if [ "$PRINT_VERSION" != 'true' ];then
+	if [ "$B_PRINT_VERSION" != 'true' ];then
 		print_hec
 	fi
 	eval $LOGPE
@@ -3036,7 +3037,7 @@ print_hec()
 {
 	local response='' key='enter' printHec='' readArgs=''
 
-	if [ "$SKIP_ENTER" != 'true' ];then
+	if [ "$B_SKIP_ENTER" != 'true' ];then
 		# this lets user set any string or spacebar to make hec add whatever they want
 		# only execute this one time during smxi run to avoid repeated conf file queries
 		if [ -z "$HEC_ALT" ];then
@@ -3308,10 +3309,11 @@ post_du_options()
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
 	local  advanced1Option='' advanced2Option='' initX=''
 	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
+	local noXOptions=' continue-to-graphics start-desktop'
 
 	local tempCount=$( echo $options | wc -w )
 
-	if [ "$KERNEL_POST_DU_FLAG" == 'true' ];then # this is always on I believe, except for livecd
+	if [ "$B_SHOW_KERNEL_INSTALL_OPTION" == 'true' ];then # this is always on I believe, except for livecd
 		tempCount=$(( $tempCount + 1 ))
 		advanced1Option='kernel-options'
 		advanced1='echo -e "${C}'$tempCount'${S} - ${C}kernel-options${S} Install kernels. Install latest, and older, kernels.\n\t${M}NEW: metapackage options; NEW: kernel-module-remover"'
@@ -3326,7 +3328,7 @@ post_du_options()
 		advanced2='echo -e "${C}'$tempCount'${S} - ${C}$advanced2Option${S} Download and start the script: ${C}$USER_SCRIPT${S}"'
 		tempCount=''
 	fi
-	options="$options $advanced2Option continue-to-graphics start-desktop quit"
+	options="$options $advanced2Option $noXOptions quit"
 
 	tempCount=$( echo $options | wc -w )
 
@@ -3565,33 +3567,33 @@ get_options()
 				H)	print_usage 'full'
 					;;
 				# skip feature options
-				d)	SKIP_DIST_UPGRADE='true'
+				d)	B_SKIP_UPGRADE='true'
 					START_OPTIONS="$START_OPTIONS -d"
 					;;
-				e)	SKIP_ENTER='true'
+				e)	B_SKIP_ENTER='true'
 					START_OPTIONS="$START_OPTIONS -e"
 					;;
-				g)	SKIP_GRAPHICS='true'
+				g)	B_SKIP_GRAPHICS='true'
 					START_OPTIONS="$START_OPTIONS -g"
 					;;
-				i)	SKIP_INFO='true'
+				i)	B_SKIP_INFO='true'
 					START_OPTIONS="$START_OPTIONS -i"
 					;;
-				k)	SKIP_KERNEL='true'
+				k)	B_SKIP_KERNEL='true'
 					START_OPTIONS="$START_OPTIONS -k"
 					;;
-				r|R)	SKIP_RESTART='true'
+				r|R)	B_SKIP_RESTART='true'
 					;;
-				s)	SKIP_CONNECTIONS='true'
+				s)	B_SKIP_CONNECTIONS='true'
 					START_OPTIONS="$START_OPTIONS -s"
 					;;
-				S)	SKIP_CONNECTION_TEST='true'
+				S)	B_SKIP_CONNECTION_TEST='true'
 					START_OPTIONS="$START_OPTIONS -S"
 					;;
-				t)	SKIP_TWEAKS='true'
+				t)	B_SKIP_TWEAKS='true'
 					START_OPTIONS="$START_OPTIONS -t"
 					;;
-				w)	SKIP_WARNING='true'
+				w)	B_SKIP_WARNING='true'
 					START_OPTIONS="$START_OPTIONS -w"
 					;;
 				# advanced options
@@ -3605,25 +3607,25 @@ get_options()
 						error_handler 'unsupported-option' 'option-handler' "-$opt $OPTARG"
 					fi
 					;;
-				K)	ADVANCED_KERNEL='true'
+				K)	B_ADVANCED_KERNEL='true'
 					START_OPTIONS="$START_OPTIONS -K"
 					;;
 				L)	B_LOCALES='true'
 					START_OPTIONS="$START_OPTIONS -L"
 					;;
-				f)	FORCE_DOWNLOAD='true'
+				f)	B_FORCE_DOWNLOAD='true'
 					;;
 				l)	echo $MLINE
 					echo "${M}The ${C}-l${M} option has been deprecated because full logging is now always on.${N}"
 					print_hec
 					;;
-				m)	CHANGE_MIRRORS='true'
+				m)	B_CHANGE_MIRRORS='true'
 					START_OPTIONS="$START_OPTIONS -m"
 					;;
-				M)	CHANGE_KERNEL_MIRROR='true'
+				M)	B_CHANGE_DISTRO_MIRROR='true'
 					START_OPTIONS="$START_OPTIONS -M"
 					;;
-				N)	KERNEL_METAPACKAGE='true'
+				N)	B_KERNEL_METAPACKAGE='true'
 					START_OPTIONS="$START_OPTIONS -N"
 					;;
 				p)	NO_PDIFFS=$NO_PDIFF_ARGS
@@ -3632,9 +3634,9 @@ get_options()
 				P)	export http_proxy="$OPTARG"
 					START_OPTIONS="$START_OPTIONS -P $http_proxy"
 					;;
-				u|U)	FORCE_UPDATE='true'
+				u|U)	B_FORCE_UPDATE='true'
 					;;
-				v)	PRINT_VERSION='true'
+				v)	B_PRINT_VERSION='true'
 					set_distro_data # need some of the distro data here
 					check_dpkg_update # need to set the update data
 					print_install_information
@@ -3766,7 +3768,7 @@ run_script_components()
 
 	# this is mainly for wifi new kernel isntalls where the new kernel wifi module
 	# requires fresh install. Triggers install_wireless_modules if user wants
-	if [ "$SKIP_CONNECTIONS" != 'true' -a "$SKIP_RESTART" != 'true' -a "$SKIP_CONNECTION_TEST" != 'true' ];then
+	if [ "$B_SKIP_CONNECTIONS" != 'true' -a "$B_SKIP_RESTART" != 'true' -a "$B_SKIP_CONNECTION_TEST" != 'true' ];then
 		check_connection
 	fi
 	# there's a minor problem here, if first run, there will be no kernel lib file, so if
@@ -3774,7 +3776,7 @@ run_script_components()
 	update_scripts $VERSION_INFO # get the version info data file
 
 	# check for latest version of script.
-	if [ "$SKIP_RESTART" != "true" -a "$SKIP_CONNECTIONS" != 'true' ];then
+	if [ "$B_SKIP_RESTART" != "true" -a "$B_SKIP_CONNECTIONS" != 'true' ];then
 		check_version
 	fi
 	update_to_aptosid
@@ -3788,7 +3790,7 @@ run_script_components()
 	sticky_prefs
 	# load the apt tools now, if no connection, use local version
 	# this must precede all apt related functions and features
-	if [ "$SKIP_CONNECTIONS" != 'true' ];then
+	if [ "$B_SKIP_CONNECTIONS" != 'true' ];then
 		run_script_import $LIB_APT_TOOLS
 		run_script_import $LIB_DU_FIXES
 		# update if inxi is installed by users
@@ -3803,7 +3805,7 @@ run_script_components()
 	set_apt_type 'first-run'
 	check_dpkg_update
 	test_required_startup_apps
-	# must be set after check_distro_version to set APTOSID_SOURCES global
+	# must be set after check_distro_version to set B_APTOSID_SOURCES global
 	set_distro_data
 	# just for -! 32 debdelta option, must happen after apt tools is loaded
 	if [ "$B_USE_DEBDELTA" == 'true' ];then
@@ -3815,13 +3817,13 @@ run_script_components()
 	launch_function_trigger 'debian-mirrors'
 	# launch_function_trigger tester
 
-	## checks for first run or -M option to run change_kernel_mirrors
+	## checks for first run or -M option to run change_distro_mirrors
 	## no reason to run this on livecd since users can't install kernels anyway
-# 	if [  "$IS_LIVE" != 'true' -a "$APTOSID_SOURCES" == 'true' ];then
+# 	if [  "$B_IS_LIVE" != 'true' -a "$B_APTOSID_SOURCES" == 'true' ];then
 # 		launch_function_trigger 'kernel-mirrors'
 #  	fi
 
-	if [ "$SKIP_CONNECTIONS" != 'true' ];then
+	if [ "$B_SKIP_CONNECTIONS" != 'true' ];then
 		get_current_apt_kernel $DEFAULT_KERNEL
 	fi
 
@@ -3832,7 +3834,7 @@ run_script_components()
 	#script_debugger 'install_dist_upgrade repeat 1'
 	# prints out various instructions and information about install, kernel version etc
 	# first hold point in script, to let user read instructions
-	if [ "$SKIP_INFO" != 'true' ];then
+	if [ "$B_SKIP_INFO" != 'true' ];then
 		print_install_information
 	fi
 
@@ -3840,36 +3842,36 @@ run_script_components()
 	set_sticky_prefs 's'
 	udev_kernel26_update_handler
 	# runs main kernel question installer sequence also, checks kernel version for du first
-	if [ "$SKIP_CONNECTIONS" != 'true' -a "$IS_LIVE" != 'true' ];then
-		if [ "$SKIP_KERNEL" != 'true' -a "$DEFAULT_KERNEL" != 'no-kernel' ];then
+	if [ "$B_SKIP_CONNECTIONS" != 'true' -a "$B_IS_LIVE" != 'true' ];then
+		if [ "$B_SKIP_KERNEL" != 'true' -a "$DEFAULT_KERNEL" != 'no-kernel' ];then
 			run_script_import $LIB_KERNEL
  			check_kernel
  			if [ "$B_TESTING_1" == 'true' ];then
  				:
  			fi
 		fi
-		KERNEL_POST_DU_FLAG='true'
+		B_SHOW_KERNEL_INSTALL_OPTION='true'
 	fi
 	test_xorg_version 'pre' # test for set xorg data
 	# an alert system for live warnings
 	# this also triggers the main du function whether or not it's true
-	if [ "$SKIP_WARNING" != 'true' -a "$SKIP_CONNECTIONS" != 'true' ];then
+	if [ "$B_SKIP_WARNING" != 'true' -a "$B_SKIP_CONNECTIONS" != 'true' ];then
 		run_script_import $LIB_WARNING
 		upgrade_warning
 	else
-		if [ "$SKIP_DIST_UPGRADE" != 'true' -a "$SKIP_CONNECTIONS" != 'true' ];then
+		if [ "$B_SKIP_UPGRADE" != 'true' -a "$B_SKIP_CONNECTIONS" != 'true' ];then
 			install_dist_upgrade 'first'
 		fi
 	fi
 	test_xorg_version 'post' # this is used by graphics and tweaks
 
 	# runs all post du options except graphic install
-	if [ "$SKIP_TWEAKS" != 'true' ];then
+	if [ "$B_SKIP_TWEAKS" != 'true' ];then
 		post_du_options
 	fi
 
 	# check if user wants to install graphics drivers and start window manager
-	if [ "$SKIP_GRAPHICS" != 'true' -a "$SKIP_CONNECTIONS" != 'true' ];then
+	if [ "$B_SKIP_GRAPHICS" != 'true' -a "$B_SKIP_CONNECTIONS" != 'true' ];then
 		run_script_import $LIB_GRAPHICS
 		install_graphics
 	else

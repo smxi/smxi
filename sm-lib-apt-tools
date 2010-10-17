@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.32
-####  Date: September 23 2010
+####  version: 1.22.33
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -435,7 +435,7 @@ apt_error_handling()
 						change_debian_mirrors
 						;;
 					change-aptosid-mirror)
-						change_kernel_mirrors
+						change_distro_mirrors
 						;;
 					continue)
 						echo $LINE
@@ -891,7 +891,7 @@ apt_update_handler()
 			;;
 	esac
 
-	if [ "$UPDATED" != 'true' -o "$forceUpdate" == 'true' ];then
+	if [ "$B_REPOS_UPDATED" != 'true' -o "$forceUpdate" == 'true' ];then
 		# give users the option to add non free sources to debian / other distros
 		update_to_nonfree_sources
 
@@ -909,7 +909,7 @@ apt_update_handler()
 		# add any gpg stuff that might be needed
 		update_gpg  # fixed it, now using debian-archive-keyring
 		# set this to determine if update should be run again
-		UPDATED='true'
+		B_REPOS_UPDATED='true'
 	fi
 	eval $LOGUE
 }
@@ -1239,7 +1239,7 @@ update_sources()
 			sourcesData=$swiftSources
 			;;
 		plain)
-			if [ "$UPDATED" != 'true' ];then
+			if [ "$B_REPOS_UPDATED" != 'true' ];then
 				doUpdate='true'
 			fi
 			;;
@@ -1254,7 +1254,7 @@ update_sources()
 	if [ "$updateReturn" -eq 0 ];then
 		eval $extraFunctions
 		doUpdate='true'
-		UPDATED=''
+		B_REPOS_UPDATED=''
 	fi
 	if [ "$doUpdate" == 'true' ];then
 		apt_update_handler 'package-install'
@@ -1262,7 +1262,7 @@ update_sources()
 	# these will install keyrings if required after the update happens
 	if [ -n "$extraFunctions2" ];then
 		eval $extraFunctions2
-		UPDATED=''
+		B_REPOS_UPDATED=''
 		apt_update_handler 'package-install'
 	fi
 	
@@ -1492,7 +1492,7 @@ force_kernel_mirror_change()
 					yes-reset-mirror)
 						echo "${S}Ok, you can now select a new kernel mirror...${N}"
 						#set_sticky_prefs $prefId
-						CHANGE_KERNEL_MIRROR='true'
+						B_CHANGE_DISTRO_MIRROR='true'
 						;;
 					no-change-to-mirror)
 						echo "${S}Ok, but remember, to change your mirror, just start ${C}$SCRIPT_NAME${S} with ${C}-M${S} option.${N}"
@@ -1516,12 +1516,12 @@ force_kernel_mirror_change()
 }
 
 # update kernel mirrors, -M option
-change_kernel_mirrors()
+change_distro_mirrors()
 {
 	eval $LOGPS
-	if [ -n "$APTOSID_SOURCES" ];then
+	if [ "$APTOSID_SOURCES" == 'true' ];then
 		echo $MBAR
-		echo "${M} SMXI KERNEL MIRROR SELECTION"
+		echo "${M} SMXI DISTRO MIRROR SELECTION"
 		echo $MLINE
 		if [ "$B_APT_PROX" == 'true' ];then
 			echo "${M}I'm sorry, but appear to be using an apt caching proxy for your apt "
@@ -1609,7 +1609,7 @@ change_kernel_mirrors()
 				if [ "$skip" != 'true' ];then
 					if [ "$currentMirror" != "$noMirrorString" ];then
 						set_sidux_mirror "$mirrorUrl"
-						change_kernel_mirrors
+						change_distro_mirrors
 					else
 						echo "${M}$noMirrorString${N}"
 					fi
@@ -1622,7 +1622,7 @@ change_kernel_mirrors()
 			else
 				print_error opt
 				eval $LOGPE
-				change_kernel_mirrors
+				change_distro_mirrors
 			fi
 		fi
 	else
@@ -1633,7 +1633,7 @@ change_kernel_mirrors()
 	fi
 }
 ## DEBUGGER
-#script_debugger 'change_kernel_mirrors prefs'
+#script_debugger 'change_distro_mirrors prefs'
 
 # args: $1 - all/get-them/non-core
 get_sidux_mirrors()

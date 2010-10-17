@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.11
-####  Date: September 16 2010
+####  version: 1.22.12
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -191,7 +191,7 @@ advanced_tweaks()
 				repeat='true'
 				;;
 			change-aptosid-mirrors)
-				change_kernel_mirrors
+				change_distro_mirrors
 				repeat='true'
 				;;
 			upgrade-dist-upgrade)
@@ -1097,7 +1097,7 @@ set_default_system_kernel()
 	local continueText='return to main menu' continueText2='returning to main menu'
 	local startNu='1-'
 
-	if [ "$USE_DEBIAN_KERNEL" != 'true' ];then
+	if [ "$B_USE_DEBIAN_KERNEL" != 'true' ];then
 		debianKernel=''
 	fi
 	options="no-kernel $debianKernel"
@@ -1107,10 +1107,10 @@ set_default_system_kernel()
 	else
 		altKernelSetting='Currently Unset'
 	fi
-	if [ -n "$LIQUORIX_SOURCES" ];then
+	if [ "$B_LIQUORIX_SOURCES" == 'true' ];then
 		options="$options liquorix"
 	fi
-	if [ -n "$APTOSID_SOURCES" ];then
+	if [ "$B_APTOSID_SOURCES" == 'true' ];then
 		options="$options aptosid"
 	fi
 	options="$options continue"
@@ -1155,7 +1155,7 @@ set_default_system_kernel()
 				set_distro_data # have to reset globals now
 				case $opt in
 					debian|liquorix|aptosid)
-						if [ "$SKIP_CONNECTIONS" != 'true' ];then
+						if [ "$B_SKIP_CONNECTIONS" != 'true' ];then
 							get_current_apt_kernel $DEFAULT_KERNEL
 						fi
 						;;

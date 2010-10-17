@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.3
-####  Date: October 1 2010
+####  version: 3.3.4
+####  Date: October 17 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -153,7 +153,7 @@ check_debian()
 				set_default_system_kernel 'conversion'
 				antix_fix_1
 				print_conversion_information
-				CON_DEB='true'
+				B_CON_DEB='true'
 				trap - INT TERM EXIT
 				;;
 			aptosid-sources)
@@ -169,7 +169,7 @@ check_debian()
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				print_conversion_information
-				CON_DEB='true'
+				B_CON_DEB='true'
 				trap - INT TERM EXIT
 				;;
 			quit)
