@@ -79,7 +79,7 @@ sysvinit_fix_1()
 	local isInstalled=$( package_tester 'perl' )
 	
 	if [ "$smPref" -eq 0 ];then
-		if [ "$APTOSID_SOURCES" != 'true' ];then # fixed package in sidux repos
+		if [ "$B_APTOSID_SOURCES" != 'true' ];then # fixed package in sidux repos
 			if [ -f /etc/default/rcS ];then
 				echo $LINE
 				echo "${S}Patching ${C}sysvinit${S} now...${N}"
