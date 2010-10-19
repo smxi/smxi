@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.10
-####  Date: October 17 2010
+####  version: 2.10.11
+####  Date: October 18 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  The following functions use core logic by Joaquim Boura (x-un-i):
@@ -180,9 +180,8 @@ clean_cruft()
 		echo $LINE
 		echo "${Q}Do you want to purge all these left over package items?"
 		echo $LINE
-		echo "${C}1 - yes-remove-one-by-one${S} - Will ask you for each package if you want to"
-		echo "    remove it completely."
-		echo "${C}2 - yes-remove-all${S} - Will ask to remove entire list at once."
+		echo "${C}1 - yes-remove-one-by-one${S} - Removes each package one at a time."
+		echo "${C}2 - yes-remove-all${S} - Removes entire list at once."
 		echo "${C}3 - simulate-remove-all${S} - Simulate the removal of all packages."
 		echo "${C}4 - return-main-menu${S} - Go back to main menu, skip removals."
 		echo $LINE
@@ -206,7 +205,8 @@ clean_cruft()
 					removeAll='true'
 					repeat='true'
 					;;
-				return-main-menu)	echo "${S}Ok, going back to the main menu now...${N}"
+				return-main-menu)	
+					echo "${S}Ok, going back to the main menu now...${N}"
 					;;
 				*)	print_error 'opt3'
 					repeat='true'
