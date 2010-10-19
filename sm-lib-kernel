@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.76
-####  Date: October 17 2010
+####  version: 2.5.77
+####  Date: October 19 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -196,7 +196,7 @@ kernel_question()
 	echo "${S}If you restart the script after you reboot and no network connection is found,"
 	echo "the script will offer you choices of wifi modules to reinstall automatically."
 
-	if [ "$NVIDIA" == 'true' -o "$ATI" == 'true' ];then
+	if [ "$B_NVIDIA" == 'true' -o "$B_ATI" == 'true' ];then
 		echo $MLINE
 		echo "${M}If you use ${C}Nvidia${M} or ${C}Fglrx${M} video drivers, you must reinstall them after your kernel install."
 		echo "${M}Graphics drivers can now be reinstalled without a reboot, right to the new kernel.${S}"

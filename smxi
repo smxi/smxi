@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.16
-####  Date: October 17 2010
+####  version: 8.12.17
+####  Date: October 19 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -250,6 +250,11 @@ B_LINUXMINT_SOURCES='false'
 B_LIQUORIX_SOURCES='false'
 B_MEPIS_SOURCES='false'
 
+# video driver booleans
+B_ATI='false'
+B_INTEL='false'
+B_NVIDIA='false'
+
 # section skip items booleans
 B_SKIP_A_S='false'
 B_SKIP_CONNECTIONS='false'
@@ -326,10 +331,7 @@ X_ORG_SAVE_LIST=''
 X_ORG_LIST=''
 
 # video driver installer info/video data
-ATI=''
 GFX_INSTALLER=''
-INTEL=''
-NVIDIA=''
 VIDEO_DATA=''
 VIDEO_SUPPORT_FGLRX=''
 VIDEO_SUPPORT_NVIDIA=''
@@ -1572,15 +1574,15 @@ set_graphics_data()
 		cardBrand=$( echo $card | cut -d ':' -f1 )
 		case $cardBrand in
 			10de|12d2)
-				NVIDIA='true'
+				B_NVIDIA='true'
 				cardInfo='NVIDIA'
 				;;
 			1002)
-				ATI='true'
+				B_ATI='true'
 				cardInfo='ATI'
 				;;
 			8086)
-				INTEL='true'
+				B_INTEL='true'
 				cardInfo='INTEL'
 				;;
 			*)
@@ -1591,9 +1593,9 @@ set_graphics_data()
 
 	if [ "$B_TESTING_1" == 'true' ];then
 		:
-# 		ATI='true'
-# 		INTEL=''
-# 		NVIDIA=''
+# 		B_ATI='true'
+# 		B_INTEL='false'
+# 		B_NVIDIA='false'
 	fi
 	log_function_data "CARD: $cardInfo"
 	GFX_INSTALLER=$MOD_GFX # assign the now default engine script
@@ -3205,7 +3207,7 @@ print_video_data()
 	local downloadUrl=$SCRIPT_DOWNLOAD$UPGRADE_DATA downloadFullUrl=''
 	local nData='' fData='' printed='' ua='-U s-tools/v-data.' uaFull=''
 
-	if [ "$NVIDIA" == 'true' -a "$VIDEO_SUPPORT_NVIDIA" != 'unset' ];then
+	if [ "$B_NVIDIA" == 'true' -a "$VIDEO_SUPPORT_NVIDIA" != 'unset' ];then
 		# only do this the first time, after we'll be reusing the same data
 		if [ -z "$VIDEO_SUPPORT_NVIDIA" ];then
 			downloadFullUrl=$downloadUrl$VIDEO_DATA_NVIDIA
@@ -3224,7 +3226,7 @@ print_video_data()
 		fi
 		log_function_data "Nvidia Support Data:\n$VIDEO_SUPPORT_NVIDIA"
 	fi
-	if [ "$ATI" == 'true' -a "$VIDEO_SUPPORT_FGLRX" != 'unset' ];then
+	if [ "$B_ATI" == 'true' -a "$VIDEO_SUPPORT_FGLRX" != 'unset' ];then
 		if [ -z "$VIDEO_SUPPORT_FGLRX" ];then
 			downloadFullUrl=$downloadUrl$VIDEO_DATA_FGLRX
 			uaFull="$ua$VIDEO_DATA_FGLRX"
