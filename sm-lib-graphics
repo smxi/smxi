@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.6
-####  Date: October 19 2010
+####  version: 2.4.7
+####  Date: October 20 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -38,7 +38,7 @@ install_graphics()
 	local NvDefaultMath='' NvLatestMath='' NvPreviousMath='' NvOlderMath='' NvOldestMath=''
 	local NvTest1='' NvTest2='' NvTest3='' NvTest4=''
 	local NvDefaultMathTemp='' NvLatestMathTemp='' NvPreviousMathTemp=''
-	local NvOldestMathTemp=''
+	local NvOldestMathTemp='' nvXorgtext=''
 	local nvDebId='debian-nvidia'
 	local nvDebianText="${C}$nvDebId${S} - Debian method nVidia driver installation.\n    ${S}This will install the ${C}Debian nVidia${S} driver.\n"
 	local nvBetaId='nvidia-beta-driver'
@@ -95,16 +95,19 @@ install_graphics()
 				fi
 				if [ "$B_ATI" == 'true' ];then
 					if [ "$fgXorgError" -eq 0 ];then
-						fgXorgText='\n${C}install-xorg-radeon${S} - Install the ${C}xorg radeon${S} driver. The following cards are supported:\n\t7000-9250, Xpress200 - Good; 95-9800,x300-x850 - Beta\n${C}install-xorg-radeonhd${S} - ${M}NEW!${S} Install the ${M}beta${S} ${C}xorg radeonhd${S} driver. For newer ATI cards.\n\t${M}3d quality varies - 2d, dual monitor should be fine.${S} Supported cards: Radeon x1200-x1900, HD 2x00\n'
+						fgXorgText='\n${C}install-xorg-radeon${S} - Install the ${C}Xorg Radeon${S} driver. The following cards are supported:\n\t7000-9250, Xpress200 - Good; 95-9800,x300-x850 - Unknown\n${C}install-xorg-radeonhd${S} - ${S} Install the ${C}Xorg Radeonhd${S} driver. For newer ATI cards.\n\t${M}3d quality varies - 2d, dual monitor should be fine.${S} Supported cards: Radeon x1200-x1900, HD 2x00\n'
 					else
 						fgXorgText='\n\n${E}Unfortunately, because of an ATI error, there is no working ${C}fglrx${E} driver\navailable for your ATI gfx card and Xorg version ${C}1.3\n\n${S}You can either install the regular ${C}xorg ati${S} native driver, or try the more powerful\n${C}xorg radeon${S} driver, if your ATI card is older than the R500 series.\nIf your card is in the R500 series, you can only use the ${C}vesa${S} driver,sorry.\n\n'
 						bError='true'
 					fi
 					OptFg="$OptFg install-xorg-radeon install-xorg-radeonhd"
+				elif [ "$B_NVIDIA" == 'true' ];then
+					nvXorgtext="\n${C}install-xorg-nouveau${S} - Install the ${C}Xorg Nouveau${S} driver - Beta Quality. Support varies widely\n     card to card, Xorg to Xorg. If it fails, try nv or vesa instead (${C}sgfxi -N vesa${S}).\n"
+					OptNv="$OptNv install-xorg-nouveau"
 				fi
 			fi
 
-			OptionText='echo -e "'$OptionText'${S}You can quit, start X now, or install one of the following drivers.\nThe xorg driver does not need to be reinstalled with new kernels or xorg updates.\n$LINE\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg '$xorgNative'${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers.'$fgXorgText'"'
+			OptionText='echo -e "'$OptionText'${S}You can quit, start X now, or install one of the following drivers.\nThe xorg driver does not need to be reinstalled with new kernels or xorg updates.\n$LINE\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg '$xorgNative'${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers.'$fgXorgText$nvXorgtext'"'
 		fi
 	else
 		OptionText='echo -e "${E}There is no driver available for installation.\nYou do not appear to be running nVidia, Intel, or ATI video cards.\n${S}You can either quit and stay in console, or start X now.\n$LINE"'
@@ -149,14 +152,14 @@ install_graphics()
 
 		if [ "$NvTest1" -eq 0 ];then
 			if [ "$NvTest4" -eq 1 ];then
-				OptNvLatest='5xxx-nvidia-c'
-				NvAdvancedText="${C}5xxx-nvidia-c${S} - Latest driver for your GeForce FX 5xxx card, with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"
+				OptNvLatest='5xxx-nvidia'
+				NvAdvancedText="${C}5xxx-nvidia${S} - Latest driver for your GeForce FX 5xxx card.\n    ${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"
 			elif [ "$NvTest2" -eq 0 ];then
-				OptNvLatest='new-nvidia-c newest-nvidia-c'
-				NvAdvancedText="${C}new-nvidia-c${S} - Newer series nVidia driver, with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvPrevious${S}\n${C}newest-nvidia-c${S} - ${M}Recommended for Newer cards${S} Newest nVidia driver, with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvLatest${S}\n"
+				OptNvLatest='new-nvidia newest-nvidia'
+				NvAdvancedText="${C}new-nvidia${S} - Newer series nVidia driver.\n    ${S}This will install this nVidia driver: ${C}$NvPrevious${S}\n${C}newest-nvidia${S} - ${M}Recommended for Newer cards${S} Newest nVidia driver.\n    ${S}This will install this nVidia driver: ${C}$NvLatest${S}\n"
 			fi
-			OptNv="$OptNv $nvDebId oldest-nvidia older-nvidia-c $OptNvLatest $nvBetaId"
-			NvOptionText='echo -e "$nvDebianText${C}oldest-nvidia${S} - Use if you have problems with newer nVidia install.\n    ${M}Recommended for older, legacy nvidia cards, or if you want a lightweight driver.${S}\n    ${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia-c${S} ${M}Recommended for midrange cards${S} nVidia driver installed with ${C}-c${S} option.\n    ${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText$nvBetaText"'
+			OptNv="$OptNv $nvDebId oldest-nvidia older-nvidia $OptNvLatest $nvBetaId"
+			NvOptionText='echo -e "$nvDebianText${C}oldest-nvidia${S} - Use if you have problems with newer nVidia install.\n    ${M}Recommended for older, legacy nvidia cards, or if you want a lightweight driver.${S}\n    ${S}This will install this nVidia driver: ${C}$NvOldest${S}\n${C}older-nvidia${S} ${M}Recommended for older cards${S}.\n    ${S}This will install this nVidia driver: ${C}$NvOlder${S}\n$NvAdvancedText$nvBetaText"'
 		else
 			OptNv="$OptNv $nvDebId legacy-nvidia $nvBetaId"
 			NvOptionText='echo -e "$nvDebianText$nvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install this nVidia driver: ${C}$NvDefault${S}$nvBetaText"'
@@ -257,6 +260,9 @@ install_graphics()
 			install-xorg-driver)
 				final_graphics_install native
 				;;
+			install-xorg-nouveau)
+				final_graphics_install nouveau
+				;;
 			install-xorg-radeon)
 				final_graphics_install radeon
 				;;
@@ -272,16 +278,17 @@ install_graphics()
 			oldest-nvidia)
 				final_graphics_install nvo $NvOldestMath
 				;;
-			older-nvidia-c)
+			older-nvidia)
 				final_graphics_install nvco $NvOlderMath
 				;;
-			default-nvidia-c)
+			# not used currently
+			default-nvidia)
 			 	final_graphics_install nvc $NvDefault
 				;;
-			new-nvidia-c|5xxx-nvidia-c)
+			new-nvidia|5xxx-nvidia)
 				final_graphics_install nvco $NvPreviousMath
 				;;
-			newest-nvidia-c)
+			newest-nvidia)
 				final_graphics_install nvco $NvLatestMath
 				;;
 			$nvBetaId)
@@ -369,6 +376,11 @@ final_graphics_install()
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
+		nouveau)
+			extraArgs=" -N nouveau"
+			bInstallDriver='true'
+			bCompleted='true'
+			;;
 		radeon)
 			extraArgs=" -N radeon"
 			bInstallDriver='true'
@@ -393,22 +405,22 @@ final_graphics_install()
 			;;
 		nvb)
 			installMess="${S}Testing for nVidia beta driver. If none, will use latest stable for your card.${N}"
-			extraArgs=" $kernelInstallTo -B -c"
+			extraArgs=" $kernelInstallTo -B"
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
 		nvc)
-			installMess="${S}installing nVidia driver ${C}$2${S} with -c option now...${N}"
+			installMess="${S}installing nVidia driver ${C}$2${S} ...${N}"
 			if [ "$2" == 'debian-nvidia' ];then
 				extraArgs=' -d '
 			fi
-			extraArgs=" $kernelInstallTo -c $extraArgs"
+			extraArgs=" $kernelInstallTo $extraArgs"
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
 		nvco)
-			installMess="${S}installing nVidia driver ${C}$2${S} with -c option now...${N}"
-			extraArgs=" $kernelInstallTo -c -o $2 "
+			installMess="${S}installing nVidia driver ${C}$2${S} now...${N}"
+			extraArgs=" $kernelInstallTo -o $2 "
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
