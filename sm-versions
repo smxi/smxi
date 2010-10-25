@@ -5,7 +5,7 @@ sm-lib-distro-conversion=3.3.4:October 17 2010
 sm-lib-du-fixes=1.4.5:October 17 2010
 sm-lib-graphics=2.4.7:October 20 2010
 sm-lib-kde4-updater=0.7.36:September 16 2010
-sm-lib-kernel=2.5.77:October 19 2010
+sm-lib-kernel=2.5.78:October 25 2010
 sm-lib-kernel-install=2.11.12:October 19 2010
 sm-lib-misc-tweaks=1.22.12:October 17 2010
 sm-lib-package-install=3.3.13:September 28 2010
@@ -23,6 +23,6 @@ sgfxi=4.15.15:October 22 2010
 svmi=2.7.5:October 19 2010
 inxi=1.4.20:October 7 2010
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.31.29:October 20 2010
+sm-main-version=8.31.30:October 25 2010
 
 ###**EOF**###
