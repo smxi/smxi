@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.17
-####  Date: October 19 2010
+####  version: 8.12.18
+####  Date: November 4 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1992,7 +1992,7 @@ start_stop_default_dm()
 	eval $LOGUS
 	local displayManager=$( get_default_display_manager )
 	local success=''
-	local dmList='entrance gdm kdm slim wdm xdm' dm=''
+	local dmList='entrance gdm gdm3 kdm slim wdm xdm' dm=''
 	local noHup='nohup' xActionString=''  finalXKill=''
 	local serviceControl='/etc/init.d/'
 	
@@ -2086,7 +2086,7 @@ start_stop_default_dm()
 do_display_manager_pid_test()
 {
 	eval $LOGUS
-	local dmIdList='entrance/entranced.pid gdm.pid kdm.pid slim.lock wdm.pid xdm.pid' dmId='' found=''
+	local dmIdList='entrance/entranced.pid gdm.pid gdm3.pid kdm.pid slim.lock wdm.pid xdm.pid' dmId='' found=''
 
 	for dmId in $dmIdList
 	do
