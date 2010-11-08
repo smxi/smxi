@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.18
-####  Date: November 4 2010
+####  version: 8.12.19
+####  Date: November 8 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3382,12 +3382,12 @@ post_du_options()
 
 	echo "${C}4${S} - ${C}miscellaneous-tweaks${S} Current options are: mozilla-tweaks,"
 	echo "    which gets rid of gtk filehandlers and other annoyances in Mozilla products;"
-	echo "    misc system config tweaks; apt-type set; upgrade type set."
+	echo "    system config tweaks (in advanced tweaks): set: default-runlevels, apt-type; upgrade type, and more!"
 	echo "    A legacy tweaks section has older, deprecated tweaks like alsaconf and some cleanup stuff."
-	echo "    ${M}New!${S} ${C}openoffice.org hold/install/update${S} feature. Lets you hold or remove hold easily."
+	echo "    ${C}openoffice.org hold/install/update${S} feature. Lets you hold or remove hold easily."
 
 	echo "${C}5${S} - ${C}virtual-machine-installer${S} Installs vbox (OSE or non-ose), vbox modules, sets up users."
-	echo "    Also has any-any script install, and basic vmware install."
+	echo "    Also has any-any script install, and basic vmware tools (new vmware is not installable, sorry)."
 
 	eval $advanced1
 	eval $advanced2

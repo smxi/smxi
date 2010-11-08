@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.22.12
-####  Date: October 17 2010
+####  version: 1.23.0
+####  Date: November 8 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -51,8 +51,9 @@ misc_hacks()
 
 	echo "${C}2${S} - ${C}install-graphics${S} Options to install various grub graphics images."
 
-	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks: update-bashrc, update-locales"
-	echo "    ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors"
+	echo "${C}3${S} - ${C}advanced-tweaks${S} Some advanced tweaks for adjusting your system:"
+	echo "    update-bashrc, set-default-runlevel (for changing startup runlevel of desktop), "
+	echo "    update-locales, ( get rid of all those locales in $DU_UPGRADE ), change-debian-mirrors"
 	echo "    ${C}1.${S} Crust fix: change ${M}hit enter to continue${S} to what you want ${C}2.${S} Set default system kernel"
 
 	echo "${C}4${S} - ${C}legacy-tweaks${S} More or less obsolete tweaks for things no longer actively"
@@ -1494,6 +1495,9 @@ set_default_runlevels()
 		mepis*)
 			defaultOpt='mepis-default'
 			;;
+		sidux)
+			defaultOpt='sidux-default'
+			;;
 	esac
 
 	# set the plural text
@@ -1513,6 +1517,8 @@ set_default_runlevels()
 		echo $LINE
 		echo "${S}You can now change your system default init level and display manager level."
 		echo "Select one of the following runlevels, or set it to ${C}$DISTRO${S} default (${C}$defaultLevels${S})."
+		echo
+		echo "This operation requires ${C}sysv-rc-conf${S}. ${C}$SCRIPT_NAME${S} will install it if it is missing."
 		echo $LINE
 		echo "${C}1${S} - ${C}$defaultOpt${S} - Restore your ${C}$DISTRO${S} system defaults."
 		echo
@@ -1522,31 +1528,37 @@ set_default_runlevels()
 		echo $LINE
 		echo -e $SLE
 		echo $LINE
-		options="debian-default 2 3 4 5 continue"
+		options="$defaultOpt 2 3 4 5 continue"
 		select opt in $options
 		do
 			log_function_data "opt: $opt"
 			case $opt in
 				debian-default)
 					echo "${S}Updating to use ${C}$opt${S}...${N}"
-					update-rc.d -f $defaultDm remove
-					update-rc.d $defaultDm defaults 99 01
-					set_default_inittab 2
+					check_sysv_rc_conf
+					# update-rc.d -f $defaultDm remove
+					# update-rc.d $defaultDm defaults 99 01
+					# note using null here so that the true Debian defaults are used
+					set_rc_runlevel "" "$defaultDm"
+					set_default_inittab 2 "$defaultDm"
 					repeat='true'
 					;;
-				aptosid-default|antix-default|mepis-default)
+				aptosid-default|antix-default|mepis-default|sidux-default)
 					echo "${S}Updating to use ${C}$opt${S}...${N}"
-					update-rc.d -f $defaultDm remove
-					update-rc.d $defaultDm start 99 5 . stop 01 0 1 2 3 4 6 .
-					set_default_inittab 5
+					check_sysv_rc_conf
+					# update-rc.d -f $defaultDm remove
+					# update-rc.d $defaultDm start 99 5 . stop 01 0 1 2 3 4 6 .
+					set_rc_runlevel "5" "$defaultDm"
+					set_default_inittab 5 "$defaultDm"
 					repeat='true'
 					;;
 				2|3|4|5)
-					echo "${S}Setting system default and startup runlevel to: ${C}$opt${N}"
-					stopLevels=$( sed "s/$opt//" <<< $stopLevels )
-					update-rc.d -f $defaultDm remove
-					update-rc.d $defaultDm start 99 $opt . stop 01 $stopLevels .
-					set_default_inittab $opt
+					check_sysv_rc_conf
+					set_rc_runlevel "$opt" "$defaultDm"
+					#stopLevels=$( sed "s/$opt//" <<< $stopLevels )
+					# update-rc.d -f $defaultDm remove
+					# update-rc.d $defaultDm start 99 $opt . stop 01 $stopLevels .
+					set_default_inittab $opt "$defaultDm"
 					repeat='true'
 					;;
 				continue)
@@ -1566,14 +1578,68 @@ set_default_runlevels()
 		eval $LOGPE
 	fi
 }
+# args: $1 - which runlevel to start on, null means default; $2 - display manager
+set_rc_runlevel()
+{
+	eval $LOGUS
+	local dmRunlevels='' levels=''
+	
+	# to do true reset to debian defaults use null always
+	if [ "$1" != '' ];then
+		levels="--level $1"
+	fi
+	echo $LINE
+	echo "${S}Setting ${C}$2${S} startup runlevel to: ${C}$1${S}...${N}"
+	sysv-rc-conf --level 012345S $2 off
+	sysv-rc-conf $levels $2 on
+	
+	# make sure it worked
+	dmRunlevels=$( get_display_manager_runlevels )
+	if [ "$1" == "$dmRunlevels" ] || [ "$1" == '' -a "$dmRunlevels" == '2 3 4 5' ];then
+		echo "${S}Update of ${C}$2${S} to start at runlevel ${C}$dmRunlevels${S} was successful.${N}"
+	else
+		echo "${E}Something went wrong! The update of ${C}$2${E} to start at runlevel ${C}$1${E} failed!${N}"
+		log_function_data "Dm update failed: $dmRunlevels is current but $1 was requested for $2."
+	fi
+	eval $LOGUE
+}
 
-# args: $1 - default level
+# install if missing
+check_sysv_rc_conf()
+{
+	eval $LOGUS
+	
+	local package='sysv-rc-conf'
+	
+	echo $LINE
+	echo "${S}Checking ${C}$package${S} is installed...${N}"
+
+	if [ -z "$( package_tester $package )" ];then
+		package_installer "$package" 'install-always'
+	else
+		echo "${C}$package${S} is installed, continuing.${N}"
+	fi
+	
+	eval $LOGUE
+}
+
+# args: $1 - default level; $2 - dm used
 set_default_inittab()
 {
 	eval $LOGUS
+	local defaultRunlevel=''
 	local etcit='/etc/inittab'
+	
 	echo "${S}Updating system default startup level in ${C}$etcit${S}to: ${C}$1${N}"
 	sed -i "s/id:[1-5]:initdefault:/id:$1:initdefault:/" $etcit
+	
+	defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	if [ "$1" == "$defaultRunlevel" ];then
+		echo "${S}Update of runlevel for ${C}$2${S} start on: ${C}$1${S} was successful.${N}"
+	else
+		echo "${E}Something went wrong! Default runlevel ${C}$2${E} at ${C}$1${E} failed!${N}"
+		log_function_data "inittab update failed: $defaultRunlevel is current but $1 was requested."
+	fi
 	eval $LOGUE
 }
 ###---------------------------------------------------------------------
