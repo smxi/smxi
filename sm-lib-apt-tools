@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.34
-####  Date: October 17 2010
+####  version: 1.22.35
+####  Date: December 25 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -143,7 +143,8 @@ package_tester_aptitude()
 check_package_status()
 {
 	eval $LOGUS
-	local packageVersion='' statusType='Candidate:'
+	local packageVersion='' statusType='Candidate:' cacheData=''
+	local poolPackageCount=0
 
 	case $2 in
 		c|candidate)	
@@ -154,7 +155,18 @@ check_package_status()
 			;;
 	esac
 
-	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= cacheData="$( apt-cache policy $1 2>/dev/null )"
+	
+	# we need to filter out all cases were the only instance in apt is the locally installed
+	# version, ie:  *** 2.13 0 \ 100 /var/lib/dpkg/status is the only value returned
+	poolPackageCount=$( grep -Es "^[[:space:]]*[0-9]{3}"  <<< "$cacheData" | grep -vcE "^[[:space:]]*100[[:space:]]" )
+	
+	packageVersion=$( grep -i "$statusType" <<< "$cacheData" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	
+	# if either none found, or only a local apt version available, return null
+	if [ "$statusType" == 'Candidate:' -a "$poolPackageCount" -eq 0 ];then
+		packageVersion=''
+	fi
 
 	echo $packageVersion
 	log_function_data "Package Version: $packageVersion"

@@ -1386,11 +1386,15 @@ check_install_package()
 	local ua="-U s-tools/package-download.$packageDeb"
 	echo $LINE
 	if [ -n "$( check_package_status "$1" )" ];then
-		package_installer "$1" 'install-missing' || success=$?
+		package_installer "$1" 'install-always' || success=$?
 	else
 		echo "${S}Downloading and installing ${C}$1${S} deb now...${N}"
 		wget $ua -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
 		if [ -f $packageDeb ];then
+			# this allows for updates, we need to remove it
+# 			if [ -n "$( check_package_status "$1" 'i' )" ];then
+# 				dpkg --remove $1 $1 2>>$LOG_FILE 2>&1
+# 			fi
 			dpkg -i $packageDeb || success=$?
 		fi
 		# update aptitude db with the package
