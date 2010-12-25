@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.14
+####  version: 3.3.15
 ####  Date: December 25 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
@@ -1388,17 +1388,15 @@ check_install_package()
 	if [ -n "$( check_package_status "$1" )" ];then
 		package_installer "$1" 'install-always' || success=$?
 	else
-		echo "${S}Downloading and installing ${C}$1${S} deb now...${N}"
+		echo "${S}Downloading ${C}$1${S} deb now...${N}"
 		wget $ua -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
 		if [ -f $packageDeb ];then
-			# this allows for updates, we need to remove it
-# 			if [ -n "$( check_package_status "$1" 'i' )" ];then
-# 				dpkg --remove $1 $1 2>>$LOG_FILE 2>&1
-# 			fi
+			echo "${S}Installing ${C}$1${S} deb now...${N}"
 			dpkg -i $packageDeb || success=$?
 		fi
 		# update aptitude db with the package
 		if [ "$APT_TYPE" == 'aptitude' ];then
+			echo "${S}Adding ${C}$1${S} to ${C}$APT_TYPE${S} package database now...${N}"
 			$APT_TYPE install $1 2>>$LOG_FILE 2>&1
 		fi
 		rm -f $packageDeb
