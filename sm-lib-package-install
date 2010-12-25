@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.13
-####  Date: September 28 2010
+####  version: 3.3.14
+####  Date: December 25 2010
 
 ####  Copyright (C) Harald Hope 2005-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -165,7 +165,7 @@ package_group_installer()
 	local consoleBrowsers='lynx links elinks links2 w3m'
 	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm gpicview leafpad mc pcmanfm sudo vim xarchiver xchat xchat-common xterm $pdfLight"
-	local ceniStuff="ifupdown libcurses-perl libterm-readkey-perl libcurses-ui-perl udev wireless-tools wpasupplicant"
+	local ceniStuff="ifupdown libcurses-perl libcurses-ui-perl libexpect-perl  libterm-readkey-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
 	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
 	local gnomeExtras="gnome-backgrounds gnome-extra-icons gnome-system-monitor gnome-netstatus-applet"
@@ -1392,6 +1392,10 @@ check_install_package()
 		wget $ua -T$TIME_OUT -t 2 -q $downloadUrl  || success=$?
 		if [ -f $packageDeb ];then
 			dpkg -i $packageDeb || success=$?
+		fi
+		# update aptitude db with the package
+		if [ "$APT_TYPE" == 'aptitude' ];then
+			$APT_TYPE install $1 2>>$LOG_FILE 2>&1
 		fi
 		rm -f $packageDeb
 	fi
