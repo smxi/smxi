@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.15
-####  Date: December 25 2010
+####  version: 3.3.16
+####  Date: January 2 2011
 
-####  Copyright (C) Harald Hope 2005-2010
+####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1407,7 +1407,7 @@ check_install_package()
 	else
 		echo "${S}Install of ${C}$1${S} was successful.${N}"
 	fi
-	print_hec
+	#print_hec
 	eval $LOGUE
 }
 
