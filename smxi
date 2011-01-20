@@ -1406,9 +1406,21 @@ set_distro_data()
 {
 	eval $LOGPS
 	
-	local aptosidSources=$( grep -Esil '^[[:space:]]*deb.*(deb-ats|aptosid)' $EAS $EAS.d/*.list )
-	local liquorixSources=$( grep -Esil '^[[:space:]]*deb.*(deb-lqx|liquorix)' $EAS $EAS.d/*.list )
-	local mepisSources=$( grep -Esil '^[[:space:]]*deb.*(deb-mep|mepis)' $EAS $EAS.d/*.list )
+	# set files to ram first, no need to keep reading them
+	local edvContent='' easContent='' eaaContent=''
+	if [ -f "$EDV" ];then
+		edvContent="$( cat $EDV )"
+	fi
+	if [ -f "$EAS" -o -d "$EAS.d" ];then
+		easContent="$( cat $EAS $EAS.d/*.list 2>/dev/null )"
+	fi
+	if [ -f "$EAA" ];then
+		eaaContent="$( cat $EAA )"
+	fi
+	
+	local aptosidSources=$( grep -Esi '^[[:space:]]*deb.*(deb-ats|aptosid)' <<< "$easContent" )
+	local liquorixSources=$( grep -Esi '^[[:space:]]*deb.*(deb-lqx|liquorix)' <<< "$easContent" )
+	local mepisSources=$( grep -Esi '^[[:space:]]*deb.*(deb-mep|mepis)' <<< "$easContent" )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	# test to make sure it's safe for antix users and others to upgrade, this shows
 	# that kopt is using a safe UUID/LABEL method for root
@@ -1418,22 +1430,23 @@ set_distro_data()
 	local systemBase=$( sm_pref_tester 'system-base' 'equal' )
 	local duUpgrade=$( sm_pref_tester 'du-upgrade' 'equal' )
 	# test for apt-proxy or approx
-	local aptProx=$( grep -Esil '^[[:space:]]*deb.*:9999/' $EAS $EAS.d/*.list )
+	local aptProx=$( grep -Esi '^[[:space:]]*deb.*:9999/' <<< "$easContent" )
 
-# these tests will be improved over time, but are ok for now
-	local isEtch=$( grep -is '^4.' $EDV )
-	local isLenny=$( grep -is '^5.' $EDV )
-	local isSqueeze=$( egrep -is '^(squeeze|6\.)' $EDV )
+	# these tests will be improved over time, but are ok for now
+	local isEtch=$( grep -is '^4.' <<< "$edvContent" )
+	local isLenny=$( grep -is '^5.' <<< "$edvContent" )
+	local isSqueeze=$( grep -Eis '^(squeeze|6\.)' <<< "$edvContent" )
+	local isWheezy=$( grep -Eis '^(wheezy|7\.)' <<< "$edvContent" )
 
 	# first tests sources
-	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$NON_DEBIAN_PATTERN" | egrep -icw '(stable|lenny|etch)' )
-	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$NON_DEBIAN_PATTERN" | egrep -icw '(squeeze|testing)' )
-	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$NON_DEBIAN_PATTERN" | egrep -icw '(sid|unstable)' )
+	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|lenny|etch)' )
+	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(squeeze|testing)' )
+	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(sid|unstable)' )
 
 	# then test conf for default version
-	local isStableDefault=$( egrep -si 'APT::Default-Release[[:space:]]"(stable|etch|lenny)"' $EAA )
-	local isTestingDefault=$( egrep -si 'APT::Default-Release[[:space:]]"(testing|squeeze)"' $EAA )
-	local isUnstableDefault=$( egrep -si 'APT::Default-Release[[:space:]]"(sid|unstable)"' $EAA )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny)"' <<< "$eaaContent" )
+	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|squeeze)"' <<< "$eaaContent" )
+	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 	local useDebianKernel=''
 
 	# set antix ID file
