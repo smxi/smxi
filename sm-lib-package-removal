@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-removal
-####  version: 1.4.1
-####  Date: December 2 2009
+####  version: 1.4.2
+####  Date: February 10 2011
 
-####  Copyright (C) Harald Hope 2005-2009
+####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -36,7 +36,7 @@ package_removal()
 {
 	eval $LOGME
 	local repeat='' response='' completed='' opt='' options='' kickThem='' kickItems=''
-	local options="bluetooth captive dmraid-mdadm-lvm german-components-de gnomemeetings isdn klaptopdaemon koffice openoffice.org-all skype splashy squid vdr wifi wvdial xawtv remove-chosen back-to-main-menu"
+	local options="bluetooth captive dmraid-mdadm-lvm german-components-de gnomemeetings isdn klaptopdaemon koffice libreoffice-all openoffice.org-all skype splashy squid vdr wifi wvdial xawtv remove-chosen back-to-main-menu"
 	local removeCount=$( echo $options | awk '{print NF-1}' )
 
 	print_lib_info $LIB_PACKAGE_REMOVAL
@@ -56,7 +56,7 @@ package_removal()
 	select opt in $options
 	do
 		case $opt in
-			bluetooth|captive|dmraid-mdadm-lvm|german-components-de|gnomemeetings|isdn|klaptopdaemon|koffice|openoffice.org-all|pppoe|skype|splashy|squid|vdr|wifi|wvdial|xawtv)
+			bluetooth|captive|dmraid-mdadm-lvm|german-components-de|gnomemeetings|isdn|klaptopdaemon|koffice|libreoffice-all|openoffice.org-all|pppoe|skype|splashy|squid|vdr|wifi|wvdial|xawtv)
 				kickItems="$kickItems $opt"
 				echo "${S}Selected items to remove:${C}$kickItems"
 				echo "${S}Enter another item's number to remove more packages, or enter ${C}$removeCount${S} to remove items.${N}"
@@ -161,6 +161,9 @@ remove_kick_packages()
 				;;
 			german-components-de)
 				packages="$( package_tester '([.a-z0-9-]*-de(-[.a-z0-9-]*)*)' )"
+				;;
+			libreoffice-all)
+				packages="$( package_tester '(libreoffice|python-uno)' 'wild-full' )"
 				;;
 			openoffice.org-all)
 				packages="$( package_tester '(openoffice.org|python-uno)' 'wild-full' )"

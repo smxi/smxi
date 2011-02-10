@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kde4-updater
-####  version: 0.7.36
-####  Date: September 16 2010
+####  version: 0.7.37
+####  Date: February 10 2011
 
-####  Copyright (C) Harald Hope 2010
+####  Copyright (C) Harald Hope 2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -150,12 +150,13 @@ kde3_log_and_removal()
 			khelpcenter)
 				package='khelpcenter4'
 				;;
-			openoffice.org-kde)
-				# ooo-gtk conflicts with this package
-				if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
-					package='openoffice.org-gtk'
-				fi
-				;;
+			# don't run this, will pull in new libreoffice for sid/testing
+# 			openoffice.org-kde)
+# 				# ooo-gtk conflicts with this package
+# 				if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
+# 					package='openoffice.org-gtk'
+# 				fi
+# 				;;
 		esac
 # 		if [ -n "$( grep -Ev '('$noUseWildcard')' <<< $package )" ];then
 		if [ -n "$( grep -Ev '('$noUseWildcard')' <<< $package )" -a *" $package "* != " $cleanedRemovePackages " ];then

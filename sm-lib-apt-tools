@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.37
-####  Date: February 9 2011
+####  version: 1.23.0
+####  Date: February 10 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1861,7 +1861,7 @@ alt-usa-3:http://mira.sunsite.utk.edu/sidux/debian/
 }
 
 ###---------------------------------------------------------------------
-### Kernel handling stuff...
+### Kernel/package version handling stuff...
 ###---------------------------------------------------------------------
 
 # check apt for latest kernel version
@@ -1995,6 +1995,24 @@ get_current_apt_kernel()
 		CURRENT_APT_KERNEL='no-apt-kernel-available'
 	fi
 	eval $LOGUE
+}
+
+# When OOo leaves apt pool it does not appear as a candidate, so after the first
+# update on the system, OOo can no longer be installed.
+set_office_data()
+{
+	if [ -z "$OFFICE_AVAILABLE" ];then
+		if [ -n "$( check_package_status 'openoffice.org-core' 'c' )" ];then
+			OFFICE_AVAILABLE='libre'
+		elif [ -n "$( check_package_status 'libreoffice-core' 'c' )" ];then
+			OFFICE_AVAILABLE='ooo'
+		fi
+		if [ -n "$( check_package_status 'openoffice.org-core' 'i' )" ];then
+			OFFICE_INSTALLED='libre'
+		elif [ -n "$( check_package_status 'libreoffice-core' 'i' )" ];then
+			OFFICE_INSTALLED='ooo'
+		fi
+	fi
 }
 
 ###---------------------------------------------------------------------

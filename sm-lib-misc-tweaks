@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.23.0
-####  Date: November 8 2010
+####  version: 1.23.1
+####  Date: February 10 2011
 
-####  Copyright (C) Harald Hope 2005-2010
+####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -92,7 +92,7 @@ misc_hacks()
 				repeat='true'
 				;;
 			openoffice-hold-install)
-				openoffice_hold_install
+				open_libre_office_hold_install
 				repeat='true'
 				;;
 			continue)
@@ -242,7 +242,7 @@ advanced_tweaks()
 ### openoffice hold/install tweaks
 ###---------------------------------------------------------------------
 
-openoffice_hold_install()
+open_libre_office_hold_install()
 {
 	eval $LOGPS
 	local opt='' repeat='' options=''
@@ -254,6 +254,10 @@ openoffice_hold_install()
 	echo $LINE
 
 	if [ -n "$oooPackages" ];then
+		if [ "$SYSTEM_BASE" != 'stable' ];then
+			echo "${M}NOTE: This will be updated for LibreOffice Support Later"
+			echo $LINE
+		fi
 		echo "${S}Tired of those huge ${C}100mB OpenOffice.org${S} updates every ${C}$DU_UPGRADE${S}? "
 		echo
 		echo "${S}Stop or start those now at will. Change openoffice.org status hold/install  or update openoffice.org."
@@ -302,7 +306,7 @@ openoffice_hold_install()
 		done
 		eval $LOGPE
 		if [ "$repeat" == 'true' ];then
-			openoffice_hold_install
+			open_libre_office_hold_install
 		fi
 	else
 		echo "${M}You do not appear to have any ${C}openoffice.org${M} packages installed. To install"

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.12.21
-####  Date: January 7 2011
+####  version: 8.13.0
+####  Date: February 10 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -168,6 +168,8 @@ LIB_2008_FIXES_STATIC='sm-lib-2008-fixes'
 LIB_2008_FIXES=''
 LIB_2009_FIXES_STATIC='sm-lib-2009-fixes'
 LIB_2009_FIXES=''
+LIB_2011_FIXES_STATIC='sm-lib-2011-fixes'
+LIB_2011_FIXES=''
 # script modules
 MOD_INXI='inxi'
 MOD_GFX='sgfxi'
@@ -176,13 +178,12 @@ MOD_VM='svmi'
 # full updater
 UPDATE_ALL="$SCRIPT_NAME $LIB_APT_TOOLS $LIB_CLEAN_UP $LIB_DISTRO_CONVERSION
 $LIB_DU_FIXES $LIB_GRAPHICS $LIB_KDE4_UPDATER $LIB_KERNEL $LIB_KERNEL_INSTALL $LIB_MISC_TWEAKS
-$LIB_PACKAGE_INSTALL $LIB_PACKAGE_REMOVAL $LIB_WARNING $LIB_2007_FIXES
-$LIB_2008_FIXES_STATIC ${LIB_2008_FIXES_STATIC}-t  $LIB_2009_FIXES_STATIC ${LIB_2009_FIXES_STATIC}-t $MOD_GFX $MOD_VM $MOD_INXI"
+$LIB_PACKAGE_INSTALL $LIB_PACKAGE_REMOVAL $LIB_WARNING $LIB_2009_FIXES_STATIC ${LIB_2009_FIXES_STATIC}-t $MOD_GFX $MOD_VM $MOD_INXI"
 # remove lists
 REMOVE_LIST_SG="$MOD_GFX* $VIDEO_DATA_FGLRX $VIDEO_DATA_NVIDIA sg-driver*"
 REMOVE_LIST_SM="$VERSION_INFO* $WARNING_STATUS* $WARNING_BODY* $ALERT_BODY* $CONFIGS_BODY* $HOLD_INSTALL* $LIB_APT_TOOLS* $LIB_CLEAN_UP* $LIB_DISTRO_CONVERSION* $LIB_DU_FIXES* $LIB_GRAPHICS* $LIB_KDE4_UPDATER* $LIB_KERNEL* $LIB_KERNEL_INSTALL* $LIB_MISC_TWEAKS*
 $LIB_PACKAGE_INSTALL* $LIB_PACKAGE_REMOVAL* $LIB_WARNING* $LIB_2007_FIXES*
-$LIB_2008_FIXES_STATIC* $LIB_2009_FIXES_STATIC* $SCRIPT_NAME* * $VIDEO_DATA_NVIDIA*"
+$LIB_2008_FIXES_STATIC* $LIB_2009_FIXES_STATIC* $LIB_2011_FIXES_STATIC* $SCRIPT_NAME* * $VIDEO_DATA_NVIDIA*"
 REMOVE_LIST_SV="$MOD_VM* "
 
 # boolean script import test values
@@ -203,6 +204,7 @@ B_SET_2006_FIXES='false'
 B_SET_2007_FIXES='false'
 B_SET_2008_FIXES='false'
 B_SET_2009_FIXES='false'
+B_SET_2011_FIXES='false'
 
 # boolean defaults for prefs, options, etc
 B_ADVANCED_KERNEL='false'
@@ -365,6 +367,8 @@ LOGUE='log_function_data ue $FUNCNAME'
 MAX_AGE=500 # due to 'fewer' script changes, no need to be as careful
 NO_PDIFFS=''
 NO_PDIFF_ARGS='-o Acquire::Pdiffs=false'
+OFFICE_AVAILABLE='' # ooo/libre
+OFFICE_INSTALLED='' # ooo/libre
 REMOTE_VERSION=''
 REMOTE_DATE=''
 SCRIPT_COLORS=1
@@ -893,6 +897,12 @@ run_script_import()
 			if [ "$B_SET_2009_FIXES" != 'true' ];then
 				loadIt='true'
 				B_SET_2009_FIXES='true'
+			fi
+			;;
+		$LIB_2011_FIXES)
+			if [ "$B_SET_2011_FIXES" != 'true' ];then
+				loadIt='true'
+				B_SET_2011_FIXES='true'
 			fi
 			;;
 		# the proper download urls for these are set in download_test_file case
@@ -1439,13 +1449,13 @@ set_distro_data()
 	local isWheezy=$( grep -Eis '^(wheezy|7\.)' <<< "$edvContent" )
 
 	# first tests sources
-	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|lenny|etch)' )
-	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(squeeze|testing)' )
+	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|squeeze|lenny|etch)' )
+	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(wheezy|testing)' )
 	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(sid|unstable)' )
 
 	# then test conf for default version
-	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny)"' <<< "$eaaContent" )
-	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|squeeze)"' <<< "$eaaContent" )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze)"' <<< "$eaaContent" )
+	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|wheezy)"' <<< "$eaaContent" )
 	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 	local useDebianKernel=''
 
@@ -1458,7 +1468,7 @@ set_distro_data()
 
 	# set system type. This test will never be perfect, but it's a good approximation
 	# if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
-	if [ -n "$isEtch" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
+	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 		if [ -n "$isEtch" ];then
 			SYSTEM_BASE='etch'
 		else
@@ -1472,7 +1482,8 @@ set_distro_data()
 		WARNING_STATUS='status_s'
 		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC-s"
 		LIB_2009_FIXES="$LIB_2009_FIXES_STATIC-s"
-	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isSqueeze" -o "$isTesting" -gt 0 ];then
+		LIB_2011_FIXES="$LIB_2011_FIXES_STATIC-s"
+	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isWheezy" -o "$isTesting" -gt 0 ];then
 		SYSTEM_BASE='testing'
 		WARNING_BODY='warning_message_t'
 		ALERT_BODY='alert_message_t'
@@ -1481,10 +1492,12 @@ set_distro_data()
 		WARNING_STATUS='status_t'
 		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC-t"
 		LIB_2009_FIXES="$LIB_2009_FIXES_STATIC-t"
+		LIB_2011_FIXES="$LIB_2011_FIXES_STATIC-t"
 	else
 		SYSTEM_BASE='sid'
 		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC"
 		LIB_2009_FIXES="$LIB_2009_FIXES_STATIC"
+		LIB_2011_FIXES="$LIB_2011_FIXES_STATIC"
 	fi
 
 	# now we're going to process as true default ELR, this will
@@ -3326,19 +3339,23 @@ install_dist_upgrade()
 	main_upgrade_engine "$1"
 }
 ########################################################################
-### run various post du user options
+### run various post upgrade user options
 ###---------------------------------------------------------------------
 
-# options for post du stuff, selection list
-post_du_options()
+# options for post upgrade stuff, selection list
+post_upgrade_options()
 {
 	eval $LOGMS
 	local repeat='' options='' opt='' cont='' qui='' advanced1='' advanced2=''
-	local  advanced1Option='' advanced2Option='' initX=''
+	local  advanced1Option='' advanced2Option='' initX='' 
 	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
 	local noXOptions=' continue-to-graphics start-desktop'
-
+	local officeString='LibreOffice'
 	local tempCount=$( echo $options | wc -w )
+	
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officeString='OpenOffice.org'
+	fi
 
 	if [ "$B_SHOW_KERNEL_INSTALL_OPTION" == 'true' ];then # this is always on I believe, except for livecd
 		tempCount=$(( $tempCount + 1 ))
@@ -3385,7 +3402,7 @@ post_du_options()
 # 	echo "    Has option to fix broken ${C}fontconfig${S} font cache issue if you need that."
 
 	echo "${C}1${S} - ${C}package-install${S} are options of packages to install."
-	echo "    Main categories - ${C}1:${S} office suites: openoffice.org, + language pack selections; gnu office"
+	echo "    Main categories - ${C}1:${S} office suites: $officeString, + language pack selections; gnu office"
 	echo "    ${C}2:${S} non-free: flash, msttcorefonts, opera, google earth; ${C}3:${S} Utilities: swiftfox, other good stuff"
 	echo "    ${C}4:${S} display-managers: Desktop/window managers; ${C}5:${S} servers: Samba NFS Apache2 (+Mysql,PHP5)"
 
@@ -3402,7 +3419,7 @@ post_du_options()
 	echo "    which gets rid of gtk filehandlers and other annoyances in Mozilla products;"
 	echo "    system config tweaks (in advanced tweaks): set: default-runlevels, apt-type; upgrade type, and more!"
 	echo "    A legacy tweaks section has older, deprecated tweaks like alsaconf and some cleanup stuff."
-	echo "    ${C}openoffice.org hold/install/update${S} feature. Lets you hold or remove hold easily."
+	echo "    ${C}$officeString hold/install/update${S} feature. Lets you hold or remove hold easily."
 
 	echo "${C}5${S} - ${C}virtual-machine-installer${S} Installs vbox (OSE or non-ose), vbox modules, sets up users."
 	echo "    Also has any-any script install, and basic vmware tools (new vmware is not installable, sorry)."
@@ -3481,11 +3498,11 @@ post_du_options()
 	done
 
 	if [ "$repeat" == 'true' ];then
-		post_du_options
+		post_upgrade_options
 	fi
 }
 ## DEBUGGER
-#script_debugger post_du_options '' 'EXTRA_OPTIONS="true"'
+#script_debugger post_upgrade_options '' 'EXTRA_OPTIONS="true"'
 
 ########################################################################
 ### graphics stuff: sm-lib-graphics
@@ -3909,6 +3926,7 @@ run_script_components()
 		B_SHOW_KERNEL_INSTALL_OPTION='true'
 	fi
 	test_xorg_version 'pre' # test for set xorg data
+	set_office_data
 	# an alert system for live warnings
 	# this also triggers the main du function whether or not it's true
 	if [ "$B_SKIP_WARNING" != 'true' -a "$B_SKIP_CONNECTIONS" != 'true' ];then
@@ -3920,10 +3938,10 @@ run_script_components()
 		fi
 	fi
 	test_xorg_version 'post' # this is used by graphics and tweaks
-
+	
 	# runs all post du options except graphic install
 	if [ "$B_SKIP_TWEAKS" != 'true' ];then
-		post_du_options
+		post_upgrade_options
 	fi
 
 	# check if user wants to install graphics drivers and start window manager

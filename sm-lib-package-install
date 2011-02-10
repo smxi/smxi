@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.3.16
-####  Date: January 2 2011
+####  version: 3.4.0
+####  Date: February 10 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -419,6 +419,11 @@ select_install_type()
 {
 	eval $LOGMS
 	local repeat='' options='' opt=''
+	local officeString='LibreOffice'
+	
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officeString='OpenOffice.org'
+	fi
 
 	print_lib_info $LIB_PACKAGE_INSTALL
 	echo $MLINE
@@ -429,8 +434,8 @@ select_install_type()
 		echo "${M}You are using the following install type: ${C}$SERVER_CLIENT"
 	fi
 	echo $LINE
-	echo "${C}1${S} - ${C}office${S} Features OpenOffice.org installer. Language pack selector."
-	echo "    Now also offers OpenOffice hold/install/update option as well."
+	echo "${C}1${S} - ${C}office${S} Features $officeString installer. Language pack selector."
+	echo "    Now also offers $officeString hold/install/update option as well."
 	echo
 	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, MS core fonts, Opera, Skype, Google Earth."
 	echo
@@ -499,16 +504,27 @@ office_installer()
 {
 	eval $LOGPS
 	local repeat='' options='' opt=''
+	local officeString='LibreOffice' officeOpt='libreoffice'
+	local installedOfficeString='LibreOffice' installedOfficeOpt='libreoffice'
+	
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officeString='OpenOffice.org'
+		officeOpt='openoffice.org'
+	fi
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		installedOfficeString='OpenOffice.org'
+		installedOfficeOpt='openoffice.org'
+	fi
 
 	echo $MLINE
 	echo "${M} Office Installer"
 	echo $MLINE
-	echo "${S}Currently only OpenOffice.org is here. More to come:"
+	echo "${S}Pick which free office suite you would like to install:"
 	echo $LINE
-	echo "${C}1${S} - ${C}openoffice.org${S} Installs all components of OOo, and also lets"
-	echo "    You choose your OpenOffice.org language packs and dictionaries, when available."
-	echo "${C}2${S} - ${C}openoffice-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to"
-	echo "    latest if ${C}openoffice.org${S} is already installed."
+	echo "${C}1${S} - ${C}$officeOpt${S} Installs all components of $officeString, and also lets"
+	echo "    You choose your $officeString language packs and dictionaries, when available."
+	echo "${C}2${S} - ${C}$installedOfficeOpt-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to"
+	echo "    latest if ${C}$installedOfficeString${S} is already installed."
 	echo
 	echo "${C}3${S} - ${C}koffice${S} Installs the main koffice components."
 	echo "${C}4${S} - ${C}kde-pim${S} Installs the kpim components. That's personal information"
@@ -522,18 +538,18 @@ office_installer()
 	echo -e $SLE
 	echo $LINE
 
-	options="openoffice.org openoffice-hold-install koffice kde-pim light-office back-to-install-menu"
+	options="$officeOpt $installedOfficeOpt-hold-install koffice kde-pim light-office back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
-			openoffice.org)
+			$officeOpt)
 				update_sources plain
-				install_openoffice
+				install_libre_open_office
 				repeat='true'
 				;;
-			openoffice-hold-install)
+			$installedOfficeOpt-hold-install)
 				run_script_import $LIB_MISC_TWEAKS
-				openoffice_hold_install
+				open_libre_office_hold_install
 				repeat='true'
 				;;
 			koffice)
@@ -1073,40 +1089,47 @@ assign_display_manager()
 ###---------------------------------------------------------------------
 ### package install stuff - office suites
 ###---------------------------------------------------------------------
-install_openoffice()
+install_libre_open_office()
 {
 	eval $LOGPS
 	# data is this order:
 	# note: no entry for en-us language pack since that's part of common
-	# oooLanguagePack:oooHyphenation:oooHelp:oooThesaurus:myspell:<Language Name>
-	local oooData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
+	# officeLanguagePack:officeHyphenation:officeHelp:officeThesaurusaurus:myspell:<Language Name>
+	local officeData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
 
-	local oooLanguages='' l='' ll='' language='' 
-	local oooLang='' oooHyph='' oooHelp='' oooThes='' oooDict='' oooDesk=''
+	local officeLanguages='' l='' ll='' language='' 
+	local officeLang='' officeHyph='' officeHelp='' officeThesaurus='' officeDictionary='' officeDesktop=''
 	local doptions='' dopt='' complete='' options=''  opt='' found='' skip=''
+	local officePrefix='libreoffice'
+	local officeString='LibreOffice'
 	
-	# ooo-gtk conflicts with this package
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officePrefix='openoffice.org'
+		officeString='OpenOffice.org'
+	fi
+	
+	# xxxoffice-gtk conflicts with this package
 	if [ -z "$( package_tester 'gtk-qt-engine' )" ];then
-		oooDesk='openoffice.org-gtk'
+		officeDesktop="$officePrefix-gtk"
 	fi
 
-	for l in $oooData
+	for l in $officeData
 	do
 		ll=$( echo $l | cut -d ':' -f 6 )
-		oooLanguages=$oooLanguages$ll' '
+		officeLanguages=$officeLanguages$ll' '
 	done
 
 	echo $MLINE
-	echo "${M}OpenOffice.org Installer"
+	echo "${M}$officeString Installer"
 	echo $MLINE
-	echo "${S}You can pick which language information to use with your OpenOffice install."
-	echo "Once you make your selection, all required Openoffice components will be installed."
+	echo "${S}You can pick which language information to use with your $officeString install."
+	echo "Once you make your selection, all required $officeString components will be installed."
 	echo
-	echo "When you select one of these your ${C}openoffice${S} install will use"
+	echo "When you select one of these your ${C}$officeString${S} install will use"
 	echo "any available language specific items for your chosen language, including"
 	echo "the language pack, help, thesaurus, and dictionaries."
-	if [ -n "$oooDesk" ];then
-		echo "Also installs the desktop integration package: $oooDesk"
+	if [ -n "$officeDesktop" ];then
+		echo "Also installs the desktop integration package: $officeDesktop"
 	fi
 	echo
 	echo "Select the number for ${C}no-change${S} if you want to return to main script."
@@ -1115,36 +1138,36 @@ install_openoffice()
 	echo -e $SLE
 	echo $LINE
 
-	options=$oooLanguages
+	options=$officeLanguages
 
 	select opt in $options
 	do
-		for language in $oooData
+		for language in $officeData
 		do
 			if [ "$opt" == "$( echo $language | cut -d ':' -f 6 )" ];then
 				found='true'
 				if [ "$language" == 'no-change' ];then
 					skip='true'
 				else
-					oooLang=$( echo $language | cut -d ':' -f 1 )
-					if [ "$oooLang" != '' ];then
-						oooLang='openoffice.org-l10n-'$oooLang
+					officeLang=$( echo $language | cut -d ':' -f 1 )
+					if [ "$officeLang" != '' ];then
+						officeLang="$officePrefix-l10n-$officeLang"
 					fi
-					oooHyph=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
-					if [ "$oooHyph" != '' ];then
-						oooHyph='openoffice.org-hyphenation-'$oooHyph
+					officeHyph=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
+					if [ "$officeHyph" != '' ];then
+						officeHyph="$officePrefix-hyphenation-$officeHyph"
 					fi
-					oooHelp=$( echo $language | cut -d ':' -f 3 )
-					if [ "$oooHelp" != '' ];then
-						oooHelp='openoffice.org-help-'$oooHelp
+					officeHelp=$( echo $language | cut -d ':' -f 3 )
+					if [ "$officeHelp" != '' ];then
+						officeHelp="$officePrefix-help-$officeHelp"
 					fi
-					oooThes=$( echo $language | cut -d ':' -f 4 )
-					if [ "$oooThes" != '' ];then
-						oooThes='openoffice.org-thesaurus-'$oooThes
+					officeThesaurus=$( echo $language | cut -d ':' -f 4 )
+					if [ "$officeThesaurus" != '' ];then
+						officeThesaurus="$officePrefix-thesaurus-$officeThesaurus"
 					fi
-					oooDict=$( echo $language | cut -d ':' -f 5 )
-					if [ "$oooDict" != '' ];then
-						oooDict='myspell-'$oooDict
+					officeDictionary=$( echo $language | cut -d ':' -f 5 )
+					if [ "$officeDictionary" != '' ];then
+						officeDictionary="myspell-$officeDictionary"
 					fi
 				fi
 				break
@@ -1158,56 +1181,73 @@ install_openoffice()
 	if [ "$found" == 'true' ];then
 # 		echo $LINE
 		if [ "$skip" != 'true' ];then
-# 			echo "${S}Please select your desktop manager. This will install the correct"
-# 			echo "OpenOffice.org desktop integration package for either kde or gnome."
-# 			echo "${C}1 - kde${S} Installs kde integration."
-# 			echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
-# 			echo "${C}3 - other${S} Does not install integration package."
-# 			echo $LINE
-# 			echo -e $SLE
-# 			echo $LINE
-# 
-# 			doptions='kde gnome other'
-# 
-# 			select dopt in $doptions
-# 			do
-# 				case $dopt in
-# 					kde)
-# 						oooDesk='openoffice.org-kde'
-# 						complete='true'
-# 						;;
-# 					gnome)
-# 						oooDesk='openoffice.org-gnome openoffice.org-gtk'
-# 						complete='true'
-# 						;;
-# 					other)
-# 						oooDesk=''
-# 						complete='true'
-# 						;;
-# 					*)
-# 						echo "${E}Invalid Selection${N}"
-# 						;;
-# 				esac
-# 				if [ "$complete" == 'true' ];then
-# 					break
-# 				fi
-# 			done
+			# officeDesktop=$( office_intgration_selector )
 
 			echo $LINE
-			echo "${S}Installing your selected language [${C}$opt${S}] components and openoffice.org.${N}"
-			package_installer "openoffice.org-calc openoffice.org-draw openoffice.org-impress openoffice.org-java-common openoffice.org-math openoffice.org-writer python-uno dictionaries-common $oooDesk $oooLang $oooHelp $oooThes $oooDict" 'install-user'
-			echo "${S}OpenOffice.org install is completed.${N}"
+			echo "${S}Installing your selected language [${C}$opt${S}] components and $officeString.${N}"
+			package_installer "$officePrefix-calc $officePrefix-draw $officePrefix-impress $officePrefix-java-common $officePrefix-math $officePrefix-writer python-uno dictionaries-common $officeDesktop $officeLang $officeHelp $officeThesaurus $officeDictionary" 'install-user'
+			echo "${S}$officeString install is completed.${N}"
 		else
-			echo "${S}Continuing on to main script without installing OpenOffice.org.${N}"
+			echo "${S}Continuing on to main script without installing $officeString.${N}"
 		fi
 		eval $LOGPE
 	else
 		eval $LOGPE
 		print_error opt
-		install_openoffice
+		install_libre_open_office
 	fi
 }
-#install_openoffice
+#install_libre_open_office
+
+office_intgration_selector()
+{
+	local opt='' options='' complete='' officeDesktop=''
+	local officePrefix='libreoffice'
+	local officeString='LibreOffice'
+	
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officePrefix='openoffice.org'
+		officeString='OpenOffice.org'
+	fi
+	
+	echo $LINE
+	echo "${S}Please select your desktop manager. This will install the correct"
+	echo "$officeString desktop integration package for either kde or gnome."
+	echo $LINE
+	echo "${C}1 - kde${S} Installs kde integration."
+	echo "${C}2 - gnome${S} Installs gnome and gtk integration. Might also work for xfce4."
+	echo "${C}3 - none${S} Does not install integration package."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+
+	options='kde gnome none'
+
+	select opt in $options
+	do
+		case $opt in
+			kde)
+				officeDesktop="$officePrefix-kde"
+				complete='true'
+				;;
+			gnome)
+				officeDesktop="$officePrefix-gnome $officePrefix-gtk"
+				complete='true'
+				;;
+			none)
+				officeDesktop=''
+				complete='true'
+				;;
+			*)
+				print_error opt
+				;;
+		esac
+		if [ "$complete" == 'true' ];then
+			break
+		fi
+	done
+	echo $officeDesktop
+}
 
 ###---------------------------------------------------------------------
 ### package install stuff -  non free
