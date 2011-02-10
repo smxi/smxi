@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.22.36
-####  Date: January 2 2011
+####  version: 1.22.37
+####  Date: February 9 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -524,7 +524,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'gnome-vfs'
 			advanced_broken_dependency_handler 'hplip'
 			advanced_broken_dependency_handler 'kde-workspace'
-			advanced_broken_dependency_handler 'ooo'
+			advanced_broken_dependency_handler 'libreoffice'
 			advanced_broken_dependency_handler 'samba'
 			advanced_broken_dependency_handler 'sun-java'
 			advanced_broken_dependency_handler 'transmission'
@@ -662,7 +662,7 @@ advanced_broken_dependency_handler()
 	local versionGroup=$1
 
 	# note: can't use wildcard searches because they might allow in packages with
-	# different group numbers, ie: openoffice.org-thesaurus etc
+	# different group numbers, ie: libreoffice-thesaurus etc
 	case $versionGroup in
 		amarok)
 			# note: removed these from sid:
@@ -739,13 +739,15 @@ advanced_broken_dependency_handler()
 			packageGroup='kde-workspace'
 			;;
 		# note: can't use full wildcard because of thesaurus using different numbering
-		ooo)
+		# python-uno is the only shared package name, so removing it for now
+		# (libreoffice-base|libreoffice-base-core|libreoffice-common|libreoffice-java-common|libreoffice-core|python-uno)
+		libreoffice)
 			packages="
-			$( package_tester '(openoffice.org-base|openoffice.org-base-core|openoffice.org-common|openoffice.org-java-common|openoffice.org-core|python-uno)' )
-			$(package_tester '(openoffice.org-calc|openoffice.org-impress|openoffice.org-gnome|openoffice.org-writer|openoffice.org-math)' )
-			$(package_tester '(openoffice.org-help-|openoffice.org-style-|openoffice.org-filter-)' 'wild-full')
+			$( package_tester '(libreoffice-base|libreoffice-base-core|libreoffice-common|libreoffice-java-common|libreoffice-core)' )
+			$(package_tester '(libreoffice-calc|libreoffice-impress|libreoffice-gnome|libreoffice-writer|libreoffice-math)' )
+			$(package_tester '(libreoffice-help-|libreoffice-style-|libreoffice-filter-)' 'wild-full')
 			"
-			packageGroup='OpenOffice.org'
+			packageGroup='LibreOffice'
 			;;
 		samba)
 			# |smbfs non-critical but chronic version mismatch, removed from list
@@ -818,7 +820,7 @@ advanced_broken_dependency_handler()
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases. sun java: 6-14-1
-				amarok|gnokii|kde-workspace|ooo|samba|sun-java)
+				amarok|gnokii|kde-workspace|libreoffice|samba|sun-java)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					tempOne=$( check_package_status "$package" | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
