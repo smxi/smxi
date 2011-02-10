@@ -1,0 +1,55 @@
+#!/bin/bash
+########################################################################
+####  Script Name: sm-lib-2011-fixes-t
+####  version: 1.0.0
+####  Date: February 10 2011
+
+####  Copyright (C) Harald Hope 2011
+####  This program is free software; you can redistribute it and/or modify it under
+####  the terms of the GNU General Public License as published by the Free Software
+####  Foundation; either version 2 of the License, or (at your option) any later version.
+
+####  This program is distributed in the hope that it will be useful, but WITHOUT
+####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+####  Get the full text of the GPL here:
+####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+####  Script Author: Harald Hope
+####  This is a library file for smxi and cannot be run independently
+
+####  Script URL: http://smxi.org/sm/sm-lib-2011-fixes-t
+####  Script SVN: http://code.google.com/p/smxi
+####  Script Home page: http://techpatterns.com/forums/about736.html
+########################################################################
+#### $DISTRO_VERSION numbers / distro name:
+#### 10, 11, 12, 13 - 2008-01/4
+#### 14, 15, 16, 17 - 2009-01/4
+#### 18, 19, 20, 21 - 2010-01/4
+#### 22, 23, 24, 25 - 2011-01/4
+#### 26, 27, 28, 29 - 2012-01/4
+########################################################################
+
+###---------------------------------------------------------------------
+### script executor
+###---------------------------------------------------------------------
+# args: $1 - pre / post
+run_2011_fixes()
+{
+	if [ "$1" == 'pre' ];then
+		if [ "$DISTRO_LEVEL" -lt 23 ];then
+			:
+		fi
+	elif [ "$1" == 'post' ];then
+		:
+	fi
+}
+
+###---------------------------------------------------------------------
+### specific du fixes
+###---------------------------------------------------------------------
+
+
+
+###**EOF**###
