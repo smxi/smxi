@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.1
+####  version: 1.23.2
 ####  Date: February 15 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -2002,10 +2002,11 @@ get_current_apt_kernel()
 set_office_data()
 {
 	if [ -z "$OFFICE_AVAILABLE" ];then
-		if [ -n "$( check_package_status 'openoffice.org-core' 'c' )" ];then
-			OFFICE_AVAILABLE='ooo'
-		elif [ -n "$( check_package_status 'libreoffice-core' 'c' )" ];then
+		# note, override ooo if libre is available
+		if [ -n "$( check_package_status 'libreoffice-core' 'c' )" ];then
 			OFFICE_AVAILABLE='libre'
+		elif [ -n "$( check_package_status 'openoffice.org-core' 'c' )" ];then
+			OFFICE_AVAILABLE='ooo'
 		fi
 		if [ -n "$( check_package_status 'openoffice.org-core' 'i' )" ];then
 			OFFICE_INSTALLED='ooo'
