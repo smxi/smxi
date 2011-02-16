@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.13.0
-####  Date: February 10 2011
+####  version: 8.13.1
+####  Date: February 15 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3356,6 +3356,9 @@ post_upgrade_options()
 	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
 		officeString='OpenOffice.org'
 	fi
+	if [ "$OFFICE_INSTALLED" == 'ooo' ] || [ -z "$OFFICE_INSTALLED" -a "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officeString2='OpenOffice.org'
+	fi
 
 	if [ "$B_SHOW_KERNEL_INSTALL_OPTION" == 'true' ];then # this is always on I believe, except for livecd
 		tempCount=$(( $tempCount + 1 ))
@@ -3419,7 +3422,7 @@ post_upgrade_options()
 	echo "    which gets rid of gtk filehandlers and other annoyances in Mozilla products;"
 	echo "    system config tweaks (in advanced tweaks): set: default-runlevels, apt-type; upgrade type, and more!"
 	echo "    A legacy tweaks section has older, deprecated tweaks like alsaconf and some cleanup stuff."
-	echo "    ${C}$officeString hold/install/update${S} feature. Lets you hold or remove hold easily."
+	echo "    ${C}$officeString2 hold/install/update${S} feature. Lets you hold or remove hold easily."
 
 	echo "${C}5${S} - ${C}virtual-machine-installer${S} Installs vbox (OSE or non-ose), vbox modules, sets up users."
 	echo "    Also has any-any script install, and basic vmware tools (new vmware is not installable, sorry)."

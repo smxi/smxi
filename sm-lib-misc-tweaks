@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.23.1
-####  Date: February 10 2011
+####  version: 1.24.0
+####  Date: February 15 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -36,7 +36,13 @@
 misc_hacks()
 {
 	eval $LOGMS
-	local repeat='' options='' opt=''
+	local repeat='' options='' opt='' 
+	local officeString='LibreOffice' officeOpt='libreoffice'
+	
+	if [ "$OFFICE_INSTALLED" == 'ooo' ] || [ -z "$OFFICE_INSTALLED" -a "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officeString='OpenOffice.org' 
+		officeOpt='openoffice'
+	fi
 
 	print_lib_info $LIB_MISC_TWEAKS
 	echo $MLINE
@@ -59,15 +65,15 @@ misc_hacks()
 	echo "${C}4${S} - ${C}legacy-tweaks${S} More or less obsolete tweaks for things no longer actively"
 	echo "    supported or required by modern Debian systems. But might be useful to older installs."
 
-	echo "${C}5${S} - ${C}openoffice-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to latest if"
-	echo "    ${C}openoffice.org${S} is already installed."
+	echo "${C}5${S} - ${C}$officeOpt-hold-install${S} Change dpkg install status to ${C}hold/install${S}, or update to latest if"
+	echo "    ${C}$officeString${S} is already installed."
 
 	echo
 	echo "${C}6${S} - Return to main menu."
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="mozilla-tweaks install-graphics advanced-tweaks legacy-tweaks openoffice-hold-install continue"
+	options="mozilla-tweaks install-graphics advanced-tweaks legacy-tweaks $officeOpt-hold-install continue"
 	select opt in $options
 	do
 		case $opt in
@@ -91,7 +97,7 @@ misc_hacks()
 				misc_legacy_tweaks
 				repeat='true'
 				;;
-			openoffice-hold-install)
+			$officeOpt-hold-install)
 				open_libre_office_hold_install
 				repeat='true'
 				;;
@@ -245,57 +251,71 @@ advanced_tweaks()
 open_libre_office_hold_install()
 {
 	eval $LOGPS
-	local opt='' repeat='' options=''
+	local opt='' repeat='' options='' 
+	local testOffice='libreoffice' officeString='LibreOffice' officeString2='LibreOffice'
+	local officeOpt='libre' officeOpt2='libre'
 	# possible extra holds ttf-freefont
-	local oooPackages="$( package_tester 'openoffice' 'wild-full' ) python-uno"
+	
+	if [ "$OFFICE_INSTALLED" == 'ooo' ] || [ -z "$OFFICE_INSTALLED" -a "$OFFICE_AVAILABLE" == 'ooo' ];then
+		testOffice='openoffice'
+		officeString2='OpenOffice.org'
+		officeOpt2='ooo'
+	fi
+	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
+		officeString='OpenOffice.org'
+		officeOpt='ooo'
+	fi
+	
+	local officePackages="$( package_tester "$testOffice" 'wild-full' ) python-uno"
 
 	echo $MLINE
-	echo "${M}OpenOffice.org hold/install/update"
+	echo "${M}$officeString2 hold/install/update"
 	echo $LINE
 
-	if [ -n "$oooPackages" ];then
-		if [ "$SYSTEM_BASE" != 'stable' ];then
-			echo "${M}NOTE: This will be updated for LibreOffice Support Later"
-			echo $LINE
-		fi
-		echo "${S}Tired of those huge ${C}100mB OpenOffice.org${S} updates every ${C}$DU_UPGRADE${S}? "
+	if [ -n "$officePackages" ];then
+		echo "${S}Tired of those huge ${C}100mB $officeString2${S} updates every ${C}$DU_UPGRADE${S}? "
 		echo
-		echo "${S}Stop or start those now at will. Change openoffice.org status hold/install  or update openoffice.org."
+		echo "${S}Stop or start those now at will. Change $officeString2 status hold/install  or update $officeString."
 		echo $LINE
-		echo "${C}1 - ooo-hold${S} Change package status for your ${C}openoffice.org${S} components to: ${C}hold"
-		echo "${C}2 - ooo-remove-hold${S} Remove any holds on your ${C}openoffice.org${S} components."
+		echo "${C}1 - $officeOpt2-hold${S} Change package status for your ${C}$officeString2${S} components to: ${C}hold"
+		echo "${C}2 - $officeOpt2-remove-hold${S} Remove any holds on your ${C}$officeString2${S} components."
 		echo "    Note: this does not install latest, just changes the package status to ${C}install"
-		echo "${C}3 - ooo-update${S} Updates openoffice to latest. Does not change package hold/install status."
+		echo "${C}3 - $officeOpt-update${S} Updates $officeString to latest. Does not change package hold/install status."
+		
+		if [ "$OFFICE_INSTALLED" == 'ooo' -a "$OFFICE_AVAILABLE" == 'libre' ];then
+			echo "${W}    ALERT!${M} Your ${C}$officeString2${M} will be replaced by ${C}$officeString${M} if you run this feature!${N}"
+		fi
 		echo
 		echo "${C}4 - return-main-menu${S} Return to main menu."
 
 		echo $LINE
 		echo -e $SLE
 		echo $LINE
-		options="ooo-hold ooo-remove-hold ooo-update return-main-menu"
+		options="$officeOpt2-hold $officeOpt2-remove-hold $officeOpt-update return-main-menu"
 
 		select opt in $options
 		do
 			case $opt in
-				ooo-hold)
-					echo "${S}Setting your ${C}openoffice${S} component status to: hold${N}"
-					HOLD_INSTALL_ITEMS="$oooPackages"
+				$officeOpt2-hold)
+					echo "${S}Setting your ${C}$officeString2${S} component status to: hold${N}"
+					HOLD_INSTALL_ITEMS="$officePackages"
 					set_hold_install 'hold-utility'
 					repeat='true'
 					;;
-				ooo-remove-hold)
-					echo "${S}Setting your ${C}openoffice${S} component status to: install${N}"
-					HOLD_INSTALL_ITEMS="$oooPackages"
+				$officeOpt2-remove-hold)
+					echo "${S}Setting your ${C}$officeString2${S} component status to: install${N}"
+					HOLD_INSTALL_ITEMS="$officePackages"
 					set_hold_install  'install'
 					repeat='true'
 					;;
-				ooo-update)
-					echo "${S}Installing latest versions of your ${C}openoffice${S} components...${N}"
-					package_installer "$oooPackages" 'install-user-ok'
+				$officeOpt-update)
+					echo "${S}Installing latest versions of your ${C}$officeString${S} components...${N}"
+					package_installer "$officePackages" 'install-user-ok'
+					set_office_data # reset globals here
 					repeat='true'
 					;;
 				return-main-menu)
-					echo "${S}Ok, going on, remember, you can always change your install status for your ${C}openoffice${S} components here.${N}"
+					echo "${S}Ok, going on, remember, you can always change your install status for your ${C}$officeString2${S} components here.${N}"
 					;;
 				*)
 					print_error opt
@@ -309,8 +329,8 @@ open_libre_office_hold_install()
 			open_libre_office_hold_install
 		fi
 	else
-		echo "${M}You do not appear to have any ${C}openoffice.org${M} packages installed. To install"
-		echo "openoffice.org, use the convenient ${C}smxi package install${M}, office suites, ooo option.${N}"
+		echo "${M}You do not appear to have any ${C}$officeString${M} packages installed. To install"
+		echo "$officeString, use the convenient ${C}smxi package install${M}, office suites, $officeOpt option.${N}"
 		print_hec
 		eval $LOGPE
 	fi
