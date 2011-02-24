@@ -762,6 +762,12 @@ advanced_broken_dependency_handler()
 			"
 			packageGroup='Sun Java'
 			;;
+		transmission)
+			packages="
+			$( package_tester '(transmission|transmission-common|transmission-cli|transmission-daemon|transmission-gtk)' )
+			"
+			packageGroup='Transmission'
+			;;
 		vegastrike)
 			packages="
 			$( package_tester 'vegastrike' 'wild-full' )
@@ -773,12 +779,6 @@ advanced_broken_dependency_handler()
 			$( package_tester 'wesnoth' 'wild-full' )
 			"
 			packageGroup='Wesnoth'
-			;;
-		transmission)
-			packages="
-			$( package_tester '(transmission|transmission-common|transmission-cli|transmission-daemon|transmission-gtk)' )
-			"
-			packageGroup='Transmission'
 			;;
 		xfce4)
 			# note: xfce4-settings|xfce4-panel are chronically version mismatched now, sigh...
