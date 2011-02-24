@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.3
+####  version: 3.4.4
 ####  Date: February 24 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -1110,7 +1110,7 @@ install_libre_open_office()
 	de:de:de:de:de-de:German
 	el:el:el:el:el-gr:Greek 
 	en-gb:en-gb:en-gb:en-gb:en-gb:English_british 
-	:en-us:en-us:en-us:en-us:English_american 
+	en-us:en-us:en-us:en-us:en-us:English_american 
 	en-za:en-za:en-za:en-za:en-za:English_southafrican 
 	es:es:es:es:es:Spanish 
 	et:et:et:et:et:Estonian 
