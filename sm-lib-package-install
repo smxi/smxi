@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.2
-####  Date: February 15 2011
+####  version: 3.4.3
+####  Date: February 24 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1092,20 +1092,93 @@ assign_display_manager()
 install_libre_open_office()
 {
 	eval $LOGPS
-	# data is this order:
+	# data is this order: Note that we can offer alternate packs for various packages/langs
 	# note: no entry for en-us language pack since that's part of common
-	# officeLanguagePack:officeHyphenation:officeHelp:officeThesaurusaurus:myspell:<Language Name>
-	local officeData='af:af::::Afrikaans ar:ar::::Arabic be-by:be-by::::Belarussian bg:bg:bg::bg:Bulgarian bn:bn::::Bengali br:br::::Breton bs:bs::::Bosnian ca:ca:::ca:Catalan cs:cs:cs:cs:cs-cz:Czech cy:cy::::Welsh da:da:da:::Danish de:de:de:de:de-de:German el:el:::el-gr:Greek en-gb:en-gb:en-gb:en-gb:en-gb:English_british :en-us:en-us:en-us:en-us:English_american en-za:en-za::::English_southafrican es:es:es::es:Spanish et:et:et::et:Estonian fa:fa::::Farsi fi:fi:::fi:Finnish fr:fr:fr::fr:French ga:ga:::ga:Gaelic gu-in:gu-in::::Gujarati he:he:::he:Hebrew hi-in:hi-in::::Hindi hr:hr:::hr:Croatian hu:hu:hu::hu:Hungarian it:it:it:it:it:Italian ja:ja:ja:::Japanese ka:ka::::Georgian km:km:km:::Khmer ko:ko:ko:::Korean ku:ku:::ku:Kurdish lo:lo::::Lao lt:lt:::lt:Lithuanian lv:lv:::lv:Latvian mk:mk:mk:::Macedonian ml-in:ml-in::::Malayalam nb:nb:::nb:Norwegian_bokmaal nn:nn:::nn:Norwegian_nynorsk ne:ne::::Nepalese nl:nl:nl::nl:Dutch nr:nr::::Ndebele pa-in:pa-in::::Punjabi pl:pl:pl:pl:pl:Polish pt:pt:::pt-pt:Portuguese pt-br:pt-br:pt-br::pt-br:Portuguese_brazilian ru:ru:ru::ru:Russian rw:rw::::Kinarwanda sk:sk:sk:sk:sk:Slovak sl:sl:sl::sl:Slovenian sr-cs:sr-cs::::Serbian st:st::::Southern_sotho sv:sv:sv::sv-se:Swedish ta-in:ta-in::::Tamil te-in:te-in::::Telugu tg:tg::::Tajik th:th:::th:Thai ti-er:ti-er::::Tigrinya tn:tn::::Tswana tr:tr::::Turkish ts:ts::::Tsonga vi:vi::::Vietnamese xh:xh::::Xhosa zh-cn:zh-cn:zh-cn:::Chinese_simplified zh-tw:zh-tw:zh-tw:::Chinese_traditional zu:zu::::Zulu no-change'
+	# LanguagePack:Hyphenation:Help:Thesaurus:myspell:<Language Name>
+	local officeData='
+	af:af:af:af:af:Afrikaans 
+	ar:ar:ar:ar:ar:Arabic 
+	be-by:be-by:be-by:be-by:be-by:Belarussian 
+	bg:bg:bg:bg:bg:Bulgarian 
+	bn:bn:bn:bn:bn:Bengali 
+	br:br:br:br:br:Breton 
+	bs:bs:bs:bs:bs:Bosnian 
+	ca:ca:ca:ca:ca:Catalan 
+	cs:cs:cs:cs:cs-cz:Czech 
+	cy:cy:cy:cy:cy:Welsh 
+	da:da:da:da:da:Danish 
+	de:de:de:de:de-de:German
+	el:el:el:el:el-gr:Greek 
+	en-gb:en-gb:en-gb:en-gb:en-gb:English_british 
+	:en-us:en-us:en-us:en-us:English_american 
+	en-za:en-za:en-za:en-za:en-za:English_southafrican 
+	es:es:es:es:es:Spanish 
+	et:et:et:et:et:Estonian 
+	fa:fa:fa:fa:fa:Farsi 
+	fi:fi:fi:fi:fi:Finnish 
+	fr:fr:fr:fr:fr:French 
+	ga:ga:ga:ga:ga:Gaelic 
+	gl:gl:gl:gl:gl:Galician
+	gu:gu:gu:gu:gu:Gujarati 
+	he:he:he:he:he:Hebrew 
+	hi:hi:hi:hi:hi:Hindi 
+	hr:hr:hr:hr:hr:Croatian 
+	hu:hu:hu:hu:hu:Hungarian 
+	it:it:it:it:it:Italian 
+	ja:ja:ja:ja:ja:Japanese 
+	ka:ka:ka:ka:ka:Georgian 
+	km:km:km:km:km:Khmer 
+	ko:ko:ko:ko:ko:Korean 
+	ku:ku:ku:ku:ku:Kurdish 
+	lo:lo:lo:lo:lo:Lao 
+	lt:lt:lt:lt:lt:Lithuanian 
+	lv:lv:lv:lv:lv:Latvian 
+	mk:mk:mk:mk:mk:Macedonian 
+	ml:ml:ml:ml:ml:Malayalam 
+	nb:nb:nb:nb:nb:Norwegian_bokmaal 
+	nn:nn:nn:nn:nn:Norwegian_nynorsk 
+	ne:ne:ne:ne:ne:Nepalese 
+	nl:nl:nl:nl:nl:Dutch 
+	nr:nr:nr:nr:nr:Ndebele 
+	pa-in:pa-in:pa-in:pa-in:pa-in:Punjabi 
+	pl:pl:pl:pl:pl:Polish 
+	pt:pt:pt:pt:pt-pt:Portuguese 
+	pt-br:pt-br:pt-br:pt-br:pt-br:Portuguese_brazilian 
+	ru:ru:ru:ru:ru:Russian 
+	rw:rw:rw:rw:rw:Kinarwanda 
+	sk:sk:sk:sk:sk:Slovak 
+	sl:sl:sl:sl:sl:Slovenian 
+	sr-cs:sr-cs:sr-cs:sr-cs:sr-cs:Serbian 
+	st:st:st:st:st:Southern_sotho 
+	sv:sv:sv:sv:sv-se:Swedish 
+	ta:ta:ta:ta:ta:Tamil 
+	te:te:te:te:te:Telugu 
+	tg:tg:tg:tg:tg:Tajik 
+	th:th:th:th:th:Thai 
+	ti-er:ti-er:ti-er:ti-er:ti-er:Tigrinya 
+	tn:tn:tn:tn:tn:Tswana 
+	tr:tr:tr:tr:tr:Turkish 
+	ts:ts:ts:ts:ts:Tsonga 
+	vi:vi:vi:vi:vi:Vietnamese 
+	xh:xh:xh:xh:xh:Xhosa 
+	zh-cn:zh-cn:zh-cn:zh-cn:zh-cn:Chinese_simplified 
+	zh-tw:zh-tw:zh-tw:zh-tw:zh-tw:Chinese_traditional 
+	zu:zu:zu:zu:zu:Zulu 
+	no-change'
 
-	local officeLanguages='' l='' ll='' language='' 
+	local officeLanguages='' l='' ll='' language='' lang=''
 	local officeLang='' officeHyph='' officeHelp='' officeThesaurus='' officeDictionary='' officeDesktop=''
 	local doptions='' dopt='' complete='' options=''  opt='' found='' skip=''
 	local officePrefix='libreoffice'
 	local officeString='LibreOffice'
+	local thesaurusPrefix='mythes'
+	local hyphenationPrefix='hyphen'
 	
 	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
 		officePrefix='openoffice.org'
 		officeString='OpenOffice.org'
+		thesaurusPrefix='openoffice.org-thesaurus'
+		hyphenationPrefix='openoffice.org-hyphenation'
 	fi
 	
 	# xxxoffice-gtk conflicts with this package
@@ -1149,25 +1222,56 @@ install_libre_open_office()
 				if [ "$language" == 'no-change' ];then
 					skip='true'
 				else
-					officeLang=$( echo $language | cut -d ':' -f 1 )
-					if [ "$officeLang" != '' ];then
-						officeLang="$officePrefix-l10n-$officeLang"
+					echo "${S}Checking for packages for ${C}$opt${S} now...${N}"
+					
+					lang=$( echo $language | cut -d ':' -f 1 )
+					officeLang="$officePrefix-l10n-$lang"
+					echo -n "  ${C}$officeLang${S} status: "
+					if [ "$lang" != '' -a -n "$( check_package_status "$officeLang" 'c' )" ];then
+						echo "${M}available${N}"
+					else
+						echo "${M}no installation candidate${N}"
+						officeLang=''
 					fi
-					officeHyph=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
-					if [ "$officeHyph" != '' ];then
-						officeHyph="$officePrefix-hyphenation-$officeHyph"
+					
+					lang=$( echo $language | cut -d ':' -f 2 ) # not used, causes errors
+					officeHyph="$hyphenationPrefix-$lang"
+					echo -n "  ${C}$officeHyph${S} status: "
+					if [ "$lang" != '' -a -n "$( check_package_status "$officeHyph" 'c' )" ];then
+						echo "${M}available${N}"
+					else
+						echo "${M}no installation candidate${N}"
+						officeHyph=''
 					fi
-					officeHelp=$( echo $language | cut -d ':' -f 3 )
-					if [ "$officeHelp" != '' ];then
-						officeHelp="$officePrefix-help-$officeHelp"
+					
+					lang=$( echo $language | cut -d ':' -f 3 )
+					officeHelp="$officePrefix-help-$lang"
+					echo -n "  ${C}$officeHelp${S} status: "
+					if [ "$lang" != '' -a -n "$( check_package_status "$officeHelp" 'c' )" ];then
+						echo "${M}available${N}"
+					else
+						echo "${M}no installation candidate${N}"
+						officeHelp=''
 					fi
-					officeThesaurus=$( echo $language | cut -d ':' -f 4 )
-					if [ "$officeThesaurus" != '' ];then
-						officeThesaurus="$officePrefix-thesaurus-$officeThesaurus"
+					
+					lang=$( echo $language | cut -d ':' -f 4 )
+					officeThesaurus="$thesaurusPrefix-$lang"
+					echo -n "  ${C}$officeThesaurus${S} status: "
+					if [ "$lang" != '' -a -n "$( check_package_status "$officeThesaurus" 'c' )" ];then
+						echo "${M}available${N}"
+					else
+						echo "${M}no installation candidate${N}"
+						officeThesaurus=''
 					fi
-					officeDictionary=$( echo $language | cut -d ':' -f 5 )
-					if [ "$officeDictionary" != '' ];then
-						officeDictionary="myspell-$officeDictionary"
+					
+					lang=$( echo $language | cut -d ':' -f 5 )
+					officeDictionary="myspell-$lang"
+					echo -n "  ${C}$officeDictionary${S} status: "
+					if [ "$lang" != '' -a -n "$( check_package_status "$officeDictionary" 'c' )" ];then
+						echo "${M}available${N}"
+					else
+						echo "${M}no installation candidate${N}"
+						officeDictionary=''
 					fi
 				fi
 				break
@@ -1185,7 +1289,7 @@ install_libre_open_office()
 
 			echo $LINE
 			echo "${S}Installing your selected language [${C}$opt${S}] components and $officeString.${N}"
-			package_installer "$officePrefix-calc $officePrefix-draw $officePrefix-impress $officePrefix-java-common $officePrefix-math $officePrefix-writer python-uno dictionaries-common $officeDesktop $officeLang $officeHelp $officeThesaurus $officeDictionary" 'install-user'
+			package_installer "$officePrefix-calc $officePrefix-draw $officePrefix-impress $officePrefix-java-common $officePrefix-math $officePrefix-writer python-uno dictionaries-common $officeDesktop $officeLang $officeHelp $officeThesaurus $officeDictionary $officeHyph" 'install-user'
 			set_office_data # reset globals here
 			echo "${S}$officeString install is completed.${N}"
 		else
