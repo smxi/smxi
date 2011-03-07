@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.13.3
+####  version: 8.13.4
 ####  Date: March 7 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
@@ -2879,11 +2879,11 @@ print_lib_info()
 			printIt='true'
 			;;
 		$LIB_KERNEL)
-			scriptText='KERNEL QUESTION'
+			scriptText='KERNEL OPTIONS'
 			printIt='true'
 			;;
 		$LIB_KERNEL_INSTALL)
-			scriptText='KERNEL INSTALL'
+			scriptText='ALTERNATE KERNEL INSTALL'
 			printIt='true'
 			;;
 		$LIB_MISC_TWEAKS)
