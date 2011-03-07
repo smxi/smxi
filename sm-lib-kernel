@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.84
+####  version: 2.6.0
 ####  Date: March 7 2011 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -43,7 +43,7 @@ TESTING_KERNEL_64=''
 check_kernel()
 {
 	eval $LOGMS
-	local opt='' options='continue advanced-kernel-install'
+	local opt='' options='continue alternate-kernel-install'
 	local advancedKernel='' kernelFile=''
 
 	local prefId='meta-package-selection'
@@ -154,9 +154,9 @@ check_debian_kernel_version()
 kernel_question()
 {
 	eval $LOGPS
-	local opt='' repeat='' kernelsNotEqual='' kernelsNotEqualOpt='' cont='' advanced=''
+	local opt='' repeat='' kernelsNotEqual='' kernelsNotEqualOpt='' 
 	local duText="Continue to $DU_UPGRADE" repeat='' removeModules='' installModules=''
-	local options=" install-kernel-modules remove-kernel-modules advanced-kernel-options"
+	local options=" alternate-kernel-install advanced-kernel-options kernel-remover continue"
 	local tempCount=$( echo $options | wc -w ) altKernelText1=''
 	# sets B_KERNEL_EQUAL_INSTALL
 	test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
@@ -172,23 +172,23 @@ kernel_question()
 	elif [ "$B_KERNEL_EQUAL_INSTALL" != 'true' ];then
 		tempCount=$(( $tempCount + 1 ))
 		kernelsNotEqualOpt='install-apt-kernel'
-		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1${S} - Installs latest ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
+		kernelsNotEqual='echo -e "${M}Your current kernel version is: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED\n$LINE\n${C}1 - install-apt-kernel${S} - Installs latest ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE${S}\n"'
 	else
 		kernelsNotEqual='echo -e "${M}Your current kernel: ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED${M}\nis the same as the latest kernel:  ${C}$CURRENT_APT_KERNEL$DEBIAN_KERNEL_CANDIDATE\n$MLINE"'
 	fi
-	advanced=$tempCount
-	removeModules=$(( $tempCount - 1 ))
-	installModules=$(( $tempCount - 2 ))
-	options="$kernelsNotEqualOpt $options continue"
-	tempCount=$( echo $options | wc -w )
-	cont=$tempCount
+	options="$kernelsNotEqualOpt $options"
+	tempCount=$( echo $options | wc -w ) altKernelText1=''
+	local contOption=$tempCount
+	local kmOption=$(( $tempCount - 1 ))
+	local akoOption=$(( $tempCount - 2 ))
+	local akiOption=$(( $tempCount - 3 ))
 
 	if [ "$1" == 'post-du' ];then
 		print_lib_info $LIB_KERNEL
 		echo $MLINE
 	fi
 	if [ "$B_APTOSID_SOURCES" == 'true' -o "$B_MEPIS_SOURCES" == 'true' -o "$B_LIQUORIX_SOURCES" == 'true' -o "$B_USE_DEBIAN_KERNEL" == 'true' ];then
-		altKernelOption='echo "    ${C}*${S} Any supported current apt kernel install(s) for your ${C}$DISTRO${S} system, with module installer automated."'
+		altKernelOption='echo "    ${S}You can also install alternate kernels from apt for your ${C}$DISTRO${S} system (or reinstall current kernel)."'
 	fi
 
 	echo "${S}If you are using wifi, you may need to reinstall your wifi drivers to the new kernel."
@@ -219,18 +219,18 @@ kernel_question()
 	fi
 	echo $MLINE
 	eval "$kernelsNotEqual"
-	echo "${C}$installModules${S} - Install kernel modules. Offers list of modules, install one by one (${M}if currently available in apt${S})."
-	echo "${C}$removeModules${S} - Remove installed kernel modules. Offers list of modules, remove one by one."
-	echo "${C}$advanced${S} - Advanced Kernel Install. The advanced options allow you do the following:"
-	echo "    ${C}*${S} Install archived kernels. Sometimes older kernels work and newer ones don't for some users."
+
+	echo "${C}$akiOption - alternate-kernel-install${S} - The alternate kernel options allow you install archived kernels."
+	echo "    Sometimes older kernels work and newer ones don't for some hardware issues."
 	eval "$altKernelOption"
-	echo "    ${C}*${S} ${C}kernel-remover${S} Remove unused kernels."
-	echo "    ${C}*${S} ${C}super-advanced-options${S} Remove/install kernel meta-packages; add liquorix sources; change default kernel."
+	echo "${C}$akoOption - advanced-kernel-options${S} Kernel metapackage options (add/remove kernel metapackages); "
+	echo "    Add ${C}liquorix${S} kernel sources; Update ${C}$SCRIPT_NAME${S} default kernel; Add/Remove kernel modules."
+	echo "${C}$kmOption - kernel-remover${S} Remove unused kernels."
 	echo
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
 	#echo "    which you want to install the modules, and if you installed that kernel with this script."
 	#echo
-	echo "${C}$cont${S} - $duText without installing a new kernel."
+	echo "${C}$contOption${S} - $duText without installing a new kernel."
 	echo $LINE
 	echo $SLE
 	echo $LINE
@@ -244,20 +244,20 @@ kernel_question()
 				print_lib_info $LIB_KERNEL_INSTALL
 				double_check_kernel 'apt' # installs system default apt kernel
 				;;
-			remove-kernel-modules)
-				remove_kernel_modules
+			kernel-remover)
+				run_script_import $LIB_CLEAN_UP
+				kernel_remover_main
 				repeat='true'
 				;;
-			install-kernel-modules)
-				run_script_import $LIB_KERNEL_INSTALL
-				kernel_module_installer
-				repeat='true'
-				;;
-			advanced-kernel-options)
+			alternate-kernel-install)
 				eval $LOGPE
 				run_script_import $LIB_KERNEL_INSTALL
 				#echo "${S}Running advanced options now${N}"
-				advanced_kernel_install
+				alternate_kernel_install
+				;;
+			advanced-kernel-options)
+				advanced_kernel_options
+				repeat='true'
 				;;
 			continue)
 				if [ "$1" == "nogo" ];then
@@ -291,8 +291,271 @@ kernel_question()
 # check_kernel
 
 ###---------------------------------------------------------------------
+### super advanced kernel utilities
+###---------------------------------------------------------------------
+
+advanced_kernel_options()
+{
+	eval $LOGPS
+	local opt='' options='' repeat=''
+	
+	echo $MLINE
+	echo "${M}Advanced Kernel Options"
+	echo $MLINE
+	echo "${S}Here are some advanced kernel options, that might be of use to some people."
+	echo "You should generally not need to do these more than one or two times."
+	echo $LINE
+
+	echo "${C}1 - kernel-metapackage-options${S} Kernel metapackage options: remove, install"
+	echo "     apt kernel/module metapackages. Also, install current apt kernel + modules."
+	echo "${C}2 - add-liquorix-sources${S} Add liquorix kernel sources (Debian Sid/Testing only)"
+	echo "${C}3 - change-$SCRIPT_NAME-default-kernel${S} Change the default kernel $SCRIPT_NAME uses to your preference."
+	echo "${C}4 - install-kernel-modules${S} - Install kernel modules. Offers list of modules, install one by one"
+	echo "    (${M}if the module is currently available in apt${S})."
+	echo "${C}5 - remove-kernel-modules${S} - Remove installed kernel modules. Offers list of modules"
+	echo "    which you can remove one by one."
+	echo "${C}6 - return-to-previous-menu${S} - Ok, all done, back to kernel main menu."
+	echo $LINE
+	echo -e $SLE
+	echo $LINE
+	options="kernel-metapackage-options add-liquorix-sources change-$SCRIPT_NAME-default-kernel install-kernel-modules remove-kernel-modules return-to-previous-menu"
+	select opt in $options
+	do
+		log_function_data "opt selected: $opt"
+		case $opt in
+			add-liquorix-sources)
+				add_liquorix_kernels
+				repeat='true'
+				;;
+			change-$SCRIPT_NAME-default-kernel)
+				run_script_import $LIB_MISC_TWEAKS
+				set_default_system_kernel
+				repeat='true'
+				;;
+			kernel-metapackage-options)
+				kernel_meta_package_handler standard
+				repeat='true'
+				;;
+			remove-kernel-modules)
+				remove_kernel_modules
+				repeat='true'
+				;;
+			install-kernel-modules)
+				run_script_import $LIB_KERNEL_INSTALL
+				kernel_module_installer
+				repeat='true'
+				;;
+			return-to-previous-menu)
+				repeat=''
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	eval $LOGPE
+	if [ "$repeat" == 'true' ];then
+		advanced_kernel_options
+	fi
+}
+
+add_liquorix_kernels()
+{
+	if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
+		update_sources 'liquorix'
+		authentication_handler 'liquorix' # add keyrings
+		set_distro_data # have to reset globals now
+	else
+		echo "${E}It is not safe to run these kernels on Debian Stable based distros."
+		echo "${S}If your system is running Sid or Testing base, please let me know.${N}"
+	fi
+}
+
+###---------------------------------------------------------------------
 ### kernel question utilities
 ###---------------------------------------------------------------------
+
+###---------------------------------------------------------------------
+### kernel meta package / apt install handling
+###---------------------------------------------------------------------
+
+# args: $1 prefs/standard
+kernel_meta_package_handler()
+{
+	eval $LOGPS
+
+	local metaDebianExists=$( package_tester 'linux-image-2.6-(686|486|amd64)' )
+	local metaLiquorixExists=$( package_tester 'linux-image-2.6-liquorix-(686|486|amd64)' )
+	local metaSiduxExists=$( package_tester 'linux-image-2.6-aptosid-(686|amd64)' )
+	local repeat='' kernelArch='686' startType='standard' userSelection=''
+	local linuxAptosidImage='' linuxAptosidHeaders=''
+	if [ -n "$1" ];then
+		startType=$1
+	fi
+	if [ "$BITS" == '64' ];then
+		kernelArch='amd64'
+	fi
+	
+	
+	local continueOption='continue-manual' kiAction='show'
+	local defaultAction='manual' kiState='on'
+	
+	# not using this one yet: install-kernel-metapackages-full
+	if [ -n "$B_APTOSID_SOURCES" ];then
+		linuxAptosidImage="linux-image-2.6-aptosid-$kernelArch"
+		linuxAptosidHeaders="linux-headers-2.6-aptosid-$kernelArch"
+	fi
+
+	if [ -n "$metaSiduxExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
+		continueOption='continue-automatic'
+		kiAction='skip'
+		defaultAction='automatic'
+		kiState='off'
+	fi
+
+	local opt='' options="remove-kernel-metapackages install-kernel-metapackages-custom-aptosid install-current-apt-kernel $continueOption"
+
+	echo $MLINE
+	echo "${M}Kernel Meta-Package Options${N}"
+	echo $MLINE
+	if [ "$1" == 'prefs' ];then
+		echo "${M}You will only see this message automatically one time prior to kernel install."
+		echo "If you are seeing it, it means you have ${C}kernel metapackages${M} installed."
+		echo $MLINE
+	fi
+
+	echo "${M}You have two main choices, with possible postive / negative outcomes. Pick the one"
+	echo "you prefer for your style."
+	echo $MLINE
+	echo "${C}Kernel metapackages:  ${M}Advantage:${S} Latest kernels and modules installed via ${C}$DU_UPGRADE"
+	echo "${M}Negatives:${S} ${C}1.${S} Some distros, like ${C}aptosid${S}, release kernels often, sometimes 1 or more a day."
+	echo "Usually you do not need new subversions of kernels, like ${C}2.6.26-2.slh.11${S} to ${C}2.6.26-2.slh.12${S}"
+	echo "${C}2.${S} Needing to reboot after the $DU_UPGRADE ${C}3.${S} Slow servers slowing $DU_UPGRADE"
+	echo "${C}4.${S} Possible unexpected kernel / hardware issues, kernel regressions, etc."
+	echo $LINE
+	echo "${C}Manual apt install of kernels: ${M}Advantage:${S} ${C}1.${S} Gives full control, lets you decide"
+	echo "when you want to install your new kernel, or if you want to install it."
+	echo "${C}2.${S} No change from prior system. ${M}Negatives:${S} You don't always have latest kernel."
+	echo $LINE
+	echo "${S}To change your selections here later, either start ${C}$SCRIPT_NAME${S} with ${C}-N${S} option, or"
+	echo "access this option page using ${C}kernel-install -> alternate-kernel-install${S}"
+	echo "using the ${C}post $DU_UPGRADE options${S} of ${C}$SCRIPT_NAME${S}"
+	echo
+	echo "Choices ${C}1${S} or ${C}3${S} convert your system to use user run kernel install (${C}manual${S})."
+	echo "Choice ${C}2${S} converts your system to use metapackages (${C}automatic${S})."
+	echo "The ${C}automatic${S} option turns off the pre $DU_UPGRADE kernel install section."
+	echo
+	echo "${C}4${S} leaves your system alone, and merely turns ${C}$kiState${S} the pre $DU_UPGRADE kernel install"
+	echo "question, and returns you to ${C}$SCRIPT_NAME${S} to do what you want."
+	echo
+	echo "${S}Confused? You can always try one way, then the other via this control panel, so don't worry!"
+	echo "${M}You current kernel is: ${C}$CURRENT_KERNEL"
+	echo $LINE
+	echo "${C}1 - remove-kernel-metapackages${S} Restore manual control of kernel install."
+	echo "${C}2 - install-kernel-metapackages-custom-aptosid${S} For automatic, no user control, install of"
+	echo "    new aptosid kernels and modules. (${M}must have aptosid apt sources installed${S})"
+	echo "${C}3 - install-current-apt-kernel${S} Install the current ${C}$DEFAULT_KERNEL${S} apt kernel: ${C}$CURRENT_APT_KERNEL"
+	echo "    ${S}Will also remove metapackages if they are installed automatically."
+	echo "${C}4 - $continueOption${S} Sets default ${C}$SCRIPT_NAME${S} to: ${C}$defaultAction${S} ($kiAction kernel install question)"
+	echo $LINE
+	echo $SLE
+	echo $LINE
+
+	select opt in $options
+	do
+		case $opt in
+			remove-kernel-metapackages)
+				set_metapackage_prefs
+				set_metapackage_selections 'manual'
+				remove_kernel_metapackages
+				repeat='true'
+				;;
+			install-kernel-metapackages-custom-aptosid)
+				if [ -n "$B_APTOSID_SOURCES" ];then
+					set_metapackage_prefs
+					set_metapackage_selections 'automatic'
+					package_installer "$linuxAptosidHeaders $linuxAptosidImage" 'install-user'
+					update_kernel_links $CURRENT_APT_KERNEL # must run prior to update_grub
+					update_grub
+					install_apt_kernel_modules 'meta-aptosid'
+					extra_module_installer $CURRENT_APT_KERNEL 'madwifi'
+					post_install_messages
+					reboot_now_question $CURRENT_APT_KERNEL
+				else
+					echo $MLINE
+					echo "${M}This feature is currently only available for systems with ${C}aptosid${M} sources present.${N}"
+					print_hec
+				fi
+				;;
+			install-current-apt-kernel)
+				set_metapackage_prefs
+				set_metapackage_selections 'manual'
+				if [ -n "$metaSiduxExists" -o -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
+					remove_kernel_metapackages
+				fi
+				double_check_kernel 'apt'
+				;;
+			continue-manual|continue-automatic)
+				set_metapackage_prefs
+				set_metapackage_selections $defaultAction
+				echo "${S}Ok, continuing on using ${C}$defaultAction${S} settings.${N}"
+				if [ "$defaultAction" == 'automatic' ];then
+					echo "${S}Remember, if you want to run this section prior to a ${C}$DU_UPGRADE${S},"
+					echo "just start ${C}$SCRIPT_NAME${S} like this: ${C}$SCRIPT_NAME -N"${N}
+					print_hec
+				fi
+				;;
+			*)
+				print_error opt
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	eval $LOGPE
+	if [ "$repeat" == 'true' ];then
+		kernel_meta_package_handler $1
+	fi
+}
+
+remove_kernel_metapackages()
+{
+	eval $LOGUS
+	local metaPackageList=$( package_tester '2.6-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
+
+	if [ -n "$metaPackageList" ];then
+		package_remover "$metaPackageList" 'purge -y'
+	else
+		echo $ELINE
+		echo "${E}There are no kernel meta packages installed, so none were removed.${N}"
+		print_hec
+	fi
+	eval $LOGUE
+}
+
+set_metapackage_prefs()
+{
+	eval $LOGUS
+	local prefId='kernel-metapackage-1'
+	local smPref=$( sm_pref_tester $prefId )
+
+	if [ "$smPref" -eq 0 ];then
+		set_sticky_prefs $prefId
+	fi
+	eval $LOGUE
+}
+
+# args: $1 manual/automatic
+set_metapackage_selections()
+{
+	eval $LOGUS
+	set_sm_pref_values 'meta-package-selection' "$1"
+	eval $LOGUE
+}
+
+
 
 # install kernel modules, either new ones, or ones you want to try
 kernel_module_installer()

@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.13.2
+####  version: 8.13.3
 ####  Date: March 7 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
@@ -1401,8 +1401,8 @@ metapackage_launcher()
 	# this extra handling is required to deal with future additions to sidux defaults
 	if [ -n "$metaExists" -o "$B_KERNEL_METAPACKAGE" == 'true' ];then
 		# run_script_import $LIB_KERNEL # need a few libs out of this one
-		run_script_import $LIB_KERNEL_INSTALL
-		print_lib_info $LIB_KERNEL_INSTALL
+		run_script_import $LIB_KERNEL
+		print_lib_info $LIB_KERNEL
 		kernel_meta_package_handler $1 # pass along prefs/standard
 	fi
 	eval $LOGPE
@@ -3350,7 +3350,7 @@ post_upgrade_options()
 	local  advanced1Option='' advanced2Option='' initX='' 
 	local options='package-install package-removal clean-up-stuff miscellaneous-tweaks virtual-machine-installer'
 	local noXOptions=' continue-to-graphics start-desktop'
-	local officeString='LibreOffice'
+	local officeString='LibreOffice' officeString2='LibreOffice'
 	local tempCount=$( echo $options | wc -w )
 	
 	if [ "$OFFICE_AVAILABLE" == 'ooo' ];then
@@ -3363,7 +3363,7 @@ post_upgrade_options()
 	if [ "$B_SHOW_KERNEL_INSTALL_OPTION" == 'true' ];then # this is always on I believe, except for livecd
 		tempCount=$(( $tempCount + 1 ))
 		advanced1Option='kernel-options'
-		advanced1='echo -e "${C}'$tempCount'${S} - ${C}kernel-options${S} Install kernels. Install latest, and older, kernels.\n\tIncludes metapackage options; kernel-module-remover;kernel-remover"'
+		advanced1='echo -e "${C}'$tempCount'${S} - ${C}kernel-options${S} Install kernels, either current, from apt, or older kernels.\n\tIncludes metapackage options; kernel remover; kernel module remover; advanced options"'
 		tempCount=''
 	fi
 	options="$options $advanced1Option"
