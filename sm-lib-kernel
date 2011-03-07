@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.0
+####  version: 2.6.1
 ####  Date: March 7 2011 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -109,7 +109,7 @@ check_kernel()
 				eval $LOGME
 			else
 				eval $LOGME
-				kernel_question
+				kernel_options
 			fi
 		else
 			echo "${M}Your current kernel:              ${C}$CURRENT_KERNEL$DEBIAN_KERNEL_INSTALLED${M}"
@@ -151,11 +151,11 @@ check_debian_kernel_version()
 }
 
 # args: $1 - post-du, started via post du options
-kernel_question()
+kernel_options()
 {
 	eval $LOGPS
 	local opt='' repeat='' kernelsNotEqual='' kernelsNotEqualOpt='' 
-	local duText="Continue to $DU_UPGRADE" repeat='' removeModules='' installModules=''
+	local duText="Continue to $DU_UPGRADE." repeat='' removeModules='' installModules=''
 	local options=" alternate-kernel-install advanced-kernel-options kernel-remover continue"
 	local tempCount=$( echo $options | wc -w ) altKernelText1=''
 	# sets B_KERNEL_EQUAL_INSTALL
@@ -164,7 +164,7 @@ kernel_question()
 	check_debian_kernel_version
 	# handle the switch of kernel install location text here
 	if [ "$B_KERNEL_POST_DU_INSTALL" == 'true' -o "$B_KERNEL_EQUAL_INSTALL" == 'true' -o "$1" == 'post-du' ];then
-		duText='Continue. Return to main menu'
+		duText='Continue. Return to main menu.'
 	fi
 
 	if [ "$DEFAULT_KERNEL" == 'no-kernel' ];then
@@ -230,7 +230,7 @@ kernel_question()
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
 	#echo "    which you want to install the modules, and if you installed that kernel with this script."
 	#echo
-	echo "${C}$contOption${S} - $duText without installing a new kernel."
+	echo "${C}$contOption${S} - $duText ."
 	echo $LINE
 	echo $SLE
 	echo $LINE
@@ -284,7 +284,7 @@ kernel_question()
 
 	if [ "$repeat" == 'true' ];then
 		eval $LOGPE
-		kernel_question $1
+		kernel_options $1
 	fi
 }
 # set_kernel_data

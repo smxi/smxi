@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.13.4
+####  version: 8.13.5
 ####  Date: March 7 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
@@ -1364,7 +1364,7 @@ launch_function_trigger()
 		tester)
 			prefId='smxi-kernel-mirror'
 			scriptOption='true'
-			scriptFunction='run_script_import $LIB_KERNEL;kernel_question'
+			scriptFunction='run_script_import $LIB_KERNEL;kernel_options'
 			setPrefs='false'
 			;;
 		*)
@@ -3475,7 +3475,7 @@ post_upgrade_options()
 			kernel-options)
 				run_script_import $LIB_KERNEL
 				get_current_apt_kernel $DEFAULT_KERNEL
-				kernel_question post-du
+				kernel_options post-du
 				repeat='true'
 				;;
 			run-$USER_SCRIPT)
