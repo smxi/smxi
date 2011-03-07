@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.11.12
-####  Date: October 19 2010
+####  version: 2.11.13
+####  Date: March 7 2011 2011
 
-####  Copyright (C) Harald Hope 2005-2010
+####  Copyright (C) Harald Hope 2005-2011
 ####  The following functions use core logic by Kel Modderman (kelmo)
 ####  extra_module_installer update_kernel_links install_the_apt_kernel_module
 ####  install_apt_kernel_modules
@@ -102,11 +102,12 @@ advanced_kernel_install()
 	optionList="$optionList $altKernelOption6"
 	altKernOpt6=$( wc -w <<< $optionList )
 
-	optionList="$optionList super-advanced-options back-to-main-menu"
+	optionList="$optionList kernel-remover super-advanced-options back-to-main-menu"
 
 	listCount=$( wc -w <<< $optionList )
 
 	local sakOption=$(( $listCount - 1 ))
+	local kmOption=$(( $listCount - 2 ))
 	local bmmOption=$listCount
 
 	print_lib_info $LIB_KERNEL_INSTALL
@@ -127,6 +128,7 @@ advanced_kernel_install()
 	print_alt_kernel_option "$altKernelOption6" "$altKernOpt6" "$altKernelText6"
 	echo "${C}$sakOption - super-advanced-options${M} New Section!${S} Kernel metapackage options (add/remove kernel metapackages); "
 	echo "     Add ${C}liquorix${S} kernel sources; Update ${C}$SCRIPT_NAME${S} default kernel."
+	echo "${C}$kmOption - kernel-remover${S} Remove unused kernels."
 	echo
 	echo "${C}$bmmOption - back-to-main-menu${S} Returns you to the main menu."
 	echo
@@ -150,7 +152,7 @@ advanced_kernel_install()
 					install-debian-kernel|install-debian-486-kernel|install-debian-686-kernel|install-liquorix-kernel|install-mepis-kernel|install-aptosid-kernel)
 						:
 						;;
-					super-advanced-options)
+					super-advanced-options|kernel-remover)
 						:
 						;;
 					*)
@@ -197,6 +199,11 @@ advanced_kernel_install()
 		install-aptosid-kernel)
 			get_current_apt_kernel aptosid
 			double_check_kernel apt-aptosid
+			;;
+		kernel-remover)
+			run_script_import $LIB_CLEAN_UP
+			kernel_remover_main
+			repeat='true'
 			;;
 		super-advanced-options)
 			super_advanced_kernel_options

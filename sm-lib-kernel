@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.5.83
-####  Date: January 27 2011
+####  version: 2.5.84
+####  Date: March 7 2011 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -224,6 +224,7 @@ kernel_question()
 	echo "${C}$advanced${S} - Advanced Kernel Install. The advanced options allow you do the following:"
 	echo "    ${C}*${S} Install archived kernels. Sometimes older kernels work and newer ones don't for some users."
 	eval "$altKernelOption"
+	echo "    ${C}*${S} ${C}kernel-remover${S} Remove unused kernels."
 	echo "    ${C}*${S} ${C}super-advanced-options${S} Remove/install kernel meta-packages; add liquorix sources; change default kernel."
 	echo
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
