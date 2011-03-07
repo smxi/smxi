@@ -230,7 +230,7 @@ kernel_options()
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
 	#echo "    which you want to install the modules, and if you installed that kernel with this script."
 	#echo
-	echo "${C}$contOption${S} - $duText ."
+	echo "${C}$contOption${S} - $duText"
 	echo $LINE
 	echo $SLE
 	echo $LINE
