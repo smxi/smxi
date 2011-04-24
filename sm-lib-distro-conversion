@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.4
-####  Date: October 17 2010
+####  version: 3.3.6
+####  Date: April 23 2011
 
-####  Copyright (C) Harald Hope 2005-2010
+####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -64,7 +64,7 @@ check_debian()
 		OFFER_LIQUORIX_KERNELS='true'
 	fi
 	if [ "$DISTRO" == 'antix' ];then
-		conversionOptions='antix-sid antix-sid-aptosid'
+		conversionOptions='antix-sid ' # removed: antix-sid-aptosid
 		altText1="${M}Here are your options for your Anti-X system:"
 		optionSet='antix'
 	elif [ "$DISTRO" == 'aptosid' ];then
@@ -91,7 +91,7 @@ check_debian()
 		antix)
 			echo "${C}2${S} - ${C}antix-sid${S} Adds sid sources to your apt repos, otherwise no change."
 			echo "    This lets you for example run Debian Sid with aptosid fixes and kernels."
-			echo "${C}3${S} - ${C}antix-sid-aptosid${S} Adds sid sources and aptosid sources, no aptosid package installs."
+# 			echo "${C}3${S} - ${C}antix-sid-aptosid${S} Adds sid sources and aptosid sources, no aptosid package installs."
 # 			echo "${C}4${S} - ${C}antix-aptosid-packages${S} Adds sid sources/aptosid sources, installs core aptosid packages."
 # 			echo "    ${M}NOTE: This will not ${C}convert${M} your system to aptosid, just install some packages."
 # 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
