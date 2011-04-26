@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.4
-####  Date: February 24 2011
+####  version: 3.4.5
+####  Date: April 26 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -163,7 +163,7 @@ package_group_installer()
 
 	# standard groups
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysv-rc-conf zip unzip"
+	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysstat sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm gpicview leafpad mc pcmanfm sudo vim xarchiver xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libcurses-ui-perl libexpect-perl  libterm-readkey-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
@@ -696,7 +696,7 @@ utilities_installer()
 	echo "${S}A small, and to increase, collection of useful utilities you might not know about:"
 	echo $LINE
 	echo "${C}1${S} - ${C}console-tools${S} Wide range of useful console tools: sysv-rc-conf."
-	echo "    (good runlevel editor), htop, zip/bzip/gzip/p7zip, irssi (nice irc client)."
+	echo "    (good runlevel editor), sysstat, htop, zip/bzip/gzip/p7zip, irssi (nice irc client)."
 
 	echo "${C}2${S} - ${C}console-browsers${S} Installs a full suite of console browsrs."
 	echo "    Check it out, these are small, fast, and really pleasant. See how the non-gui side."
