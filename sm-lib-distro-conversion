@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.6
-####  Date: April 23 2011
+####  version: 3.3.7
+####  Date: May 4 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -90,7 +90,7 @@ check_debian()
 	case "$optionSet" in
 		antix)
 			echo "${C}2${S} - ${C}antix-sid${S} Adds sid sources to your apt repos, otherwise no change."
-			echo "    This lets you for example run Debian Sid with aptosid fixes and kernels."
+			echo "    This lets you for example run Debian Sid kernels."
 # 			echo "${C}3${S} - ${C}antix-sid-aptosid${S} Adds sid sources and aptosid sources, no aptosid package installs."
 # 			echo "${C}4${S} - ${C}antix-aptosid-packages${S} Adds sid sources/aptosid sources, installs core aptosid packages."
 # 			echo "    ${M}NOTE: This will not ${C}convert${M} your system to aptosid, just install some packages."
