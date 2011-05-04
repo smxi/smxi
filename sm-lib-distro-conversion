@@ -48,21 +48,25 @@ check_debian()
 	local conversionOptions='aptosid-sources'
 	local quitNu='' mepisId='' 
 	local altText1="${S}Adding ${C}Aptosid sources${S} let you run Aptosid kernels."
+	
+	case $SYSTEM_BASE in
+		stable|squeeze|lenny|etch)
+			# have to use this for wild card mepis string, mepis-8.x...
+			case $DISTRO in
+				mepis*)
+					mepisId=' Mepis'
+					;;
+			esac
+			conversionOptions=''
+			#altText1="${M}It is not safe to run aptosid sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
+			altText1=""
+			optionSet='stable'
+			;;
+		*)
+			B_OFFER_LIQUORIX_KERNELS='true'
+			;;
+	esac
 
-	if [ "$SYSTEM_BASE" == 'stable' -o "$SYSTEM_BASE" == 'lenny' -o "$SYSTEM_BASE" == 'etch' ];then
-		# have to use this for wild card mepis string, mepis-8.x...
-		case $DISTRO in
-			mepis*)
-				mepisId=' Mepis'
-				;;
-		esac
-		conversionOptions=''
-		#altText1="${M}It is not safe to run aptosid sources with your${C}$mepisId Debian Stable${M} system\nso those options are not being offered to you, sorry."
-		altText1=""
-		optionSet='stable'
-	else
-		B_OFFER_LIQUORIX_KERNELS='true'
-	fi
 	if [ "$DISTRO" == 'antix' ];then
 		conversionOptions='antix-sid ' # removed: antix-sid-aptosid
 		altText1="${M}Here are your options for your Anti-X system:"
