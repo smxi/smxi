@@ -24,7 +24,7 @@
 ####  Script Home page: http://techpatterns.com/forums/about736.html
 ########################################################################
 
-OFFER_LIQUORIX_KERNELS='false'
+B_OFFER_LIQUORIX_KERNELS='false'
 
 # will remove flag files if user exits early
 # args: $1 - FUNCNAME
@@ -61,7 +61,7 @@ check_debian()
 		altText1=""
 		optionSet='stable'
 	else
-		OFFER_LIQUORIX_KERNELS='true'
+		B_OFFER_LIQUORIX_KERNELS='true'
 	fi
 	if [ "$DISTRO" == 'antix' ];then
 		conversionOptions='antix-sid ' # removed: antix-sid-aptosid
@@ -338,7 +338,7 @@ update_smxi_data()
 {
 	eval $LOGPS
 	run_script_import $LIB_MISC_TWEAKS
-	if [ "$OFFER_LIQUORIX_KERNELS" == 'true' ];then
+	if [ "$B_OFFER_LIQUORIX_KERNELS" == 'true' ];then
 		offer_liquorix_kernel
 	fi
 	# this tests for presence of aptitude, and only offers itself if user has aptitude installed
