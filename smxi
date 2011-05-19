@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.13.5
-####  Date: March 7 2011
+####  version: 8.13.6
+####  Date: March 18 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3407,7 +3407,7 @@ post_upgrade_options()
 	echo "${C}1${S} - ${C}package-install${S} are options of packages to install."
 	echo "    Main categories - ${C}1:${S} office suites: $officeString, + language pack selections; gnu office"
 	echo "    ${C}2:${S} non-free: flash, msttcorefonts, opera, google earth; ${C}3:${S} Utilities: swiftfox, other good stuff"
-	echo "    ${C}4:${S} display-managers: Desktop/window managers; ${C}5:${S} servers: Samba NFS Apache2 (+Mysql,PHP5)"
+	echo "    ${C}4:${S} desktop-environment installer; ${C}5:${S} servers: Samba NFS Apache2 (+Mysql,PHP5)"
 
 	echo "${C}2${S} - ${C}package-removal${S} is a way to totally remove packages/programs you don't want."
 	echo "    Check it out to see if any of the packages listed are things you don't need."

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.5
-####  Date: April 26 2011
+####  version: 3.4.6
+####  Date: May 18 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -441,7 +441,7 @@ select_install_type()
 	echo
 	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, rbxi, and more."
 	echo
-	echo "${C}4${S} - ${C}display-managers${S} Install Xorg, Gnome, Kde, Xfce, fVwm Crystal, Lxde."
+	echo "${C}4${S} - ${C}desktop-environment${S} Install Xorg, Gnome, Kde, Xfce, fVwm Crystal, Lxde."
 	echo
 	echo "${C}5${S} - ${C}servers${S} Install Samba, NFS, and Apache2 (+MySql,PHP) server components."
 	echo
@@ -455,7 +455,7 @@ select_install_type()
 	echo -e $SLE
 	echo $LINE
 
-	options="office non-free utilities display-manager servers select-system-type back-to-main-menu"
+	options="office non-free utilities desktop-environment servers select-system-type back-to-main-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -471,8 +471,8 @@ select_install_type()
 				utilities_installer
 				repeat='true'
 				;;
-			display-manager)
-				display_manager_installer
+			desktop-environment)
+				desktop_environment_installer
 				repeat='true'
 				;;
 			servers)
@@ -812,7 +812,7 @@ utilities_installer()
 	fi
 }
 
-display_manager_installer()
+desktop_environment_installer()
 {
 	eval $LOGPS
 	local displayManager=$( get_default_display_manager )
@@ -824,7 +824,7 @@ display_manager_installer()
 	fi
 
 	echo $MLINE
-	echo "${M} Desktop / Window Manager Installer"
+	echo "${M} Desktop Environment Installer"
 	echo $MLINE
 	echo "${S}Get started if you're building this from nothing at all, or just add some extras."
 	echo "${M}Recommendation:${S} if you are starting from no desktop installed, use the ${C}full${S} option."
@@ -988,7 +988,7 @@ display_manager_installer()
 	done
 	eval $LOGPE
 	if [ "$repeat" == 'true' ];then
-		display_manager_installer
+		desktop_environment_installer
 	fi
 }
 
