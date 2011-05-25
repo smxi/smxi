@@ -322,10 +322,10 @@ if [ "$LOGIN_PID" == '' ];then
 fi
 LOGIN_PID=$( awk '{print $1}' <<< $LOGIN_PID | grep -Eo "^[0-9]+$" )
 
-# xorg stuff
-X_VERSION=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1)\.[1-6]' )
+# xorg stuff, this isn't used at the moment
+X_VERSION=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1|2)\.[0-9]+' )
 if [ -z "$X_VERSION" ];then
-	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1)\.[1-6]' )
+	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1|2)\.[0-9]+' )
 fi
 X_VERSIONS_PRE=''
 X_VERSIONS_POST=''
