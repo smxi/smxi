@@ -546,7 +546,7 @@ kernel_meta_package_handler()
 remove_kernel_metapackages()
 {
 	eval $LOGUS
-	local metaPackageList=$( package_tester '(2\.6|[3-9])-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
+	local metaPackageList=$( package_tester '-(2\.6|[3-9])-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
 
 	if [ -n "$metaPackageList" ];then
 		package_remover "$metaPackageList" 'purge -y'
