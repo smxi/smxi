@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.6
+####  version: 2.6.7
 ####  Date: May 31 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -678,7 +678,7 @@ remove_kernel_modules()
 	installedModules="$moduleStoreTemp continue"
 
 	local moduleCount="$(( $( wc -w <<< $installedModules ) - 1 ))"
-	local opt='' options='' module='' skip='' found=''
+	local opt='' options='' module='' skip='' found='' modules=''
 	local options=$installedModules
 	local contCount="$( wc -w <<< $options )"
 
@@ -720,7 +720,8 @@ remove_kernel_modules()
 		else
 			#echo "${S}Removing ${C}$module${S} now....${N}"
 			# we're doing a wildcard remover here so we can dump all the modules
-			package_remover "$module*" 'purge -y'
+			modules="$( package_tester "$module" 'wild-full' )"
+			package_remover "$modules" 'purge -y'
 			remove_kernel_modules
 		fi
 	else
