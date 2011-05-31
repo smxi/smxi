@@ -1941,14 +1941,14 @@ get_current_apt_kernel()
 		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= tempKernels=$( apt-cache show linux-image-2.6$kernelStringExtra-$platform | grep -i '^Depends: ' | cut -d ' ' -f 2 | grep "$platform$" | cut -d '-' -f 3-7 | grep -Ev "^(2\.6|[3-9])$kernelStringExtra-$platform" )
 		
 		 # this is hackish but should work for several years
-		CURRENT_APT_KERN_BASE=$( check_package_status "linux-4$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^4' )
+		CURRENT_APT_KERN_BASE=$( check_package_status "linux-image-4$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^4' )
 		if [ -z "$CURRENT_APT_KERN_BASE" ];then
-			CURRENT_APT_KERN_BASE=$( check_package_status "linux-3$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^3' )
+			CURRENT_APT_KERN_BASE=$( check_package_status "linux-image-3$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^3' )
 		fi
 		if [ -z "$CURRENT_APT_KERN_BASE" ];then
-			CURRENT_APT_KERN_BASE=$( check_package_status "linux-2.6$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^2\.6' )
+			CURRENT_APT_KERN_BASE=$( check_package_status "linux-image-2.6$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^2\.6' )
 		fi
-		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra\nCurrent Apt Kernel Base: $CURRENT_APT_KERN_BASE"
+		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra\nCURRENT_APT_KERN_BASE: $CURRENT_APT_KERN_BASE"
 
 		for kernel1 in $tempKernels
 		do
