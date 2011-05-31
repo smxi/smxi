@@ -2,10 +2,10 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.7
-####  Date: September 29 2010
+####  version: 2.3.8
+####  Date: May 31 2011
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2010
+####  Copyright (C) Harald Hope 2007-2011
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
@@ -150,7 +150,7 @@ get_options()
 -e Use exp.main data (aptosid only)
 -f Use future data (liquorix only)
 -g Use alternate GCC values. Syntax: -g [3-4].[0-9]
--k Kernel to download. Requires -k <2.6.26-8.lqx.2> type syntax
+-k Kernel to download. Requires -k <3.12-4.lqx.2|2.6.26-8.lqx.2> type syntax
    NOTE: -k <kernel> is required to run dsl always
 -p Use past data (liquorix only)
 -r Redo zip without downloading again.
@@ -187,9 +187,9 @@ set_values()
 	case $KERNEL_TYPE in
 		aptosid)
 			repoPre="http://aptosid.com/debian/pool/${POOL_TYPE}/l/"
-			repoMain='linux-aptosid-2.6/'
-			repoModules='linux-modules-aptosid-main-2.6/'
-			repoExtra='linux-kbuild-2.6/'
+			repoMain='linux-aptosid/'
+			repoModules='linux-modules-aptosid-main/'
+			repoExtra='linux-kbuild/'
 			;;
 		liquorix)
 			repoPre="http://liquorix.net/debian/pool/${POOL_TYPE}/l/"
@@ -404,7 +404,11 @@ move_files_to_directories()
 
 	echo "Transferring files to directories..."
 	mv -f *2.6-${kernelType}*i386.deb 32-meta
+	mv -f linux-image-${kernelType}*i386.deb 32-meta
+	mv -f linux-headers-${kernelType}*i386.deb 32-meta
 	mv -f *2.6-${kernelType}*amd64.deb 64-meta
+	mv -f linux-image-${kernelType}*amd64.deb 64-meta
+	mv -f linux-headers-${kernelType}*amd64.deb 64-meta
 	cp -f $gzDir*${KERNEL_MAIN}*.gz 32
 	cp -f $gzDir*$KERNEL_MAIN*.gz 64
 	cp -f $gzDir*${KERNEL_MAIN}*.bz2 32
