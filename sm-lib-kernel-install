@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.12.2
-####  Date: May 30 2011 2011
+####  version: 2.12.3
+####  Date: May 31 2011 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  The following functions use core logic by Kel Modderman (kelmo)
@@ -464,7 +464,8 @@ install_apt_kernel_modules()
 	if [ "$BITS" == '64' ];then
 		kernelArch='amd64'
 	fi
-
+	# note, need to wait for liquorix to switch, debian will require special handling
+	# because of 2.6 in squeeze and older
 	case $1 in
 		standard)
 			moduleType=$2
@@ -474,7 +475,7 @@ install_apt_kernel_modules()
 			extraModuleText=' meta package'
 			;;
 		meta-aptosid)
-			moduleType="$CURRENT_APT_KERN_BASE-aptosid-$kernelArch"
+			moduleType="aptosid-$kernelArch"
 			extraModuleText=' meta package'
 			;;
 		meta-debian)
