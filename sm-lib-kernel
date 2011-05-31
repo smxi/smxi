@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.5
+####  version: 2.6.6
 ####  Date: May 31 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -412,9 +412,9 @@ kernel_meta_package_handler()
 {
 	eval $LOGPS
 
-	local metaDebianExists=$( package_tester 'linux-image-(2\.6|[3-9])-(686|486|amd64)' )
-	local metaLiquorixExists=$( package_tester 'linux-image-(2\.6|[3-9])-liquorix-(686|486|amd64)' )
-	local metaAptosidExists=$( package_tester 'linux-image-(2\.6|[3-9])-aptosid-(686|amd64)' )
+	local metaDebianExists=$( package_tester 'linux-image-(2\.6-|)(686|486|amd64)' )
+	local metaLiquorixExists=$( package_tester 'linux-image-(2\.6-|)liquorix-(686|486|amd64)' )
+	local metaAptosidExists=$( package_tester 'linux-image-(2\.6-|)aptosid-(686|amd64)' )
 	local repeat='' kernelArch='686' startType='standard' userSelection=''
 	local linuxAptosidImage='' linuxAptosidHeaders=''
 	if [ -n "$1" ];then
@@ -430,8 +430,8 @@ kernel_meta_package_handler()
 	
 	# not using this one yet: install-kernel-metapackages-full
 	if [ -n "$B_APTOSID_SOURCES" ];then
-		linuxAptosidImage="linux-image-$CURRENT_APT_KERN_BASE-aptosid-$kernelArch"
-		linuxAptosidHeaders="linux-headers-$CURRENT_APT_KERN_BASE-aptosid-$kernelArch"
+		linuxAptosidImage="linux-image-aptosid-$kernelArch"
+		linuxAptosidHeaders="linux-headers-aptosid-$kernelArch"
 	fi
 
 	if [ -n "$metaAptosidExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
@@ -549,7 +549,7 @@ kernel_meta_package_handler()
 remove_kernel_metapackages()
 {
 	eval $LOGUS
-	local metaPackageList=$( package_tester '-(2\.6|[3-9])-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
+	local metaPackageList=$( package_tester '(linux-image|linux-headers|modules)-(2\.6-|)(aptosid-|liquorix-|sidux-|)(686|486|amd64)' 'wild-full' )
 
 	if [ -n "$metaPackageList" ];then
 		package_remover "$metaPackageList" 'purge -y'
@@ -596,7 +596,7 @@ kernel_module_installer()
 	local options="$availableModules continue"
 	local contCount=$( wc -w <<< $options )
 	local moduleCount=$(( $contCount - 1 ))
-	local isMeta=$( package_tester "linux-image-(2\.6|[3-9])-(aptosid-|liquorix-|)(486|686|amd64)" '' )
+	local isMeta=$( package_tester "linux-image-(2\.6-|)(aptosid-|liquorix-|)(486|686|amd64)" '' )
 
 	if [ -n "$isMeta" ];then
 		metaText='echo "Since you are using kernel metapackages, the script will install the module metapackage."'
