@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.8
-####  Date: May 30 2011
+####  version: 1.4.9
+####  Date: May 31 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 
@@ -455,9 +455,9 @@ post_du_tasks()
 		fi
 
 		# load the 2009 fixes
-		if [ "$DISTRO_LEVEL" -lt 18 ];then
-			run_2009_fixes 'post'
-		fi
+# 		if [ "$DISTRO_LEVEL" -lt 18 ];then
+# 			run_2009_fixes 'post'
+# 		fi
 		if [ "$DISTRO_LEVEL" -lt 30 ];then
 		run_script_import $LIB_2011_FIXES
 		run_2011_fixes 'post'
