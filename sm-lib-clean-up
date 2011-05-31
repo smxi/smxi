@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-clean-up
-####  version: 2.10.12
-####  Date: December 2 2010
+####  version: 2.10.13
+####  Date: May 30 2011
 
-####  Copyright (C) Harald Hope 2005-2010
+####  Copyright (C) Harald Hope 2005-2011
 ####  The following functions use core logic by Joaquim Boura (x-un-i):
 ####  msg_on msg_off list_modules remove_the_kernel
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -541,7 +541,7 @@ remove_the_directory()
 	# quick hack to handle legacy kernel syntax in grub, changing back to old syntax here
 	local grubTester=$( echo $2 | sed -e 's/\.slh\./-slh.*-/' | sed -r 's/(-(aptosid|sidux)-(686|amd64))//' )
 	local kernelInGrub=$( grep $2 $GRUB_PATH )
-	local cleanedKernelInGrub=$( egrep $grubTester $GRUB_PATH )
+	local cleanedKernelInGrub=$( grep -E $grubTester $GRUB_PATH )
 
 	log_function_data "Remove the kernel install directory $1/$2\nkernelInGrub: $kernelInGrub\ncleanedKernelInGrub: $cleanedKernelInGrub"
 

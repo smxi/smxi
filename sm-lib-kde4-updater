@@ -106,7 +106,7 @@ kde3_log_and_removal()
 	fi
 	log_function_data "kde installed dpkg list (all):\n$dpkgKdePackagesAll"
 	# now we don't need the linebreaks anymore after this cleaning
-	dpkgCleanKdePackages=$( egrep -v '('$noUseWildcard')' <<< "$dpkgKdePackagesAll" )
+	dpkgCleanKdePackages=$( grep -Ev '('$noUseWildcard')' <<< "$dpkgKdePackagesAll" )
 	log_function_data "kde installed dpkg list (cleaned):\n$dpkgCleanKdePackages"
 	
 	echo "${S}Calculating and logging KDE data of packages to be removed (can take a while)...${N}"
@@ -286,7 +286,7 @@ post_kde4_install_fixes()
 print_kde4_message()
 {
 	eval $LOGUS
-	local rootHomeData="$( df -h -T | egrep '(/|/home)$'  | S=${S} C=${C} awk '{print $7, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $2, ENVIRON["S"]"Size:"ENVIRON["C"], $3, ENVIRON["S"]"Used:"ENVIRON["C"], $4, ENVIRON["S"]"("ENVIRON["C"], $6, ENVIRON["S"]")", "Free:"ENVIRON["C"], $5}' )"
+	local rootHomeData="$( df -h -T | grep -E  '(/|/home)$'  | S=${S} C=${C} awk '{print $7, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $2, ENVIRON["S"]"Size:"ENVIRON["C"], $3, ENVIRON["S"]"Used:"ENVIRON["C"], $4, ENVIRON["S"]"("ENVIRON["C"], $6, ENVIRON["S"]")", "Free:"ENVIRON["C"], $5}' )"
 	
 	echo $LINE
 	echo "${S}Please note: the first time each user logs-in to their new ${C}KDE 4${S} desktop,"

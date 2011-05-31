@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.3
-####  Date: February 15 2011
+####  version: 1.23.4
+####  Date: May 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -128,7 +128,7 @@ package_tester_aptitude()
 
 	#note: only if aptitude has been used to set hold or unhold on a package will it have a
 	# state of 1 or 2
-	packageState=$( grep ": $packageName$" -A 2 $aptitudeStates | grep -i '^State:' | egrep -o "$packageHoldInstall" )
+	packageState=$( grep ": $packageName$" -A 2 $aptitudeStates | grep -i '^State:' | grep -Eo "$packageHoldInstall" )
 
 	if [ -n "$packageState" ];then
 		echo $packageState
@@ -339,7 +339,7 @@ package_remover()
 			packageExists=$( package_tester $item )
 			# this is for a single case: eg: some-module*, only wild card ending
 			# we're only using this case when packages are already tested for by caller function
-			packageIsWild=$( egrep ".*\*" <<< $item )
+			packageIsWild=$( grep -E ".*\*" <<< $item )
 			if [ -n "$packageExists" -o -n "$packageIsWild" ];then
 				removeError=0 # reset to no error
 				echo
@@ -606,7 +606,7 @@ broken_dependency_handler()
 	for packageGroup in $CHECK_HOLD_PACKAGES
 	do
 		echo -n '.'
-		# note, we're ignoring debian subversion data for  now, like 2.6.2-2
+		# note, we're ignoring debian subversion data for  now, like 2.8.2-2
 		package1=$( echo $packageGroup | cut -d ':' -f1 )
 		package2=$( echo $packageGroup | cut -d ':' -f2 )
 		# I'm not using (ii|hi) test anymore, to avoid breaking user set holds
@@ -1130,7 +1130,7 @@ update_to_nonfree_sources()
 	for i in $EAS $EASDL
 	do
 		if [ -f "$i" ];then
-			counter=$( egrep -c '^[[:space:]]*deb.*(mirrors\.kernel\.org|debian\.org|deb-main|debian-main|:9999).*(contrib|non-free)' $i )
+			counter=$( grep -Ec '^[[:space:]]*deb.*(mirrors\.kernel\.org|debian\.org|deb-main|debian-main|:9999).*(contrib|non-free)' $i )
 			isFree=$(( $counter + $isFree ))
 		fi
 	done
@@ -1292,7 +1292,7 @@ create_apt_source_item()
 	local grepSearch=$1 sourceFile=$2 sourcesData=$3 sourcePresent=''
 	local searchIdentifier=$4
 
-	sourcePresent=$( egrep -ils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
+	sourcePresent=$( grep -Eils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
 	log_function_data "sourcePresent: $sourcePresent"
 	echo $LINE
 	echo "${S}Checking if source file for ${C}$searchIdentifier${S} is present...${N}"
@@ -1331,7 +1331,7 @@ check_add_remove_sources()
 	local grepSearch=$1
 	local sourceFile="$EAS.d/$1.khsdgkd.list"
 	local sourceData=''
-	local sourcePresent=$( egrep -ils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
+	local sourcePresent=$( grep -Eils "^[[:space:]]*deb[[:space:]].*$grepSearch" $EAS $EAS.d/*.list )
 
 	case $1 in
 		aptosid)
@@ -1466,7 +1466,7 @@ force_kernel_mirror_change()
 	# core-eu-4:http://ftp.spline.de/pub/sidux/debian/
 	local prefId='smxi-kernel-borked-2'
 	local smPref=$( sm_pref_tester $prefId )
-	#local isBorked=$( echo $( get_set_mirror 'get' 'mirrors' ) | egrep '(http://ftp.spline.de/pub/sidux/debian/)' http://ftp.spline.de/pub/sidux/debian/ )
+	#local isBorked=$( echo $( get_set_mirror 'get' 'mirrors' ) | grep -E '(http://ftp.spline.de/pub/sidux/debian/)' http://ftp.spline.de/pub/sidux/debian/ )
 	local borkedMirror='ftp://ftp.sunsite.utk.edu/pub/linux/Sidux/debian/'
 	# this method is tighter, and will let me also just replace the stuff if required
 	# at some other point. This gets all relevant files to update for sed
@@ -1674,7 +1674,7 @@ get_sidux_mirrors()
 		# some cases where the bad repo name is contained in the good repo name so that
 		# requires a test for ending it with / or no / and space
 		# echo mirrorTemp: $mirrorTemp
-		mirrorFiles="$( egrep -ls "^[[:space:]]*(deb|deb-src)[[:space:]]*$mirrorTemp[/]*[[:space:]]" $EAS $EAS.d/*.list )"
+		mirrorFiles="$( grep -Els "^[[:space:]]*(deb|deb-src)[[:space:]]*$mirrorTemp[/]*[[:space:]]" $EAS $EAS.d/*.list )"
 
 		if [ -n "$mirrorFiles" ];then
 			# case one we return a list of all found mirrors
@@ -1684,7 +1684,7 @@ get_sidux_mirrors()
 					;;
 				# here we return only current non sidux mirror (hopefully anyway)
 				non-core)
-					singleTest=$( egrep -v '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' <<< $mirrorTemp )
+					singleTest=$( grep -Ev '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' <<< $mirrorTemp )
 					# echo singleTest: $singleTest
 					# if a core mirror is not found, or if there is only one sidux mirror
 					if [ -n "$singleTest" ] || [ "$countMirrors" -eq 1 ];then
@@ -1723,8 +1723,8 @@ set_sidux_mirror()
 	nonCoreSiduxRepo=$( get_sidux_mirrors 'non-core' )
 
 	# we only want to overwrite sidux stuff it's not a dual apt sources...
-	isSiduxMulti=$(  egrep -s "^[[:space:]]*(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/*.list | cut -d ':' -f 2-6 )
-	isCoreSiduxRepo="$( echo "$1" | egrep '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
+	isSiduxMulti=$( grep -Es "^[[:space:]]*(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/*.list | cut -d ':' -f 2-6 )
+	isCoreSiduxRepo="$( echo "$1" | grep -E  '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
 
 	# handle multiple entries in sources
 	# make sure the current mirror only is selected
@@ -1736,7 +1736,7 @@ set_sidux_mirror()
 		# separator before awk
 		entryExists=$( grep -s '^[^#]' $EAS $EAS.d/*.list | cut -d ':' -f 2-6 | awk '/^(deb)[ ]*(((http|ftp):\/\/)(sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de))/{print $2}' )
 	else
-		entryExists=$( egrep -os -m1 "^[[:space:]]*(deb|deb-src)[[:space:]]*$nonCoreSiduxRepo" $EAS $EAS.d/*.list | grep -o "$nonCoreSiduxRepo" )
+		entryExists=$( grep -Eos -m1 "^[[:space:]]*(deb|deb-src)[[:space:]]*$nonCoreSiduxRepo" $EAS $EAS.d/*.list | grep -o "$nonCoreSiduxRepo" )
 	fi
 	log_function_data "mirror to install: $1"
 	log_function_data "nonCoreSiduxRepo: $nonCoreSiduxRepo"
@@ -1764,7 +1764,7 @@ set_sidux_mirror()
 			# we need to loop it here because of possible multi source files
 			for siduxSource in $siduxSources
 			do
-				siduxTempHolder=$( egrep -m1 "(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $siduxSource )
+				siduxTempHolder=$( grep -E -m1 "(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $siduxSource )
 				# for presentation, just use the repo name
 				siduxTempRepo=$( cut -d ' ' -f 2 <<< $siduxTempHolder )
 				# we need to replace whitespace for sed here
@@ -1870,12 +1870,12 @@ alt-usa-3:http://mira.sunsite.utk.edu/sidux/debian/
 get_current_apt_kernel()
 {
 	eval $LOGUS
-	local tempKernels='' kernelThird=0 
+	local tempKernels='' kernelMath=0 kernelBase='' baseWorking=''
 	local kernel1='' kernel2='' kernel1Greater='' kernelStringExtra=''
 	local defaultKernel=$1 distro='' currentKernel='' kernelPackageExists=''
 	# needed for alt platforms, no easy way to handle say move from 486 to 686, so
 	# we'll just respect the user initial preference and make them change manually if desired
-	local platform=$( egrep -o '\-(486|686|686-bigmem|xen-686)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2-4 )
+	local platform=$( grep -Eo '\-(486|686|686-bigmem|xen-686)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2-4 )
 
 	if [ "$defaultKernel" != 'no-kernel' ];then
 		if [ "$BITS" == '64' ];then
@@ -1921,8 +1921,7 @@ get_current_apt_kernel()
 				platform='smp'
 				;;
 		esac
-		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra"
-
+		
 		# little trick here to present just debian kernels if not distro
 		if [ "$B_APTOSID_SOURCES" != 'true' -a "$B_LIQUORIX_SOURCES" != 'true' -a "$B_MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
 			kernelStringExtra=''
@@ -1939,7 +1938,17 @@ get_current_apt_kernel()
 		# note: testing for kernel metapackages here, so only systems with metapackage kernels
 		# can be tested with this method. The last slice handles a case with metapackages
 
-		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= tempKernels=$( apt-cache show linux-image-2.6$kernelStringExtra-$platform | grep -i '^Depends: ' | cut -d ' ' -f 2 | grep "$platform$" | cut -d '-' -f 3-7 | grep -v "2.6-$platform" )
+		LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= tempKernels=$( apt-cache show linux-image-2.6$kernelStringExtra-$platform | grep -i '^Depends: ' | cut -d ' ' -f 2 | grep "$platform$" | cut -d '-' -f 3-7 | grep -Ev "^(2\.6|[3-9])$kernelStringExtra-$platform" )
+		
+		 # this is hackish but should work for several years
+		CURRENT_APT_KERN_BASE=$( check_package_status "linux-4$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^4' )
+		if [ -z "$CURRENT_APT_KERN_BASE" ];then
+			CURRENT_APT_KERN_BASE=$( check_package_status "linux-3$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^3' )
+		fi
+		if [ -z "$CURRENT_APT_KERN_BASE" ];then
+			CURRENT_APT_KERN_BASE=$( check_package_status "linux-2.6$kernelStringExtra-$platform" 'c' | cut -d '+' -f 1 | cut -d '-' -f 1 | grep -os '^2\.6' )
+		fi
+		log_function_data "Platform: $platform\nkernelStringExtra: $kernelStringExtra\nCurrent Apt Kernel Base: $CURRENT_APT_KERN_BASE"
 
 		for kernel1 in $tempKernels
 		do
@@ -1983,9 +1992,13 @@ get_current_apt_kernel()
 		if [ "$defaultKernel" == "$DEFAULT_KERNEL" ];then
 			CURRENT_APT_KERNEL=$currentKernel
 			log_function_data "CURRENT_APT_KERNEL: $CURRENT_APT_KERNEL"
-			kernelThird=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | egrep -o '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
+			if [ -n "$( grep -Es '^[3-9]' <<< $CURRENT_APT_KERNEL  )" ];then
+				kernelMath=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -Eo '^[3-9]\.[0-9]{1,2}' | cut -d '.' -f 2 )
+			else
+				kernelMath=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -Eo '^2\.6\.[0-9]{1,2}' | cut -d '.' -f 3 )
+			fi
 			# now just slice out the major version, and add 1 so it's always 1 > than current
-			KERNEL_FORCE_DU=$(( $kernelThird + 1 ))
+			KERNEL_FORCE_DU=$(( $kernelMath + 1 ))
 			log_function_data "KERNEL_FORCE_DU: $KERNEL_FORCE_DU"
 			# global will handle alert to metapackage users to reboot post du
 			CURRENT_APT_KERNEL_GRUB=$( grep -is -o -m 1 "$CURRENT_APT_KERNEL" $GRUB_PATH )

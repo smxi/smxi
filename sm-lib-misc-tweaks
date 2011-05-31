@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.24.0
-####  Date: February 15 2011
+####  version: 1.24.1
+####  Date: May 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -832,7 +832,7 @@ grub_gfx_message_installer()
 	local grubCbrd='/boot/'$cbrd
 	local bgmc=$SCRIPT_DOWNLOAD'artwork/'$cbrd
 	# make sure not commented out etc
-	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
+	local gfxGrubExists=$( grep '^gfxmenu'  $GRUB_PATH )
 	local ua="-U s-tools/grub-gfx.$cbrd"
 
 	echo $LINE
@@ -864,7 +864,7 @@ grub_gfx_message_installer()
 restore_grub_gfx()
 {
 	eval $LOGUS
-	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
+	local gfxGrubExists=$( grep '^gfxmenu'  $GRUB_PATH )
 
 	echo $LINE
 	if [ -n "$gfxGrubExists" ];then
@@ -957,9 +957,9 @@ check_gfxboot_in_menu()
 {
 	eval $LOGUS
 	# make sure not commented out etc
-	local gfxGrubExists=$( egrep '^gfxmenu'  $GRUB_PATH )
-	local colorExists=$( egrep '^color[[:space:]]'  $GRUB_PATH )
-	local colorLineNu=$( egrep -in '^color[[:space:]]' $GRUB_PATH | cut -d ':' -f 1 )
+	local gfxGrubExists=$( grep '^gfxmenu'  $GRUB_PATH )
+	local colorExists=$( grep -E '^color[[:space:]]'  $GRUB_PATH )
+	local colorLineNu=$( grep -Ein '^color[[:space:]]' $GRUB_PATH | cut -d ':' -f 1 )
 	local grootGrub=$( awk -F= '/^# groot/{print $2}' $GRUB_PATH  )
 	log_function_data "gfxGrubExists: $gfxGrubExists - colorExists: $colorExists - colorLineNu: $colorLineNu - grootGrub: $grootGrub"
 	if [ -z "$gfxGrubExist" ];then
@@ -1498,7 +1498,7 @@ set_default_runlevels()
 	eval $LOGPS
 	local defaultDm=$( get_default_display_manager )
 	local dmRunlevels=$( get_display_manager_runlevels )
-	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | grep -Eo '[0-5]' )
 	local stopLevels='0 1 2 3 4 5 6' defaultLevels='5'
 	local defaultOpt='' opt='' option='' repeat='' plural1=''
 
@@ -1657,7 +1657,7 @@ set_default_inittab()
 	echo "${S}Updating system default startup level in ${C}$etcit${S}to: ${C}$1${N}"
 	sed -i "s/id:[1-5]:initdefault:/id:$1:initdefault:/" $etcit
 	
-	defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	defaultRunlevel=$( grep ':initdefault:' /etc/inittab | grep -Eo '[0-5]' )
 	if [ "$1" == "$defaultRunlevel" ];then
 		echo "${S}Update of runlevel for ${C}$2${S} start on: ${C}$1${S} was successful.${N}"
 	else

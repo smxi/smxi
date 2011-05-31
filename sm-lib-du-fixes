@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.7
-####  Date: February 10 2011
+####  version: 1.4.8
+####  Date: May 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 
@@ -206,10 +206,10 @@ pre_du_tasks()
 	# set xorg version pre upgrade, either unset or like 6. or 7. etc
 	test_xorg_version pre
 	# load the 2009/11 fixes
-	if [ "$DISTRO_LEVEL" -lt 18 ];then
-		run_script_import $LIB_2009_FIXES
-		run_2009_fixes 'pre'
-	fi
+# 	if [ "$DISTRO_LEVEL" -lt 18 ];then
+# 		run_script_import $LIB_2009_FIXES
+# 		run_2009_fixes 'pre'
+# 	fi
 	if [ "$DISTRO_LEVEL" -lt 30 ];then
 		run_script_import $LIB_2011_FIXES
 		run_2011_fixes 'pre'
@@ -229,7 +229,7 @@ main_upgrade_engine()
 	local smPref=$( sm_pref_tester $prefId )
 	local continue='' repeat='' options='' opt='' ConnectionDropped=''
 	local exitStatus=$2 # only for script re-runs, $2 not set first time
-	local metaExists=$( package_tester 'linux-image-2.6-(sidux-|)' 'wild-full' )
+	local metaExists=$( package_tester 'linux-image-(2\.6|[3-9])-(sidux-|)' 'wild-full' )
 	local currentAptKernelGrub=$( grep -i -o -m1 "$CURRENT_APT_KERNEL" $GRUB_PATH )
 	local exitNo='' rebootNo='' rebootText='' rebootTopText=''
 	local options="use-install-f $DU_UPGRADE-again check-services continue "
@@ -547,7 +547,7 @@ kde4_updater()
 libc6_fix_1()
 {
 	eval $LOGUS
-	#local libc6Version=$( apt-cache policy libc6 | grep -m 2 ':' | egrep '2\.[0-4]' )
+	#local libc6Version=$( apt-cache policy libc6 | grep -m 2 ':' | grep -E '2\.[0-4]' )
 	# for general users I'll update this if needed now and then, but mostly this is
 	# for kernel installs, to avoid the du failure after new kernel
 	local prefId='libc6-fix-4'
@@ -665,13 +665,18 @@ udev_kernel26_update_handler()
 		
 		log_function_data "udevVersionCan: $udevVersionCan\nudevVersionInst: $udevVersionInst"
 		# don't run this if no udev is installed, then this doesn't matter
-		if [ "$KERNEL_THIRD" -lt 30 -a "$udevVersionCan" -gt 140 -a "$udevVersionInst" -lt 130 -a "$udevVersionInst" -gt 0 ];then
-			udev_kernel_updater_main
-		fi
-		# this should always run until the safe udev + new kernel is installed
-		if [ "$KERNEL_THIRD" -gt 28 -a "$udevVersionInst" -gt 140 ];then
-			set_sticky_prefs $prefId
-		fi
+		case $KERNEL_BASE in
+			2.6)
+				if [ "$KERNEL_MATH" -lt 30 -a "$udevVersionCan" -gt 140 -a "$udevVersionInst" -lt 130 -a "$udevVersionInst" -gt 0 ];then
+					udev_kernel_updater_main
+				fi
+				# this should always run until the safe udev + new kernel is installed
+				if [ "$KERNEL_MATH" -gt 28 -a "$udevVersionInst" -gt 140 ];then
+					set_sticky_prefs $prefId
+				fi
+				;;
+		esac
+		
 	fi
 	eval $LOGUE
 }
@@ -686,7 +691,7 @@ udev_kernel_updater_main()
 	
 	echo $MLINE
 	echo "${M}ALERT: The new ${C}udev${M} version ${C}$udevVersionCan${M} requires special handling, "
-	echo "when you are running kernel ${C}2.6.$KERNEL_THIRD${M}. ${C}$SCRIPT_NAME${M} can handle most"
+	echo "when you are running kernel ${C}2.6.$KERNEL_MATH${M}. ${C}$SCRIPT_NAME${M} can handle most"
 	echo "of the process for you, but you must do the following:"
 	
 	echo $LINE
@@ -780,7 +785,7 @@ nvidia_sse_alert()
 	eval $LOGUS
 	local isSse=$( grep -io 'sse' /proc/cpuinfo )
 	# for some reason using \s* fails randomly for space test
-	# local isNvidia=$( egrep -io 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2  )
+	# local isNvidia=$( grep -Eio 'Driver.*"nvidia"' $X_ORG_PATH | cut -d '"' -f 2  )
 	# I'm going to test for nvidia alone in the lspci output in case they are running nv
 	 local isNvidia=$( lspci | grep 'VGA' | grep -i 'nvidia' )
 
@@ -792,7 +797,7 @@ nvidia_sse_alert()
 		echo "${W}Your${C}$CPU_NAME${W} does ${C}NOT${W} support ${C}SSE."
 		echo $MLINE
 		echo "${S}What does this mean? It means with new drivers you will not have 3d support."
-		echo "The 100 series drivers do work, but cannot be installed on 2.6.28 kernels."
+		echo "The 100 series drivers do work, but cannot be installed on 2.6.28 or newer kernels."
 		echo
 		echo "${S}Only drivers of series ${C}169/96/71${S} or newer work on ${C}2.6.26${S} and later kernels."
 		echo "For now, this leaves you with only these choices:"
@@ -800,9 +805,9 @@ nvidia_sse_alert()
 		echo "    You must install these drivers directly with sgfxi, like this: ${C}sgfxi -co 100.14.19"
 		echo "${C}2 - ${S}Forget about 3d and just use the 2d part of the driver, or run the legacy ${C}7xxx${S} drivers."
 		echo "${C}3 - ${S}Use the ${C}xorg nv${S} drivers instead, which aren't very good."
-		echo "${C}4 - ${S}Get an old used ${C}ATI 7/8/9xxx${S} card that has fine working ${C}xorg drivers."
-		echo
-		echo "${S}Please check the ${C}sidux.com${S} forums, hardware section, for more information on this.${N}"
+		echo "${C}4 - ${S}Use the ${C}xorg nouveau${S} drivers instead, and see if they work for you."
+		echo "${C}5 - ${S}Get an old used ${C}ATI 7/8/9xxx${S} card that has fine working ${C}xorg drivers."
+
 		log_function_data "Is sse cpu and nvidia system."
 		print_hec
 	fi

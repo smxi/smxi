@@ -151,7 +151,7 @@ b43_fwcutter_fix_1()
 	local smPref=$( sm_pref_tester $prefId )
 	local isInstalled=$( package_tester 'b43-fwcutter'  )
 
-	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a "$KERNEL_THIRD" -ge 25 ];then
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" -a "$KERNEL_MATH" -ge 25 ];then
 		echo $LINE
 		echo "${S}Running ${C}b43-fwcutter${S} fix now...${N}"
 		package_remover 'b43-fwcutter' 'purge -y'

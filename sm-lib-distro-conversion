@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.9
-####  Date: May 18 2011
+####  version: 3.3.10
+####  Date: May 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -464,7 +464,7 @@ distro_number_calculator()
 		esac
 
 		assembled="$year:$month"
-		distroLevel=$( egrep -o "$assembled:[0-9]{1,2}" <<< $distroLevels | cut -d ':' -f 3 )
+		distroLevel=$( grep -Eo "$assembled:[0-9]{1,2}" <<< $distroLevels | cut -d ':' -f 3 )
 
 		# set the distro level id number now
 		echo $distroLevel > $SMDL
@@ -520,7 +520,7 @@ update_to_new_sources()
 tweak_antix_vb_source()
 {
 	eval $LOGUS
-	local fixVB=$( egrep '^deb[[:space:]].*virtualbox.*' $EAS )
+	local fixVB=$( grep -E '^deb[[:space:]].*virtualbox.*' $EAS )
 
 	if [ -n "$fixVB" ];then
 		echo "${S}Commenting out broken virtualbox repo ...${N}"
@@ -532,8 +532,8 @@ tweak_antix_vb_source()
 tweak_antix_sources()
 {
 	eval $LOGUS
-	local fixDM=$( egrep '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
-	local fixDS=$( egrep '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
+	local fixDM=$( grep -E '^#.*deb[[:space:]].*ian-mult.*unstable.*' $EAS )
+	local fixDS=$( grep -E '^#.*deb[[:space:]].*debian\.org.*unstable.*' $EAS )
 	local doUpdate=''
 
 	if [ -n "$fixDM" ];then

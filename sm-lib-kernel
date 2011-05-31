@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.2
-####  Date: March 24 2011
+####  version: 2.6.3
+####  Date: May 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -44,7 +44,8 @@ check_kernel()
 {
 	eval $LOGMS
 	local opt='' options='continue alternate-kernel-install'
-	local advancedKernel='' kernelFile=''
+	local advancedKernel='' kernelFile='' 
+	local kernelMath=$KERNEL_MATH kernel_slice=2 kernel_add=0
 
 	local prefId='meta-package-selection'
 	local smPref=$( sm_pref_tester $prefId 'equal' )
@@ -73,11 +74,33 @@ check_kernel()
 		fi
 		# sets B_KERNEL_EQUAL_INSTALL
 		test_kernel_strings $CURRENT_APT_KERNEL 'set-ke'
+		
+		local kernelAptMath=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -oE "^(2\.6|[3-9])\.[0-9]+" | cut -d '.' -f $kernel_slice )
 
 		# this is for comparing say 23/25 (2.6.23/2.6.25) with arithmetic, sometimes
 		# need to force du prior to kernel install to avoid errors
-		local kernelMajorCurrent=$( echo $CURRENT_APT_KERNEL | cut -d '-' -f 1 | grep -o -G "2.6.[0-9]*" | cut -d '.' -f 3 )
-		local kernelCompare=$(( $kernelMajorCurrent - $KERNEL_THIRD ))
+		# need to see if it's new or 2.6 kernel first
+		case $CURRENT_APT_KERN_BASE in
+			2.6)
+				kernel_slice='3'
+				;;
+			3)
+				kernelAptMath=$(( $kernelAptMath + 40 ))
+				;;
+			4)
+				kernelAptMath=$(( $kernelAptMath + 80 ))
+				;;
+		esac
+		case $KERNEL_BASE in
+			3)
+				kernelMath=$(( $kernelMath + 40 ))
+				;;
+			4)
+				kernelMath=$(( $kernelMath + 80 ))
+				;;
+		esac
+
+		local kernelCompare=$(( $kernelAptMath - $kernelMath ))
 
 		# set this data if required for debian type kernels
 		check_debian_kernel_version
@@ -99,9 +122,9 @@ check_kernel()
 			# go to dist-upgrade first, and kernel install will come after. Only run first time
 			# the first condition handles cases where the latest install kernel requires a du first
 			# the first case will now never happen, needs to be dumped
-			# if [ "$kernelMajorCurrent" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$B_KERNEL_POST_DU_INSTALL" != 'true' -a "$B_KERNEL_EQUAL_INSTALL" != 'true' ]
+			# if [ "$kernelAptMath" == "$KERNEL_FORCE_DU"  ] || [ "$kernelCompare" -gt 1 -a "$B_KERNEL_POST_DU_INSTALL" != 'true' -a "$B_KERNEL_EQUAL_INSTALL" != 'true' ]
 			if [ "$kernelCompare" -gt 1 -a "$B_KERNEL_POST_DU_INSTALL" != 'true' -a "$B_UDEV_KERNEL26" != 'true' ];then
-				echo "${M}Your kernel version ${C}$KERNEL_VERSION${M} requires that you first run"
+				echo "${M}Your kernel version ${C}$KERNEL_NUMBER${M} requires that you first run"
 				echo "a ${C}$DU_UPGRADE${M} before you install a new kernel. The option to install"
 				echo "the new kernels is in the ${C}POST $( tr [a-z] [A-Z] <<< $DU_UPGRADE ) FIXES${M} menu.${N}"
 				B_KERNEL_POST_DU_INSTALL='true'
@@ -386,9 +409,9 @@ kernel_meta_package_handler()
 {
 	eval $LOGPS
 
-	local metaDebianExists=$( package_tester 'linux-image-2.6-(686|486|amd64)' )
-	local metaLiquorixExists=$( package_tester 'linux-image-2.6-liquorix-(686|486|amd64)' )
-	local metaSiduxExists=$( package_tester 'linux-image-2.6-aptosid-(686|amd64)' )
+	local metaDebianExists=$( package_tester 'linux-image-(2\.6|[3-9])-(686|486|amd64)' )
+	local metaLiquorixExists=$( package_tester 'linux-image-(2\.6|[3-9])-liquorix-(686|486|amd64)' )
+	local metaAptosidExists=$( package_tester 'linux-image-(2\.6|[3-9])-aptosid-(686|amd64)' )
 	local repeat='' kernelArch='686' startType='standard' userSelection=''
 	local linuxAptosidImage='' linuxAptosidHeaders=''
 	if [ -n "$1" ];then
@@ -404,11 +427,11 @@ kernel_meta_package_handler()
 	
 	# not using this one yet: install-kernel-metapackages-full
 	if [ -n "$B_APTOSID_SOURCES" ];then
-		linuxAptosidImage="linux-image-2.6-aptosid-$kernelArch"
-		linuxAptosidHeaders="linux-headers-2.6-aptosid-$kernelArch"
+		linuxAptosidImage="linux-image-$CURRENT_APT_KERN_BASE-aptosid-$kernelArch"
+		linuxAptosidHeaders="linux-headers-$CURRENT_APT_KERN_BASE-aptosid-$kernelArch"
 	fi
 
-	if [ -n "$metaSiduxExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
+	if [ -n "$metaAptosidExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
 		continueOption='continue-automatic'
 		kiAction='skip'
 		defaultAction='automatic'
@@ -431,7 +454,7 @@ kernel_meta_package_handler()
 	echo $MLINE
 	echo "${C}Kernel metapackages:  ${M}Advantage:${S} Latest kernels and modules installed via ${C}$DU_UPGRADE"
 	echo "${M}Negatives:${S} ${C}1.${S} Some distros, like ${C}aptosid${S}, release kernels often, sometimes 1 or more a day."
-	echo "Usually you do not need new subversions of kernels, like ${C}2.6.26-2.slh.11${S} to ${C}2.6.26-2.slh.12${S}"
+	echo "Usually you do not need new subversions of kernels, like ${C}2.6.39.dmz.3${S} to ${C}2.6.39.dmz.4${S}"
 	echo "${C}2.${S} Needing to reboot after the $DU_UPGRADE ${C}3.${S} Slow servers slowing $DU_UPGRADE"
 	echo "${C}4.${S} Possible unexpected kernel / hardware issues, kernel regressions, etc."
 	echo $LINE
@@ -492,7 +515,7 @@ kernel_meta_package_handler()
 			install-current-apt-kernel)
 				set_metapackage_prefs
 				set_metapackage_selections 'manual'
-				if [ -n "$metaSiduxExists" -o -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
+				if [ -n "$metaAptosidExists" -o -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
 					remove_kernel_metapackages
 				fi
 				double_check_kernel 'apt'
@@ -523,7 +546,7 @@ kernel_meta_package_handler()
 remove_kernel_metapackages()
 {
 	eval $LOGUS
-	local metaPackageList=$( package_tester '2.6-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
+	local metaPackageList=$( package_tester '(2\.6|[3-9])-(aptosid-|liquorix-|sidux-)(686|486|amd64)' 'wild-full' )
 
 	if [ -n "$metaPackageList" ];then
 		package_remover "$metaPackageList" 'purge -y'
@@ -570,7 +593,7 @@ kernel_module_installer()
 	local options="$availableModules continue"
 	local contCount=$( wc -w <<< $options )
 	local moduleCount=$(( $contCount - 1 ))
-	local isMeta=$( package_tester "linux-image-2.6-(aptosid-|liquorix-|)(486|686|amd64)" '' )
+	local isMeta=$( package_tester "linux-image-(2\.6|[3-9])-(aptosid-|liquorix-|)(486|686|amd64)" '' )
 
 	if [ -n "$isMeta" ];then
 		metaText='echo "Since you are using kernel metapackages, the script will install the module metapackage."'
@@ -643,7 +666,7 @@ remove_kernel_modules()
 	# we need to dump the multi modules first:
 	for store in $installedModules
 	do
-		store=$( egrep -o '.*-modules' <<< $store )
+		store=$( grep -Eo '.*-modules' <<< $store )
 		if [ "$store" != "$store2" ];then
 			moduleStoreTemp="$moduleStoreTemp $store"
 		fi

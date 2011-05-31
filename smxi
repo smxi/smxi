@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.13.6
-####  Date: March 18 2011
+####  version: 8.14.0
+####  Date: March 30 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -285,6 +285,7 @@ LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= CPU_NAME=$( grep -i -m1 'model name' /proc/
 # kernel info
 CURRENT_KERNEL=$(uname -r)
 CURRENT_APT_KERNEL=''
+CURRENT_APT_KERN_BASE=''
 CURRENT_APT_KERNEL_GRUB=''
 CURRENT_DEBIAN_KERNEL=''
 CURRENT_LIQUORIX_KERNEL=''
@@ -293,10 +294,16 @@ CURRENT_APTOSID_KERNEL=''
 DEBIAN_KERNEL_INSTALLED=''
 DEBIAN_KERNEL_CANDIDATE=''
 DEFAULT_KERNEL=''
-# 2 dot: like: 2.6.32
-KERNEL_VERSION=$( uname -r | cut -d '-' -f 1 | egrep -o "2\.6\.[0-9]{2,3}" )
+# 1 dot: like 3.2 - 2 dot: like: 2.6.32
+KERNEL_NUMBER=$( uname -r | cut -d '-' -f 1 | grep -Eo "(2\.6|3)\.[0-9]+" )
 # for math kernel compares, eg, -gt 24
-KERNEL_THIRD=$( cut -d '.' -f 3 <<< $KERNEL_VERSION )
+if [ -n "$( grep -Es '^[3-9]\.' <<< $KERNEL_NUMBER )" ];then
+	KERNEL_MATH=$( cut -d '.' -f 2 <<< $KERNEL_NUMBER )
+	KERNEL_BASE=$( cut -d '.' -f 1 <<< $KERNEL_NUMBER ) # like: 3
+else
+	KERNEL_MATH=$( cut -d '.' -f 3 <<< $KERNEL_NUMBER )
+	KERNEL_BASE=$( cut -d '.' -f 1-2 <<< $KERNEL_NUMBER ) # like: 2.6
+fi
 KERNEL_FILE=''
 KERNEL_FILE_RESET=''
 KERNEL_FORCE_DU=''
@@ -323,9 +330,9 @@ fi
 LOGIN_PID=$( awk '{print $1}' <<< $LOGIN_PID | grep -Eo "^[0-9]+$" )
 
 # xorg stuff, this isn't used at the moment
-X_VERSION=$( X -version 2>&1 | grep 'X Window System' | egrep -o '(7|1|2)\.[0-9]+' )
+X_VERSION=$( X -version 2>&1 | grep 'X Window System' | grep -Eo '(7|1|2)\.[0-9]+' )
 if [ -z "$X_VERSION" ];then
-	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | egrep -o '(7|1|2)\.[0-9]+' )
+	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | grep -Eo '(7|1|2)\.[0-9]+' )
 fi
 X_VERSIONS_PRE=''
 X_VERSIONS_POST=''
@@ -355,7 +362,7 @@ EXTRA_OPTIONS=''
 HEC_ALT=''
 HOLD_INSTALL_ITEMS='' # holds value for any hold/install required
 # we'll always use the system default in all cases
-INIT_LEVEL=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+INIT_LEVEL=$( grep ':initdefault:' /etc/inittab | grep -Eo '[0-5]' )
 LOG_FILE='/var/log/smxi.log'
 LOG_INDENT=''
 LOGMS='log_function_data ms $FUNCNAME "$( echo $@ )"'
@@ -1278,7 +1285,7 @@ compare_numbers()
 	# echo $1 $2
 	# first we need to determine what the base system is using for decimal indicator
 	local returnValue=''
-	local decimalType=$( echo 1 | awk '{total = $1 / 2; print total}' | egrep -o '(\.|,)' )
+	local decimalType=$( echo 1 | awk '{total = $1 / 2; print total}' | grep -Eo '(\.|,)' )
 
 	# next we'll get the raw data and transate it if required
 	local numOne=$( echo $1 | cut -d '.' -f 1-2 | tr '.' $decimalType )
@@ -1393,7 +1400,7 @@ launch_function_trigger()
 metapackage_launcher()
 {
 	eval $LOGPS
-	local metaExists=$( package_tester 'linux-image-2.6-(aptosid-|sidux-|liquorix-|)(amd64|486|686)' )
+	local metaExists=$( package_tester 'linux-image-(2\.6|[3-9])-(aptosid-|sidux-|liquorix-|)(amd64|486|686)' )
 
 	# special case here, only run if metapackages are present, or if user initiates
 	# note: user initiates either by starting from kernel advanced, or -N
@@ -2146,7 +2153,7 @@ x_is_running()
 	local returnVal=''
 	# we'll do one final X is running test here, note, handling a bunch of
 	# different possible X detections in etch, lenny, and sid, then filtering out the grep
-	local xIsRunning=$( ps aux | grep '/usr.*/X' | egrep -ivc '(grep|/Xprt)' )
+	local xIsRunning=$( ps aux | grep '/usr.*/X' | grep -Eivc '(grep|/Xprt)' )
 
 	if [ "$xIsRunning" -gt 0 ];then
 		returnVal='0'
@@ -2279,7 +2286,7 @@ check_display_and_x()
 	local currentRunlevel=$( echo $( runlevel ) | awk '{print $NF}' )
 	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
 	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
-	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | egrep -o '[0-5]' )
+	local defaultRunlevel=$( grep ':initdefault:' /etc/inittab | grep -Eo '[0-5]' )
 	local runlevelUse='' runlevelText='' runlevelText2='' runlevelText3=''
 	local dmRunlevels=$( get_display_manager_runlevels )
 	local dmRunlevelsCount=$( wc -w <<< "$dmRunlevels" )
@@ -2468,7 +2475,7 @@ check_distro_version()
 		# NOTE: default for DISTRO_LEVEL is 0
 		for (( i=0; i < ${#supportedReleases[@]}; i++ ))
 		do
-			dis=$( echo $DISTRO_VERSION | egrep -i "${supportedReleases[$i]%^*}" )
+			dis=$( echo $DISTRO_VERSION | grep -Ei "${supportedReleases[$i]%^*}" )
 			if [ -n "$dis" ];then
 				DISTRO_LEVEL=${supportedReleases[$i]#*^}
 				break
@@ -2717,7 +2724,7 @@ check_dpkg_update()
 	local dpkguf='/var/cache/apt/pkgcache.bin'
 
 	if [ -f $dpkguf ];then
-		DPKG_UPDATE=$( ls -l --time-style=+%Y-%m-%d-%H:%M $dpkguf | egrep -o "20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}" )
+		DPKG_UPDATE=$( ls -l --time-style=+%Y-%m-%d-%H:%M $dpkguf | grep -Eo "20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}" )
 	else
 		DPKG_UPDATE="${W}No update file found - Unmodified Install"
 	fi
@@ -2745,7 +2752,7 @@ get_gfx_driver_info()
 	local driverVersion='' 
 	
 	# set to lower always to make sure it's consistent
-	driverVersion=$( egrep -sio "Driver.*\"$1\"" $X_ORG_PATH | cut -d '"' -f 2 )
+	driverVersion=$( grep -Esio "Driver.*\"$1\"" $X_ORG_PATH | cut -d '"' -f 2 )
 	driverVersion=$( tr '[A-Z]' '[a-z]' <<< $driverVersion )
 	
 	echo $driverVersion
@@ -2853,8 +2860,8 @@ print_lib_info()
 {
 	eval $LOGUS
 	local scriptText='' printIt=''
-	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$1 | cut -d ' ' -f 2 )
-	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$1 | cut -d ' ' -f 2-4 )
+	local scriptVersion=$( grep -Eo -m 1 "(version:).*" $SCRIPT_HOME/$1 | cut -d ' ' -f 2 )
+	local scriptDate=$( grep -Eo -m 1 '(Date:).*' $SCRIPT_HOME/$1 | cut -d ' ' -f 2-4 )
 	local moduleText='Module Version'
 
 	case $1 in
@@ -2939,8 +2946,8 @@ print_version()
 	local extraMessage="...and welcome Debian users, hope you enjoy $SCRIPT_NAME..."
 	local item=''
 	# only for -v option printout
-	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
-	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
+	local scriptVersion=$( grep -Eo -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
+	local scriptDate=$( grep -Eo -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
 	local systemBase=$( perl -wp -e '$_ = ucfirst' <<< $SYSTEM_BASE )
 	local distroId=$( print_distro_id )
 
@@ -3000,7 +3007,7 @@ print_install_information()
 	eval $LOGPS
 	local AdvancedOptions=''
 	local dpkgUpdate='' dpkgInstall=''
-	local rootHomeData="$( df -h -T | egrep '(/|/boot|/var|/home)$'  | S=${S} C=${C} awk '{print $7, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $2, ENVIRON["S"]"Size:"ENVIRON["C"], $3, ENVIRON["S"]"Used:"ENVIRON["C"], $4, ENVIRON["S"]"("ENVIRON["C"], $6, ENVIRON["S"]")", "Free:"ENVIRON["C"], $5}' )"
+	local rootHomeData="$( df -h -T | grep -E '(/|/boot|/var|/home)$'  | S=${S} C=${C} awk '{print $7, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $2, ENVIRON["S"]"Size:"ENVIRON["C"], $3, ENVIRON["S"]"Used:"ENVIRON["C"], $4, ENVIRON["S"]"("ENVIRON["C"], $6, ENVIRON["S"]")", "Free:"ENVIRON["C"], $5}' )"
 	local latestKernel='NO KERNEL DATA'
 	if [ -n "$CURRENT_APT_KERNEL" ];then
 		latestKernel=$CURRENT_APT_KERNEL
@@ -3017,7 +3024,7 @@ print_install_information()
 	fi
 
 	if [ -f $dpkgif ];then
-		dpkgInstall=$( ls -l --time-style=+%Y-%m-%d-%H:%M $dpkgif | egrep -o "20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}" )
+		dpkgInstall=$( ls -l --time-style=+%Y-%m-%d-%H:%M $dpkgif | grep -Eo "20[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}:[0-9]{2}" )
 	else
 		dpkgInstall="${W}No packages have been upgraded - Unmodified Install"
 	fi
@@ -3669,7 +3676,7 @@ get_options()
 					START_OPTIONS="$START_OPTIONS -w"
 					;;
 				# advanced options
-				j)	if [ -n "$( egrep '^[0-4]$' <<< $OPTARG )" ];then
+				j)	if [ -n "$( grep -E '^[0-4]$' <<< $OPTARG )" ];then
 						SCRIPT_COLORS=$OPTARG
 						set_script_colors
 						if [ "$SCRIPT_COLORS" != 1 ];then
@@ -3714,7 +3721,7 @@ get_options()
 					print_install_information
 					exit 0
 					;;
-				W)	if [ -z "$( egrep "^(c|w|cw|wc)$" <<< $OPTARG )" ];then
+				W)	if [ -z "$( grep -E "^(c|w|cw|wc)$" <<< $OPTARG )" ];then
 						echo "${E}The -W option supported the following options only:"
 						echo "${S}c - print config y/n data"
 						echo "w - print current alert/warning data"
@@ -3729,7 +3736,7 @@ get_options()
 				x)	EXTRA_OPTIONS='true'
 					START_OPTIONS="$START_OPTIONS -x"
 					;;
-				X)	if [ -z "$( egrep "^.*#.*$" <<< $OPTARG )" ];then
+				X)	if [ -z "$( grep -E "^.*#.*$" <<< $OPTARG )" ];then
 						echo "${E}The -X option requires the following syntax:"
 						echo "${C}$SCRIPT_NAME -X script-name#script-url${S} (script name + # + script web address/url"
 						echo "Example: ${C}$SCRIPT_NAME -X my-system-cleaner#http://somesite.com/my-system-cleaner.sh${N}"

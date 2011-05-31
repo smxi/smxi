@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.7
-####  Date: October 20 2010
+####  version: 2.4.8
+####  Date: May 30 2011
 
-####  Copyright (C) Harald Hope 2005-2010
+####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -43,7 +43,7 @@ install_graphics()
 	local nvDebianText="${C}$nvDebId${S} - Debian method nVidia driver installation.\n    ${S}This will install the ${C}Debian nVidia${S} driver.\n"
 	local nvBetaId='nvidia-beta-driver'
 	local nvBetaText="\n${C}$nvBetaId${S} - Installs latest ${C}nVidia beta driver${S} (${M}if available${S}) for your card type.\n    ${S}If none is available, the ${C}latest stable nVidia${S} driver for your card model is used instead.\n"
-	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | egrep -o -m 1 '(1[0-9]{2}\.[0-9]{2}\.?[0-9]{0,2}|1\.[0-9]-[0-9]{4})' )
+	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | grep -Eo -m 1 '(1[0-9]{2}\.[0-9]{2}\.?[0-9]{0,2}|1\.[0-9]-[0-9]{4})' )
 	# fglrx stuff
 	local FgOptionText='' OptFg='' OptFgLatest='' FgLatestText='' FgDebianSid=''
 	local FgDefault='' FgLatest='' FgPrevious='' FgOlder=''
@@ -82,7 +82,7 @@ install_graphics()
 		unsupportedNvFgCard=$( echo $sgfxiData | grep -c 'ERROR: (253)' )
 		fgXorgError=$( echo $sgfxiData | grep -c 'ERROR: (236)' )
 
-		otherError=$( echo $sgfxiData | egrep -o '\([0-9]{3}\)' )
+		otherError=$( echo $sgfxiData | grep -Eo '\([0-9]{3}\)' )
  		# handle weird cases
 		if [ -n "$otherError" -a -z "$fgXorgError" -a -z "$unsupportedNvFgCard" ];then
 			OptionText='echo -e "${E}Error ${C}'$otherError'${E} occurred. The script is not able to continue.\n${S}Please let the script maintainer know.\n\n"'
@@ -428,9 +428,16 @@ final_graphics_install()
 		#the -r removes modelines from xorg which cause out of sync errors
 		fglrx)
 			# only do if newer kernel
-			if [ "$KERNEL_THIRD" -ge 17 ];then
-				FglrxFlag=' -r '
-			fi
+			case $KERNEL_BASE in
+				2.6)
+					if [ "$KERNEL_MATH" -ge 17 ];then
+						FglrxFlag=' -r '
+					fi
+					;;
+				*)
+					FglrxFlag=' -r '
+					;;
+			esac
 			# this will force, for ati, debian sid package install instead of ati junk
 			if [ "$2" == 'debian-fglrx' ];then
 				extraArgs=' -d '
@@ -442,9 +449,16 @@ final_graphics_install()
 			;;
 		fglrx-o)
 			# only do if newer kernel
-			if [ "$KERNEL_THIRD" -ge 17 ];then
-				FglrxFlag=' -r '
-			fi
+			case $KERNEL_BASE in
+				2.6)
+					if [ "$KERNEL_MATH" -ge 17 ];then
+						FglrxFlag=' -r '
+					fi
+					;;
+				*)
+					FglrxFlag=' -r '
+					;;
+			esac
 			installMess="${S}installing ATI/fglrx driver ${C}$2${S} now...${N}"
 			extraArgs=" $FglrxFlag -o $2 "
 			bInstallDriver='true'
@@ -452,9 +466,16 @@ final_graphics_install()
 			;;
 		fglrx-l)
 			# only do if newer kernel
-			if [ "$KERNEL_THIRD" -ge 17 ];then
-				FglrxFlag=' -r '
-			fi
+			case $KERNEL_BASE in
+				2.6)
+					if [ "$KERNEL_MATH" -ge 17 ];then
+						FglrxFlag=' -r '
+					fi
+					;;
+				*)
+					FglrxFlag=' -r '
+					;;
+			esac
 			installMess="${S}installing latest ATI/fglrx driver ${C}$2${S} now...${N}"
 			extraArgs=" $FglrxFlag -o $2 "
 			bInstallDriver='true'
