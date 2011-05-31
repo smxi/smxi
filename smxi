@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.0
-####  Date: March 30 2011
+####  version: 8.14.1
+####  Date: March 31 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3625,14 +3625,35 @@ print_usage()
 get_options()
 {
 	local altScriptUrl=''
+	
+	case $1 in
+		--help|-h)
+			if tty > /dev/null ;then
+				print_usage
+			else
+				echo "You cannot use the $SCRIPT_NAME help option in an IRC client!"
+				exit 1
+			fi
+			;;
+		--version|-v)
+			B_PRINT_VERSION='true'
+			set_distro_data # need some of the distro data here
+			check_dpkg_update # need to set the update data
+			# if showing in irc, kill the colors
+			if ! tty > /dev/null ;then
+				SCRIPT_COLORS=0
+				set_script_colors
+			fi
+			print_install_information
+			exit 0
+			;;
+	esac
 
 	# no point in running this if nothing to do
 	if [ -n "$1" ];then
-		while getopts :dehHgGij:kKlLmNpP:sStvwW:frRuUxX:YZ:@!: opt
+		while getopts :deHgGij:kKlLmNpP:sStwW:frRuUxX:YZ:@!: opt
 		do
 			case $opt in
-				h)	print_usage
-					;;
 				H)	print_usage 'full'
 					;;
 				# skip feature options
@@ -3714,12 +3735,6 @@ get_options()
 					START_OPTIONS="$START_OPTIONS -P $http_proxy"
 					;;
 				u|U)	B_FORCE_UPDATE='true'
-					;;
-				v)	B_PRINT_VERSION='true'
-					set_distro_data # need some of the distro data here
-					check_dpkg_update # need to set the update data
-					print_install_information
-					exit 0
 					;;
 				W)	if [ -z "$( grep -E "^(c|w|cw|wc)$" <<< $OPTARG )" ];then
 						echo "${E}The -W option supported the following options only:"
