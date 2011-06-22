@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.6
-####  Date: May 18 2011
+####  version: 3.4.7
+####  Date: June 22 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -163,7 +163,7 @@ package_group_installer()
 
 	# standard groups
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate net-tools p7zip-full p7zip-rar rcconf sysstat sysv-rc-conf zip unzip"
+	local consoleTools="$aTop bzip2 htop irssi nano gzip findutils $mlocate iproute p7zip-full p7zip-rar rcconf sysstat sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm gpicview leafpad mc pcmanfm sudo vim xarchiver xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libcurses-ui-perl libexpect-perl  libterm-readkey-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
@@ -187,7 +187,7 @@ package_group_installer()
 	local openboxPackages="openbox obconf obmenu openbox-themes"
 	local rsyncGroup="rsync $rdiff"
 	local streamTuner='streamtuner streamripper'
-	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors net-tools pmount powersaved sdparm udev"
+	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors iproute pmount powersaved sdparm udev"
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
 	local xfcePackages="gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia"
@@ -684,10 +684,10 @@ utilities_installer()
 {
 	eval $LOGPS
 	local repeat='' options='' opt=''
-	local systemUtils="alsa gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
+	local systemUtils="alsa gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors iproute pmount powersaved sdparm udev"
 
 	if [ "$SERVER_CLIENT" == 'server' ];then
-		systemUtils="gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors net-tools pmount powersaved sdparm udev"
+		systemUtils="gpm dbus dbus-X11 hal hdparm hddtemp lm-sensors iproute pmount powersaved sdparm udev"
 	fi
 
 	echo $MLINE
@@ -1480,7 +1480,7 @@ inxi_installer()
 	fi
 	# install dependencies
 	echo "${S}Checking/installing utility recommended packages...${N}"
-	package_installer 'file hddtemp lm-sensors module-init-tools net-tools sysvinit usbutils' 'install-missing'
+	package_installer 'file hddtemp lm-sensors module-init-tools iproute sysvinit usbutils' 'install-missing'
 	echo $LINE
 
 	echo "${S}Installing and running ${C}inxi -F${S} now...${N}"
