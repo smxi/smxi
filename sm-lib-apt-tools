@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.8
-####  Date: June 15 2011
+####  version: 1.23.9
+####  Date: July 12 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -782,8 +782,10 @@ advanced_broken_dependency_handler()
 			;;
 		xfce4)
 			# note: xfce4-settings|xfce4-panel are chronically version mismatched now, sigh...
+			# actually... xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-session|xfwm4|xfconf
+			# cannot be used because xfce4-session xfconf xfwm4 don't relate at all
 			packages="
-			$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils|xfce4-session|xfwm4|xfconf)' )
+			$( package_tester '(xfdesktop4|xfdesktop4-data|xfce4-utils)' )
 			"
 			packageGroup='Xfce4'
 			;;

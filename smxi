@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.3
-####  Date: June 9 2011
+####  version: 8.14.4
+####  Date: July 12 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3007,7 +3007,13 @@ print_install_information()
 	eval $LOGPS
 	local AdvancedOptions=''
 	local dpkgUpdate='' dpkgInstall=''
-	local rootHomeData="$( df -h -T | grep -E '(/|/boot|/var|/home)$'  | S=${S} C=${C} awk '{print $NF, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $(NF-5), ENVIRON["S"]"Size:"ENVIRON["C"], $(NF-4), ENVIRON["S"]"Used:"ENVIRON["C"], $(NF-3), ENVIRON["S"]"("ENVIRON["C"], $(NF-1), ENVIRON["S"]")", "Free:"ENVIRON["C"], $(NF-2)}' )"
+	# sometimes df wraps to next line, creating a hang in execution, so this adds some
+	# protection checks before 
+	local rootHomeData="$( df -h -T | S=${S} C=${C} awk  '
+	(NF > 4) && ($NF ~ /^(\/|\/boot|\/var|\/home)$/ ) {
+		print $NF, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $(NF-5), ENVIRON["S"]"Size:"ENVIRON["C"], $(NF-4), ENVIRON["S"]"Used:"ENVIRON["C"], $(NF-3), ENVIRON["S"]"("ENVIRON["C"], $(NF-1), ENVIRON["S"]")", "Free:"ENVIRON["C"], $(NF-2)
+	}'
+	)"
 	local latestKernel='NO KERNEL DATA'
 	if [ -n "$CURRENT_APT_KERNEL" ];then
 		latestKernel=$CURRENT_APT_KERNEL
