@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.4
+####  version: 8.14.5
 ####  Date: July 12 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
@@ -3008,8 +3008,8 @@ print_install_information()
 	local AdvancedOptions=''
 	local dpkgUpdate='' dpkgInstall=''
 	# sometimes df wraps to next line, creating a hang in execution, so this adds some
-	# protection checks before 
-	local rootHomeData="$( df -h -T | S=${S} C=${C} awk  '
+	# protection checks before. -l keeps to local, -P makes all one line per mount
+	local rootHomeData="$( df -h -T -l -P | S=${S} C=${C} awk  '
 	(NF > 4) && ($NF ~ /^(\/|\/boot|\/var|\/home)$/ ) {
 		print $NF, ENVIRON["S"]" - ", "Type:"ENVIRON["C"], $(NF-5), ENVIRON["S"]"Size:"ENVIRON["C"], $(NF-4), ENVIRON["S"]"Used:"ENVIRON["C"], $(NF-3), ENVIRON["S"]"("ENVIRON["C"], $(NF-1), ENVIRON["S"]")", "Free:"ENVIRON["C"], $(NF-2)
 	}'
