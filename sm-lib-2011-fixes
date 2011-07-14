@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-2011-fixes
-####  version: 1.0.0
-####  Date: February 10 2011
+####  version: 1.1.0
+####  Date: July 14 2011
 
 ####  Copyright (C) Harald Hope 2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -42,7 +42,9 @@ run_2011_fixes()
 			:
 		fi
 	elif [ "$1" == 'post' ];then
-		:
+		if [ "$DISTRO_LEVEL" -lt 25 ];then
+			kde_udev_fix_1
+		fi
 	fi
 }
 
@@ -50,6 +52,32 @@ run_2011_fixes()
 ### specific du fixes
 ###---------------------------------------------------------------------
 
+kde_udev_fix_1()
+{
+	local prefId='kde-udev-fix-1'
+	local smPref=$( sm_pref_tester $prefId )
+	local isInstalled=$( package_tester 'kdebase-workspace-bin' )
+	
+	if [ "$smPref" -eq 0 -a -n "$isInstalled" ];then
+		echo "${S}Running ${C}KDE Udev${S} fix now...${N}"
+		isInstalled=$( package_tester 'upower' )
+		isAvailable=$( check_package_status 'upower' 'c' )
+		if [ -z "$isInstalled" -a -n "$isAvailable" ];then
+			package_installer "upower" 'install-always' 
+		fi
+		isInstalled=$( package_tester 'udisks' )
+		isAvailable=$( check_package_status 'udisks' 'c' )
+		if [ -z "$isInstalled" -a -n "$isAvailable" ];then
+			package_installer "udisks" 'install-always' 
+		fi
+		isInstalled=$( package_tester 'polkit-kde-1' )
+		isAvailable=$( check_package_status 'polkit-kde-1' 'c' )
+		if [ -z "$isInstalled" -a -n "$isAvailable" ];then
+			package_installer "polkit-kde-1" 'install-always' 
+		fi
+		set_sticky_prefs $prefId
+	fi
+}
 
 
 ###**EOF**###
