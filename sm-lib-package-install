@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.8
-####  Date: July 14 2011
+####  version: 3.4.9
+####  Date: July 15 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1475,7 +1475,7 @@ inxi_installer()
 	# install x tools if x is installed
 	if [ -n "$( check_package_status 'xserver-xorg-core' 'i' )" ];then
 		echo "${S}Checking/installing graphics recommended packages...${N}"
-		package_installer 'mesa-utils X11-utils x11-xserver-utils' 'install-missing'
+		package_installer 'mesa-utils x11-utils x11-xserver-utils' 'install-missing'
 		echo $LINE
 	fi
 	# install dependencies
