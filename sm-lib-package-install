@@ -1506,8 +1506,8 @@ inxi_installer()
 		echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
 		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviKde4Path}$MOD_INXI
 	fi
-	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or 4)${M} options unless requested in IRC."
-	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-d${S} or ${C}-v3${S}"
+	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or greater)${M} options unless requested in IRC."
+	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-b${S} or ${C}-v 1 (1-3 are reasonable)${S}"
 	echo "See ${C}inxi -h${S} for the full list of supported output options.${N}"
 	print_hec
 }
