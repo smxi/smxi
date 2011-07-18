@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.9
-####  Date: July 12 2011
+####  version: 1.23.10
+####  Date: July 18 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -26,7 +26,7 @@
 
 # one global here just for convenience
 # temp for sid volatile period:
-TEMP_HOLDS='p7zip-rar:p7zip-full '
+TEMP_HOLDS=''
 CHECK_HOLD_PACKAGES="amule:amule-common audacity:audacity-data elinks:elinks-data gimp-help-common:gimp-helpbrowser gnucash:gnucash-common hugin:hugin-data kdenlive:kdenlive-data k3b:k3b-data ktorrent:ktorrent-data pidgin:pidgin-data rosegarden:rosegarden-data thunar:thunar-data xchat:xchat-common xmoto:xmoto-data xsane:xsane-common $TEMP_HOLDS"
 
 ###---------------------------------------------------------------------
@@ -283,12 +283,13 @@ package_installer()
 		echo "${SPACER}${S}$altText1 ${C}$1${S}$altText2...${N}"
 
 		if [ "$forceIt" == 'true' ];then
-			log_function_data "install -f pre"
+			log_function_data "install -f pre: $APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes"
 			$APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes 2>>$LOG_FILE 2>&1
 		fi
+		log_function_data "install main: $APT_TYPE $install $WITHOUT_RECOMMENDS $doYes $extraInstallArgs $1"
 		$APT_TYPE $install $WITHOUT_RECOMMENDS $doYes $extraInstallArgs $1 2>>$LOG_FILE 2>&1 || installError=$?
 		if [ "$forceIt" == 'true' ];then
-			log_function_data "install -f post"
+			log_function_data "install -f post: $APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes"
 			$APT_TYPE install $WITHOUT_RECOMMENDS -f $doYes 2>>$LOG_FILE 2>&1 || forceError=$?
 		fi
 	# if user install and already installed...
