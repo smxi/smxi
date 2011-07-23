@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.11
-####  Date: July 18 2011
+####  version: 1.23.12
+####  Date: July 23 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -422,7 +422,7 @@ apt_error_handling()
 			echo "${C}2 - $APT_TYPE update${S} Runs update again using your current choices."
 			echo "${C}3 - change-debian-mirror${S} If the mirror that is failing is a Debian mirror,"
 			echo "    change to another debian mirror."
-# 			echo "${C}4 - change-aptosid-mirror${S} If the mirror that is failing is a ${C}sidux${S} mirror,"
+# 			echo "${C}4 - change-aptosid-mirror${S} If the mirror that is failing is a ${C}aptosid${S} mirror,"
 # 			echo "    change to another aptosid mirror."
 			echo
 			echo "${C}4 - continue${S} Continue without fixing the error, trust that it will be ok."
@@ -1169,7 +1169,7 @@ update_to_nonfree_sources()
 						do
 							if [ -f "$i" ];then
 								echo "${S}Updating your ${C}$i${S} now...${N}"
-								# these are both updated to handle sidux mirrors as well
+								# these are both updated to handle aptosid mirrors as well
 								sed -i -r 's%(#?deb.*(debian\.org|mirrors\.kernel\.org).*\s(main))(\s*)(non-free.*|contrib.*)*%\1 contrib non-free%' $i
 							fi
 						done
@@ -1552,11 +1552,11 @@ change_distro_mirrors()
 			local countryId='' mirrorUrl='' mirror='' opt='' options='' found='' skip='' prefMess=''
 			#local currentMirror=$( sm_pref_tester $prefId 'equal' )
 			local updateSuccess='' exitStatus='' noChange=' continue' currentMirrorText=''
-			local currentMirror="$( get_sidux_mirrors 'all' )"
+			local currentMirror="$( get_aptosid_mirrors 'all' )"
 			local plural1='' plural2='is'
 			local noMirrorString='No mirrors were detected that fit the search pattern.'
-			local siduxMirrors="$( list_sidux_mirrors ) $noChange"
-			local cont=$( wc -w <<< $siduxMirrors )
+			local aptosidMirrors="$( list_aptosid_mirrors ) $noChange"
+			local cont=$( wc -w <<< $aptosidMirrors )
 			local mirrorCount=$(( $cont - 1 ))
 
 			currentMirrorText="$currentMirror"
@@ -1577,34 +1577,34 @@ change_distro_mirrors()
 			echo "${SPACER}${C}$currentMirrorText${S}"
 			echo
 			echo "There are two types of mirrors: ${C}core${S} (required), and ${C}alternate${S} (optional)."
-			echo "The following are the ${C}core${S} aptosid mirrors: ${C}sidux.com/net debian.tu-bs.de ftp.spline.de"
+			echo "The following are the ${C}core${S} aptosid mirrors: ${C}aptosid.com/net debian.tu-bs.de ftp.spline.de"
 			echo "${S}You will always use one of these. Picking a core will modify the core mirror always."
 			echo
 			echo "Alternate mirrors are localized, and often provide much faster downloads, but do not sync"
 			echo "as frequently as the core ones. If you pick an alternate, it will be prepended"
 			echo "to your current core mirror, or, if already with alternate, will modify the alternate."
-			echo "${M}Please install at least one alternate mirror, it will really help the sidux server load.${S}"
+			echo "${M}Please install at least one alternate mirror, it will really help the aptosid server load.${S}"
 			echo
-			echo "${S}When you select your mirror(s), sidux will use it/them as source for latest"
-			echo "kernels and sidux hot-fixes. You can start this script like this: ${C}$SCRIPT_NAME -M${S}"
+			echo "${S}When you select your mirror(s), aptosid will use it/them as source for latest"
+			echo "kernels and aptosid hot-fixes. You can start this script like this: ${C}$SCRIPT_NAME -M${S}"
 			echo "to reset your prefered mirror(s) any time you like."
 			eval $prefMess
 			echo $LINE
 			echo "${C}1-$mirrorCount - Mirror List${S} Select which core/alternate mirror to add or update."
 			if [ -n "$currentMirror" ];then
 				echo
-				echo "${C}$cont - continue${S} If you want to leave your sidux mirror$plural1 alone, or if you are done."
+				echo "${C}$cont - continue${S} If you want to leave your aptosid mirror$plural1 alone, or if you are done."
 			fi
 
 			echo $LINE
 			echo -e $SLE
 			echo $LINE
 
-			options=$siduxMirrors
+			options=$aptosidMirrors
 
 			select opt in $options
 			do
-				for mirror in $siduxMirrors
+				for mirror in $aptosidMirrors
 				do
 					if [ "$opt" == "$mirror" ];then
 						found='true'
@@ -1626,13 +1626,13 @@ change_distro_mirrors()
 				echo $LINE
 				if [ "$skip" != 'true' ];then
 					if [ "$currentMirror" != "$noMirrorString" ];then
-						set_sidux_mirror "$mirrorUrl"
+						set_aptosid_mirror "$mirrorUrl"
 						change_distro_mirrors
 					else
 						echo "${M}$noMirrorString${N}"
 					fi
 				else
-						echo "${S}Continuing on to main script. Remember, you can change your ${C}sidux apt mirrors${S}"
+						echo "${S}Continuing on to main script. Remember, you can change your ${C}aptosid apt mirrors${S}"
 						echo "anytime by starting the script like this: ${C}$SCRIPT_NAME -M${N}"
 						apt_update_handler 'post-mirror'
 				fi
@@ -1645,7 +1645,7 @@ change_distro_mirrors()
 		fi
 	else
 		echo $MLINE
-		echo "${M}This feature is only available for systems using ${C}sidux${M} sources.${N}"
+		echo "${M}This feature is only available for systems using ${C}aptosid${M} sources.${N}"
 		print_hec
 		eval $LOGPE
 	fi
@@ -1654,23 +1654,23 @@ change_distro_mirrors()
 #script_debugger 'change_distro_mirrors prefs'
 
 # args: $1 - all/get-them/non-core
-get_sidux_mirrors()
+get_aptosid_mirrors()
 {
 	eval $LOGUS
-	local siduxMirrors="$( list_sidux_mirrors )"
-	local badSiduxMirrors="$( list_bad_sidux_mirrors )"
+	local aptosidMirrors="$( list_aptosid_mirrors )"
+	local badSiduxMirrors="$( list_bad_aptosid_mirrors )"
 	local noMirrorString='No mirrors were detected that fit the search pattern.'
 	local mirrorTemp='' mirror='' mirrorsFound='' mirrorFiles='' singleTest=''
 	local currentMirrors=''
 
 	# needed to avoid infinite loop from function calling itself
 	if [ "$1" != 'get-them' ];then
-		currentMirrors="$( get_sidux_mirrors 'get-them' )"
+		currentMirrors="$( get_aptosid_mirrors 'get-them' )"
 	fi
 
 	local countMirrors=$( wc -w <<< $currentMirrors )
 
-	for mirror in $siduxMirrors $badSiduxMirrors
+	for mirror in $aptosidMirrors $badSiduxMirrors
 	do
 		mirrorTemp=$( echo $mirror | cut -d ':' -f 2-4 )
 		# it's very important here to search only for start deb, no # and also there are
@@ -1685,11 +1685,11 @@ get_sidux_mirrors()
 				all|get-them)
 					mirrorsFound="$mirrorsFound $mirrorTemp"
 					;;
-				# here we return only current non sidux mirror (hopefully anyway)
+				# here we return only current non aptosid mirror (hopefully anyway)
 				non-core)
-					singleTest=$( grep -Ev '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' <<< $mirrorTemp )
+					singleTest=$( grep -Ev '(http://aptosid\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)/' <<< $mirrorTemp )
 					# echo singleTest: $singleTest
-					# if a core mirror is not found, or if there is only one sidux mirror
+					# if a core mirror is not found, or if there is only one aptosid mirror
 					if [ -n "$singleTest" ] || [ "$countMirrors" -eq 1 ];then
 						mirrorsFound="$mirrorTemp"
 						# echo mirrorsFound: $mirrorsFound
@@ -1713,83 +1713,83 @@ get_sidux_mirrors()
 }
 
 # args: $1 - which mirror to update
-set_sidux_mirror()
+set_aptosid_mirror()
 {
 	eval $LOGUS
-	local siduxSources='' siduxSource='' mirrorTemp='' nonCoreSiduxRepo='' isCoreSiduxRepo=''
-	local entryExists='' siduxSpecs='' isSiduxMulti='' siduxTempHolder='' siduxTempRepo=''
-	local updateIt=''
-	local currentMirrors="$( get_sidux_mirrors 'get-them' )"
+	local aptosidSources='' aptosidSource='' mirrorTemp='' nonCoreAptosidRepo=''
+	local isCoreAptosidRepo='' entryExists='' aptosidSpecs='' isAptosidMulti=''
+	local aptosidTempHolder='' aptosidTempRepo='' updateIt=''
+	local currentMirrors="$( get_aptosid_mirrors 'get-them' )"
 	local countMirrors=$( wc -w <<< $currentMirrors )
 
-	# get filtered, non sidux mirror repo
-	nonCoreSiduxRepo=$( get_sidux_mirrors 'non-core' )
+	# get filtered, non aptosid mirror repo
+	nonCoreAptosidRepo=$( get_aptosid_mirrors 'non-core' )
 
-	# we only want to overwrite sidux stuff it's not a dual apt sources...
-	isSiduxMulti=$( grep -Es "^[[:space:]]*(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/*.list | cut -d ':' -f 2-6 )
-	isCoreSiduxRepo="$( echo "$1" | grep -E  '(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
+	# we only want to overwrite aptosid stuff it's not a dual apt sources...
+	isAptosidMulti=$( grep -Es "^[[:space:]]*(deb|deb-src)\s*.*(http://aptosid\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $EAS $EAS.d/*.list | cut -d ':' -f 2-6 )
+	isCoreAptosidRepo="$( echo "$1" | grep -E  '(http://aptosid\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)' )"
 
 	# handle multiple entries in sources
 	# make sure the current mirror only is selected
 	# this step is critical, it is required to correctly set entryExists
 	# for case of multiple mirror entries AND correctly setting mirror
-	if [ -n "$isCoreSiduxRepo" ];then
-		# this handles a really weird case where sidux.list is commented out
+	if [ -n "$isCoreAptosidRepo" ];then
+		# this handles a really weird case where aptosid.list is commented out
 		# because we're checking multiple files, we need to slice out the file :
 		# separator before awk
-		entryExists=$( grep -s '^[^#]' $EAS $EAS.d/*.list | cut -d ':' -f 2-6 | awk '/^(deb)[ ]*(((http|ftp):\/\/)(sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de))/{print $2}' )
+		entryExists=$( grep -s '^[^#]' $EAS $EAS.d/*.list | cut -d ':' -f 2-6 | awk '/^(deb)[ ]*(((http|ftp):\/\/)(aptosid\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de))/{print $2}' )
 	else
-		entryExists=$( grep -Eos -m1 "^[[:space:]]*(deb|deb-src)[[:space:]]*$nonCoreSiduxRepo" $EAS $EAS.d/*.list | grep -o "$nonCoreSiduxRepo" )
+		entryExists=$( grep -Eos -m1 "^[[:space:]]*(deb|deb-src)[[:space:]]*$nonCoreAptosidRepo" $EAS $EAS.d/*.list | grep -o "$nonCoreAptosidRepo" )
 	fi
 	log_function_data "mirror to install: $1"
-	log_function_data "nonCoreSiduxRepo: $nonCoreSiduxRepo"
+	log_function_data "nonCoreAptosidRepo: $nonCoreAptosidRepo"
 	log_function_data "entryExists: $entryExists"
 	log_function_data "writing to: $sourceFile"
 	log_function_data "countMirrors: $countMirrors"
-	log_function_data "isSiduxMulti: $isSiduxMulti"
-	log_function_data "isCoreSiduxRepo: $isCoreSiduxRepo"
+	log_function_data "isAptosidMulti: $isAptosidMulti"
+	log_function_data "isCoreAptosidRepo: $isCoreAptosidRepo"
 
 	# note: we don't need any special regex because we already know
 	# we're in the right place, with a matching syntax, so things should be good
 	if [ -n "$entryExists" ];then
-		if [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" ] || [ "$countMirrors" -eq 1 -a -n "$isCoreSiduxRepo" ];then
-			siduxSources=$( grep -ls "$entryExists" $EAS $EAS.d/*.list )
-			echo "${SPACER}${S}Updating ${C}$siduxSources${S} now...${N}"
-			sed -i -r "s%(#?[[:space:]]*(deb|deb-src)[[:space:]]*)$entryExists%\1$1%" $siduxSources
+		if [ "$countMirrors" -gt 1 -a -n "$isAptosidMulti" ] || [ "$countMirrors" -eq 1 -a -n "$isCoreAptosidRepo" ];then
+			aptosidSources=$( grep -ls "$entryExists" $EAS $EAS.d/*.list )
+			echo "${SPACER}${S}Updating ${C}$aptosidSources${S} now...${N}"
+			sed -i -r "s%(#?[[:space:]]*(deb|deb-src)[[:space:]]*)$entryExists%\1$1%" $aptosidSources
 			echo
-			echo "${SPACER}${S}Your system will now use sidux-apt/kernel mirror(s):"
-			echo "${SPACER}${C}$( get_sidux_mirrors 'all' )${N}"
+			echo "${SPACER}${S}Your system will now use aptosid-apt/kernel mirror(s):"
+			echo "${SPACER}${C}$( get_aptosid_mirrors 'all' )${N}"
 			updateIt='true'
 		# only when not a core mirror and sources are not yet upgraded to multi
-		elif [ "$countMirrors" -eq 1 -a -z "$isCoreSiduxRepo" ];then
+		elif [ "$countMirrors" -eq 1 -a -z "$isCoreAptosidRepo" ];then
 			#note: we only want to prepend to sources NOT commented out
-			siduxSources=$( grep -ls "^[[:space:]]*deb.*$entryExists" $EAS $EAS.d/*.list )
+			aptosidSources=$( grep -ls "^[[:space:]]*deb.*$entryExists" $EAS $EAS.d/*.list )
 			# we need to loop it here because of possible multi source files
-			for siduxSource in $siduxSources
+			for aptosidSource in $aptosidSources
 			do
-				siduxTempHolder=$( grep -E -m1 "(deb|deb-src)\s*.*(http://sidux\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $siduxSource )
+				aptosidTempHolder=$( grep -E -m1 "(deb|deb-src)\s*.*(http://aptosid\.(com|net)|debian\.tu-bs\.de|ftp\.spline\.de)" $aptosidSource )
 				# for presentation, just use the repo name
-				siduxTempRepo=$( cut -d ' ' -f 2 <<< $siduxTempHolder )
+				aptosidTempRepo=$( cut -d ' ' -f 2 <<< $aptosidTempHolder )
 				# we need to replace whitespace for sed here
-				siduxTempMainHolder=$( echo "$siduxTempHolder" | sed -r 's%(\s|\t)%\\s%g' )
+				aptosidTempMainHolder=$( echo "$aptosidTempHolder" | sed -r 's%(\s|\t)%\\s%g' )
 				# we want the same stuff after the mirror as the primary has
-				siduxSpecs=$( echo $siduxTempHolder | sed -r 's%.*((sid|unstable).*)%\1%' )
+				aptosidSpecs=$( echo $aptosidTempHolder | sed -r 's%.*((sid|unstable).*)%\1%' )
 
-				log_function_data "siduxTempHolder: $siduxTempHolder"
-				log_function_data "siduxTempMainHolder: $siduxTempMainHolder"
-				log_function_data "siduxSpecs: $siduxSpecs"
+				log_function_data "aptosidTempHolder: $aptosidTempHolder"
+				log_function_data "aptosidTempMainHolder: $aptosidTempMainHolder"
+				log_function_data "aptosidSpecs: $aptosidSpecs"
 
 				echo "${S}Prepending the mirror:${C} $1"
-				echo "${S}to current sidux repo: ${C}$siduxTempRepo${N}"
-				sed -i "s%$siduxTempMainHolder%deb $1 $siduxSpecs\n$siduxTempHolder%" $siduxSource
+				echo "${S}to current aptosid repo: ${C}$aptosidTempRepo${N}"
+				sed -i "s%$aptosidTempMainHolder%deb $1 $aptosidSpecs\n$aptosidTempHolder%" $aptosidSource
 			done
-			echo "${SPACER}${S}Your system will now use sidux-apt/kernel mirror(s):"
-			echo "${SPACER}${C}$( get_sidux_mirrors 'all' )${N}"
+			echo "${SPACER}${S}Your system will now use aptosid-apt/kernel mirror(s):"
+			echo "${SPACER}${C}$( get_aptosid_mirrors 'all' )${N}"
 			updateIt='true'
 		# this case should never happen any more with above modifications
-		elif [ "$countMirrors" -gt 1 -a -n "$isSiduxMulti" -a -n "$isCoreSiduxRepo" ];then
-			echo "${E}You cannot overwrite your primary ${C}sidux.com${E} apt source:"
-			echo "${C}$isCoreSiduxRepo"
+		elif [ "$countMirrors" -gt 1 -a -n "$isAptosidMulti" -a -n "$isCoreAptosidRepo" ];then
+			echo "${E}You cannot overwrite your primary ${C}aptosid.com${E} apt source:"
+			echo "${C}$isCoreAptosidRepo"
 			echo "${E}only your alternate mirror.${N}"
 		# and not this one either, but good to test for bugs
 		else
@@ -1798,9 +1798,9 @@ set_sidux_mirror()
 	# either multi update or single core update
 	# only do this at the true end
 	elif [ -z "$entryExists" ];then
-		echo "${E}Unable to properly match your ${C}sidux.com${E} repo, sorry.${N}"
+		echo "${E}Unable to properly match your ${C}aptosid.com${E} repo, sorry.${N}"
 		print_hec
-		log_function_data "Unable to match sidux repo"
+		log_function_data "Unable to match aptosid repo"
 		eval $LOGUE
 		return 1
 	fi
@@ -1813,7 +1813,7 @@ set_sidux_mirror()
 }
 
 # bad mirrors for updates:
-list_bad_sidux_mirrors()
+list_bad_aptosid_mirrors()
 {
 	eval $LOGUS
 	# these are currently either dead or defective:
@@ -1834,32 +1834,32 @@ new-zealand-1:ftp://debian.co.nz/Sidux/debian/
 }
 
 # I want to keep this out of globals, so we'll just echo it to functions
-list_sidux_mirrors()
+list_aptosid_mirrors()
 {
 	eval $LOGUS
 
-	local siduxMirrors="
-core-eu-1:http://debian.tu-bs.de/project/sidux/debian/
-core-eu-2:ftp://debian.tu-bs.de/project/sidux/debian/
-core-eu-3:ftp://ftp.spline.de/pub/sidux/debian/
-core-eu-4:http://sidux.com/debian/
-core-eu-5:http://sidux.net/debian/
-core-eu-6:http://sidux.office-vienna.at/sidux/debian/
-core-eu-7:ftp://sidux.office-vienna.at/sidux/debian/
-alt-africa-1:http://ftp.leg.uct.ac.za/pub/linux/sidux/debian/
+	local aptosidMirrors="
+core-eu-1:http://debian.tu-bs.de/project/aptosid/debian/
+core-eu-2:ftp://debian.tu-bs.de/project/aptosid/debian/
+core-eu-3:ftp://ftp.spline.de/pub/aptosid/debian/
+core-eu-4:http://aptosid.com/debian/
+core-eu-5:http://aptosid.net/debian/
+core-eu-6:http://aptosid.office-vienna.at/aptosid/debian/
+core-eu-7:ftp://aptosid.office-vienna.at/aptosid/debian/
+alt-africa-1:http://ftp.leg.uct.ac.za/pub/linux/aptosid/debian/
 alt-asia-1:http://ftp.tw.debian.org/pub/Sidux/debian/
 alt-asia-2:ftp://ftp.tw.debian.org/pub/Sidux/debian/
-alt-brazil-1:http://sidux.c3sl.ufpr.br/debian/
-alt-australia-1:http://mirror.aarnet.edu.au/pub/sidux/debian/
-alt-australia-2:ftp://mirror.aarnet.edu.au/pub/sidux/debian/
-alt-eu-1:http://www.mirrorservice.org/sites/sidux.com/sidux/debian/
-alt-eu-2:ftp://ftp.mirrorservice.org/sites/sidux.com/sidux/debian/
-alt-eu-3:http://ftp.heanet.ie/pub/sidux/debian/
-alt-eu-4:ftp://ftp.heanet.ie/pub/sidux/debian/
-alt-usa-3:http://mira.sunsite.utk.edu/sidux/debian/
+alt-brazil-1:http://aptosid.c3sl.ufpr.br/debian/
+alt-australia-1:http://mirror.aarnet.edu.au/pub/aptosid/debian/
+alt-australia-2:ftp://mirror.aarnet.edu.au/pub/aptosid/debian/
+alt-eu-1:http://www.mirrorservice.org/sites/aptosid.com/aptosid/debian/
+alt-eu-2:ftp://ftp.mirrorservice.org/sites/aptosid.com/aptosid/debian/
+alt-eu-3:http://ftp.heanet.ie/pub/aptosid/debian/
+alt-eu-4:ftp://ftp.heanet.ie/pub/aptosid/debian/
+alt-usa-3:http://mira.sunsite.utk.edu/aptosid/debian/
 "
 
-	echo "$siduxMirrors"
+	echo "$aptosidMirrors"
 	eval $LOGUE
 }
 
