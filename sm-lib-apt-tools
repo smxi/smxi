@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.12
-####  Date: July 23 2011
+####  version: 1.23.13
+####  Date: July 26 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1899,9 +1899,19 @@ get_current_apt_kernel()
 			debian)
 				distro='Debian'
 				if [ "$BITS" == '32' ];then
-					if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
-						platform='686-pae'
-					fi
+					case $platform in
+					486)
+						distro='Debian-486'
+						;;
+					686|686-pae)
+						if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
+							platform='686-pae'
+						fi
+						;;
+					686-bigmem)
+						distro='Debian-686-bigmem'
+						;;
+					esac
 				fi
 				;;
 			debian-486)
