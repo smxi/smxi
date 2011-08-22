@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.14
+####  version: 1.23.15
 ####  Date: August 21 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -820,13 +820,13 @@ advanced_broken_dependency_handler()
 			tempTwo=$tempOne
 			case $versionGroup in
 				# full version strings for picky package groups
-				evolution|transmission|virtualbox|wesnoth)
+				transmission|virtualbox|wesnoth)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
 				# I'm adding in the + test to handle those beta versions and some other odd
 				# syntaxes: 2.8.4+2.8.4-1;
-				gimp|gnome-1|gnome-2|gnome-3|gnome-ruby|gnome-vfs|hplip|vegastrike|xfce4|xpdf)
+				evolution|gimp|gnome-1|gnome-2|gnome-3|gnome-ruby|gnome-vfs|hplip|vegastrike|xfce4|xpdf)
 					tempOne=$( check_package_status "$package" | cut -d '-' -f 1 | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases. sun java: 6-14-1
