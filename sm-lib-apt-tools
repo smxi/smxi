@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.13
-####  Date: July 26 2011
+####  version: 1.23.14
+####  Date: August 21 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -530,6 +530,7 @@ set_hold_install()
 			advanced_broken_dependency_handler 'sun-java'
 			advanced_broken_dependency_handler 'transmission'
 			advanced_broken_dependency_handler 'vegastrike'
+			advanced_broken_dependency_handler 'virtualbox'
 			advanced_broken_dependency_handler 'wesnoth'
 			advanced_broken_dependency_handler 'xfce4'
 			advanced_broken_dependency_handler 'xpdf'
@@ -775,6 +776,12 @@ advanced_broken_dependency_handler()
 			"
 			packageGroup='Vegastrike'
 			;;
+		virtualbox)
+			packages="
+			$( package_tester '(virtualbox|virtualbox-qt|virtualbox-source)')
+			"
+			packageGroup='VirtualBox'
+			;;
 		wesnoth)
 			packages="
 			$( package_tester 'wesnoth' 'wild-full' )
@@ -813,7 +820,7 @@ advanced_broken_dependency_handler()
 			tempTwo=$tempOne
 			case $versionGroup in
 				# full version strings for picky package groups
-				evolution|transmission|wesnoth)
+				evolution|transmission|virtualbox|wesnoth)
 					tempOne=$( check_package_status "$package" )
 					;;
 				# shorter version number strings for less picky package groups
