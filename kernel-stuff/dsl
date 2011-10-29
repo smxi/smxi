@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.9
-####  Date: October 26 2011
+####  version: 2.3.10
+####  Date: October 29 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####
@@ -194,7 +194,7 @@ set_values()
 		liquorix)
 			repoPre="http://liquorix.net/debian/pool/${POOL_TYPE}/l/"
 			repoMain='linux-liquorix/'
-			repoModules='linux-modules-liquorix-main-2.6/'
+			repoModules='linux-modules-liquorix-main/'
 			repoExtra=''
 			;;
 	esac
@@ -405,12 +405,14 @@ move_files_to_directories()
 	echo "Transferring files to directories..."
 	mv -f linux-image-${kernelType}*i386.deb 32-meta
 	mv -f linux-headers-${kernelType}*i386.deb 32-meta
-	mv -f linux-image-${kernelType}*i386.deb 32-meta
-	mv -f linux-headers-${kernelType}*i386.deb 32-meta
+	# 2.6 packages for headers are dummies to update user systems
+	mv -f linux-image-2.6-${kernelType}*i386.deb 32-meta
+	mv -f linux-headers-2.6-${kernelType}*i386.deb 32-meta
 	mv -f linux-image-${kernelType}*amd64.deb 64-meta
 	mv -f linux-headers-${kernelType}*amd64.deb 64-meta
-	mv -f linux-image-${kernelType}*amd64.deb 64-meta
-	mv -f linux-headers-${kernelType}*amd64.deb 64-meta
+	# 2.6 packages for headers are dummies to update user systems
+	mv -f linux-image-2.6-${kernelType}*amd64.deb 64-meta
+	mv -f linux-headers-2.6-${kernelType}*amd64.deb 64-meta
 	cp -f $gzDir*${KERNEL_MAIN}*.gz 32
 	cp -f $gzDir*$KERNEL_MAIN*.gz 64
 	cp -f $gzDir*${KERNEL_MAIN}*.bz2 32
