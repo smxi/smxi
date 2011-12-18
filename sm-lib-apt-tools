@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.16
-####  Date: September 3 2011
+####  version: 1.23.17
+####  Date: December 17 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -620,13 +620,13 @@ broken_dependency_handler()
 			# determine whether to do full or partial version number tests
 			# using cut -f 2-4 to handle cases of numbering like 1:2.5.6-3
 			case $package1 in
-				amule|gnucash|rosegarden|xchat)
+				amule|gnucash|rosegarden)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					tempHolder1=$( check_package_status "$package1" )
 					tempHolder2=$( check_package_status "$package2" )
 					;;
 				# special case to avoid 0.11.3-7+b1 / 0.11.3-7 type cases
-				audacity|elinks|k3b|thunar|xsane)
+				audacity|elinks|k3b|thunar|xchat|xsane)
 					# this is to deal with package subversion mismatch breaks: 1.0.4-6 1.0.4-5
 					tempHolder1=$( check_package_status "$package1" | cut -d '+' -f 1 | cut -d '~' -f 1 )
 					tempHolder2=$( check_package_status "$package2" | cut -d '+' -f 1 | cut -d '~' -f 1 )
