@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.12
-####  Date: July 22 2011
+####  version: 3.4.13
+####  Date: December 29 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -452,7 +452,7 @@ select_install_type()
 	echo
 	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, MS core fonts, Opera, Skype, Google Earth."
 	echo
-	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, rbxi, and more."
+	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi,  , and more."
 	echo
 	echo "${C}4${S} - ${C}desktop-environment${S} Install Xorg, Gnome, Kde, Xfce, fVwm Crystal, Lxde."
 	echo
@@ -616,11 +616,12 @@ non_free_installer()
 	echo "${C}3${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
 	echo "    Check out the new FSF gnash player for the Free Software version flash player."
 	echo
-	echo "${C}4${S} - ${C}java-plugin${S} Installs the Sun Java plugin and jre, for use by all browsers."
+	echo "${C}4${S} - ${C}java-plugin${S} Installs the Java plugin and jre, for use by all browsers."
+	echo "    Depending on your system, this will either be the ${C}Sun${S} version or ${C}icedtea6-plugin${S}"
 	echo
 	echo "${C}5${S} - ${C}ms-core-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
 	echo
-	echo "${C}6${S} - ${C}skype${S} Installs Skype. Some people call it spyware too."
+	echo "${C}6${S} - ${C}skype${S} Installs Skype. Hate it or love it, here it is."
 	echo
 	echo -e "${C}7${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
 	echo "    ${M}NOTE: This is working again in at least Debian Sid, installs latest and it starts."
@@ -790,6 +791,7 @@ utilities_installer()
 				repeat='true'
 				;;
 			rbxi)
+				package_group_installer 'plain' 'bzip2 rsync'
 				update_all_scripts 'rbxi' 'internal'
 				repeat='true'
 				;;
@@ -1381,10 +1383,13 @@ java_plugin_installer()
 	echo $LINE
 	echo "${S}Checking for ${C}Java Plugin${S} installation candidates...${N}"
 	if [ -n "$sunJava" ];then
-		package_group_installer plain sun-java6-plugin 'update_to_nonfree_sources'
+		package_group_installer plain 'sun-java6-plugin' 'update_to_nonfree_sources'
+		installed='true'
+	elif [ -n "$( check_package_status 'icedtea6-plugin' 'c' )" ];then
+		package_group_installer plain 'icedtea6-plugin'
 		installed='true'
 	elif [ -n "$( check_package_status 'java-gcj-compat-plugin' 'c' )" ];then
-		package_group_installer plain java-gcj-compat-plugin
+		package_group_installer plain 'java-gcj-compat-plugin'
 		installed='true'
 	else
 		echo "${M}No ${C}Java plugin${M} available in your ${C}$BITS bit $SYSTEM_BASE${M} install."
@@ -1404,10 +1409,12 @@ reinstall_skype()
 	local SkypeFileName=''
 	# note: the skype url is a 302 to the current latest version of skype
 	# local skypeDebUrl='http://www.skype.com/go/getskype-linux-beta-deb'
+	# this changed and now there's a 32/64 bit auto redirect, default 32, so need to
+	# make it explicit
 
 	# dependencies: libasound2 (>> 1.0.8), libc6 (>= 2.3.2.ds1-4), libgcc1 (>= 1:3.4.1-3), libqt3-mt | libqt3c102-mt (>= 3:3.3.3.2), libstdc++5 (>= 1:3.3.4-1), libx11-6 | xlibs (>> 4.1.0), libxext6 | xlibs (>> 4.1.0)
 	# libasound2 libc6 libgcc1 libstdc++5
-	local skypeDebUrl='http://www.skype.com/go/getskype-linux-deb'
+	local skypeDebUrl="http://www.skype.com/go/getskype-linux-deb-$BITS"
 	echo $LINE
 	wget -T$TIME_OUT -t2 -Nc $skypeDebUrl
 	SkypeFileName=$(ls -f | grep 'skype')
