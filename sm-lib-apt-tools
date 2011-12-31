@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.18
-####  Date: December 20 2011
+####  version: 1.23.19
+####  Date: December 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -156,7 +156,7 @@ check_package_status()
 	esac
 
 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= cacheData="$( apt-cache policy $1 2>/dev/null )"
-	
+# 	
 	# we need to filter out all cases were the only instance in apt is the locally installed
 	# version, ie:  *** 2.13 0 \ 100 /var/lib/dpkg/status is the only value returned
 	poolPackageCount=$( grep -Es "^[[:space:]]*[0-9]{3}"  <<< "$cacheData" | grep -vcE "^[[:space:]]*100[[:space:]]" )
@@ -1220,6 +1220,8 @@ update_sources()
 	local liquorixApt="$EAS.d/liquorix.list"
 	local operaSources='deb http://deb.opera.com/opera sid non-free'
 	local operaApt="$EAS.d/opera.list"
+	local siductionSources='deb ftp://ftp.spline.de/pub/siduction/siduction unstable main '
+	local siductionApt="$EAS.d/siduction.list"
 	local skypeSources='deb http://download.skype.com/linux/repos/debian/ stable non-free'
 	local skypeApt="$EAS.d/skype.list"
 	local swiftSources='deb http://getswiftfox.com/builds/debian unstable non-free'
@@ -1250,6 +1252,13 @@ update_sources()
 			searchIdentifier='Opera'
 			sourceFile=$operaApt
 			sourcesData=$operaSources
+			;;
+		siduction)
+			grepSearch='(siduction|deb-sid)'
+			searchIdentifier='Siduction'
+			sourceFile=$siductionApt
+			sourcesData=$siductionSources
+			extraFunctions2='package_installer siduction-archive-keyring install-always --allow-unauthenticated'
 			;;
 		skype)
 			grepSearch='(skype|deb-skp)'
@@ -1950,10 +1959,17 @@ get_current_apt_kernel()
 				distro='Mepis'
 				platform='smp'
 				;;
+			siduction)
+				kernelStringExtra='-siduction'
+				distro='Siduction'
+				if [ "$BITS" == '32' ];then
+					platform='686'
+				fi
+				;;
 		esac
 		
 		# little trick here to present just debian kernels if not distro
-		if [ "$B_APTOSID_SOURCES" != 'true' -a "$B_LIQUORIX_SOURCES" != 'true' -a "$B_MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
+		if [ "$B_APTOSID_SOURCES" != 'true' -a "$B_SIDUCTION_SOURCES" != 'true' -a "$B_LIQUORIX_SOURCES" != 'true' -a  "$B_MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
 			kernelStringExtra=''
 			distro='Debian'
 			defaultKernel='debian'
@@ -2017,6 +2033,10 @@ get_current_apt_kernel()
 			aptosid)
 				CURRENT_APTOSID_KERNEL=$currentKernel
 				log_function_data "CURRENT_APTOSID_KERNEL: $CURRENT_APTOSID_KERNEL"
+				;;
+			siduction)
+				CURRENT_SIDUCTION_KERNEL=$currentKernel
+				log_function_data "CURRENT_SIDUCTION_KERNEL: $CURRENT_SIDUCTION_KERNEL"
 				;;
 		esac
 

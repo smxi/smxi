@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.5
-####  Date: July 12 2011
+####  version: 8.14.6
+####  Date: December 30 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -74,7 +74,7 @@
 # trigger to turn off libc6 pre installs in sm-kernel-install because libc6 breaks at times
 B_LIBC6_BORKED='false'
 
-NON_DEBIAN_PATTERN='(deb-ats|deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|aptosid|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
+NON_DEBIAN_PATTERN='(deb-ats|deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|aptosid|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|siduction|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
 
 # system paths etc
 EAA='/etc/apt/apt.conf'
@@ -114,6 +114,7 @@ EDV='/etc/debian_version'
 EKV='/etc/kanotix-version'
 ELR='/etc/lsb-release'
 ESV='/etc/sidux-version'
+ESUV='/etc/siduction-version'
 SMDV='/etc/s-distro-version'
 SMDL='/etc/s-distro-level'
 
@@ -251,6 +252,7 @@ B_APTOSID_SOURCES='false'
 B_LINUXMINT_SOURCES='false'
 B_LIQUORIX_SOURCES='false'
 B_MEPIS_SOURCES='false'
+B_SIDUCTION_SOURCES='false'
 
 # video driver booleans
 B_ATI='false'
@@ -287,10 +289,11 @@ CURRENT_KERNEL=$(uname -r)
 CURRENT_APT_KERNEL=''
 CURRENT_APT_KERN_BASE=''
 CURRENT_APT_KERNEL_GRUB=''
+CURRENT_APTOSID_KERNEL=''
 CURRENT_DEBIAN_KERNEL=''
 CURRENT_LIQUORIX_KERNEL=''
 CURRENT_MEPIS_KERNEL=''
-CURRENT_APTOSID_KERNEL=''
+CURRENT_SIDUCTION_KERNEL=''
 DEBIAN_KERNEL_INSTALLED=''
 DEBIAN_KERNEL_CANDIDATE=''
 DEFAULT_KERNEL=''
@@ -1400,7 +1403,7 @@ launch_function_trigger()
 metapackage_launcher()
 {
 	eval $LOGPS
-	local metaExists=$( package_tester 'linux-image-(2\.6|[3-9])-(aptosid-|sidux-|liquorix-|)(amd64|486|686)' )
+	local metaExists=$( package_tester 'linux-image-(2\.6|[3-9])-(aptosid-|siduction-|sidux-|liquorix-|)(amd64|486|686)' )
 
 	# special case here, only run if metapackages are present, or if user initiates
 	# note: user initiates either by starting from kernel advanced, or -N
@@ -1438,6 +1441,7 @@ set_distro_data()
 	local aptosidSources=$( grep -Esi '^[[:space:]]*deb.*(deb-ats|aptosid)' <<< "$easContent" )
 	local liquorixSources=$( grep -Esi '^[[:space:]]*deb.*(deb-lqx|liquorix)' <<< "$easContent" )
 	local mepisSources=$( grep -Esi '^[[:space:]]*deb.*(deb-mep|mepis)' <<< "$easContent" )
+	local siductionSources=$( grep -Esi '^[[:space:]]*deb.*(deb-sid|siduction)' <<< "$easContent" )
 	local aptType=$( sm_pref_tester 'apt-type' 'equal' )
 	# test to make sure it's safe for antix users and others to upgrade, this shows
 	# that kopt is using a safe UUID/LABEL method for root
@@ -1508,8 +1512,10 @@ set_distro_data()
 	fi
 
 	# now we're going to process as true default ELR, this will
-	# override everything except antix/sidux/aptosid
-	if [ -f $EAV ];then
+	# override everything except antix/sidux/aptosid/siduction
+	if [ -f $ESUV ];then
+		DISTRO='siduction'
+	elif [ -f $EAV ];then
 		DISTRO='aptosid'
 	elif [ -f $ESV ];then
 		DISTRO='sidux'
@@ -1548,12 +1554,16 @@ set_distro_data()
 	if [ -n "$liquorixSources" ];then
 		B_LIQUORIX_SOURCES='true'
 	fi
+	if [ -n "$siductionSources" ];then
+		B_SIDUCTION_SOURCES='true'
+	fi
+	
 	DISTRO_F="$DISTRO-$SYSTEM_BASE-$BITS"
 
 	## override defaults by user preference
 	# user set default kernel
 	case "$defaultKernel" in
-		aptosid|debian|liquorix|mepis|no-kernel)
+		siduction|aptosid|debian|liquorix|mepis|no-kernel)
 			DEFAULT_KERNEL=$defaultKernel
 			;;
 	esac
@@ -1595,7 +1605,8 @@ set_distro_data()
 	log_function_data "B_USE_DEBIAN_KERNEL: $B_USE_DEBIAN_KERNEL"
 	log_function_data "DISTRO: $DISTRO"
 	log_function_data "DISTRO_F: $DISTRO_F"
-	log_function_data "B_APTOSID_SOURCES: $B_APTOSID_SOURCES"
+# # 	log_function_data "B_APTOSID_SOURCES: $B_APTOSID_SOURCES"
+	log_function_data "B_SIDUCTION_SOURCES: $B_APTOSID_SOURCES"
 	eval $LOGPE
 }
 
@@ -2960,6 +2971,10 @@ print_version()
 			distroThanks='warnings: craigevil crust drb iotaka latino wilberfan zulu9; kernels: damentz'
 			extraMessage='...onward and downward bound... as we sail the seas of... what?...'
 			;;
+		siduction)
+			distroThanks='warnings: craigevil drb iotaka latino; kernels: damentz'
+			extraMessage='...onward bound... hopefully this time around it works...'
+			;;
 		mepis*)
 			distroThanks='anticapitalista eriefisher masinick and the helpers from mepislovers forums'
 			extraMessage='...and welcome to Mepis users. Hope the scripts work for you as expected...'
@@ -3883,7 +3898,7 @@ run_script_components()
 	if [ "$B_SKIP_RESTART" != "true" -a "$B_SKIP_CONNECTIONS" != 'true' ];then
 		check_version
 	fi
-	update_to_aptosid
+# 	update_to_aptosid
 	# tests for supported version. Nothing older than sidux pre release 5 is supported
 	check_distro_version
 	# check date to make sure the script is not out of date after being updated

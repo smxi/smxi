@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.24.1
-####  Date: May 30 2011
+####  version: 1.24.2
+####  Date: December 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1138,6 +1138,9 @@ set_default_system_kernel()
 	if [ "$B_APTOSID_SOURCES" == 'true' ];then
 		options="$options aptosid"
 	fi
+	if [ "$B_SIDUCTION_SOURCES" == 'true' ];then
+		options="$options siduction"
+	fi
 	options="$options continue"
 	contCount=$( wc -w <<< $options )
 	defaultCount=$(( $contCount - 1 ))
@@ -1173,13 +1176,13 @@ set_default_system_kernel()
 	select opt in $options
 	do
 		case $opt in
-			debian|no-kernel|liquorix|aptosid)
+			debian|no-kernel|liquorix|aptosid|siduction)
 				echo $LINE
 				echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default kernel option: ${C}$opt${N}"
 				set_sm_pref_values "$smPref" "$opt"
 				set_distro_data # have to reset globals now
 				case $opt in
-					debian|liquorix|aptosid)
+					debian|liquorix|aptosid|siduction)
 						if [ "$B_SKIP_CONNECTIONS" != 'true' ];then
 							get_current_apt_kernel $DEFAULT_KERNEL
 						fi
@@ -1390,7 +1393,7 @@ update_locales()
 	
 	# only some distros have lots of locales added
 	case $DISTRO in
-		antix|mepis*|aptosid)
+		antix|mepis*|aptosid|siduction)
 			distroTest='true'
 			;;
 	esac
@@ -1522,6 +1525,9 @@ set_default_runlevels()
 		sidux)
 			defaultOpt='sidux-default'
 			;;
+		siduction)
+			defaultOpt='siduction-default'
+			;;
 	esac
 
 	# set the plural text
@@ -1567,7 +1573,7 @@ set_default_runlevels()
 					set_default_inittab 2 "$defaultDm"
 					repeat='true'
 					;;
-				aptosid-default|antix-default|mepis-default|sidux-default)
+				aptosid-default|antix-default|mepis-default|sidux-default|siduction-default)
 					echo "${S}Updating to use ${C}$opt${S}...${N}"
 					check_sysv_rc_conf
 					# update-rc.d -f $defaultDm remove

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.10
-####  Date: October 30 2011
+####  version: 2.6.11
+####  Date: December 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -415,8 +415,9 @@ kernel_meta_package_handler()
 	local metaDebianExists=$( package_tester 'linux-image-(2\.6-|)(686|486|amd64)' )
 	local metaLiquorixExists=$( package_tester 'linux-image-(2\.6-|)liquorix-(686|486|amd64)' )
 	local metaAptosidExists=$( package_tester 'linux-image-(2\.6-|)aptosid-(686|amd64)' )
+	local metaSiductionExists=$( package_tester 'linux-image-(2\.6-|)siduction-(686|amd64)' )
 	local repeat='' kernelArch='686' startType='standard' userSelection=''
-	local linuxAptosidImage='' linuxAptosidHeaders=''
+	local linuxAptosidImage='' linuxAptosidHeaders='' linuxSiductionImage='' linuxSiductionHeaders=''
 	if [ -n "$1" ];then
 		startType=$1
 	fi
@@ -434,7 +435,7 @@ kernel_meta_package_handler()
 		linuxAptosidHeaders="linux-headers-aptosid-$kernelArch"
 	fi
 
-	if [ -n "$metaAptosidExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
+	if [ -n "$metaSiductionExists" -o  -n "$metaAptosidExists" -o  -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
 		continueOption='continue-automatic'
 		kiAction='skip'
 		defaultAction='automatic'
@@ -518,7 +519,7 @@ kernel_meta_package_handler()
 			install-current-apt-kernel)
 				set_metapackage_prefs
 				set_metapackage_selections 'manual'
-				if [ -n "$metaAptosidExists" -o -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
+				if [ -n "$metaSiductionExists" -o -n "$metaAptosidExists" -o -n "$metaDebianExists" -o -n "$metaLiquorixExists" ];then
 					remove_kernel_metapackages
 				fi
 				double_check_kernel 'apt'
@@ -549,7 +550,7 @@ kernel_meta_package_handler()
 remove_kernel_metapackages()
 {
 	eval $LOGUS
-	local metaPackageList=$( package_tester '(linux-image|linux-headers|modules)-(2\.6-|)(aptosid-|liquorix-|sidux-|)(686|486|amd64)' 'wild-full' )
+	local metaPackageList=$( package_tester '(linux-image|linux-headers|modules)-(2\.6-|)(aptosid-|liquorix-|siduction-|sidux-|)(686|486|amd64)' 'wild-full' )
 
 	if [ -n "$metaPackageList" ];then
 		package_remover "$metaPackageList" 'purge -y'
