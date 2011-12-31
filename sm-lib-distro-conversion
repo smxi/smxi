@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.10
-####  Date: May 30 2011
+####  version: 3.3.11
+####  Date: December 30 2011
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -49,6 +49,10 @@ check_debian()
 	local quitNu='' mepisId='' 
 	local altText1="${S}Adding ${C}Aptosid sources${S} let you run Aptosid kernels."
 	
+	# dump the ats stuff
+	conversionOptions=''
+	altText1=""
+	
 	case $SYSTEM_BASE in
 		stable|squeeze|lenny|etch)
 			# have to use this for wild card mepis string, mepis-8.x...
@@ -71,10 +75,10 @@ check_debian()
 		conversionOptions='antix-sid ' # removed: antix-sid-aptosid
 		altText1="${M}Here are your options for your Anti-X system:"
 		optionSet='antix'
-	elif [ "$DISTRO" == 'aptosid' ];then
-		conversionOptions=''
-		altText1=''
-		optionSet='aptosid'
+# 	elif [ "$DISTRO" == 'aptosid' ];then
+# 		conversionOptions=''
+# 		altText1=''
+# 		optionSet='aptosid'
 	fi
 	options="continue-no-change $conversionOptions quit"
 	quitNu=$( wc -w <<< $options )
