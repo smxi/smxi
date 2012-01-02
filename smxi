@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.6
-####  Date: December 30 2011
+####  version: 8.14.7
+####  Date: January 1 2012
 ########################################################################
-####  Copyright (C) Harald Hope 2005-2011
+####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -333,9 +333,22 @@ fi
 LOGIN_PID=$( awk '{print $1}' <<< $LOGIN_PID | grep -Eo "^[0-9]+$" )
 
 # xorg stuff, this isn't used at the moment
-X_VERSION=$( X -version 2>&1 | grep 'X Window System' | grep -Eo '(7|1|2)\.[0-9]+' )
-if [ -z "$X_VERSION" ];then
-	X_VERSION=$( X -version 2>&1 | grep 'X.Org X Server' | grep -Eo '(7|1|2)\.[0-9]+' )
+X_VERSION=''
+# this handles the 1.x syntax used by newer xorg versions
+# it also handles the change in ID text they did with 1.4
+# slicing out parts prior to parentheses: X.Org X Server 1.7.7
+# NOTE: grep -o behavior has CHANGED! Now it will slice out separate instances, like:
+# 1.11
+# 2.902
+# from one string, like: 1.11.2.902
+if [ -n "$( type -p X )" ];then
+	X_VERSION=$( X -version 2>&1 | grep -Eis -m 1 '^(X.Org X Server|X Window System)' | cut -d '(' -f 1 | awk '{ print $NF }' | grep -Eo '^[1237]\.[0-9]+' )
+# some users only want to be running a very light xorg, which won't have X, only Xorg
+# Tested and works Debian/Arch
+elif [ -n "$( type -p Xorg )" ];then
+	# X.Org X Server 1.7.7
+	# xorg-server 2:1.7.7-7 (Julien Cristau...)
+	X_VERSION=$( Xorg -version 2>&1 | grep -Eis -m 1 '^(X\.org|xorg)' | cut -d ':' -f 2 | cut -d '(' -f 1 | awk '{ print $NF }' | grep -Eo '^[1237]\.[0-9]+' )
 fi
 X_VERSIONS_PRE=''
 X_VERSIONS_POST=''
@@ -1057,7 +1070,7 @@ update_all_scripts()
 				uaFull=="$ua/updater.$script"
 				;;
 			rbxi)
-				downloadUrl='http://smxi.org/rb'
+				downloadUrl='http://smxi.org/rb/rbxi.tar.bz2'
 				completionMessage='Rbxi install'
 				uaFull="$ua/rbxi.rbxi.zip"
 				;;
