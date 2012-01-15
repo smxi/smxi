@@ -2,12 +2,12 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.1.4
-####  Date: October 26 2011
+####  version: 2.1.5
+####  Date: January 15 2012
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
 ####  Copyright (C) 2006-2008: Kel Modderman Stefan Lippers-Hollmann (sidux project)
-####  Subsequent changes: copyright (C) 2008-2009: Harald Hope
+####  Subsequent changes: copyright (C) 2008-2012: Harald Hope
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License version 2 as published by the Free
@@ -28,7 +28,7 @@ LINE='--------------------------------------------------------------------'
 ## set core variables: gcc/kernel version are dynamically set if needed
 # make this match version kernel was built with, can be overridden with -g in dsl
 # both must use "" for smxi / dsl handling here
-GCC_VERSION="4.5"
+GCC_VERSION="4.6"
 # KERNEL_VERSION will be set dynamically by dsl, 
 KERNEL_VERSION="2.6.24"
 UDEV_CONFIG_SIDUX="0.5.0"
@@ -170,26 +170,7 @@ check_script_dependencies()
  		fi
 	fi
 	
-	# make sure udev-config-sidux is up to date
-	# - do not blacklist b43, we need it for kernel >= 2.6.23
-	# - make sure to install the IEEE1394 vs. FireWire "Juju" blacklist
-	# only need this for sidux kernels
-	if [ -n "$( check_package_status 'udev-config-sidux' 'c' )" -a -n "$( grep 'slh' <<< $KERNEL_VERSION )" ];then
-		if [ -r /etc/modprobe.d/sidux ] || [ -r /etc/modprobe.d/ieee1394 ] || [ -r /etc/modprobe.d/mac80211 ]; then
-			packageVersion=$( check_package_status 'udev-config-sidux' 'i' )
-			dpkg --compare-versions ${packageVersion:-0} lt $UDEV_CONFIG_SIDUX
-			if [ "$?" -eq 0 ]; then
-				installDependencies="$installDependencies udev-config-sidux"
-			fi
-# 		else
-# 			installDependencies="$installDependencies udev-config-sidux"
-		fi
-	fi
-# 	if [ -z "$( check_package_status 'sidux-scripts' 'i' )" -a -n "$( check_package_status 'sidux-scripts' 'c' )" ];then
-# 		installDependencies="$installDependencies sidux-scripts"
-# 	fi
-	
-	# install kernel, headers, documentation and any extras that were detected
+		# install kernel, headers, documentation and any extras that were detected
 	if [ -n "$installDependencies" ]; then
 		echo $LINE
 		echo 'Installing missing applications for kernel install.'
@@ -200,17 +181,7 @@ check_script_dependencies()
 
 set_resume_partition()
 {
-	local siduxScripts=$( check_package_status 'sidux-scripts' 'i' )
-	
-	if [ -n "$siduxScripts" ];then
-		# check resume partition configuration is valid
-		if [ -x /usr/sbin/get-resume-partition ]; then
-			dpkg --compare-versions $siduxScripts ge 0.1.38
-			if [ "$?" -eq 0 ]; then
-				get-resume-partition
-			fi
-		fi
-	fi
+	:
 }
 
 ### -------------------------------------------------------------------
@@ -403,8 +374,8 @@ print_complete_message()
 	echo "Make sure that /etc/fstab and /boot/grub/menu.lst use UUID or LABEL"
 	echo "based mounting, which is required for classic IDE vs. lib(p)ata changes!"
 	echo
-	echo "For more details about UUID or LABEL fstab usage see the sidux manual:"
-	echo "   http://manual.sidux.com/en/part-cfdisk-en.htm#disknames"
+	echo "For more details about UUID or LABEL fstab usage see this thread:"
+	echo "   http://techpatterns.com/forums/about1240.html"
 	echo
 	echo "Have fun!"
 	echo 
