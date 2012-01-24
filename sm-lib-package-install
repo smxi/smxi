@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.14
-####  Date: December 30 2011
+####  version: 3.4.15
+####  Date: January 24 2012
 
-####  Copyright (C) Harald Hope 2005-2011
+####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -738,24 +738,26 @@ utilities_installer()
 	echo "    Asks before installing each package group, so you can decide for yourself if you want each group."
 	#kshutdown - shutdown/reboot timer for kde
 	#katapult - alternative way of startings apps
-	echo "${C}9${S} - ${C}ceni${S} Install ${C}ceni${S}, a good command line tool to setup wired and wireless networking."
-	echo "${C}10${S} - ${C}inxi${S} Install ${C}inxi${S} + all dependencies/recommends. Feature rich CLI sys info tool."
+	echo "${C}9${S} - ${C}ceni-sid${S} Install ${C}ceni${S}, a good command line tool to setup wired and wireless networking."
+	echo "     Install this version for current ${C}Debian Testing${S} and ${C}Unstable/Sid${S}."
+	echo "${C}10${S} - ${C}ceni-stable${S} Installs older version of Ceni for ${C}Debian Stable${S}."
+	echo "${C}11${S} - ${C}inxi${S} Install ${C}inxi${S} + all dependencies/recommends. Feature rich CLI sys info tool."
 	echo "     If ${C}Konversation${S} is present, also creats link so you can run inxi directly: ${C}/inxi${S}"
 	echo "     Runs once with full (${C}-F${S}) options when you install it. See ${C}inxi -h${S} for all options."
-	echo "${C}11${S} - ${C}rbxi${S} Download/install ${C}rbxi package${S}, the new rysnc/rdiff-backup tool."
+	echo "${C}12${S} - ${C}rbxi${S} Download/install ${C}rbxi package${S}, the new rysnc/rdiff-backup tool."
 	echo "     ${M}Note:${S} installs to: ${C}$SCRIPT_HOME${S}. Manual configuration required. For setup info, see:"
 	echo "     ${C}$SCRIPT_HOME/rbxi-data/rbxi-values${S} and ${C}$SCRIPT_HOME/rbxi-data/readme-rbxi.htm${S}"
 
 # 	echo "    This will also remove completely all ${C}powernowd / apmd${S} components."
 
 	echo
-	echo "${C}12${S} - ${C}back-to-install-menu${S}"
+	echo "${C}13${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni inxi rbxi back-to-install-menu"
+	options="console-tools  console-browsers system-utilities swiftfox streamtuner captive-to-ntfs-3g yakuake h2-favorites ceni-sid ceni-stable inxi rbxi back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -764,9 +766,14 @@ utilities_installer()
 				install_ntfs_3g
 				repeat='true'
 				;;
-			ceni)
+			ceni-sid)
 				# package_group_installer plain ceni-stuff
-				install_ceni
+				install_ceni 'sid'
+				repeat='true'
+				;;
+			ceni-stable)
+				# package_group_installer plain ceni-stuff
+				install_ceni 'stable'
 				repeat='true'
 				;;
 			console-tools)
@@ -1518,7 +1525,7 @@ inxi_installer()
 	echo "See ${C}inxi -h${S} for the full list of supported output options.${N}"
 	print_hec
 }
-
+# args: $1 - stable/sid
 install_ceni()
 {
 	eval $LOGPS
@@ -1535,7 +1542,7 @@ install_ceni()
 		rm -f $SCRIPT_HOME/ceni
 	fi
 	package_group_installer 'plain' 'ceni-stuff'
-	check_install_package 'ceni'
+	check_install_package 'ceni' "$1"
 	echo
 	echo  "${S}Congratulations. ${C}$appName${S} is now installed. To redo your networking, simply type, as root: ${C}$appName${S} (uppercase C)${N}"
 	print_hec
@@ -1547,9 +1554,14 @@ check_install_package()
 {
 	eval $LOGUS
 	local packageDeb="$1.deb" success=0
+	if [ "$2" != '' ];then
+		packageDeb="$1-$2.deb" 
+	fi
 	local downloadUrl="$SCRIPT_DOWNLOAD/packages/$packageDeb"
 	local ua="-U s-tools/package-download.$packageDeb"
+	
 	echo $LINE
+	# if in repo, prefer that
 	if [ -n "$( check_package_status "$1" )" ];then
 		package_installer "$1" 'install-always' || success=$?
 	else
