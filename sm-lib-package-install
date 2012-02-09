@@ -888,7 +888,7 @@ desktop_environment_installer()
 	echo "${C}19${S} - ${C}lxde-extras${S} Installs extras like lxnm, lxlauncher, lxmusic, etc (if available)."
 	echo "${C}20${S} - ${C}openbox${S} Installs lightweight window manager. Also adds openbox/kde or "
 	echo "     openbox/gnome option in gdm/kdm which lets you run a lighter weight version of those desktops."
-	echo "${C}21${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager."
+	echo "${C}21${S} - ${C}xfce${S} A really pleasant, light weight but not light featured display manager. Uses gdm."
 	echo "${C}22${S} - ${C}base-plus-xfce${S} xfce + xorg + system utitilies/base light packages + gdm if kdm/gdm not present."
 	echo "${C}23${S} - ${C}back-to-install-menu${S}"
 
