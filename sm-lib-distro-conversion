@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.11
-####  Date: December 30 2011
+####  version: 3.3.12
+####  Date: February 13 2012
 
-####  Copyright (C) Harald Hope 2005-2011
+####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -46,7 +46,7 @@ check_debian()
 	trap 'conversion_trap_handler $FUNCNAME' INT TERM EXIT
 	local opt='' options='' repeat='' optionSet='debian'
 	local conversionOptions='aptosid-sources'
-	local quitNu='' mepisId='' 
+	local quitNu='' mepisId='' bSkipQuestion='true'
 	local altText1="${S}Adding ${C}Aptosid sources${S} let you run Aptosid kernels."
 	
 	# dump the ats stuff
@@ -75,6 +75,7 @@ check_debian()
 		conversionOptions='antix-sid ' # removed: antix-sid-aptosid
 		altText1="${M}Here are your options for your Anti-X system:"
 		optionSet='antix'
+		bSkipQuestion='false'
 # 	elif [ "$DISTRO" == 'aptosid' ];then
 # 		conversionOptions=''
 # 		altText1=''
@@ -86,13 +87,14 @@ check_debian()
 	print_lib_info $LIB_DISTRO_CONVERSION
 	echo $MBAR
 	echo "${M}You appear to be using Debian or a Debian derived distro based on ${C}Debian $SYSTEM_BASE${S}."
-	echo "${S}If you want to try running ${C}$SCRIPT_NAME${S}, please select one of the following options."
+	echo "${S}If you want to run ${C}$SCRIPT_NAME${S}, please select from the following option(s)."
+	echo "You will be asked a series of initial setup questions. You will only be asked these once."
 	echo
 	echo "${W}There are no guarantees, as is the case with all ${C}GPL${W} code."
 	echo "${S}However, based on most user's experience, your results should be fine.${S}"
 	echo -e "$altText1"
 	echo $LINE
-	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing your system."
+	echo "${C}1${S} - ${C}continue-no-change${S} Runs ${C}$SCRIPT_NAME${S} without changing anything."
 	echo "    Only ${C}$SCRIPT_NAME${S} fixes will run, and you can use the other script options too."
 
 	case "$optionSet" in
@@ -104,19 +106,20 @@ check_debian()
 # 			echo "    ${M}NOTE: This will not ${C}convert${M} your system to aptosid, just install some packages."
 # 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
 			;;
-		aptosid)
-			echo "    ${M}Please note: ${C}Aptosid${M} users: ${C}$SCRIPT_NAME${M} now will treat"
-			echo "    Aptosid as a standard Debian derived distro."
-			echo
-			echo "    Not all the old distro specific features will be working the way they used"
-			echo "    to when ${C}sidux${M} existed."
-			;;
+# 		aptosid)
+# 			echo "    ${M}Please note: ${C}Aptosid${M} users: ${C}$SCRIPT_NAME${M} now will treat"
+# 			echo "    Aptosid as a standard Debian derived distro."
+# 			echo
+# 			echo "    Not all the old distro specific features will be working the way they used"
+# 			echo "    to when ${C}sidux${M} existed."
+# 			;;
 		debian)
-			echo "${C}2${S} - ${C}aptosid-sources${S} Adds aptosid sources to your apt repos, otherwise no change."
-			echo "    This lets you for example run Debian Sid with aptosid fixes and kernels."
+# 			echo "${C}2${S} - ${C}aptosid-sources${S} Adds aptosid sources to your apt repos, otherwise no change."
+# 			echo "    This lets you for example run Debian Sid with aptosid fixes and kernels."
 # 			echo "${C}3${S} - ${C}aptosid-packages${S} Will add aptosid sources and install core aptosid packages."
 # 			echo "    ${M}NOTE: This will not ${C}convert${M} your system to aptosid, just install some packages."
 # 			echo "    ${M}You must not exit ${C}$SCRIPT_NAME${M} until the entire process is completed."
+			:
 			;;
 	esac
 
