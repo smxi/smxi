@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.16
-####  Date: February 8 2012
+####  version: 3.4.17
+####  Date: March 7 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1984,30 +1984,30 @@ apache_package_installer()
 	echo "${M}::  Apache  ::"
 	echo "${C}1 - apache2-full${S} - Installs ${C}Apache${S}, ${C}MySql${S}, and ${C}PHP${S}, in the proper order."
 	echo "${C}2 - apache2-server${S} - Installs ${C}apache2-mpm-prefork${S} server and ${C}apache2-utils${S}"
-	echo "${C}3 - apache2-configuration${S} - Installs ${C}rapache${S} a graphical user tool for configuring ${C}Apache2${S}"
-	echo "    It allows easy creation of virtual name hosts and activating modules all without any"
-	echo "    knowledge of configuration files (${M}I have NOT tested this tool${S})."
+# 	echo "${C}3 - apache2-configuration${S} - Installs ${C}rapache${S} a graphical user tool for configuring ${C}Apache2${S}"
+# 	echo "    It allows easy creation of virtual name hosts and activating modules all without any"
+# 	echo "    knowledge of configuration files (${M}I have NOT tested this tool${S})."
 
 	echo "${M}::  MySql  ::"
-	echo "${C}4 - mysql5-server${S} - Main Database server for ${C}Apache2${S} installs. Install first if you are adding Apache2."
-	echo "${C}5 - mysql5-client${S} - Includes the client binaries and the additional tools
+	echo "${C}3 - mysql5-server${S} - Main Database server for ${C}Apache2${S} installs. Install first if you are adding Apache2."
+	echo "${C}4 - mysql5-client${S} - Includes the client binaries and the additional tools
  innotop, mysqlreport"
-	echo "${C}6 - mysql-top${S} - Installs ${C}mtop${S} and ${C}mytop${S} command line ${C}mysql${S} monitoring tools (like ${C}top${S})."
+	echo "${C}5 - mysql-top${S} - Installs ${C}mtop${S} and ${C}mytop${S} command line ${C}mysql${S} monitoring tools (like ${C}top${S})."
 
 	echo "${M}::  PHP / Python / Perl / Ruby ::"
-	echo "${C}7 - apache2-mod-php5${S} - This is the main PHP5 Apache2 module."
-	echo "${C}8 - php5-modules${S} - Installs useful ${C}gd${S} and ${C}curl${S} modules for Apache2/PHP."
-	echo "${C}9 - php5-mysql${S} - Installs the MySql database PHP module."
-	echo "${C}10 - php5-postgre${S} - Installs the Postgre database PHP module."
-	echo "${C}11 - apache2-mod-perl${S} - Installs the Apache2 Perl module."
-	echo "${C}12 - apache2-mod-python${S} - Installs the Apache2 Python module."
-	echo "${C}13 - apache2-mod-ruby${S} - Installs the Apache2 Ruby module."
+	echo "${C}6 - apache2-mod-php5${S} - This is the main PHP5 Apache2 module."
+	echo "${C}7 - php5-modules${S} - Installs useful ${C}gd${S} and ${C}curl${S} modules for Apache2/PHP."
+	echo "${C}8 - php5-mysql${S} - Installs the MySql database PHP module."
+	echo "${C}9 - php5-postgre${S} - Installs the Postgre database PHP module."
+	echo "${C}10 - apache2-mod-perl${S} - Installs the Apache2 Perl module."
+	echo "${C}11 - apache2-mod-python${S} - Installs the Apache2 Python module."
+	echo "${C}12 - apache2-mod-ruby${S} - Installs the Apache2 Ruby module."
 	echo
-	echo "${C}14 - back-to-menu${S} - Return to main menu."
+	echo "${C}13 - back-to-menu${S} - Return to main menu."
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="apache2-full apache2-server apache2-configuration mysql5-server mysql5-client mysql-top apache2-mod-php5 php5-modules php5-mysql php5-postgre apache2-mod-perl  apache2-mod-python apache2-mod-ruby back-to-menu"
+	options="apache2-full apache2-server mysql5-server mysql5-client mysql-top apache2-mod-php5 php5-modules php5-mysql php5-postgre apache2-mod-perl  apache2-mod-python apache2-mod-ruby back-to-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
