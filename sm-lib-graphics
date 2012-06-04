@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.4.12
-####  Date: July 25 2011
+####  version: 2.4.13
+####  Date:   June 4 2012
 
-####  Copyright (C) Harald Hope 2005-2011
+####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -59,24 +59,24 @@ install_graphics()
 	local optIntel=''  
 
 	if [ "$B_NVIDIA" == 'true' ];then
-		if [ -n "$( check_package_status 'xserver-xorg-video-nv' 'c' )" ];then
+		if [ -n "$( check_package_status 'xserver-xorg-video-nouvea' 'c' )" ];then
 			cardBrand='nVidia'
-			xorgNative='nv'
+			xorgNative='nouveau'
 			OptNv=$installXorgDriver
-			nvText=' nv or'
+			nvText=''
 		else
 			bNoNvDriver='true'
 		fi
 	elif [ "$B_ATI" == 'true' ];then
-		if [ -z "$( check_package_status 'xserver-xorg-video-radeonhd' 'c' )" ];then
-			bRadeonhd='false'
-		fi
+# 		if [ -z "$( check_package_status 'xserver-xorg-video-radeon' 'c' )" ];then
+# 			bRadeonhd='false'
+# 		fi
 		cardBrand='ATI'
 		xorgNative='ati'
 		OptFg=$installXorgDriver
 	elif [ "$B_INTEL" == 'true' ];then
 		cardBrand='Intel'
-		xorgNative='i810'
+		xorgNative='intel'
 		OptIntel=$installXorgDriver
 	fi
 
@@ -106,22 +106,22 @@ install_graphics()
 				fi
 				# there are some cases with both ati/nvidia installed...
 				if [ "$B_ATI" == 'true' ];then
-					if [ "$bRadeonhd" == 'true' ];then
-						radeonhdText="\n${C}install-xorg-radeonhd${S} - ${S} Install the ${C}Xorg Radeonhd${S} driver. For newer ATI cards.\n\t${M}3d quality varies - 2d, dual monitor should be fine.${S}"
-						optRadeonhd='install-xorg-radeonhd'
-					fi
+# 					if [ "$bRadeonhd" == 'true' ];then
+# 						radeonhdText="\n${C}install-xorg-radeonhd${S} - ${S} Install the ${C}Xorg Radeonhd${S} driver. For newer ATI cards.\n\t${M}3d quality varies - 2d, dual monitor should be fine.${S}"
+# 						optRadeonhd='install-xorg-radeonhd'
+# 					fi
 					if [ "$fgXorgError" -eq 0 ];then
 						fgXorgText='\n${C}install-xorg-radeon${S} - Install the ${C}Xorg Radeon${S} driver. Card support varies, 2d usually at least, 3d getting better.'$radeonhdText'\n'
 					else
-						fgXorgText='\n\n${E}Unfortunately, because of an ATI error, there is no working ${C}fglrx${E} driver\navailable for your ATI gfx card and Xorg version ${C}1.3\n\n${S}You can either install the regular ${C}Xorg ati${S} native driver, or try the more powerful\n${C}xorg radeon${S} driver.\n\n'
+						fgXorgText='\n\n${E}Unfortunately, because of an ATI error, there is no working ${C}fglrx${E} driver\navailable for your ATI gfx card and Xorg your version\n\n${S}You can either install the regular ${C}Xorg ati${S} native driver, or try the \n${C}xorg radeon${S} driver.\n\n'
 						bError='true'
 					fi
 					OptFg="$OptFg install-xorg-radeon $optRadeonhd"
 				fi
 				if [ "$B_NVIDIA" == 'true' ];then
-					if [ "$bNoNvDriver" != 'true' ];then
-						nvDriverString="\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg $xorgNative${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers."
-					fi
+# 					if [ "$bNoNvDriver" != 'true' ];then
+# 						nvDriverString="\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg $xorgNative${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers."
+# 					fi
 					nvXorgtext="\n${C}install-xorg-nouveau${S} - Install the ${C}Xorg Nouveau${S} driver - Support varies widely\n     card to card, Xorg to Xorg. If it fails, try$nvText vesa instead (${C}sgfxi -N vesa${S}).\n     Handles KMS modeset blacklisting automatically if needed.\n"
 					OptNv="$OptNv install-xorg-nouveau"
 				fi
