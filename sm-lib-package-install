@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.17
-####  Date: March 7 2012
+####  version: 3.4.18
+####  Date: June 7 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -108,8 +108,12 @@ package_group_installer()
 	# set these to null to avoid installing the desktop gunk unless needed
 	if [ "$dmUse" == 'kdm' -a -n "$( check_package_status 'kdm' 'i' )" ];then
 		dmUse=''
-	elif [ "$dmUse" == 'gdm' -a -n "$( check_package_status 'gdm' 'i' )" ];then
-		dmUse=''
+	elif [ "$dmUse" == 'gdm' ];then
+		if [ -n "$( check_package_status 'gdm' 'i' )" -o -n "$( check_package_status 'gdm3' 'i' )" ];then
+			dmUse=''
+		elif [ -n "$( check_package_status 'gdm3' 'c' )" ];then
+			dmUse='gdm3'
+		fi
 	fi
 
 	# package groups, console stuff first so it's included in following
@@ -1019,7 +1023,7 @@ select_display_manager()
 {
 	eval $LOGPS
 	local displayManager=$( get_default_display_manager )
-	local repeat='' options='kdm gdm xdm wdm slim back-to-desktop-install' opt=''
+	local repeat='' options='gdm kdm xdm entrance lightdm nodm slim wdm back-to-desktop-install' opt=''
 
 	echo $MLINE
 	echo "${M}Display Manager Selector"
@@ -1027,17 +1031,23 @@ select_display_manager()
 	if [ -z "$displayManager" ];then
 		displayManager='none detected'
 
-		echo "Please select from the following list. Note that xdm, wdm, and slim, sometimes"
-		echo "require extra configurations to allow user shutdown from desktop."
+		echo "Please select from the following list. Note that non gdm/kdm display managers "
+		echo "sometimes require extra configurations to allow user shutdown from desktop."
 		echo "Your current default is: ${C}$displayManager${S}"
 		echo $LINE
-		echo "${C}1 - kdm${S} Default display / login manager for kde."
-		echo "${C}2 - gdm${S} Default display / login manager for gnome."
+		
+		echo "${C}1 - gdm${S} Default display / login manager for gnome."
+		echo "Will install gdm3 if present, otherwise installs gdm regular."
+		echo "${C}2 - kdm${S} Default display / login manager for kde."
 		echo "${C}3 - xdm${S} Default display / login manager for X11/xorg (very plain and basic)."
 		echo "    For non gnome/kde desktops."
-		echo "${C}4 - wdm${S} Alternate display / login manager for non kde/gnome desktops."
-		echo "${C}5 - slim${S} Alternate display / login manager for non kde/gnome desktops."
-		echo "    Very light weight, thus the name."
+		echo "${C}4 - entrance${S} Alternate display / login manager for non kde/gnome desktops."
+		echo "${C}5 - lightdm${S} As name indicates, a light display manager."
+		echo "${C}6 - nodm${S} Contrary to name, it is in fact a light display manager."
+		
+		echo "${C}7 - slim${S} Alternate display / login manager for non kde/gnome desktops."
+		echo "    Very light weight, thus the name. Also unreliable, not recommended."
+		echo "${C}8 - wdm${S} Alternate display / login manager for non kde/gnome desktops."
 		echo $LINE
 		echo -e $SLE
 		echo $LINE
@@ -1045,14 +1055,16 @@ select_display_manager()
 		select opt in $options
 		do
 			case $opt in
-				kdm|gdm|xdm|wdm|slim)
+				gdm|kdm|xdm|entrance|lightdm|nodm|slim|wdm)
 					# note: slim is not in every Debian level
-					if [ -z "$( check_package_status 'slim' )" -a "$opt" == 'slim' ];then
-						echo "${E}The display manager ${C}$opt${E} is not currently in Debian Stable. Please select another one.${N}"
-						repeat='true'
-					else
+					if [ "$opt" == 'gdm' -a -n "$( check_package_status "gdm3" 'c' )" ] || \
+					[ -n "$( check_package_status "$opt" 'c' )" ];then
 						echo "${S}Your default display manager for your desktop install is now: ${C}$opt${N}"
 						DEFAULT_DM=$opt
+					else
+						echo "${E}The display manager ${C}$opt${E} is not currently in your Debian branch."
+						echo "Please select another one.${N}"
+						repeat='true'
 					fi
 					log_function_data "DEFAULT_DM: $DEFAULT_DM"
 					print_hec
