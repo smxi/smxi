@@ -34,23 +34,23 @@ install_graphics()
 	local cardBrand='' bError='false' xorgNative='' installXorgDriver='install-xorg-driver'
 	# nvidia stuff
 	local NvOptionText='' OptNv='' OptNvCurrentStable='' NvAdvancedText=''
-	local NvDefault='' NvCurrentStable='' NvLegacy3='' NvLegacy2='' NvLegacy1=''
-	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy3Math='' NvLegacy2Math='' NvLegacy1Math=''
+	local NvDefault='' NvCurrentStable='' NvLegacy4='' NvLegacy3='' NvLegacy2=''
+	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy4Math='' NvLegacy3Math='' NvLegacy2Math=''
 	local NvTest1='' NvTest2='' NvTest3='' NvTest4=''
-	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy3MathTemp=''
-	local NvLegacy1MathTemp='' nvXorgtext=''
+	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy4MathTemp=''
+	local NvLegacy2MathTemp='' nvXorgtext=''
 	local nvDebId='debian-nvidia'
 	local nvDebianText="${C}$nvDebId${S} - Debian method nVidia driver installation.\n    ${S}This will install the proper ${C}Debian nVidia${S} driver packages for your card.\n"
 	local nvBetaId='nvidia-beta-driver'
 	local nvBetaText="\n${C}$nvBetaId${S} - Installs latest ${C}nVidia beta driver${S} (${M}if available${S}) for your card type.\n    ${S}If none is available, the ${C}latest stable nVidia${S} driver for your card model is used instead.\n"
-	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | grep -Eo -m 1 '(1[0-9]{2}\.[0-9]{2}\.?[0-9]{0,2}|1\.[0-9]-[0-9]{4})' )
+	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | grep -Eo -m 1 '([0-9]+\.[0-9\.]+|1\.[0-9]-[0-9]{4})' )
 	local bNoNvDriver='false' nvDriverString='' nvText='' 
 	# fglrx stuff
 	local FgOptionText='' OptFg='' OptFgLatest='' FgLatestText='' FgDebianSid=''
 	local FgDefault='' FgLatest='' FgPrevious='' FgOlder=''
 	local FgDefaultMathTemp='' FgLatestMathTemp='' FgPreviousMathTemp='' FgOlderMathTemp=''
 	local FgTest1='' FgTest2='' FgTest3='' fgXorgError='' fgXorgText=''
-	local FgCurrentDriver=$( dmesg | grep -i 'fglrx' | grep -o -m 1 '8\.[0-9]\{2\}\.[0-9]\{1,2\}' )
+	local FgCurrentDriver=$( dmesg | grep -i 'fglrx' | grep -o -m 1 '8\.[0-9\.]+' )
 	local FgDebId='debian-fglrx'
 	local FgDebianText="${C}$FgDebId${S} - Debian method fglrx driver installation.\n    ${S}This will install the ${C}Debian fglrx${S} driver packages.\n"
 	local radeonhdText='' bRadeonhd='true'
@@ -144,45 +144,45 @@ install_graphics()
 		NvDefaultMath=$( echo $NvDefault | cut -d '-' -f 2 )
 		NvCurrentStable=$( echo $sgfxiData | cut -d ':' -f 2 )
 		NvCurrentStableMath=$( echo $NvCurrentStable | cut -d '-' -f 2 )
-		NvLegacy3=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvLegacy4=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvLegacy4Math=$( echo $NvLegacy4 | cut -d '-' -f 2 )
+		NvLegacy3=$( echo $sgfxiData | cut -d ':' -f 4 )
 		NvLegacy3Math=$( echo $NvLegacy3 | cut -d '-' -f 2 )
-		NvLegacy2=$( echo $sgfxiData | cut -d ':' -f 4 )
+		NvLegacy2=$( echo $sgfxiData | cut -d ':' -f 5 )
 		NvLegacy2Math=$( echo $NvLegacy2 | cut -d '-' -f 2 )
-		NvLegacy1=$( echo $sgfxiData | cut -d ':' -f 5 )
-		NvLegacy1Math=$( echo $NvLegacy1 | cut -d '-' -f 2 )
-# 		[ "$NvDefaultMath" -gt "$NvLegacy2Math"  ] && NvTest1=0 || NvTest1=1
-# 		[ "$NvLegacy3Math" -gt "$NvDefaultMath"  ] && NvTest2=0 || NvTest2=1
+# 		[ "$NvDefaultMath" -gt "$NvLegacy3Math"  ] && NvTest1=0 || NvTest1=1
+# 		[ "$NvLegacy4Math" -gt "$NvDefaultMath"  ] && NvTest2=0 || NvTest2=1
 # 		[ "$NvCurrentStableMath" -gt "$NvDefaultMath"  ] && NvTest3=0 || NvTest3=1
 		NvDefaultMathTemp=$( convert_to_new_versioning $NvDefaultMath nv )
 		NvCurrentStableMathTemp=$( convert_to_new_versioning $NvCurrentStableMath nv )
+		NvLegacy4MathTemp=$( convert_to_new_versioning $NvLegacy4Math nv )
 		NvLegacy3MathTemp=$( convert_to_new_versioning $NvLegacy3Math nv )
 		NvLegacy2MathTemp=$( convert_to_new_versioning $NvLegacy2Math nv )
-		NvLegacy1MathTemp=$( convert_to_new_versioning $NvLegacy1Math nv )
 		# this is preparing for the new nvidia driver format, the above will handle the
 		# legacy formatting, and requires no change for new formatting.
 		# once 10x.xx formatting is used, the logic here will handle the conversions
 		# return values: compare_numbers a b: 0 >; 1 =; 2 <
-		NvTest1=$( compare_numbers $NvDefaultMathTemp $NvLegacy1MathTemp )
-		NvTest2=$( compare_numbers $NvDefaultMathTemp $NvLegacy2MathTemp )
+		NvTest1=$( compare_numbers $NvDefaultMathTemp $NvLegacy2MathTemp )
+		NvTest2=$( compare_numbers $NvDefaultMathTemp $NvLegacy3MathTemp )
 		NvTest3=$( compare_numbers $NvCurrentStableMathTemp $NvDefaultMathTemp )
-		NvTest4=$( compare_numbers $NvDefaultMathTemp $NvLegacy3Math )
+		NvTest4=$( compare_numbers $NvDefaultMathTemp $NvLegacy4Math )
 
-		log_function_data "NV tempno 1:$NvDefaultMathTemp 2:$NvCurrentStableMathTemp 3:$NvLegacy3MathTemp 4:$NvLegacy2MathTemp 5:$NvLegacy1MathTemp"
+		log_function_data "NV tempno 1:$NvDefaultMathTemp 2:$NvCurrentStableMathTemp 3:$NvLegacy4MathTemp 4:$NvLegacy3MathTemp 5:$NvLegacy2MathTemp"
 		log_function_data "nvtests 1:$NvTest1 2:$NvTest2 3:$NvTest3 4:$NvTest4"
 
 		if [ "$NvTest1" -eq 0 ];then
 			if [ "$NvTest4" -eq 1 ];then
-				OptNvCurrentStable='5xxx-nvidia'
-				NvAdvancedText="${C}5xxx-nvidia${S} - Latest driver for your GeForce FX 5xxx card.\n    ${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"
+				OptNvCurrentStable='6-7xxx-nvidia'
+				NvAdvancedText="${C}6-7xxx-nvidia${S} - Latest driver for your GeForce 6xxx/7xxx card.\n    ${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"
 			elif [ "$NvTest2" -eq 0 ];then
-				OptNvCurrentStable='5xxx-nvidia current-nvidia'
-				NvAdvancedText="${C}5xxx-nvidia${S} - 173 series nVidia driver. Use only if you have problems with current-nvidia.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n${C}current-nvidia${S} - ${M}Recommended driver for your card${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
+				OptNvCurrentStable='6-7xxx-nvidia current-nvidia'
+				NvAdvancedText="${C}6-7xxx-nvidia${S} - 304 series nVidia driver. Use only if you have problems with current-nvidia.\n    ${S}This will install the legacy 4 nVidia driver: ${C}$NvLegacy4${S}\n${C}current-nvidia${S} - ${M}Recommended driver for your card${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
 			fi
-			OptNv="$OptNv $nvDebId ancient-nvidia old-nvidia $OptNvCurrentStable $nvBetaId"
-			NvOptionText='echo -e "$nvDebianText${C}ancient-nvidia${S} - Generally a poor choice in modern systems.\n    ${M}Recommended only for ancient, legacy nvidia cards (unreliable new kernel/Xorg support).${S}\n    ${S}This will install the legacy 1 nVidia driver: ${C}$NvLegacy1${S}\n${C}old-nvidia${S} - ${M}Recommended only for old (pre 6/5xxx series) cards${S}.\n    ${S}This will install the legacy 2 nVidia driver: ${C}$NvLegacy2${S}\n$NvAdvancedText$nvBetaText"'
+			OptNv="$OptNv $nvDebId ancient-nvidia 5xxx-nvidia $OptNvCurrentStable $nvBetaId"
+			NvOptionText='echo -e "$nvDebianText${C}ancient-nvidia${S} - Generally a poor choice in modern systems.\n    ${M}Recommended only for ancient, legacy nvidia cards (unreliable new kernel/Xorg support).${S}\n    ${S}This will install the legacy 2 nVidia driver: ${C}$NvLegacy2${S}\n${C}5xxx-nvidia${S} - ${M}Recommended only for older (5xxx series) cards${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n$NvAdvancedText$nvBetaText"'
 		else
 			OptNv="$OptNv $nvDebId legacy-nvidia $nvBetaId"
-			NvOptionText='echo -e "$nvDebianText$nvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install the legacy 1 nVidia driver: ${C}$NvDefault${S}$nvBetaText${S}\n    Inconsistent new Xorg and Kernel support."'
+			NvOptionText='echo -e "$nvDebianText$nvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install the legacy 2 nVidia driver: ${C}$NvDefault${S}$nvBetaText${S}\n    Inconsistent new Xorg and Kernel support."'
 		fi
 	fi
 
@@ -296,17 +296,17 @@ install_graphics()
 				final_graphics_install nv $NvDefault
 				;;
 			ancient-nvidia)
-				final_graphics_install nvo $NvLegacy1Math
+				final_graphics_install nvo $NvLegacy2Math
 				;;
-			old-nvidia)
-				final_graphics_install nvco $NvLegacy2Math
+			5xxx-nvidia)
+				final_graphics_install nvco $NvLegacy3Math
 				;;
 			# not used currently
 			default-nvidia)
 			 	final_graphics_install nvc $NvDefault
 				;;
-			5xxx-nvidia)
-				final_graphics_install nvco $NvLegacy3Math
+			6-7xxx-nvidia)
+				final_graphics_install nvco $NvLegacy4Math
 				;;
 			current-nvidia)
 				final_graphics_install nvco $NvCurrentStableMath
