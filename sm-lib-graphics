@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.5.0
+####  version: 2.5.1
 ####  Date:   September 16 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
@@ -36,7 +36,7 @@ install_graphics()
 	local NvOptionText='' OptNv='' OptNvCurrentStable='' NvAdvancedText=''
 	local NvDefault='' NvCurrentStable='' NvLegacy4='' NvLegacy3='' NvLegacy2=''
 	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy4Math='' NvLegacy3Math='' NvLegacy2Math=''
-	local NvTest1='' NvTest2='' NvTest3='' NvTest4=''
+	local NvTest1='' NvTest2='' NvTest3='' NvTest4='' NvTest5=''
 	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy4MathTemp=''
 	local NvLegacy2MathTemp='' nvXorgtext=''
 	local nvDebId='debian-nvidia'
@@ -171,7 +171,8 @@ install_graphics()
 		log_function_data "nvtests 1:$NvTest1 2:$NvTest2 3:$NvTest3 4:$NvTest4"
 
 		if [ "$NvTest1" -eq 0 ];then
-			if [ "$NvTest4" -eq 1 ];then
+			# short hack while 304 series is current stable, remove:   -a "$NvTest3" -ne 1 when stable > 304
+			if [ "$NvTest4" -eq 1 -a "$NvTest3" -ne 1 ];then
 				OptNvCurrentStable='6-7xxx-nvidia'
 				NvAdvancedText="${C}6-7xxx-nvidia${S} - Latest driver for your GeForce 6xxx/7xxx card.\n    ${S}This will install this nVidia driver: ${C}$NvDefault${S}\n"
 			elif [ "$NvTest2" -eq 0 ];then
