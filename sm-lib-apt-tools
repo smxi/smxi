@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.20
+####  version: 1.23.21
 ####  Date: October 6 2012
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -1418,10 +1418,11 @@ set_apt_type()
 			echo "for all its operations. If you are in doubt, maybe exit here to learn more"
 			echo "about the pros and cons of each method."
 			echo
-			echo "After ${C}aptitude${S} showed great early promise, I now ${C}STRONGLY recommend AGAINST${S} using aptitude. "
-			echo "Sadly, it has grown to be almost totally useless, and unable to handle even the most simple upgrade situations."
+			echo "After ${C}aptitude${S} showed great early promise, I now ${M}STRONGLY recommend AGAINST${S} using aptitude. "
+			echo "Sadly, it has grown to be almost totally useless, and unable to handle even the "
+			echo "most simple upgrade situations."
 			echo
-			echo "Changing apt type will also change your upgrade type automatically if you have that set."
+			echo "Changing ${C}apt-type${S} will also change your ${C}upgrade-type${S} automatically if you have that set."
 			echo
 			echo "Your current setting is: ${C}$aptTypeSetting"
 			echo $LINE
