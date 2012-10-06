@@ -1501,7 +1501,7 @@ reset_upgrade_type()
 	esac
 	check_sm_pref_file
 	if [ -n "$( sm_pref_tester $smPref 'equal' )" ];then
-		echo "Changing upgrade type now..."
+		echo "${S}Changing upgrade type now...${N}"
 		sed -i "s/du-upgrade=$oldUpgrade/du-upgrade=$upgrade/" $SM_CONFIG_FILE
 		sed -i "s/du-upgrade=$oldDu/du-upgrade=$du/" $SM_CONFIG_FILE
 	fi
