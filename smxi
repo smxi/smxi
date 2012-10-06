@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.12
-####  Date: June 22 2012
+####  version: 8.14.14
+####  Date: October 6 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1435,6 +1435,7 @@ metapackage_launcher()
 ### Test for script files, cleanup stuff
 ###---------------------------------------------------------------------
 
+# args: $1 - optional, force, make reload of config file
 set_distro_data()
 {
 	eval $LOGPS
@@ -1449,6 +1450,10 @@ set_distro_data()
 	fi
 	if [ -f "$EAA" ];then
 		eaaContent="$( cat $EAA )"
+	fi
+	
+	if [ "$1" == 'force' ];then
+		check_sm_pref_file 'force' # force reset of data global
 	fi
 	
 	local aptosidSources=$( grep -Esi '^[[:space:]]*deb.*(deb-ats|aptosid)' <<< "$easContent" )
@@ -1757,7 +1762,7 @@ update_to_aptosid()
 			echo $LINE
 			echo "${S}Updating $SM_CONFIG_FILE now to use aptosid kernel for default...${N}"
 			sed -i 's/distro-kernel=sidux/distro-kernel=aptosid/' $SM_CONFIG_FILE
-			set_distro_data
+			set_distro_data 'force'
 		fi
 		echo $LINE
 		echo "${S}Removing all sidux apt repo entries now before adding a safe one for conversion to aptosid...${N}"
@@ -1965,6 +1970,7 @@ set_static_sm_prefs()
 	echo "$SM_CONFIGS_STATIC" > $SM_CONFIG_FILE
 }
 
+# args: $1 - optional, force, to reset global container
 check_sm_pref_file()
 {
 	# make config file if required
@@ -1972,7 +1978,7 @@ check_sm_pref_file()
 		touch $SM_CONFIG_FILE
 	# set the initial content here
 	else
-		if [ -z "$SM_CONFIGS_STATIC" ];then
+		if [ -z "$SM_CONFIGS_STATIC" -o "$1" == 'force' ];then
 			SM_CONFIGS_STATIC="$( cat $SM_CONFIG_FILE )"
 		fi
 	fi
@@ -2508,7 +2514,7 @@ check_distro_version()
 	# run debian conversion options only if no id files for s/k present
 	# non supported tests have already been run in  start_up_tests
 	elif [ ! -f $ESV -a -e $EDV ];then
-		set_distro_data # need to set this here to avoid small detection errors
+		set_distro_data  # need to set this here to avoid small detection errors
 		run_script_import $LIB_APT_TOOLS
 		run_script_import $LIB_DISTRO_CONVERSION
 		check_debian

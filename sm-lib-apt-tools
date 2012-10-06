@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.21
+####  version: 1.23.22
 ####  Date: October 6 2012
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -1446,7 +1446,7 @@ set_apt_type()
 						echo "${S}Setting ${C}$SCRIPT_NAME${S} to use default apt type: ${C}$opt${N}"
 						set_sm_pref_values "$smPref" "$opt"
 						reset_upgrade_type "$opt"
-						set_distro_data # have to reset globals now
+						set_distro_data 'force' # have to reset globals now
 						echo "${C}$SCRIPT_NAME${S} will now use apt type: ${C}$APT_TYPE${N}"
 						echo "${S}To change your preference, go to Miscellaneous Tweaks, Advanced Options${N}"
 						print_hec

@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.15
-####  Date: October 5 2012
+####  version: 2.6.16
+####  Date: October 6 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -392,7 +392,7 @@ add_liquorix_kernels()
 	if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
 		update_sources 'liquorix'
 		authentication_handler 'liquorix' # add keyrings
-		set_distro_data # have to reset globals now
+		set_distro_data 'force' # have to reset globals now
 	else
 		echo "${E}It is not safe to run these kernels on Debian Stable based distros."
 		echo "${S}If your system is running Sid or Testing base, please let me know.${N}"
