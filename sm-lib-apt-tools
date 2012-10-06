@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.22
+####  version: 1.23.23
 ####  Date: October 6 2012
 
 ####  Copyright (C) Harald Hope 2005-2011
@@ -1448,6 +1448,9 @@ set_apt_type()
 						reset_upgrade_type "$opt"
 						set_distro_data 'force' # have to reset globals now
 						echo "${C}$SCRIPT_NAME${S} will now use apt type: ${C}$APT_TYPE${N}"
+						if [ -n $( sm_pref_tester 'du-upgrade' 'equal' ) ];then
+							echo "${S}Your current upgrade type is now: ${C}$( sm_pref_tester 'du-upgrade' 'equal' )${N}"
+						fi
 						echo "${S}To change your preference, go to Miscellaneous Tweaks, Advanced Options${N}"
 						print_hec
 						;;
@@ -1502,7 +1505,7 @@ reset_upgrade_type()
 	esac
 	check_sm_pref_file
 	if [ -n "$( sm_pref_tester $smPref 'equal' )" ];then
-		echo "${S}Changing upgrade type now...${N}"
+		echo "${S}Changing upgrade type ${C}$( sm_pref_tester $smPref 'equal' )${S} now...${N}"
 		sed -i "s/du-upgrade=$oldUpgrade/du-upgrade=$upgrade/" $SM_CONFIG_FILE
 		sed -i "s/du-upgrade=$oldDu/du-upgrade=$du/" $SM_CONFIG_FILE
 	fi
