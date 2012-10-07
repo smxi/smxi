@@ -2972,7 +2972,7 @@ print_lib_info()
 print_version()
 {
 	eval $LOGUS
-	local distroThanks='crust craigevil damentz dutchy iotaka latino poptarts trash80 wilberfan zulu9'
+	local distroThanks='crust craigevil damentz dutchy iotaka latino tartie trash80 wilberfan zulu9'
 	local extraMessage="...and welcome Debian users, hope you enjoy $SCRIPT_NAME..."
 	local item=''
 	# only for -v option printout
