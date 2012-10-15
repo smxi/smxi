@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.20
-####  Date: August 13 2012
+####  version: 3.4.21
+####  Date: October 15 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -205,7 +205,7 @@ package_group_installer()
 	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
 	local kofficePackages='koffice '
 	local lightOfficePackages="$pdfLight abiword abiword-plugins gnumeric gnumeric-plugins-extra"
-	local lxdePackages="$lxdeLMC lxappearance lxde-core lxde-settings-daemon $lxdeMD lxrandr $lxdeSE lxterminal"
+	local lxdePackages="$lxdeLMC lxappearance lxappearance-obconf lxde-core lxde-settings-daemon $lxdeMD lxrandr $lxdeSE lxterminal"
 	local lxdeExtras="$lxdeIP lxlauncher $lxdeM lxnm"
 	local mozillaGroup="$iceDove iceweasel"
 	local openboxPackages="openbox obconf obmenu openbox-themes"
