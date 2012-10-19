@@ -187,7 +187,7 @@ package_group_installer()
 
 	# standard groups
 	local consoleBrowsers='lynx links elinks links2 w3m'
-	local consoleTools="$aTop bc bzip2 ed htop irssi less nano gzip findutils $mlocate iproute p7zip-full p7zip-rar rcconf screen sysstat sysv-rc-conf zip unzip"
+	local consoleTools="$aTop bc bzip2 ed htop irssi less nano gzip findutils mc $mlocate iproute p7zip-full p7zip-rar rcconf screen sysstat sysv-rc-conf zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm gpicview leafpad mc pcmanfm sudo vim xarchiver xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libcurses-ui-perl libexpect-perl  libterm-readkey-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
