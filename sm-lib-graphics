@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.5.1
-####  Date:   September 16 2012
+####  version: 2.5.2
+####  Date:   October 24 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -39,12 +39,12 @@ install_graphics()
 	local NvTest1='' NvTest2='' NvTest3='' NvTest4='' NvTest5=''
 	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy4MathTemp=''
 	local NvLegacy2MathTemp='' nvXorgtext=''
-	local nvDebId='debian-nvidia'
-	local nvDebianText="${C}$nvDebId${S} - Debian method nVidia driver installation.\n    ${S}This will install the proper ${C}Debian nVidia${S} driver packages for your card.\n"
-	local nvBetaId='nvidia-beta-driver'
-	local nvBetaText="\n${C}$nvBetaId${S} - Installs latest ${C}nVidia beta driver${S} (${M}if available${S}) for your card type.\n    ${S}If none is available, the ${C}latest stable nVidia${S} driver for your card model is used instead.\n"
+	local NvDebId='debian-nvidia'
+	local NvDebianText="${C}$NvDebId${S} - Debian method nVidia driver installation.\n    ${S}This will install the proper ${C}Debian nVidia${S} driver packages for your card.\n"
+	local NvBetaId='nvidia-beta-driver' 
+	local NvBetaText="\n${C}$NvBetaId${S} - Installs latest ${C}nVidia beta driver${S} (${M}if available${S}) for your card type.\n    ${S}If none is available, the ${C}latest stable nVidia${S} driver for your card model is used instead.\n"
 	local NvCurrentDriver=$( dmesg | grep -i 'nvrm' | grep -Eo -m 1 '([0-9]+\.[0-9\.]+|1\.[0-9]-[0-9]{4})' )
-	local bNoNvDriver='false' nvDriverString='' nvText='' 
+	local bNoNvDriver='false' NvDriverString='' NvText='' 
 	# fglrx stuff
 	local FgOptionText='' OptFg='' OptFgLatest='' FgLatestText='' FgDebianSid=''
 	local FgDefault='' FgLatest='' FgPrevious='' FgOlder=''
@@ -53,17 +53,21 @@ install_graphics()
 	local FgCurrentDriver=$( dmesg | grep -i 'fglrx' | grep -o -m 1 '8\.[0-9\.]+' )
 	local FgDebId='debian-fglrx'
 	local FgDebianText="${C}$FgDebId${S} - Debian method fglrx driver installation.\n    ${S}This will install the ${C}Debian fglrx${S} driver packages.\n"
+	local FgBetaId='fglrx-beta-driver' 
+	local FgBetaText="\n${C}$FgBetaId${S} - Installs latest ${C}AMD/fglrx beta driver${S} (${M}if available${S}) for your card type.\n    ${S}If none is available, the ${C}latest stable FGLRX${S} driver is used instead.\n"
 	local radeonhdText='' bRadeonhd='true'
 	local optRadeonhd=''
 	# intel stuff
 	local optIntel=''  
-
+	## test stuff
+# 	B_ATI='true'
+# 	B_NVIDIA='false'
 	if [ "$B_NVIDIA" == 'true' ];then
 		if [ -n "$( check_package_status 'xserver-xorg-video-nouvea' 'c' )" ];then
 			cardBrand='nVidia'
 			xorgNative='nouveau'
 			OptNv=$installXorgDriver
-			nvText=''
+			NvText=''
 		else
 			bNoNvDriver='true'
 		fi
@@ -86,6 +90,7 @@ install_graphics()
 		# get the output data for print available drivers
 		# bypassing x tests for this.
 		sgfxiData=$( ./$GFX_INSTALLER -pXD )
+# 		sgfxiData=$( /usr/local/bin/scripts/sgfxi/dev/$GFX_INSTALLER -! 5 -pXD )
 		log_function_data "sgfxiData: $sgfxiData"
 		#[ "$B_TESTING_1" == 'true' ] && sgfxiData='8-7:8-6'
 		# test for errors in sgfxi output
@@ -120,14 +125,14 @@ install_graphics()
 				fi
 				if [ "$B_NVIDIA" == 'true' ];then
 # 					if [ "$bNoNvDriver" != 'true' ];then
-# 						nvDriverString="\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg $xorgNative${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers."
+# 						NvDriverString="\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg $xorgNative${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers."
 # 					fi
-					nvXorgtext="\n${C}install-xorg-nouveau${S} - Install the ${C}Xorg Nouveau${S} driver - Support varies widely\n     card to card, Xorg to Xorg. If it fails, try$nvText vesa instead (${C}sgfxi -N vesa${S}).\n     Handles KMS modeset blacklisting automatically if needed.\n"
+					nvXorgtext="\n${C}install-xorg-nouveau${S} - Install the ${C}Xorg Nouveau${S} driver - Support varies widely\n     card to card, Xorg to Xorg. If it fails, try$NvText vesa instead (${C}sgfxi -N vesa${S}).\n     Handles KMS modeset blacklisting automatically if needed.\n"
 					OptNv="$OptNv install-xorg-nouveau"
 				fi
 			fi
 			
-			OptionText='echo -e "'$OptionText'${S}You can quit, start X now, or install one of the following drivers.\nThe xorg driver does not need to be reinstalled with new kernels or xorg updates.\n$LINE'$fgXorgText$nvDriverString$nvXorgtext'"'
+			OptionText='echo -e "'$OptionText'${S}You can quit, start X now, or install one of the following drivers.\nThe xorg driver does not need to be reinstalled with new kernels or xorg updates.\n$LINE'$fgXorgText$NvDriverString$nvXorgtext'"'
 		fi
 	else
 		OptionText='echo -e "${E}There is no driver available for installation.\nYou do not appear to be running nVidia, Intel, or ATI video cards.\n${S}You can either quit and stay in console, or start X now.\n$LINE"'
@@ -179,11 +184,11 @@ install_graphics()
 				OptNvCurrentStable='6-7xxx-nvidia current-nvidia'
 				NvAdvancedText="${C}6-7xxx-nvidia${S} - 304 series nVidia driver. Use only if you have problems with current-nvidia.\n    ${S}This will install the legacy 4 nVidia driver: ${C}$NvLegacy4${S}\n${C}current-nvidia${S} - ${M}Recommended driver for your card${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
 			fi
-			OptNv="$OptNv $nvDebId ancient-nvidia 5xxx-nvidia $OptNvCurrentStable $nvBetaId"
-			NvOptionText='echo -e "$nvDebianText${C}ancient-nvidia${S} - Generally a poor choice in modern systems.\n    ${M}Recommended only for ancient, legacy nvidia cards (unreliable new kernel/Xorg support).${S}\n    ${S}This will install the legacy 2 nVidia driver: ${C}$NvLegacy2${S}\n${C}5xxx-nvidia${S} - ${M}Recommended only for older (5xxx series) cards${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n$NvAdvancedText$nvBetaText"'
+			OptNv="$OptNv $NvDebId ancient-nvidia 5xxx-nvidia $OptNvCurrentStable $NvBetaId"
+			NvOptionText='echo -e "$NvDebianText${C}ancient-nvidia${S} - Generally a poor choice in modern systems.\n    ${M}Recommended only for ancient, legacy nvidia cards (unreliable new kernel/Xorg support).${S}\n    ${S}This will install the legacy 2 nVidia driver: ${C}$NvLegacy2${S}\n${C}5xxx-nvidia${S} - ${M}Recommended only for older (5xxx series) cards${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n$NvAdvancedText$NvBetaText"'
 		else
-			OptNv="$OptNv $nvDebId legacy-nvidia $nvBetaId"
-			NvOptionText='echo -e "$nvDebianText$nvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install the legacy 2 nVidia driver: ${C}$NvDefault${S}$nvBetaText${S}\n    Inconsistent new Xorg and Kernel support."'
+			OptNv="$OptNv $NvDebId legacy-nvidia $NvBetaId"
+			NvOptionText='echo -e "$NvDebianText$NvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install the legacy 2 nVidia driver: ${C}$NvDefault${S}$NvBetaText${S}\n    Inconsistent new Xorg and Kernel support."'
 		fi
 	fi
 
@@ -196,7 +201,8 @@ install_graphics()
 
 		FgDebianSid=$( echo $sgfxiData | grep -o $FgDebId )
 		log_function_data "FgDebianSid: $FgDebianSid"
-
+		# note: although these tests runs, sgfxi no longer actually returns the tested driver, it
+		# always returns the same string, that's because amd simply doesn't do legacy driver support 
 		if [ -z "$FgDebianSid" ];then
 			# run the script, first use the print version flag to get output
 			FgDefault=$( echo $sgfxiData | cut -d ':' -f 1)
@@ -231,7 +237,7 @@ install_graphics()
 		elif [ "$FgTest1" -eq 0 -a "$FgTest2" -le 1 -a "$FgTest3" -eq 2 -a -n "$FgOlder" ];then
 			if [ "$FgTest2" -eq 0 ];then
 				OptFgLatest=' latest-fglrx'
-				FgLatestText="\n${C}latest-fglrx${S} - Installs the very latest test/beta fglrx driver: ${C}$FgLatest"
+				FgLatestText="\n${C}latest-fglrx${S} - Installs the latest fglrx driver: ${C}$FgLatest"
 			fi
 			### note: sometimes only 2 fglrx drivers may be useable, switch comments if needed
 			OptFg="$OptFg $FgDebId older-fglrx previous-fglrx current-fglrx $OptFgLatest"
@@ -245,9 +251,10 @@ install_graphics()
 
 			# FgOptionText='echo -e "${C}previous-fglrx${S} - Installs ${C}$FgPrevious${S} Radeon/fglrx driver.\n\t\tOnly use this if you have problems with current fgrlx driver.\n${C}current-fglrx${S} - ${M}Recommended${S} Radeon/fglrx driver install.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}$FgLatestText\n"'
 		# this is a special case to handle cases where 2 drivers are working
+	## IMPORTANT: this is actually the only text that shows for any amd/ati card
 		elif [ "$FgTest2" -eq 1 ];then
-			OptFg="$OptFg $FgDebId previous-fglrx current-fglrx"
-			FgOptionText='echo -e "$FgDebianText${C}previous-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgPrevious${S}\n${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
+			OptFg="$OptFg $FgDebId previous-fglrx current-fglrx $FgBetaId "
+			FgOptionText='echo -e "$FgDebianText${C}previous-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgPrevious${S}\n${C}current-fglrx${S} - Radeon/fglrx driver install.\n\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n$FgBetaText\n"'
 # 		else
 # 			OptFg="$OptFg legacy-fglrx"
 # 			FgOptionText='echo -e "${C}legacy-fglrx${S} - ${W}Legacy driver install!${S} script will install an older driver.\n\t\t${S}The script will install this fglrx driver: ${C}$FgDefault${S}\n"'
@@ -290,8 +297,8 @@ install_graphics()
 			install-xorg-radeonhd)
 				final_graphics_install radeonhd
 				;;
-			$nvDebId)
-				final_graphics_install nvc $nvDebId
+			$NvDebId)
+				final_graphics_install nvc $NvDebId
 				;;
 			legacy-nvidia)
 				final_graphics_install nv $NvDefault
@@ -312,7 +319,7 @@ install_graphics()
 			current-nvidia)
 				final_graphics_install nvco $NvCurrentStableMath
 				;;
-			$nvBetaId)
+			$NvBetaId)
 				final_graphics_install nvb
 				;;
 			$FgDebId)
@@ -329,6 +336,9 @@ install_graphics()
 				;;
 			latest-fglrx)
 				final_graphics_install fglrx-l $FgLatest
+				;;
+			$FgBetaId)
+				final_graphics_install fglrx-b
 				;;
 			start-desktop)
 				final_graphics_install no-driver-install
@@ -465,6 +475,12 @@ final_graphics_install()
 			fi
 			installMess="${S}installing ATI/fglrx driver ${C}$2${S} now...${N}"
 			extraArgs=" $extraArgs $FglrxFlag"
+			bInstallDriver='true'
+			bCompleted='true'
+			;;
+		fglrx-b)
+			installMess="${S}Testing for AMD/FGLRX beta driver. If none, will use latest stable for your card.${N}"
+			extraArgs=" $FglrxFlag -B"
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
