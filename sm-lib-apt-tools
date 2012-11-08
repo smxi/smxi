@@ -957,10 +957,10 @@ fix_bad_repos()
 			badRepoFileList=$( grep -lsR  "$repoBad" /etc/apt/ )
 			log_function_data "repo Data: $repo\nbad Repo Files: $badRepoFileList"
 			if [ -n "$badRepoFileList" ];then
-				echo "${S}Updating ${C}$repoBad${S} to ${C}$repoGood${S} in the following files:"
+				echo "${S}Updating changed repo domain ${C}$repoBad${S} to ${C}$repoGood${S} in the following files:"
 				echo "${C}$badRepoFileList${N}"
 				sed -i "s/$repoBad/$repoGood/g" $badRepoFileList
-				echo "${S}Apt source files updated to use new repo ${C}$repoGood${S}. Continuing."
+				echo "${S}Apt source files updated to use ${C}$repoGood${S} domain. Continuing."
 			fi
 		done
 		set_sticky_prefs $prefId
