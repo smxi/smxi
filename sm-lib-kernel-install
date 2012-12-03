@@ -371,16 +371,24 @@ kernel_return_location()
 ###---------------------------------------------------------------------
 
 # args: $1 - package to test for
-authentication_handler()
+kernel_authentication_handler()
 {
 	eval $LOGUS
 	local liquorixKeyrings='liquorix-keyrings'
-
-	if [ -n "$( grep 'liquorix' <<< $1 )" ];then
-		if [ -z "$( package_tester "$liquorixKeyrings" )" ];then
-			package_installer "$liquorixKeyrings liquorix-keyring" 'install-missing' '--allow-unauthenticated -y'
-		fi
-	fi
+	local siductionKeyrings='siduction-archive-keyring'
+	
+	case $1 in
+		liquorix)
+			if [ -z "$( package_tester "$liquorixKeyrings" )" ];then
+				package_installer "$liquorixKeyrings liquorix-keyring" 'install-missing' '--allow-unauthenticated -y'
+			fi
+			;;
+		siduction)
+			if [ -z "$( package_tester "$siductionKeyrings" )" ];then
+				package_installer "$siductionKeyrings" 'install-missing' '--allow-unauthenticated -y'
+			fi
+			;;
+	esac
 
 	eval $LOGUE
 }
@@ -462,8 +470,8 @@ install_the_apt_kernel()
 	eval $LOGUS
 	local kernelImage="linux-image-$1"
 	local kernelHeaders="linux-headers-$1"
-	# add liquorix keyrings if needed
-	authentication_handler $1 
+	# add alt kernel keyrings if needed
+	kernel_authentication_handler $1 
 	echo $LINE
 	echo "${S}Installing your new ${C}$1${S} kernel now...${N}"
 	package_installer "$kernelHeaders $kernelImage" 'install-always' 
@@ -551,8 +559,8 @@ install_the_apt_kernel_module()
 	local noModuleText=''
 	local moduleExists=$( grep-aptavail -PX "$modulePackage" )
 	local moduleOutputName=$( grep -Eo '.*-modules' <<< $modulePackage )
-	# add liquorix keyrings if needed
-	authentication_handler $1
+	# add alt kernel keyrings if needed
+	kernel_authentication_handler $1
 
 	case $2 in
 		manual)
@@ -591,8 +599,8 @@ download_remaining_module_debs()
 	# not current: acx100- redhat-cluster-modules- loop-aes-modules-
 	local module='' missingModules='' missingModule=''
 	local availableModules="$( print_module_list )"
-	# add liquorix keyrings if needed
-	authentication_handler $1
+	# add alt keyrings if needed
+	kernel_authentication_handler $1
 
 	echo $LINE
 	echo "${S}Downloading missing modules from aptosid repos to kernel install directory (can take a few seconds)...${N}"

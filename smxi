@@ -206,6 +206,8 @@ B_SET_2007_FIXES='false'
 B_SET_2008_FIXES='false'
 B_SET_2009_FIXES='false'
 B_SET_2011_FIXES='false'
+B_SET_2012_FIXES='false'
+B_SET_2013_FIXES='false'
 
 # boolean defaults for prefs, options, etc
 B_ADVANCED_KERNEL='false'

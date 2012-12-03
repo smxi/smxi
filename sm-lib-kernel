@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.21
-####  Date: November 28 2012
+####  version: 2.6.22
+####  Date: December 03 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -335,22 +335,27 @@ advanced_kernel_options()
 	echo "${C}1 - kernel-metapackage-options${S} Kernel metapackage options: remove, install"
 	echo "     apt kernel/module metapackages. Also, install current apt kernel + modules."
 	echo "${C}2 - add-liquorix-sources${S} Add liquorix kernel sources (Debian Sid/Testing only)"
-	echo "${C}3 - change-$SCRIPT_NAME-default-kernel${S} Change the default kernel $SCRIPT_NAME uses to your preference."
-	echo "${C}4 - install-kernel-modules${S} - Install kernel modules. Offers list of modules, install one by one"
+	echo "${C}3 - add-siduction-sources${S} Add siduction/towol kernel sources (Debian Sid/Testing only)"
+	echo "${C}4 - change-$SCRIPT_NAME-default-kernel${S} Change the default kernel $SCRIPT_NAME uses to your preference."
+	echo "${C}5 - install-kernel-modules${S} - Install kernel modules. Offers list of modules, install one by one"
 	echo "    (${M}if the module is currently available in apt${S})."
-	echo "${C}5 - remove-kernel-modules${S} - Remove installed kernel modules. Offers list of modules"
+	echo "${C}6 - remove-kernel-modules${S} - Remove installed kernel modules. Offers list of modules"
 	echo "    which you can remove one by one."
-	echo "${C}6 - return-to-previous-menu${S} - Ok, all done, back to kernel main menu."
+	echo "${C}7 - return-to-previous-menu${S} - Ok, all done, back to kernel main menu."
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="kernel-metapackage-options add-liquorix-sources change-$SCRIPT_NAME-default-kernel install-kernel-modules remove-kernel-modules return-to-previous-menu"
+	options="kernel-metapackage-options add-liquorix-sources add-siduction-sources change-$SCRIPT_NAME-default-kernel install-kernel-modules remove-kernel-modules return-to-previous-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
 		case $opt in
 			add-liquorix-sources)
-				add_liquorix_kernels
+				add_alternate_kernels_sources "liquorix"
+				repeat='true'
+				;;
+			add-siduction-sources)
+				add_alternate_kernels_sources "siduction"
 				repeat='true'
 				;;
 			change-$SCRIPT_NAME-default-kernel)
@@ -387,11 +392,12 @@ advanced_kernel_options()
 	fi
 }
 
-add_liquorix_kernels()
+# args: $1 - which kernel type
+add_alternate_kernels_sources()
 {
 	if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
-		update_sources 'liquorix'
-		authentication_handler 'liquorix' # add keyrings
+		update_sources "$1"
+		kernel_authentication_handler "$1" # add keyrings
 		set_distro_data 'force' # have to reset globals now
 	else
 		echo "${E}It is not safe to run these kernels on Debian Stable based distros."
