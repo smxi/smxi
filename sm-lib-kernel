@@ -335,7 +335,7 @@ advanced_kernel_options()
 	echo "${C}1 - kernel-metapackage-options${S} Kernel metapackage options: remove, install"
 	echo "     apt kernel/module metapackages. Also, install current apt kernel + modules."
 	echo "${C}2 - add-liquorix-sources${S} Add liquorix kernel sources (Debian Sid/Testing only)"
-	echo "${C}3 - add-siduction-sources${S} Add siduction/towol kernel sources (Debian Sid/Testing only)"
+	echo "${C}3 - add-siduction-sources${S} Add siduction/towo kernel sources (Debian Sid/Testing only)"
 	echo "${C}4 - change-$SCRIPT_NAME-default-kernel${S} Change the default kernel $SCRIPT_NAME uses to your preference."
 	echo "${C}5 - install-kernel-modules${S} - Install kernel modules. Offers list of modules, install one by one"
 	echo "    (${M}if the module is currently available in apt${S})."
