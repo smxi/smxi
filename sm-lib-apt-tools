@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.24
-####  Date: November 8 2012
+####  version: 1.23.25
+####  Date: December 3 2012
 
 ####  Copyright (C) Harald Hope 2005-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1986,17 +1986,22 @@ get_current_apt_kernel()
 				distro='Debian'
 				if [ "$BITS" == '32' ];then
 					case $platform in
-					486)
-						distro='Debian-486'
-						;;
-					686|686-pae)
-						if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
-							platform='686-pae'
-						fi
-						;;
-					686-bigmem)
-						distro='Debian-686-bigmem'
-						;;
+						486)
+							distro='Debian-486'
+							;;
+						686)
+							platform='686'
+							;;
+						686-pae)
+							if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
+								platform='686-pae'
+							else
+								platform='686'
+							fi
+							;;
+						686-bigmem)
+							distro='Debian-686-bigmem'
+							;;
 					esac
 				fi
 				;;
@@ -2007,11 +2012,18 @@ get_current_apt_kernel()
 			debian-686)
 				distro='Debian-686'
 				# as of 2.6.39 debian added -pae to default, sigh...
-				if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
-					platform='686-pae'
-				else
-					platform='686'
-				fi
+				case $platform in
+					686)
+						platform='686'
+						;;
+					686-pae)
+						if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
+							platform='686-pae'
+						else
+							platform='686'
+						fi
+						;;
+				esac
 				;;
 			liquorix)
 				kernelStringExtra='-liquorix'
@@ -2033,7 +2045,18 @@ get_current_apt_kernel()
 				kernelStringExtra='-siduction'
 				distro='Siduction'
 				if [ "$BITS" == '32' ];then
-					platform='686'
+					case $platform in
+						686)
+							platform='686'
+							;;
+						686-pae)
+							if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" ];then
+								platform='686-pae'
+							else
+								platform='686'
+							fi
+							;;
+					esac
 				fi
 				;;
 		esac
