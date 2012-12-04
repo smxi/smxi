@@ -407,6 +407,7 @@ add_alternate_kernels_sources()
 				else
 					echo "${E}You can not run Liquorix kernels because your CPU does not support ${C}PAE${E}."
 					echo "${S}If this is wrong for your cpu, please let me know.${N}"
+					print_hec
 				fi
 				;;
 		esac
@@ -418,6 +419,7 @@ add_alternate_kernels_sources()
 	else
 		echo "${E}It is not safe to run these kernels on Debian Stable based distros."
 		echo "${S}If your system is running Sid or Testing base, please let me know.${N}"
+		print_hec
 	fi
 }
 
