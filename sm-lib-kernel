@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.22
-####  Date: December 03 2012
+####  version: 2.6.23
+####  Date: December 04 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -250,7 +250,7 @@ kernel_options()
 	echo "    Sometimes older kernels work and newer ones don't for some hardware issues."
 	eval "$altKernelOption"
 	echo "${C}$akoOption - advanced-kernel-options${S} Kernel metapackage options (add/remove kernel metapackages); "
-	echo "    Add ${C}liquorix${S} kernel sources; Update ${C}$SCRIPT_NAME${S} default kernel; Add/Remove kernel modules."
+	echo "    Add ${C}liquorix${S} kernel sources (if supported); Update ${C}$SCRIPT_NAME${S} default kernel; Add/Remove kernel modules."
 	echo "${C}$kmOption - kernel-remover${S} Remove unused kernels."
 	echo
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
@@ -334,7 +334,7 @@ advanced_kernel_options()
 
 	echo "${C}1 - kernel-metapackage-options${S} Kernel metapackage options: remove, install"
 	echo "     apt kernel/module metapackages. Also, install current apt kernel + modules."
-	echo "${C}2 - add-liquorix-sources${S} Add liquorix kernel sources (Debian Sid/Testing only)"
+	echo "${C}2 - add-liquorix-sources${S} Add liquorix kernel sources (Debian Sid/Testing only, and if system supports)"
 	echo "${C}3 - add-siduction-sources${S} Add siduction/towo kernel sources (Debian Sid/Testing only)"
 	echo "${C}4 - change-$SCRIPT_NAME-default-kernel${S} Change the default kernel $SCRIPT_NAME uses to your preference."
 	echo "${C}5 - install-kernel-modules${S} - Install kernel modules. Offers list of modules, install one by one"
@@ -392,13 +392,29 @@ advanced_kernel_options()
 	fi
 }
 
-# args: $1 - which kernel type
+# args: $1 - which kernel type, currently only 
 add_alternate_kernels_sources()
 {
+	local bDoAdd='false'
 	if [ "$SYSTEM_BASE" == 'testing' -o "$SYSTEM_BASE" == 'sid' ];then
-		update_sources "$1"
-		kernel_authentication_handler "$1" # add keyrings
-		set_distro_data 'force' # have to reset globals now
+		case $1 in
+			siduction)
+				bDoAdd='true'
+				;;
+			liquorix)
+				if [ "$BITS" == '64' -o -n "$( check_pae_exists )" ];then
+					bDoAdd='true'
+				else
+					echo "${E}You can not run Liquorix kernels because your CPU does not support ${C}PAE${E}."
+					echo "${S}If this is wrong for your cpu, please let me know.${N}"
+				fi
+				;;
+		esac
+		if [ "$bDoAdd" == 'true' ];then
+			update_sources "$1"
+			kernel_authentication_handler "$1" # add keyrings
+			set_distro_data 'force' # have to reset globals now
+		fi
 	else
 		echo "${E}It is not safe to run these kernels on Debian Stable based distros."
 		echo "${S}If your system is running Sid or Testing base, please let me know.${N}"
