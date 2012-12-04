@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.15
-####  Date: November 8 2012
+####  version: 8.14.16
+####  Date: December 4 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -113,6 +113,7 @@ EDI='/etc/issue'
 EDV='/etc/debian_version'
 EKV='/etc/kanotix-version'
 ELR='/etc/lsb-release'
+EOR='/etc/os-release'
 ESV='/etc/sidux-version'
 ESUV='/etc/siduction-version'
 SMDV='/etc/s-distro-version'
@@ -1542,7 +1543,9 @@ set_distro_data()
 	elif [ -f $EAX ];then
 		DISTRO='antix'
 	elif [ -f $ELR ];then
-		DISTRO=$( print_elr_version )
+		DISTRO=$( print_elr_osr_version "$ELR" )
+	elif [ -f $EOR ];then
+		DISTRO=$( print_elr_osr_version "$EOR" )
 	fi
 
 	# this test goes before the next two to set defaults
@@ -3162,32 +3165,65 @@ print_hec()
 	fi
 }
 
-print_elr_version()
+# args: $1 - which file. The file exists test has already been run
+print_elr_osr_version()
 {
-	if [ -f $ELR ];then
-		awk -F '=' '
-			BEGIN {
-				IGNORECASE=1
-				# handling detection failures by default
-				distroId="ID-error"
-				distroRelease="RE-error"
-				distroCodename="CO-error"
-			}
-			/DISTRIB_ID/ {
-				distroId = $2
-			}
-			/DISTRIB_RELEASE/ {
-				distroRelease = $2
-			}
-			# this is unused for now
-			/DISTRIB_CODENAME/ {
-				distroCodename = $2
-			}
-			END {
-				print tolower( distroId "-" distroRelease )
-			}
-			' $ELR
-	fi
+	case $1 in
+		$ELR)
+			awk -F '=' '
+				BEGIN {
+					IGNORECASE=1
+					# handling detection failures by default
+					distroId="ID-error"
+					distroRelease="RE-error"
+					distroCodename="CO-error"
+				}
+				/DISTRIB_ID/ {
+					distroId = $2
+				}
+				/DISTRIB_RELEASE/ {
+					distroRelease = $2
+				}
+				# this is unused for now
+				/DISTRIB_CODENAME/ {
+					distroCodename = $2
+				}
+				END {
+					print tolower( distroId "-" distroRelease )
+				}
+				' $ELR
+			;;
+		$EOR)
+			awk -F '=' '
+				BEGIN {
+					IGNORECASE=1
+					# handling detection failures by default
+					distroName="DN-error"
+					distroPrettyName="PN-error"
+				}
+				
+				/^PRETTY_NAME/ {
+					gsub(/\"/,"",$2)
+					distroPrettyName = $2
+				}
+				/^NAME/ {
+					gsub(/\"/,"",$2)
+					distroName = $2
+				}
+				END {
+					if ( distroPrettyName != "PN-error" ) {
+						print distroPrettyName
+					}
+					else if ( distroName != "DN-error" ) {
+						print distroName
+					}
+					else {
+						print distroPrettyName
+					}
+				}
+				' $EOR
+			;;
+	esac
 }
 
 print_distro_id()
@@ -3195,14 +3231,16 @@ print_distro_id()
 	eval $LOGUS
 	# Note: $EDV is the default if all else fails. The order is important,
 	# distros with specific versionining files need to come before the defaults
-	local knownDistroIds="$EAV $ESV $EKV $EAX $ELR $EDI $SMDV $EDV"
+	local knownDistroIds="$EAV $ESV $EKV $EAX $ELR $EOR $EDI $SMDV $EDV"
 	local distroFile='' distroId=''
 
 	for distroFile in $knownDistroIds
 	do
 		if [ -f $distroFile ];then
 			if [ $distroFile == $ELR ];then
-				distroId=$( print_elr_version | perl -wp -e '$_ = ucfirst' )
+				distroId=$( print_elr_osr_version "$distroFile" | perl -wp -e '$_ = ucfirst' )
+			elif [ $distroFile == $EOR ];then
+				distroId=$( print_elr_osr_version "$distroFile" )
 			else
 				# print first line, for cases where > 1 line exist in file, and trim off that
 				# debian \r, \l gunk
@@ -3235,7 +3273,7 @@ print_update_warning_configs()
 	echo $MLINE
 	echo "${M}$SCRIPT_NAME Warning/Config Data"
 	echo $MLINE
-	if [ "$(whoami)" == "root" ];then
+	if [ "$( whoami )" == "root" ];then
 		echo "${S}Since you are logged in as root, the warning/config data will be updated live.${N}"
 		startArgs='print-root'
 		echo $LINE
