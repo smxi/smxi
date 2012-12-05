@@ -170,7 +170,7 @@ start_up_tests()
 	fi
 
 	# make sure the paths you made are right and exist
-	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $RBXI_BZIP $RBXI_DEV $RBXI_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_DEV $SVMI_SVN
+	for startDir in $DEV_TOOLS_SVN $INXI_SVN  $KERNEL_SVN $RBXI_BZIP $RBXI_DEV $RBXI_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_DEV $SVMI_SVN
 	do
 		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
