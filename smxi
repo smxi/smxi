@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.16
-####  Date: December 4 2012
+####  version: 8.14.17
+####  Date: December 15 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -109,6 +109,7 @@ fi
 # distro id files
 EAV='/etc/aptosid-version'
 EAX='/etc/antix-version'
+ELRC='/etc/lsb-release-crunchbang'
 EDI='/etc/issue'
 EDV='/etc/debian_version'
 EKV='/etc/kanotix-version'
@@ -1532,8 +1533,7 @@ set_distro_data()
 		LIB_2011_FIXES="$LIB_2011_FIXES_STATIC"
 	fi
 
-	# now we're going to process as true default ELR, this will
-	# override everything except antix/sidux/aptosid/siduction
+	
 	if [ -f $ESUV ];then
 		DISTRO='siduction'
 	elif [ -f $EAV ];then
@@ -1542,10 +1542,14 @@ set_distro_data()
 		DISTRO='sidux'
 	elif [ -f $EAX ];then
 		DISTRO='antix'
+	elif [ -f $ELRC ];then
+		DISTRO='crunchbang'
+	# now we're going to process as true default ELR/$EOR, this will
+	# override everything except distros with known id files
 	elif [ -f $ELR ];then
-		DISTRO=$( print_elr_osr_version "$ELR" )
+		DISTRO=$( print_elr_osr_version "$ELR" 'basic' )
 	elif [ -f $EOR ];then
-		DISTRO=$( print_elr_osr_version "$EOR" )
+		DISTRO=$( print_elr_osr_version "$EOR" 'basic' )
 	fi
 
 	# this test goes before the next two to set defaults
@@ -3165,19 +3169,21 @@ print_hec()
 	fi
 }
 
-# args: $1 - which file. The file exists test has already been run
+# args: $1 - which file. The file exists test has already been run; $2 full/basic - which print to runs
 print_elr_osr_version()
 {
 	case $1 in
 		$ELR)
-			awk -F '=' '
+			awk -v outputType="$2" -F '=' '
 				BEGIN {
 					IGNORECASE=1
 					# handling detection failures by default
 					distroId="ID-error"
 					distroRelease="RE-error"
 					distroCodename="CO-error"
+					distroString=""
 				}
+				
 				/DISTRIB_ID/ {
 					distroId = $2
 				}
@@ -3189,39 +3195,78 @@ print_elr_osr_version()
 					distroCodename = $2
 				}
 				END {
-					print tolower( distroId "-" distroRelease )
+					if ( outputType == "basic" ) {
+						distroId = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroId )
+						distroRelease = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroRelease )
+						distroString = tolower( distroId " " distroRelease )
+						gsub(/\"|\)|\(/, "", distroString )
+						gsub(/\//, "-", distroString )
+					}
+					else {
+						distroString = distroId " " distroRelease
+					}
+					print distroString
 				}
 				' $ELR
+				log_function_data "$( cat $ELR )"
 			;;
 		$EOR)
-			awk -F '=' '
+			awk -v outputType="$2" -F '=' '
 				BEGIN {
 					IGNORECASE=1
 					# handling detection failures by default
 					distroName="DN-error"
 					distroPrettyName="PN-error"
+					distroId="ID-error"
+					distroString=""
 				}
-				
 				/^PRETTY_NAME/ {
-					gsub(/\"/,"",$2)
 					distroPrettyName = $2
 				}
 				/^NAME/ {
-					gsub(/\"/,"",$2)
 					distroName = $2
 				}
 				END {
-					if ( distroPrettyName != "PN-error" ) {
-						print distroPrettyName
-					}
-					else if ( distroName != "DN-error" ) {
-						print distroName
+					
+					# return only the first term in string
+					# clean out all the gunk
+					if ( outputType == "basic" ) {
+						if ( distroId != "ID-error" ) {
+						 distroString = distroId
+						}
+						else if ( distroName != "DN-error" ) {
+							distroString = distroName 
+						}
+						else if ( distroPrettyName != "PN-error" ) {
+							distroString = distroPrettyName
+						}
+						else {
+							distroString = distroPrettyName
+						}
+						gsub(/\)|\(/,"",distroString)
+						gsub(/\//, "-",distroString )
+						distroString = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroString )
+						distroString = tolower( distroString )
 					}
 					else {
-						print distroPrettyName
+						if ( distroPrettyName != "PN-error" ) {
+							distroString = distroPrettyName
+						}
+						else if ( distroName != "DN-error" ) {
+							distroString = distroName 
+						}
+						else if ( distroId != "ID-error" ) {
+							distroString = distroId
+						}
+						else {
+							distroString = distroPrettyName
+						}
 					}
+					gsub(/\"/,"",distroString)
+					print distroString
 				}
 				' $EOR
+				log_function_data "$( cat $EOR )"
 			;;
 	esac
 }
@@ -3238,9 +3283,9 @@ print_distro_id()
 	do
 		if [ -f $distroFile ];then
 			if [ $distroFile == $ELR ];then
-				distroId=$( print_elr_osr_version "$distroFile" | perl -wp -e '$_ = ucfirst' )
+				distroId=$( print_elr_osr_version "$distroFile" 'full' | perl -wp -e '$_ = ucfirst' )
 			elif [ $distroFile == $EOR ];then
-				distroId=$( print_elr_osr_version "$distroFile" )
+				distroId=$( print_elr_osr_version "$distroFile" 'full' )
 			else
 				# print first line, for cases where > 1 line exist in file, and trim off that
 				# debian \r, \l gunk
