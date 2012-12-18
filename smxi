@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.17
-####  Date: December 15 2012
+####  version: 8.14.18
+####  Date: December 17 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1501,9 +1501,14 @@ set_distro_data()
 
 	# set system type. This test will never be perfect, but it's a good approximation
 	# if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
-	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
+	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isSqueeze" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 		if [ -n "$isEtch" ];then
 			SYSTEM_BASE='etch'
+		# note: script uses this internally so make sure to search and correct everywhere before removing these comments
+# 		elif [ -n "$isLenny" ];then
+# 			SYSTEM_BASE='lenny'
+# 		elif [ -n "$isSqueeze" ];then
+# 			SYSTEM_BASE='squeeze'
 		else
 			SYSTEM_BASE='stable'
 		fi
@@ -3225,6 +3230,9 @@ print_elr_osr_version()
 				}
 				/^NAME/ {
 					distroName = $2
+				}
+				/^ID/ {
+					distroId = $2
 				}
 				END {
 					
