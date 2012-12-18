@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.22
-####  Date: October 19 2012
+####  version: 3.4.23
+####  Date: December 17 2012
 
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1462,7 +1462,7 @@ reinstall_skype()
 		# install skype
 		COLUMNS=200 dpkg -l | awk '/skype/{print $2}' | xargs -r dpkg --purge
 		echo "${S}Installing new skype.${N}"
-		package_installer 'libstdc++5 libqt4-core libqt4-gui' 'install-user'
+		package_installer 'libqtwebkit4 libstdc++5 libqt4-core libqt4-gui' 'install-user'
 		dpkg -i $SkypeFileName
 		rm -f $SkypeFileName
 		$APT_TYPE install -f
