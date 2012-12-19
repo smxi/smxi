@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.18
-####  Date: December 17 2012
+####  version: 8.14.19
+####  Date: December 19 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -3186,29 +3186,58 @@ print_elr_osr_version()
 					distroId="ID-error"
 					distroRelease="RE-error"
 					distroCodename="CO-error"
+					distroDescription="DE-error"
 					distroString=""
 				}
-				
-				/DISTRIB_ID/ {
+				# initial cleanup
+				{ 
+					if ( outputType == "basic" ) {
+						gsub(/\//, "-", $0 )
+						gsub(/\)|\(/,"", $0 )
+					}
+					gsub(/\"/,"", $0 )
+					gsub(/^[[:space:]]*/, "", $2 )
+					gsub(/[[:space:]]*$/, "", $2 )
+				}
+				/^DISTRIB_ID/ {
 					distroId = $2
 				}
-				/DISTRIB_RELEASE/ {
+				/^DISTRIB_RELEASE/ {
 					distroRelease = $2
 				}
-				# this is unused for now
-				/DISTRIB_CODENAME/ {
+				/^DISTRIB_CODENAME/ {
 					distroCodename = $2
+				}
+				/^DISTRIB_DESCRIPTION/ {
+					distroDescription = $2
 				}
 				END {
 					if ( outputType == "basic" ) {
 						distroId = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroId )
-						distroRelease = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroRelease )
-						distroString = tolower( distroId " " distroRelease )
-						gsub(/\"|\)|\(/, "", distroString )
-						gsub(/\//, "-", distroString )
+						distroRelease = gsub(/[[:space:]]/, "-", distroRelease )
+						distroCodename = gsub(/[[:space:]]/, "-", distroCodename )
+						distroString = distroId
+						if ( distroRelease != "RE-error" ) {
+							distroString = distroString "-" distroRelease
+						}
+						if ( distroCodename != "CO-error" ) {
+							distroString = distroString "-" distroCodename
+						}
+						distroString = tolower( distroString )
 					}
 					else {
-						distroString = distroId " " distroRelease
+						if ( distroDescription != "DE-error" ){
+							distroString = distroDescription
+						}
+						else {
+							distroString = distroId
+							if ( distroRelease != "RE-error" ) {
+								distroString = distroString " " distroRelease
+							}
+							if ( distroCodename != "CO-error" ) {
+								distroString = distroString " " distroCodename
+							}
+						}
 					}
 					print distroString
 				}
@@ -3223,7 +3252,18 @@ print_elr_osr_version()
 					distroName="DN-error"
 					distroPrettyName="PN-error"
 					distroId="ID-error"
+					distroVersionId="VID-error"
 					distroString=""
+				}
+				# initial cleanup
+				{ 
+					if ( outputType == "basic" ) {
+						gsub(/\//, "-", $0 )
+						gsub(/\)|\(/,"", $0 )
+					}
+					gsub(/\"/,"", $0 )
+					gsub(/^[[:space:]]*/, "", $2 )
+					gsub(/[[:space:]]*$/, "", $2 )
 				}
 				/^PRETTY_NAME/ {
 					distroPrettyName = $2
@@ -3234,26 +3274,28 @@ print_elr_osr_version()
 				/^ID/ {
 					distroId = $2
 				}
+				/^VERSION_ID/ {
+					distroVersionId = $2
+				}
 				END {
-					
 					# return only the first term in string
 					# clean out all the gunk
 					if ( outputType == "basic" ) {
 						if ( distroId != "ID-error" ) {
-						 distroString = distroId
+							distroString = distroId
+							if ( distroVersionId != "VID-error" ) {
+								distroString = distroString "-" distroVersionId
+							}
 						}
 						else if ( distroName != "DN-error" ) {
-							distroString = distroName 
+							distroString = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroName  )
 						}
 						else if ( distroPrettyName != "PN-error" ) {
-							distroString = distroPrettyName
+							distroString = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroPrettyName )
 						}
 						else {
 							distroString = distroPrettyName
 						}
-						gsub(/\)|\(/,"",distroString)
-						gsub(/\//, "-",distroString )
-						distroString = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroString )
 						distroString = tolower( distroString )
 					}
 					else {
@@ -3270,7 +3312,6 @@ print_elr_osr_version()
 							distroString = distroPrettyName
 						}
 					}
-					gsub(/\"/,"",distroString)
 					print distroString
 				}
 				' $EOR
