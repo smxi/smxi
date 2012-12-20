@@ -3205,7 +3205,7 @@ print_elr_osr_version()
 						gsub(/\//, "-", $0 )
 						gsub(/\)|\(/,"", $0 )
 					}
-					gsub(/\"/,"", $0 )
+					gsub(/\\|\"|[:\47]/,"", $0 )
 					gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2 )
 				}
 				/^DISTRIB_ID/ {
@@ -3273,7 +3273,8 @@ print_elr_osr_version()
 						gsub(/\//, "-", $0 )
 						gsub(/\)|\(/,"", $0 )
 					}
-					gsub(/\"/,"", $0 )
+					# [:\47] escapes single quote
+					gsub(/\\|\"|[:\47]/,"", $0 )
 					gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2 )
 				}
 				/^PRETTY_NAME/ {
