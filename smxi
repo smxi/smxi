@@ -3235,7 +3235,10 @@ print_elr_osr_version()
 						distroString = tolower( distroString )
 					}
 					else {
-						if ( distroDescription != "LDE-error" ){
+						if ( distroRelease != "LRE-error" && distroCodename != "LCO-error" && distroId != "LID-error" ) {
+							distroString = distroId " " distroRelease " " distroCodename
+						}
+						else if ( distroDescription != "LDE-error" ){
 							distroString = distroDescription
 						}
 						else {
