@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.21
-####  Date: December 19 2012
+####  version: 8.14.22
+####  Date: December 20 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1504,11 +1504,13 @@ set_distro_data()
 	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isSqueeze" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 		if [ -n "$isEtch" ];then
 			SYSTEM_BASE='etch'
-		# note: script uses this internally so make sure to search and correct everywhere before removing these comments
+#		# note: script uses this internally so make sure to search and correct everywhere before removing these comments
 # 		elif [ -n "$isLenny" ];then
 # 			SYSTEM_BASE='lenny'
 # 		elif [ -n "$isSqueeze" ];then
 # 			SYSTEM_BASE='squeeze'
+# 		elif [ -n "$isWheezy" ];then
+# 			SYSTEM_BASE='wheezy'
 		else
 			SYSTEM_BASE='stable'
 		fi
@@ -1548,7 +1550,7 @@ set_distro_data()
 	elif [ -f $EAX ];then
 		DISTRO='antix'
 	elif [ -f $ELRC ];then
-		DISTRO='crunchbang'
+		DISTRO=$( print_elr_osr_version "$ELRC" 'basic' )
 	# now we're going to process as true default ELR/$EOR, this will
 	# override everything except distros with known id files
 	elif [ -f $ELR ];then
@@ -1630,15 +1632,15 @@ set_distro_data()
 	if [ -f $SM_VALUES ];then
 		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
 	fi
-	log_function_data "APT_TYPE: $APT_TYPE"
-	log_function_data "SYSTEM_BASE: $SYSTEM_BASE"
-	log_function_data "DU_UPGRADE: $DU_UPGRADE"
-	log_function_data "DEFAULT_KERNEL: $DEFAULT_KERNEL"
-	log_function_data "B_USE_DEBIAN_KERNEL: $B_USE_DEBIAN_KERNEL"
-	log_function_data "DISTRO: $DISTRO"
-	log_function_data "DISTRO_F: $DISTRO_F"
-# # 	log_function_data "B_APTOSID_SOURCES: $B_APTOSID_SOURCES"
-	log_function_data "B_SIDUCTION_SOURCES: $B_APTOSID_SOURCES"
+	log_function_data "APT_TYPE: $APT_TYPE
+SYSTEM_BASE: $SYSTEM_BASE
+DU_UPGRADE: $DU_UPGRADE
+DEFAULT_KERNEL: $DEFAULT_KERNEL
+B_USE_DEBIAN_KERNEL: $B_USE_DEBIAN_KERNEL
+DISTRO: $DISTRO
+DISTRO_F: $DISTRO_F
+B_APTOSID_SOURCES: $B_APTOSID_SOURCES
+B_SIDUCTION_SOURCES: $B_APTOSID_SOURCES"
 	eval $LOGPE
 }
 
@@ -3004,7 +3006,7 @@ print_version()
 			distroThanks='floating along the debian waters, sid in our veins and eyes blinded by dreams'
 			extraMessage='...onward and downward bound... as we sail the seas of... what?...'
 			;;
-		crunchbang)
+		crunchbang*)
 			distroThanks='VastOne xaos52; alternate kernels: damentz towo'
 			extraMessage='... and welcome to CrunchBangers. Hope the scripts work for you as expected...'
 			;;
@@ -3178,21 +3180,23 @@ print_hec()
 	fi
 }
 
-# args: $1 - which file. The file exists test has already been run; $2 full/basic - which print to runs
+# args: $1 - which file. The file exists test has already been run; $2 full/basic - which print to execute
 print_elr_osr_version()
 {
 	eval $LOGUS
 	
+	local distroString=''
+	
 	case $1 in
-		$ELR)
-			awk -v outputType="$2" -F '=' '
+		$ELR|$ELRC)
+			distroString=$( awk -v outputType="$2" -F '=' '
 				BEGIN {
 					IGNORECASE=1
 					# handling detection failures by default
-					distroId="ID-error"
-					distroRelease="RE-error"
-					distroCodename="CO-error"
-					distroDescription="DE-error"
+					distroId="LID-error"
+					distroRelease="LRE-error"
+					distroCodename="LCO-error"
+					distroDescription="LDE-error"
 					distroString=""
 				}
 				# initial cleanup
@@ -3202,8 +3206,7 @@ print_elr_osr_version()
 						gsub(/\)|\(/,"", $0 )
 					}
 					gsub(/\"/,"", $0 )
-					gsub(/^[[:space:]]*/, "", $2 )
-					gsub(/[[:space:]]*$/, "", $2 )
+					gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2 )
 				}
 				/^DISTRIB_ID/ {
 					distroId = $2
@@ -3223,42 +3226,42 @@ print_elr_osr_version()
 						gsub(/[[:space:]]/, "-", distroRelease )
 						gsub(/[[:space:]]/, "-", distroCodename )
 						distroString = distroId
-						if ( distroRelease != "RE-error" ) {
+						if ( distroRelease != "LRE-error" ) {
 							distroString = distroString "-" distroRelease
 						}
-						if ( distroCodename != "CO-error" ) {
+						if ( distroCodename != "LCO-error" ) {
 							distroString = distroString "-" distroCodename
 						}
 						distroString = tolower( distroString )
 					}
 					else {
-						if ( distroDescription != "DE-error" ){
+						if ( distroDescription != "LDE-error" ){
 							distroString = distroDescription
 						}
 						else {
 							distroString = distroId
-							if ( distroRelease != "RE-error" ) {
+							if ( distroRelease != "LRE-error" ) {
 								distroString = distroString " " distroRelease
 							}
-							if ( distroCodename != "CO-error" ) {
+							if ( distroCodename != "LCO-error" ) {
 								distroString = distroString " " distroCodename
 							}
 						}
 					}
 					print distroString
 				}
-				' $ELR
-				log_function_data "$( cat $ELR )"
+ 				' $1
+				)
 			;;
 		$EOR)
-			awk -v outputType="$2" -F '=' '
+			distroString=$( awk -v outputType="$2" -F '=' '
 				BEGIN {
 					IGNORECASE=1
 					# handling detection failures by default
-					distroName="DN-error"
-					distroPrettyName="PN-error"
-					distroId="ID-error"
-					distroVersionId="VID-error"
+					distroName="ODN-error"
+					distroPrettyName="OPN-error"
+					distroId="OID-error"
+					distroVersionId="OVID-error"
 					distroString=""
 				}
 				# initial cleanup
@@ -3268,8 +3271,7 @@ print_elr_osr_version()
 						gsub(/\)|\(/,"", $0 )
 					}
 					gsub(/\"/,"", $0 )
-					gsub(/^[[:space:]]*/, "", $2 )
-					gsub(/[[:space:]]*$/, "", $2 )
+					gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2 )
 				}
 				/^PRETTY_NAME/ {
 					distroPrettyName = $2
@@ -3287,16 +3289,16 @@ print_elr_osr_version()
 					# return only the first term in string
 					# clean out all the gunk
 					if ( outputType == "basic" ) {
-						if ( distroId != "ID-error" ) {
+						if ( distroId != "OID-error" ) {
 							distroString = distroId
-							if ( distroVersionId != "VID-error" ) {
+							if ( distroVersionId != "OVID-error" ) {
 								distroString = distroString "-" distroVersionId
 							}
 						}
-						else if ( distroName != "DN-error" ) {
+						else if ( distroName != "ODN-error" ) {
 							distroString = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroName  )
 						}
-						else if ( distroPrettyName != "PN-error" ) {
+						else if ( distroPrettyName != "OPN-error" ) {
 							distroString = gensub(/([^[[:space:]]]*)[[:space:]].*/, "\\1", 1, distroPrettyName )
 						}
 						else {
@@ -3305,13 +3307,13 @@ print_elr_osr_version()
 						distroString = tolower( distroString )
 					}
 					else {
-						if ( distroPrettyName != "PN-error" ) {
+						if ( distroPrettyName != "OPN-error" ) {
 							distroString = distroPrettyName
 						}
-						else if ( distroName != "DN-error" ) {
+						else if ( distroName != "ODN-error" ) {
 							distroString = distroName 
 						}
-						else if ( distroId != "ID-error" ) {
+						else if ( distroId != "OID-error" ) {
 							distroString = distroId
 						}
 						else {
@@ -3320,10 +3322,13 @@ print_elr_osr_version()
 					}
 					print distroString
 				}
-				' $EOR
-				log_function_data "$( cat $EOR )"
+				' $1
+				)
 			;;
 	esac
+	log_function_data "$1\n$( cat $1 )"
+	log_function_data "distroString: $distroString"
+	echo $distroString
 	
 	eval $LOGUE
 }
@@ -3333,13 +3338,13 @@ print_distro_id()
 	eval $LOGUS
 	# Note: $EDV is the default if all else fails. The order is important,
 	# distros with specific versionining files need to come before the defaults
-	local knownDistroIds="$EAV $ESV $ESUV $EKV $EAX $ELR $EOR $EDI $SMDV $EDV"
+	local knownDistroIds="$EAV $ESV $ESUV $EKV $EAX $ELRC $ELR $EOR $EDI $SMDV $EDV"
 	local distroFile='' distroId=''
 
 	for distroFile in $knownDistroIds
 	do
 		if [ -f $distroFile ];then
-			if [ $distroFile == $ELR ];then
+			if [ $distroFile == $ELR -o $distroFile == $ELRC ];then
 				distroId=$( print_elr_osr_version "$distroFile" 'full' | perl -wp -e '$_ = ucfirst' )
 			elif [ $distroFile == $EOR ];then
 				distroId=$( print_elr_osr_version "$distroFile" 'full' )
