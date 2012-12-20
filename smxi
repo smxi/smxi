@@ -3177,6 +3177,8 @@ print_hec()
 # args: $1 - which file. The file exists test has already been run; $2 full/basic - which print to runs
 print_elr_osr_version()
 {
+	eval $LOGUS
+	
 	case $1 in
 		$ELR)
 			awk -v outputType="$2" -F '=' '
@@ -3318,6 +3320,8 @@ print_elr_osr_version()
 				log_function_data "$( cat $EOR )"
 			;;
 	esac
+	
+	eval $LOGUE
 }
 
 print_distro_id()
@@ -3325,7 +3329,7 @@ print_distro_id()
 	eval $LOGUS
 	# Note: $EDV is the default if all else fails. The order is important,
 	# distros with specific versionining files need to come before the defaults
-	local knownDistroIds="$EAV $ESV $EKV $EAX $ELR $EOR $EDI $SMDV $EDV"
+	local knownDistroIds="$EAV $ESV $ESUV $EKV $EAX $ELR $EOR $EDI $SMDV $EDV"
 	local distroFile='' distroId=''
 
 	for distroFile in $knownDistroIds
