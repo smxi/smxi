@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.26
-####  Date: December 4 2012
+####  version: 1.23.27
+####  Date: January 15 2013
 
-####  Copyright (C) Harald Hope 2005-2011
+####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1959,28 +1959,49 @@ alt-usa-3:http://mira.sunsite.utk.edu/aptosid/debian/
 check_pae_support()
 {
 	eval $LOGUS
-	
-	local memInstalled=$( free 2>/dev/null | awk '/^Mem:/ { print $2 }' | grep -Es '(^[0-9]+$)' )
-	local paeExists=$( check_pae_exists )
+
+	local bPaeExists=$( check_pae_exists )
 	local bUsePae='false'
 	local paePref=$( sm_pref_tester 'use-pae-kernel' 'equal')
 	
 	if [  "$paePref" != 'false' -o "$1" == 'force' ];then
-		if [ "$BITS" == '32' -a -n "$paeExists" -a -n "$memInstalled" -a "$memInstalled" -gt 3000000 ];then
+		# if [ "$BITS" == '32' -a -n "$bPaeExists" -a -n "$memInstalled" -a "$memInstalled" -gt 3000000 ];then
+		if [ "$BITS" == '32' -a "$bPaeExists" == 'true' ];then
 			bUsePae='true'
 		fi
 	fi
-	log_function_data "memInstalled: $memInstalled\npaeExists: $paeExists\nbUsePae: $bUsePae"
+	log_function_data "bUsePae: $bUsePae"
 	
 	echo $bUsePae
 	
 	eval $LOGUE
 }
+check_pae_memory_size()
+{
+	eval $LOGUS
+	local memInstalled=$( free 2>/dev/null | awk '/^Mem:/ { print $2 }' | grep -Es '(^[0-9]+$)' )
+	local bMemoryUsePae='false'
+	
+	if [ -n "$memInstalled" -a "$memInstalled" -gt 3000000 ];then
+		bMemoryUsePae='true'
+	fi
+	log_function_data "memInstalled: $memInstalled"
+	echo $bMemoryUsePae
+	eval $LOGUE
+}
+
 check_pae_exists()
 {
+	eval $LOGUS
 	local paeExists=$( grep -Eis 'flags.*pae' /proc/cpuinfo )
+	local bPae='false'
+	if [ -n "$paeExists" ];then
+		bPae='true'
+	fi
 	
-	echo $paeExists
+	echo $bPae
+	log_function_data "paeExists: $paeExists"
+	eval $LOGUE
 }
 
 # check apt for latest kernel version
@@ -1991,10 +2012,10 @@ get_current_apt_kernel()
 	eval $LOGUS
 	local tempKernels='' kernelMath=0 kernelBase='' baseWorking=''
 	local kernel1='' kernel2='' kernel1Greater='' kernelStringExtra=''
-	local defaultKernel=$1 distro='' currentKernel='' kernelPackageExists=''
+	local defaultKernel=$1 kernelType='' currentKernel='' kernelPackageExists=''
 	# needed for alt platforms, no easy way to handle say move from 486 to 686, so
 	# we'll just respect the user initial preference and make them change manually if desired
-	local platform=$( grep -Eo -- '\-(486|686|686-bigmem|686-pae|xen-686)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2-4 )
+	local platform=$( grep -Eo -- '\-(486|686|686-bigmem|686-pae|rt-686-pae|rt-amd64|xen-686)$' <<< $CURRENT_KERNEL | cut -d '-' -f 2-4 )
 
 	if [ "$defaultKernel" != 'no-kernel' ];then
 		if [ "$BITS" == '64' ];then
@@ -2007,55 +2028,84 @@ get_current_apt_kernel()
 		case $defaultKernel in
 			aptosid)
 				kernelStringExtra='-aptosid'
-				distro='Aptosid'
+				kernelType='Aptosid'
 				if [ "$BITS" == '32' ];then
 					platform='686'
 				fi
 				;;
+			# note, debian removed their standard 686 in prepartion for wheezy stable. Why? Who knows.
 			debian)
-				distro='Debian'
+				kernelType='Debian'
 				if [ "$BITS" == '32' ];then
 					case $platform in
 						486)
-							distro='Debian-486'
+							kernelType='Debian-486'
+							platform='486'
 							;;
 						686|686-pae)
+							# first case, < 3gB ram and 686 is present
+							if [ -n "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )" \
+							-a "$( check_pae_memory_size )" != 'true' ];then
+								platform='686'
+							# second case: standard, if supports pae
+							elif [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
+							-a "$( check_pae_support )" == 'true' ];then
+								platform='686-pae'
+							# note, for now, this will return a null value for the kernel when the actual package test runs
+							elif [ -z "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )"  \
+								-a "$( check_pae_support )" != 'true' ];then
+									platform='686 (no pae)'
+							fi
+							kernelType="Debian-$platform"
+							;;
+						686-bigmem)
 							if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
 							-a "$( check_pae_support )" == 'true' ];then
 								platform='686-pae'
-							else
-								platform='686'
+							elif [ -n "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686-bigmem$' 'c' )" ];then
+								platform='686-bigmem'
 							fi
-							;;
-						686-bigmem)
-							distro='Debian-686-bigmem'
+							kernelType="Debian-$platform"
 							;;
 					esac
 				fi
 				;;
 			debian-486)
-				distro='Debian-486'
+				kernelType='Debian-486'
 				platform='486'
 				;;
 			debian-686)
-				distro='Debian-686'
+				kernelType='Debian-686'
 				# as of 2.6.39 debian added -pae to default, sigh...
 				case $platform in
 					686-pae|686)
-						if [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
+						# first case, < 3gB ram and 686 is present
+						if [ -n "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )" \
+						-a "$( check_pae_memory_size )" != 'true' ];then
+							platform='686'
+						# second case: standard, if supports pae
+						elif [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
 						-a "$( check_pae_support )" == 'true' ];then
 							platform='686-pae'
-						else
-							platform='686'
+						# note, for now, this will return a null value for the kernel when the actual package test runs
+						elif [ -z "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )"  \
+							-a "$( check_pae_support )" != 'true' ];then
+								platform='686 (no pae)'
 						fi
+						kernelType="Debian-$platform"
 						;;
 				esac
 				;;
 			liquorix)
 				kernelStringExtra='-liquorix'
-				distro='Liquorix'
+				kernelType='Liquorix'
+				# as of 3.7, liquorix ships with pae only
 				if [ "$BITS" == '32' ];then
-					platform='686'
+					if [ "$( check_pae_support )" == 'true' ];then
+						platform='686'
+					else
+						platform='686 (no pae)' # trigger an error condition further down
+					fi
 				fi
 				;;
 			mepis)
@@ -2064,12 +2114,12 @@ get_current_apt_kernel()
 				else
 					kernelStringExtra='-mepis64'
 				fi
-				distro='Mepis'
+				kernelType='Mepis'
 				platform='smp'
 				;;
 			siduction)
 				kernelStringExtra='-siduction'
-				distro='Siduction'
+				kernelType='Siduction'
 				if [ "$BITS" == '32' ];then
 					case $platform in
 						686-pae|686)
@@ -2085,10 +2135,10 @@ get_current_apt_kernel()
 				;;
 		esac
 		
-		# little trick here to present just debian kernels if not distro
+		# little trick here to present just debian kernels if not kernelType
 		if [ "$B_APTOSID_SOURCES" != 'true' -a "$B_SIDUCTION_SOURCES" != 'true' -a "$B_LIQUORIX_SOURCES" != 'true' -a  "$B_MEPIS_SOURCES" != 'true' -a "$defaultKernel" != 'debian-486'  -a "$defaultKernel" != 'debian-686' ];then
 			kernelStringExtra=''
-			distro='Debian'
+			kernelType='Debian'
 			defaultKernel='debian'
 		fi
 
@@ -2096,7 +2146,7 @@ get_current_apt_kernel()
 		apt_update_handler 'kernel'
 		# then we'll slice out the latest apt kernel
 		echo
-		echo "${S}Calculating latest ${C}$distro${S} kernel version...${N}"
+		echo "${S}Calculating latest ${C}$kernelType${S} kernel version...${N}"
 		# need to make sure it's not a bigmem kernel from debian too, ends in  $platform
 		# note: testing for kernel metapackages here, so only systems with metapackage kernels
 		# can be tested with this method. The last slice handles a case with metapackages
@@ -2128,6 +2178,12 @@ get_current_apt_kernel()
 		# test that the kernel actually exists, metapackages can be wrong, out of date
 		kernelPackageExists=$( check_package_status "linux-image-$currentKernel" )
 		if [ -z "$kernelPackageExists" ];then
+			echo "${E}Error: the kernel package ${C}linux-image$kernelStringExtra-$platform${E} has no installation candidate."
+			echo "${M}Setting kernel version to null for the ${C}$defaultKernel${M} kernel type.${N}"
+			if [ "$BITS" == '32' -a "$( check_pae_support )" != true ];then
+				echo "${M}Since you are using a ${C}32 bit${M} system that does not support ${C}PAE${M} kernels, your default kernel"
+				echo "${C}$defaultKernel${M}selected probably does not offer a non-pae kernel.${N}"
+			fi
 			log_function_data "Error: the kernel package: linux-image-$currentKernel has no installation candidate.\Setting kernel version to null for this kernel type."
 			currentKernel=''
 		else
