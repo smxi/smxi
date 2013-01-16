@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.28
+####  version: 1.23.29
 ####  Date: January 15 2013
 
 ####  Copyright (C) Harald Hope 2005-2013
@@ -2044,22 +2044,25 @@ get_current_apt_kernel()
 							;;
 						686|686-pae)
 							# first case, < 3gB ram and 686 is present
-							if [ -n "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )" \
+							if [ -n "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686$' 'c' )" \
 							-a "$( check_pae_memory_size )" != 'true' ];then
 								platform='686'
 							# second case: standard, if supports pae
 							elif [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
 							-a "$( check_pae_support )" == 'true' ];then
 								platform='686-pae'
+							elif [ -n "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686-bigmem$' 'c' )" \
+							-a "$( check_pae_support )" == 'true' ];then
+								platform='686-bigmem'
 							# for the single common case, pentium m, will install the 486 kernel if none of the above work
-							elif [ -z "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )"  \
-								-a "$( check_pae_support )" != 'true' ];then
-									platform='486'
+							elif [ -z "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686$' 'c' )"  \
+							-a "$( check_pae_support )" != 'true' ];then
+								platform='486'
 							fi
 							kernelType="Debian-$platform"
 							;;
 						686-bigmem)
-							if [ -n "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686-bigmem$' 'c' )" ];then
+							if [ -n "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686-bigmem$' 'c' )" ];then
 								platform='686-bigmem'
 							elif [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
 							-a "$( check_pae_support )" == 'true' ];then
@@ -2080,17 +2083,20 @@ get_current_apt_kernel()
 				case $platform in
 					686-pae|686)
 						# first case, < 3gB ram and 686 is present
-						if [ -n "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )" \
+						if [ -n "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686$' 'c' )" \
 						-a "$( check_pae_memory_size )" != 'true' ];then
 							platform='686'
 						# second case: standard, if supports pae
 						elif [ -n "$( check_package_status 'linux-image-686-pae' 'c' )" \
 						-a "$( check_pae_support )" == 'true' ];then
 							platform='686-pae'
+						elif [ -n "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686-bigmem$' 'c' )" \
+						-a "$( check_pae_support )" == 'true' ];then
+							platform='686-bigmem'
 						# for the single common case, pentium m, will install the 486 kernel if none of the above work
-						elif [ -z "$( check_package_status 'linux-image-[2-9].[0-9][0-9\.-]+-686$' 'c' )"  \
-							-a "$( check_pae_support )" != 'true' ];then
-								platform='486'
+						elif [ -z "$( check_package_status 'linux-image-[2-9]\.[0-9][0-9\.-]+-686$' 'c' )"  \
+						-a "$( check_pae_support )" != 'true' ];then
+							platform='486'
 						fi
 						kernelType="Debian-$platform"
 						;;
