@@ -2182,7 +2182,7 @@ get_current_apt_kernel()
 			echo "${M}Setting kernel version to null for the ${C}$defaultKernel${M} kernel type.${N}"
 			if [ "$BITS" == '32' -a "$( check_pae_support )" != true ];then
 				echo "${M}Since you are using a ${C}32 bit${M} system that does not support ${C}PAE${M} kernels, your default kernel"
-				echo "${C}$defaultKernel${M} selection probably does not offer a non-pae kernel.${N}"
+				echo "selection ${C}$defaultKernel${M} probably does not offer a non-pae kernel.${N}"
 			fi
 			log_function_data "Error: the kernel package: linux-image-$currentKernel has no installation candidate.\Setting kernel version to null for this kernel type."
 			currentKernel=''
