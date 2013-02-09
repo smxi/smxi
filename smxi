@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.22
-####  Date: December 20 2012
+####  version: 8.14.23
+####  Date: February 9 2013
 ########################################################################
-####  Copyright (C) Harald Hope 2005-2012
+####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -995,7 +995,7 @@ test_version_info()
 		update_scripts $1 $2
 	fi
 	# test local against remote versions
-	LocalVersion=$( grep -m 1 -o -G "version:\ [0-9]*.[0-9]*.[0-9]*" $SCRIPT_HOME/$1 | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+	LocalVersion=$( grep -im 1 -o -G "version:\ [0-9]*.[0-9]*.[0-9]*" $SCRIPT_HOME/$1 | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	# I'm being careful with globals, I want to make sure no unset global error occurs
 	# reset the global value for remote version now
 	remoteVersion=$( grep -e "$1=.*" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
