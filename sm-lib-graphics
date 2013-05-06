@@ -184,7 +184,7 @@ install_graphics()
 				OptNvCurrentStable='6-7xxx-nvidia current-nvidia'
 				NvAdvancedText="${C}6-7xxx-nvidia${S} - 304 series nVidia driver. Use only if you have problems with current-nvidia.\n    ${S}This will install the legacy 4 nVidia driver: ${C}$NvLegacy4${S}\n${C}current-nvidia${S} - ${M}Recommended driver for your card${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
 			fi
-			OptNv="$OptNv $NvDebId ancient-nvidia 5xxx-nvidia $OptNvCurrentStable $NvBetaId"
+			OptNv="$OptNv $NvDebId 5xxx-nvidia $OptNvCurrentStable $NvBetaId"
 			NvOptionText='echo -e "$NvDebianText${C}5xxx-nvidia${S} - ${M}Recommended only for older (5xxx series) cards${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n$NvAdvancedText$NvBetaText"'
 		else
 			OptNv="$OptNv $NvDebId antique-nvidia $NvBetaId"
