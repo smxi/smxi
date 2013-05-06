@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.5.2
-####  Date:   October 24 2012
+####  version: 2.5.3
+####  Date:   May 5 2013
 
-####  Copyright (C) Harald Hope 2005-2012
+####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -185,10 +185,10 @@ install_graphics()
 				NvAdvancedText="${C}6-7xxx-nvidia${S} - 304 series nVidia driver. Use only if you have problems with current-nvidia.\n    ${S}This will install the legacy 4 nVidia driver: ${C}$NvLegacy4${S}\n${C}current-nvidia${S} - ${M}Recommended driver for your card${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
 			fi
 			OptNv="$OptNv $NvDebId ancient-nvidia 5xxx-nvidia $OptNvCurrentStable $NvBetaId"
-			NvOptionText='echo -e "$NvDebianText${C}ancient-nvidia${S} - Generally a poor choice in modern systems.\n    ${M}Recommended only for ancient, legacy nvidia cards (unreliable new kernel/Xorg support).${S}\n    ${S}This will install the legacy 2 nVidia driver: ${C}$NvLegacy2${S}\n${C}5xxx-nvidia${S} - ${M}Recommended only for older (5xxx series) cards${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n$NvAdvancedText$NvBetaText"'
+			NvOptionText='echo -e "$NvDebianText${C}5xxx-nvidia${S} - ${M}Recommended only for older (5xxx series) cards${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n$NvAdvancedText$NvBetaText"'
 		else
-			OptNv="$OptNv $NvDebId legacy-nvidia $NvBetaId"
-			NvOptionText='echo -e "$NvDebianText$NvBetaText${C}legacy-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install the legacy 2 nVidia driver: ${C}$NvDefault${S}$NvBetaText${S}\n    Inconsistent new Xorg and Kernel support."'
+			OptNv="$OptNv $NvDebId antique-nvidia $NvBetaId"
+			NvOptionText='echo -e "$NvDebianText\n${M}96 series driver: No support for Xorg version 1.13 or newer, or for kernels about 3.5 or newer.\n${C}antique-nvidia${S} - This appears to be the only driver that will support your card.\n\t${S}This will install the legacy 2 nVidia driver: ${C}$NvDefault${S}$NvBetaText${S}"'
 		fi
 	fi
 
@@ -300,7 +300,7 @@ install_graphics()
 			$NvDebId)
 				final_graphics_install nvc $NvDebId
 				;;
-			legacy-nvidia)
+			antique-nvidia)
 				final_graphics_install nv $NvDefault
 				;;
 			ancient-nvidia)
@@ -424,7 +424,7 @@ final_graphics_install()
 			;;
 		nv)
 			installMess="${S}installing nVidia driver ${C}$2${S} now...${N}"
-			extraArgs=" -n "
+			extraArgs=" $kernelInstallTo -o $2"
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
@@ -531,7 +531,7 @@ final_graphics_install()
 		extraArgs="$extraArgs -! 1 "
 	fi
 	# send trigger colors to the receiving script
-	extraArgs="$extraArgs -j $SCRIPT_COLORS"
+	extraArgs=" $extraArgs -j $SCRIPT_COLORS"
 
 	if [ "$bInstallDriver" == 'true' ];then
 		echo $installMess
