@@ -170,7 +170,7 @@ start_up_tests()
 	fi
 	
 # 	if [[ $UPDATE_TYPE == 'i' ]];then
-		KERNEL_DIR=''
+# 		KERNEL_DIR=''
 # 	fi
 
 	# make sure the paths you made are right and exist
