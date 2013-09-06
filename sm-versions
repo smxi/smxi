@@ -1,5 +1,5 @@
 smxi=8.14.24:May 5 2013
-sm-lib-apt-tools=1.23.29:January 15 2013
+sm-lib-apt-tools=1.23.30:September 6 2013
 sm-lib-clean-up=2.10.15:February 8 2012
 sm-lib-distro-conversion=3.3.16:January 16 2013
 sm-lib-du-fixes=1.4.9:May 31 2011
@@ -26,6 +26,6 @@ sgfxi=4.20.58:September 4 2013
 svmi=2.8.39:July 5 2013
 inxi=1.9.14:August 20 2013
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.38.45:August 26 2013
+sm-main-version=8.38.46:September 06 2013
 
 ###**EOF**###
