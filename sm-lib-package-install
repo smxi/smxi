@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.23
-####  Date: December 17 2012
+####  version: 3.4.24
+####  Date: September 20 2013
 
-####  Copyright (C) Harald Hope 2005-2012
+####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -470,7 +470,7 @@ select_install_type()
 	echo "${C}1${S} - ${C}office${S} Features $officeString installer. Language pack selector."
 	echo "    Now also offers $officeString hold/install/update option as well."
 	echo
-	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, MS core fonts, Opera, Skype, Google Earth."
+	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, MS core fonts, Opera, Skype, Google Earth, Google Chrome (with Flash)."
 	echo
 	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi,  , and more."
 	echo
@@ -630,29 +630,29 @@ non_free_installer()
 	echo $LINE
 	echo "${C}1${S} - ${C}Opera${S} One of the better Non Free packages here. Web browser."
 	echo "    Will add opera.com sources to your ${C}$EAS${S}."
-	echo
 	echo "${C}2${S} - ${C}update-opera-keyrings${S} Update to latest keyrings from Opera."
-	echo
-	echo "${C}3${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
+	echo "${C}3${S} - ${C}Google Chrome (unstable)${S} Unstable, ie, latest, version of Chrome. Web browser."
+	echo "    Will add google.com sources to your ${C}$EAS${S}. Includes current Flash player built in."
+	echo "    Note: this is the official Google release, with its phone home features."
+	echo "${C}4${S} - ${C}Google Chrome (stable)${S} Stable, ie, long term release, version of Chrome. Web browser."
+	echo "    Will add google.com sources to your ${C}$EAS${S}. Includes current Flash player built in."
+	echo "    Note: this is the official Google release, with its phone home features."
+	echo "${C}5${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
 	echo "    Check out the new FSF gnash player for the Free Software version flash player."
-	echo
-	echo "${C}4${S} - ${C}java-plugin${S} Installs the Java plugin and jre, for use by all browsers."
+	echo "${C}6${S} - ${C}java-plugin${S} Installs the Java plugin and jre, for use by all browsers."
 	echo "    Depending on your system, this will either be the ${C}Sun${S} version or ${C}icedtea6-plugin${S}"
-	echo
-	echo "${C}5${S} - ${C}ms-core-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
-	echo
-	echo "${C}6${S} - ${C}skype${S} Installs Skype. Hate it or love it, here it is."
-	echo
-	echo -e "${C}7${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
+	echo "${C}7${S} - ${C}ms-core-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
+	echo "${C}8${S} - ${C}skype${S} Installs Skype. Hate it or love it, here it is."
+	echo -e "${C}9${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
 	echo "    ${M}NOTE: This is working again in at least Debian Sid, installs latest and it starts."
 	echo
-	echo "${C}8${S} - ${C}back-to-install-menu${S}"
+	echo "${C}10${S} - ${C}back-to-install-menu${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="opera update-opera-keyrings flash-plugin java-plugin ms-core-fonts skype google-earth back-to-install-menu"
+	options="opera update-opera-keyrings google-chrome-stable google-chrome-unstable flash-plugin java-plugin ms-core-fonts skype google-earth back-to-install-menu"
 	select opt in $options
 	do
 		case $opt in
@@ -678,6 +678,12 @@ non_free_installer()
 					error_handler 'package-unavailable' $FUNCNAME 'flashplugin-nonfree/flashplayer-mozilla'
 				fi
 				repeat='true'
+				;;
+			google-chrome-stable)
+				package_group_installer 'google-chrome' 'google-chrome-stable' 
+				;;
+			google-chrome-unstable)
+				package_group_installer 'google-chrome' 'google-chrome-unstable' 
 				;;
 			java-plugin)
 				java_plugin_installer
