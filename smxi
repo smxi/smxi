@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.25
-####  Date: October 2 2013
+####  version: 8.14.26
+####  Date: October 3 2013
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1299,21 +1299,23 @@ wget_test()
 # note: this function will always be sent . type numbers, and it handles any
 # localization re decimal indicators internally, otherwise it's too much of a pain.
 # Handles cases like 13.10 > 13.9 as well, ie, 10>9
+# Make sure all numbers passed to this function only contain numbers/dots, like: 195.23.23
+# if any non numeric values are encountered the function will return 3, which means one of the
+# numbers was not numeric almost certainly.
 compare_numbers()
 {
 	eval $LOGUS
-	## DEBUGGER
-	# echo $1 $2
+
 	# first we need to determine what the base system is using for decimal indicator
-	local returnValue='' test1='' test2='' test3='' # these two will be only tested if test1 is 1
+	local returnValue='' 
 	local oneTwo=0 oneThree=0 twoTwo=0 twoThree=0
 	local b_debug='false'
-	local decimalType=$( echo 1 | awk '{total = 1 / 2; print total}' | grep -Eo '(\.|,)' )
+	# local decimalType=$( echo 1 | awk '{total = 1 / 2; print total}' | grep -Eo '(\.|,)' )
 
 	# next we'll get the raw data and transate it into separate numbers, this also handles cases
 	# like 13.10 is greater than 13.9 for versions
-	local oneOne=$( cut -d '.' -f 1 <<< $1 | tr '.' $decimalType )
-	local twoOne=$( cut -d '.' -f 1 <<< $2 | tr '.' $decimalType )
+	local oneOne=$( cut -d '.' -f 1 <<< $1 )
+	local twoOne=$( cut -d '.' -f 1 <<< $2 )
 	if [ -z "$oneOne" ];then
 		oneOne=0
 	fi
@@ -1321,21 +1323,11 @@ compare_numbers()
 		twoOne=0
 	fi
 	
-	test1=$( echo $oneOne $twoOne | awk '{
-		if ( $1 > $2 ) {
-			print 0
-		}
-		else if ($1 == $2) {
-			print 1
-		}
-		else {
-			print 2
-		}
-	}' )
+	returnValue=$( number_compare $oneOne $twoOne )
 	# only do more tests if first numbers are equal
-	if [ "$test1" -eq 1 ];then
-		oneTwo=$( cut -d '.' -f 2 <<< $1 | tr '.' $decimalType )
-		twoTwo=$( cut -d '.' -f 2 <<< $2 | tr '.' $decimalType )
+	if [ "$returnValue" -eq 1 ];then
+		oneTwo=$( cut -d '.' -f 2 <<< $1 )
+		twoTwo=$( cut -d '.' -f 2 <<< $2 )
 		if [ -z "$oneTwo" ];then
 			oneTwo=0
 		fi
@@ -1343,19 +1335,9 @@ compare_numbers()
 			twoTwo=0
 		fi
 		
-		test2=$( echo $oneTwo $twoTwo | awk '{
-			if ( $1 > $2 ) {
-				print 0
-			}
-			else if ($1 == $2) {
-				print 1
-			}
-			else {
-				print 2
-			}
-		}' )
+		returnValue=$( number_compare $oneTwo $twoTwo )
 		# only do more tests if second numbers are equal
-		if [ "$test2" -eq 1 ];then
+		if [ "$returnValue" -eq 1 ];then
 			oneThree=$( cut -d '.' -f 3 <<< $1 )
 			twoThree=$( cut -d '.' -f 3 <<< $2 )
 			if [ -z "$oneThree" ];then
@@ -1364,17 +1346,7 @@ compare_numbers()
 			if [ -z "$twoThree" ];then
 				twoThree=0
 			fi
-			test3=$( echo $oneThree $twoThree | awk '{
-				if ( $1 > $2 ) {
-					print 0
-				}
-				else if ($1 == $2) {
-					print 1
-				}
-				else {
-					print 2
-				}
-			}' )
+			returnValue=$( number_compare $oneThree $twoThree )
 		fi
 	fi
 
@@ -1385,44 +1357,30 @@ compare_numbers()
 		echo "twoOne: $twoOne"
 		echo "twoTwo: $twoTwo"
 		echo "twoThree: $twoThree"
-		echo -e "test1 $test1\ntest2 $test2\ntest3 $test3"
-	fi
-
-	# first case, $1 > $2
-	if [ "$test1" -eq 0 ];then
-		returnValue=0
-	# second case, $1 == $2
-	elif [ "$test1" -eq 1 ];then # only when x = y, 3.2 = 3.2
-		# sub number a > b
-		if [ "$test2" -eq 0 ];then
-			returnValue=0
-		# sub number a = b
-		elif [ "$test2" -eq 1 ];then
-			if [ "$test3" -eq 0 ];then
-				returnValue=0
-			# sub number a = b
-			elif [ "$test3" -eq 1 ];then
-				returnValue=1
-			# sub number a < b
-			else
-				returnValue=2
-			fi
-			returnValue=1
-		# sub number a < b
-		else
-			returnValue=2
-		fi
-	# $1 < $2
-	else
-		returnValue=2
+		echo "returnValue $returnValue"
 	fi
 
 	echo $returnValue
 	log_function_data "returnValue: $returnValue"
 	eval $LOGUE
 }
+# args: $1 first number; $2 -second number
+number_compare()
+{
+	local compareValue=3 # 3 will be used for debugging of non numberic numbers etc
+	
+	if [ "$1" -gt "$2" ];then
+		compareValue=0
+	elif [ "$1" -eq "$2" ];then
+		compareValue=1
+	elif [ "$1" -lt "$2" ];then
+		compareValue=2
+	fi
+	echo $compareValue
+}
 ## DEBUGGER
-# compare_numbers 13.10 13.9 ;exit
+# compare_numbers 13.101.233 13.101.222 ;exit
+
 
 # generic test and launch function
 # args: $1 - which function
