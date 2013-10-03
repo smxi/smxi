@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.24
-####  Date: May 5 2013
+####  version: 8.14.25
+####  Date: October 2 2013
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1293,54 +1293,126 @@ wget_test()
 	wget -T5 -t 1 -q --spider $1 && return 0 || return 1
 }
 
-# compare 2 dot [5.34.6] or 1/0 dot [3.45,3] version numbers
+# compare 2 dot [5.34.6] or 1/0 dot [3.45, 3] version numbers
 # return codes: 0 - $1 > $2; 1 - $1 == $2; 2 - $1 < $2
 # note: this also works for one dot, like 3.4, and for 0 dot, like 3
 # note: this function will always be sent . type numbers, and it handles any
 # localization re decimal indicators internally, otherwise it's too much of a pain.
+# Handles cases like 13.10 > 13.9 as well, ie, 10>9
 compare_numbers()
 {
 	eval $LOGUS
 	## DEBUGGER
 	# echo $1 $2
 	# first we need to determine what the base system is using for decimal indicator
-	local returnValue=''
-	local decimalType=$( echo 1 | awk '{total = $1 / 2; print total}' | grep -Eo '(\.|,)' )
+	local returnValue='' test1='' test2='' test3='' # these two will be only tested if test1 is 1
+	local oneTwo=0 oneThree=0 twoTwo=0 twoThree=0
+	local b_debug='false'
+	local decimalType=$( echo 1 | awk '{total = 1 / 2; print total}' | grep -Eo '(\.|,)' )
 
-	# next we'll get the raw data and transate it if required
-	local numOne=$( echo $1 | cut -d '.' -f 1-2 | tr '.' $decimalType )
-	local subOne=$( echo $1 | cut -d '.' -f 3 )
-	if [ -z "$subOne" ];then
-		subOne=0
+	# next we'll get the raw data and transate it into separate numbers, this also handles cases
+	# like 13.10 is greater than 13.9 for versions
+	local oneOne=$( cut -d '.' -f 1 <<< $1 | tr '.' $decimalType )
+	local twoOne=$( cut -d '.' -f 1 <<< $2 | tr '.' $decimalType )
+	if [ -z "$oneOne" ];then
+		oneOne=0
 	fi
-	local numTwo=$( echo $2 | cut -d '.' -f 1-2 | tr '.' $decimalType )
-	local subTwo=$( echo $2 | cut -d '.' -f 3 )
-	if [ -z "$subTwo" ];then
-		subTwo=0
+	if [ -z "$twoOne" ];then
+		twoOne=0
+	fi
+	
+	test1=$( echo $oneOne $twoOne | awk '{
+		if ( $1 > $2 ) {
+			print 0
+		}
+		else if ($1 == $2) {
+			print 1
+		}
+		else {
+			print 2
+		}
+	}' )
+	# only do more tests if first numbers are equal
+	if [ "$test1" -eq 1 ];then
+		oneTwo=$( cut -d '.' -f 2 <<< $1 | tr '.' $decimalType )
+		twoTwo=$( cut -d '.' -f 2 <<< $2 | tr '.' $decimalType )
+		if [ -z "$oneTwo" ];then
+			oneTwo=0
+		fi
+		if [ -z "$twoTwo" ];then
+			twoTwo=0
+		fi
+		
+		test2=$( echo $oneTwo $twoTwo | awk '{
+			if ( $1 > $2 ) {
+				print 0
+			}
+			else if ($1 == $2) {
+				print 1
+			}
+			else {
+				print 2
+			}
+		}' )
+		# only do more tests if second numbers are equal
+		if [ "$test2" -eq 1 ];then
+			oneThree=$( cut -d '.' -f 3 <<< $1 )
+			twoThree=$( cut -d '.' -f 3 <<< $2 )
+			if [ -z "$oneThree" ];then
+				oneThree=0
+			fi
+			if [ -z "$twoThree" ];then
+				twoThree=0
+			fi
+			test3=$( echo $oneThree $twoThree | awk '{
+				if ( $1 > $2 ) {
+					print 0
+				}
+				else if ($1 == $2) {
+					print 1
+				}
+				else {
+					print 2
+				}
+			}' )
+		fi
 	fi
 
-	local test1=$( echo $numOne $numTwo | awk '{if ( $1 > $2 ) print 0;else print 1}' )
-	local test2=$( echo $numOne $numTwo | awk '{if ( $1 == $2 ) print 0;else print 1}' )
-	local test3=$( echo $subOne $subTwo | awk '{if ( $1 > $2 ) print 0;else print 1}' )
-	local test4=$( echo $subOne $subTwo | awk '{if ( $1 == $2 ) print 0;else print 1}' )
-	# echo -e "test1 $test1\ntest2 $test2\ntest3 $test3\ntest4 $test4"
+	if [ "$b_debug" == 'true' ];then
+		echo "oneOne: $oneOne"
+		echo "oneTwo: $oneTwo"
+		echo "oneThree: $oneThree"
+		echo "twoOne: $twoOne"
+		echo "twoTwo: $twoTwo"
+		echo "twoThree: $twoThree"
+		echo -e "test1 $test1\ntest2 $test2\ntest3 $test3"
+	fi
 
-	# first case, x > y, and not equal
+	# first case, $1 > $2
 	if [ "$test1" -eq 0 ];then
 		returnValue=0
-	# second case, x = y
-	elif [ "$test2" -eq 0 ];then # only when x = y, 3.2 = 3.2
+	# second case, $1 == $2
+	elif [ "$test1" -eq 1 ];then # only when x = y, 3.2 = 3.2
 		# sub number a > b
-		if [ "$test3" -eq 0 ];then
+		if [ "$test2" -eq 0 ];then
 			returnValue=0
 		# sub number a = b
-		elif [ "$test4" -eq 0 ];then
+		elif [ "$test2" -eq 1 ];then
+			if [ "$test3" -eq 0 ];then
+				returnValue=0
+			# sub number a = b
+			elif [ "$test3" -eq 1 ];then
+				returnValue=1
+			# sub number a < b
+			else
+				returnValue=2
+			fi
 			returnValue=1
 		# sub number a < b
 		else
 			returnValue=2
 		fi
-	# if the x is less than y
+	# $1 < $2
 	else
 		returnValue=2
 	fi
@@ -1350,7 +1422,7 @@ compare_numbers()
 	eval $LOGUE
 }
 ## DEBUGGER
-# compare_numbers   100.12.2 100.4.3  ;echo result: $?;exit
+# compare_numbers 13.10 13.9 ;exit
 
 # generic test and launch function
 # args: $1 - which function
