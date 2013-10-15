@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.14
-####  Date: February 10 2011
+####  version: 2.4.15
+####  Date: 2013-10-15
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####
@@ -274,7 +274,7 @@ update_sm_data()
 	for script in $1
 	do
 		localVersion=$( grep -im 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
-		localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9,\ ]*" $2$script | cut -f 2-4 -d ' ' )
+		localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9,-\ ]*" $2$script | cut -f 2-4 -d ' ' )
 		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
 
 		# echo "copy $script to ${SMXI_SVN}$script"
@@ -428,7 +428,8 @@ update_kernel_installers()
 	local kernelInstaller='install-kernel.sh'
 
 	# update kernel installers if needed
-	cp -f ${KERNEL_DIR}kernel-installer/$kernelInstaller $KERNEL_SVN$kernelInstaller
+	# note needed anymore, it's a sym link now
+	# cp -f ${KERNEL_DIR}kernel-installer/$kernelInstaller $KERNEL_SVN$kernelInstaller
 }
 
 # developer scripts for creating smxi
