@@ -279,7 +279,7 @@ update_sm_data()
 		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
 
 		# echo "copy $script to ${SMXI_SVN}$script"
-		echo "$script'='$localVersion':'$localDate"
+		echo "$script=$localVersion:$localDate"
 		cp -f --preserve=timestamps $2$script $SMXI_SVN$script
 
 		# working sgfxi/svmi will often have testing data, don't want to comment out
