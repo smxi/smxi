@@ -5,7 +5,7 @@
 ####  version: 2.4.15
 ####  Date: 2013-10-15
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2009
+####  Copyright (C) Harald Hope 2007-2013
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
@@ -275,7 +275,7 @@ update_sm_data()
 	do
 		localVersion=$( grep -im 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 		# weird: [A-Za-z0-9,\ -] works but [A-Za-z0-9,-\ ] only returns the first number in 2013-10-14
-		localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9,\ -]*" $2$script | cut -f 2-4 -d ' ' )
+		localDate=$( grep -im 1 -o -G "Date:[\ ]*[A-Za-z0-9,\ -]*" $2$script | cut -f 2-4 -d ' ' )
 		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
 
 		# echo "copy $script to ${SMXI_SVN}$script"
@@ -362,7 +362,7 @@ construct_smxi_version_number()
 		smMainThird=$(( $smMainThird + 1 ))
 	fi
 	# then, if changed, update main date as well
-	if [ "$incrementFirst" == 'false' -o "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
+	if [ "$incrementFirst" == 'true' -o "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
 		smMainDate=$( date "+%Y-%m-%d" )
 	fi
 	# process the numbers to make them nice and neat again for output
