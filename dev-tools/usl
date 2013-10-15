@@ -276,6 +276,8 @@ update_sm_data()
 		localVersion=$( grep -im 1 -o -G "version:\ [0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 		localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9,-\ ]*" $2$script | cut -f 2-4 -d ' ' )
 		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
+		
+		echo $script'='$localVersion':'$localDate
 
 		# echo "copy $script to ${SMXI_SVN}$script"
 		# echo "$script'='$localVersion':'$localDate"
@@ -362,7 +364,7 @@ construct_smxi_version_number()
 	fi
 	# then, if changed, update main date as well
 	if [ "$incrementFirst" == 'true' -o "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
-		smMainDate=$( date "+%B %d %Y" )
+		smMainDate=$( date "+%Y-%m-%d" )
 	fi
 	# process the numbers to make them nice and neat again for output
 
