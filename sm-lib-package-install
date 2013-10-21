@@ -44,7 +44,6 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
-	local inxi='inxi'
 	local inxiDepends='coreutils gawk grep hostname pciutils procps'
 	local inxiXorg='mesa-utils x11-utils x11-xserver-utils'
 	local inxiRecommends='dmidecode file hddtemp iproute lm-sensors module-init-tools usbutils'
