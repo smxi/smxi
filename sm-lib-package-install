@@ -1552,7 +1552,7 @@ inxi_installer()
 	else
 		echo "${S}Installing ${C}inxi${S} from SVN now...${N}"
 		run_script_import $MOD_INXI
-		echo "${S}Updating ${C}inxi${S} to force install of latest version + man page...${N}"
+		echo "${S}Updating ${C}inxi${S} to force install of man page...${N}"
 		$inxiPath -U
 	fi
 	inxiPath=$( type -p $MOD_INXI )
