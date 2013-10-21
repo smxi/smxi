@@ -1552,6 +1552,8 @@ inxi_installer()
 	else
 		echo "${S}Installing ${C}inxi${S} from SVN now...${N}"
 		run_script_import $MOD_INXI
+		echo "${S}Updating ${C}inxi${S} to force install of latest version + man page...${N}"
+		$inxiPath -U
 	fi
 	inxiPath=$( type -p $MOD_INXI )
 	if [ -n "$inxiPath" ];then
@@ -1563,8 +1565,6 @@ inxi_installer()
 			echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
 			ln -sf $inxiPath ${konviKde4Path}$MOD_INXI
 		fi
-		echo "${S}Updating ${C}inxi${S} to force install of latest version + man page...${N}"
-		$inxiPath -U
 	fi
 
 	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or greater)${M} options unless requested in IRC."
