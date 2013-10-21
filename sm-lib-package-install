@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: sm-lib-package-install
 ####  version: 3.4.24
-####  Date: 2013-09-20
+####  Date: 2013-10-21
 
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -44,9 +44,10 @@ package_group_installer()
 	# select: default system/user set/wdm as default if nothing else, if kde, use kdm
 	# unless other default override is set
 	local dmUse=$( assign_display_manager $itemName )
+	local inxi='inxi'
 	local inxiDepends='coreutils gawk grep hostname pciutils procps'
 	local inxiXorg='mesa-utils x11-utils x11-xserver-utils'
-	local inxiRecommends='file hddtemp lm-sensors module-init-tools iproute sysvinit usbutils'
+	local inxiRecommends='dmidecode file hddtemp iproute lm-sensors module-init-tools usbutils'
 	local pdfLight='epdfview' mlocate='mlocate' kioapt='kio-apt' kpdf='kpdf'
 	local karm='karm' ksvg='ksvg' katePlugins='kate-plugins' kpower='kpowersave'
 	local kmoon='kmoon' kickerApplets='kicker-applets' kdeAddonsKfile='kdeaddons-kfile-plugins'
@@ -472,7 +473,7 @@ select_install_type()
 	echo
 	echo "${C}2${S} - ${C}non-free${S} Flash plugin, Java plugin, MS core fonts, Opera, Skype, Google Earth, Google Chrome (with Flash)."
 	echo
-	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi,  , and more."
+	echo "${C}3${S} - ${C}utilities${S} tools: console browsers, networking (ceni), swiftfox, inxi, and more."
 	echo
 	echo "${C}4${S} - ${C}desktop-environment${S} Install Xorg, Gnome, Kde, Xfce, fVwm Crystal, Lxde."
 	echo
@@ -1525,7 +1526,7 @@ inxi_installer()
 {
 	local konviPath='/usr/share/apps/konversation/scripts/'
 	local konviKde4Path='/usr/share/kde4/apps/konversation/scripts/'
-	local isAvailable=''
+	local isAvailable='' inxiPath=''
 
 	echo $LINE
 	# install core depends just in case
@@ -1545,21 +1546,34 @@ inxi_installer()
 	package_group_installer 'plain' 'inxi-recommends'
 	echo $LINE
 
-	echo "${S}Installing and running ${C}inxi -F${S} now...${N}"
-	run_script_import $MOD_INXI
-	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviPath ];then
-		echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
-		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviPath}$MOD_INXI
+	
+	if [ -n "$( check_package_status 'inxi' 'c' )" ];then
+		echo "${S}Installing ${C}inxi${S} package from repos now...${N}"
+		package_group_installer 'plain' 'inxi'
+	else
+		echo "${S}Installing ${C}inxi${S} from SVN now...${N}"
+		run_script_import $MOD_INXI
 	fi
-	if [ -f $SCRIPT_HOME/$MOD_INXI -a -d $konviKde4Path ];then
-		echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
-		ln -sf $SCRIPT_HOME/$MOD_INXI ${konviKde4Path}$MOD_INXI
+	inxiPath=$( type -p $MOD_INXI )
+	if [ -n "$inxiPath" ];then
+		if [ -f "$inxiPath" -a -d $konviPath ];then
+			echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
+			ln -sf $inxiPath ${konviPath}$MOD_INXI
+		fi
+		if [ -f "$SinxiPath" -a -d $konviKde4Path ];then
+			echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
+			ln -sf $inxiPath ${konviKde4Path}$MOD_INXI
+		fi
+		echo "${S}Updating ${C}inxi${S} to force install of latest version + man page...${N}"
+		$inxiPath -U
 	fi
+
 	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or greater)${M} options unless requested in IRC."
 	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-b${S} or ${C}-v 1 (1-3 are reasonable)${S}"
 	echo "See ${C}inxi -h${S} for the full list of supported output options.${N}"
 	print_hec
 }
+
 # args: $1 - stable/sid
 install_ceni()
 {
