@@ -1545,7 +1545,6 @@ inxi_installer()
 	package_group_installer 'plain' 'inxi-recommends'
 	echo $LINE
 
-	
 	if [ -n "$( check_package_status 'inxi' 'c' )" ];then
 		echo "${S}Installing ${C}inxi${S} package from repos now...${N}"
 		package_group_installer 'plain' 'inxi'
