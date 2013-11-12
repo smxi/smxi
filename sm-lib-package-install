@@ -2145,7 +2145,8 @@ samba_package_installer()
 	echo "${M}::  Samba Server ::"
 	echo "${C}1 - samba-server${S} - the main ${C}Samba${S} server. Does not include ${C}smbclient${S},"
 	echo "    ${C}smbfs${S}, or ${C}winbind${S}."
-	# echo "${C}2 - swat${S} - Web administration tool for ${C}Samba${S} server."
+	# note: swat appears to have been removed from debian due to no dev work
+	#  echo "${C}2 - swat${S} - Web administration tool for ${C}Samba${S} server."
 	echo "${M}::  Samba Clients ::"
 	echo "${C}2 - smb-client${S} - These ${C}Samba ${S}client packages both contain the command"
 	echo "    line utilities${C}smbclient${S}, ${C}smbtar${S}, and ${C}smbspool${S}, as well as ${C}smbfs${S}."
