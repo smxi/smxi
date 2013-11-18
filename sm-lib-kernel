@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.36
-####  Date: 2013-09-20
+####  version: 2.6.37
+####  Date: 2013-11-18
 
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,11 +28,11 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists 
-KERNEL_LIST_32='3.10-12.dmz.1-liquorix-686 3.9-11.dmz.1-liquorix-686 3.8-13.dmz.1-liquorix-686 3.7.0-10.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
+KERNEL_LIST_32='3.10-19.dmz.1-liquorix-686 3.9-11.dmz.1-liquorix-686 3.8-13.dmz.1-liquorix-686 3.7.0-10.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
 KERNEL_ADVANCED_LIST_32=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
-KERNEL_LIST_64='3.10-12.dmz.1-liquorix-amd64 3.9-11.dmz.1-liquorix-amd64 3.8-13.dmz.1-liquorix-amd64 3.7.0-10.dmz.1-liquorix-amd64 3.6.0-11.dmz.1-liquorix-amd64 3.4.0-35.dmz.1-liquorix-amd64 3.2.0-14.dmz.1-liquorix-amd64 3.0.0-9.dmz.1-liquorix-amd64 2.6.38-7.dmz.2-liquorix-amd64 2.6.36-3.dmz.2-liquorix-amd64 2.6.34-2.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64'
+KERNEL_LIST_64='3.10-19.dmz.1-liquorix-amd64 3.9-11.dmz.1-liquorix-amd64 3.8-13.dmz.1-liquorix-amd64 3.7.0-10.dmz.1-liquorix-amd64 3.6.0-11.dmz.1-liquorix-amd64 3.4.0-35.dmz.1-liquorix-amd64 3.2.0-14.dmz.1-liquorix-amd64 3.0.0-9.dmz.1-liquorix-amd64 2.6.38-7.dmz.2-liquorix-amd64 2.6.36-3.dmz.2-liquorix-amd64 2.6.34-2.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64'
 KERNEL_ADVANCED_LIST_64=''
 TESTING_KERNEL_64=''
 
