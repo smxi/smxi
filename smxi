@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.28
-####  Date: 2013-11-19
+####  version: 8.14.29
+####  Date: 2013-12-02
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -566,6 +566,10 @@ error_handler()
 		not-root)
 			errorCode=2
 			errorMessage="You must be logged in as root to run this script.\n${LOG_INDENT}Please start $SCRIPT_NAME as root."
+			;;
+		sudo-login)
+			errorCode=8
+			errorMessage="Do not use sudo to start this script.\n${LOG_INDENT}Please start $SCRIPT_NAME as root user, or with 'sudo su -' (note the '-')\n${LOG_INDENT}then run the $SCRIPT_NAME start command."
 			;;
 		smxi-version-too-old)
 			errorCode=5
@@ -2350,6 +2354,19 @@ check_root()
 {
 	if [ "$(whoami)" != "root" ];then
 		error_handler 'not-root' $FUNCNAME
+	fi
+	#Check if started with sudo, not root
+	if [ -n "$SUDO_USER" ] ; then
+		error_handler 'sudo-login' $FUNCNAME
+	fi
+	# this can detect 'sudo su -' if required
+	local startPPID=$( ps -j -fp $PPID 2>/dev/null | awk '/root/ {print $3}' )
+	local startPPPID=$( ps -j -fp $startPPID 2>/dev/null | awk '/root/ {print $3}' )
+	local sudoBase=$( ps -j -fp $startPPPID 2>/dev/null | grep -Eos 'sudo su.*' )
+	# log_function_data "startPPID: $startPPID\nstartPPPID: $startPPPID\nsudoBase: $sudoBase"
+	if [ -n "$sudoBase" ];then
+		echo "${M}Information: Starting $SCRIPT_NAME with: ${C}$sudoBase${N}"
+		SUDO_START=$sudoBase
 	fi
 }
 
