@@ -403,6 +403,7 @@ SERVER_CLIENT=''
 SM_CONFIGS_STATIC='' # static version of prefs data
 SM_VERSIONS_STATIC='' # static file versions data
 START_OPTIONS=''
+SUDO_START=''
 SYSTEM_BASE=''
 TIME_OUT=25 # for wget
 # optional user set scripts/download locations
@@ -810,6 +811,7 @@ create_log()
 	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
+	echo "SUDO_START: $SUDO_START" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 
 	B_LOGGING_STARTED='true'
