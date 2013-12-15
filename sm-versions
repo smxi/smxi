@@ -1,4 +1,4 @@
-smxi=8.14.29:2013-12-02
+smxi=8.14.30:2013-12-15
 sm-lib-apt-tools=1.23.35:2013-11-19
 sm-lib-clean-up=2.10.15:2012-02-08
 sm-lib-distro-conversion=3.3.16:2013-01-16
@@ -6,7 +6,7 @@ sm-lib-du-fixes=1.4.10:2013-11-19
 sm-lib-graphics=2.5.4:2013-11-21
 sm-lib-kde4-updater=0.7.39:2013-11-19
 sm-lib-kernel=2.6.39:2013-12-09
-sm-lib-kernel-install=2.12.8:2013-12-14
+sm-lib-kernel-install=2.12.9:2013-12-15
 sm-lib-misc-tweaks=1.24.4:2012-10-06
 sm-lib-package-install=3.4.25:2013-11-12
 sm-lib-package-removal=1.4.2:2011-02-10
@@ -26,6 +26,6 @@ sgfxi=4.21.21:2013-12-13
 svmi=2.8.44:2013-11-30
 inxi=1.9.17:2013-12-02
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.38.62:2013-12-14
+sm-main-version=8.38.63:2013-12-15
 
 ###**EOF**###

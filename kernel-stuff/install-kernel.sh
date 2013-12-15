@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.1.6
-####  Date: September 19 2012
+####  version: 2.1.7
+####  Date: 2013-12-15
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
 ####  Copyright (C) 2006-2008: Kel Modderman Stefan Lippers-Hollmann (sidux project)
@@ -28,7 +28,8 @@ LINE='--------------------------------------------------------------------'
 ## set core variables: gcc/kernel version are dynamically set if needed
 # make this match version kernel was built with, can be overridden with -g in dsl
 # both must use "" for smxi / dsl handling here
-GCC_VERSION="4.7"
+# switch to 4.8 as of 3.12
+GCC_VERSION="4.8"
 # KERNEL_VERSION will be set dynamically by dsl, 
 KERNEL_VERSION="3.5"
 
