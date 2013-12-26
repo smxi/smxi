@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.30
-####  Date: 2013-12-15
+####  version: 8.14.31
+####  Date: 2013-12-26
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -570,7 +570,7 @@ error_handler()
 			;;
 		sudo-login)
 			errorCode=8
-			errorMessage="Do not use sudo to start this script.\n${LOG_INDENT}Please start $SCRIPT_NAME as root user, or with 'sudo su -' (note the '-')\n${LOG_INDENT}then run the $SCRIPT_NAME start command."
+			errorMessage="You cannot start $SCRIPT_NAME with sudo. Please start $SCRIPT_NAME \nproperly as root (use either 'sudo su -' (note the '-' at the end) \nto become root, or login as root directly). If 'sudo su -' does not \nwork, please let the $SCRIPT_NAME maintainer know, and if your system \nhas root locked (why would anyone do that?) then you will have to \nunlock root, but for most cases 'sudo su -' should work.\nAfter you are root, then start $SCRIPT_NAME.\n\nTypical signs of sudo failures are respawnings of your desktop while \n$SCRIPT_NAME is running, or failures to create directories.\n"
 			;;
 		smxi-version-too-old)
 			errorCode=5
