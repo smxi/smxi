@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.33
+####  version: 8.14.34
 ####  Date: 2013-12-31
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
@@ -814,6 +814,8 @@ create_log()
 	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
 	echo "SUDO_START: $SUDO_START" >> $LOG_FILE
+	echo "B_SYSTEMD: $B_SYSTEMD" >> $LOG_FILE
+	echo "B_SYSTEMD_GRAPHICAL: $B_SYSTEMD_GRAPHICAL" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 
 	B_LOGGING_STARTED='true'
@@ -1674,8 +1676,6 @@ set_distro_data()
 		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
 	fi
 	log_function_data "APT_TYPE: $APT_TYPE
-B_SYSTEMD: $B_SYSTEMD
-B_SYSTEMD_GRAPHICAL: $B_SYSTEMD_GRAPHICAL
 SYSTEM_BASE: $SYSTEM_BASE
 DU_UPGRADE: $DU_UPGRADE
 DEFAULT_KERNEL: $DEFAULT_KERNEL
@@ -2137,10 +2137,10 @@ start_stop_default_dm()
 	case $1 in
 		full)
 			if [ "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
-				if [ "$1" == 'stop' ];then
-					xActionString="systemctl isolate multi-user.target && success='true'"
-				elif ["$1" == 'start' ];then
-					xActionString="systemctl isolate graphical.target && success='true'"
+				if [ "$2" == 'stop' ];then
+					xActionString="$noHup systemctl isolate multi-user.target && success='true'"
+				elif ["$2" == 'start' ];then
+					xActionString="$noHup systemctl isolate graphical.target && success='true'"
 				fi
 				echo "${M}Using ${C}systemd/systemctl${M} to try to ${C}$2${M} your desktop.${N}"
 			elif [ -z "$displayManager" ];then
