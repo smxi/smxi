@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.31
-####  Date: 2013-12-26
+####  version: 8.14.32
+####  Date: 2013-12-31
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -244,6 +244,8 @@ B_PRINT_VERSION='false'
 B_REPOS_UPDATED='false'
 B_SHOW_KERNEL_INSTALL_OPTION='false'
 B_SKIP_CONNECTION_RETRY='false'
+B_SYSTEMD='false'
+B_SYSTEMD_GRAPHICAL='false'
 B_UDEV_KERNEL26='false'
 B_UDEV_KERNEL26_DU='false'
 B_USE_DEBDELTA='false'
@@ -1672,6 +1674,8 @@ set_distro_data()
 		log_function_data "Begin User Set $SM_VALUES:\n$( cat $SM_VALUES)\nEnd User Set Values"
 	fi
 	log_function_data "APT_TYPE: $APT_TYPE
+B_SYSTEMD: $B_SYSTEMD
+B_SYSTEMD_GRAPHICAL: $B_SYSTEMD_GRAPHICAL
 SYSTEM_BASE: $SYSTEM_BASE
 DU_UPGRADE: $DU_UPGRADE
 DEFAULT_KERNEL: $DEFAULT_KERNEL
@@ -2332,6 +2336,7 @@ launch_from_X()
 # basic support tests
 start_up_tests()
 {
+	local systemdData=''
 	# Make sure script is in path set in $SCRIPT_HOME
 	check_script_path
 	# check for correct user status. This script must run as root
@@ -2350,6 +2355,17 @@ start_up_tests()
 	
 	if [ ! -e $GRUB_PATH -a "$B_IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
+	fi
+	
+	if [ -n "$( type -p systemctl )" ];then
+		systemdData="$( systemctl list-units type=target 2>/dev/null)"
+		if [ -n "$( grep -E '^sysinit.target.*[[:space:]]active' <<< "$systemdData" )" ];then
+			B_SYSTEMD='true'
+		fi
+		if [ -n "$( grep -E '^graphical.target[[:space:]]' <<< "$systemdData" )" ];then
+			B_SYSTEMD_GRAPHICAL='true'
+		fi
+		
 	fi
 
 }
