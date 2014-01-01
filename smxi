@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.36
+####  version: 8.14.37
 ####  Date: 2013-12-31
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
@@ -2141,37 +2141,39 @@ start_stop_default_dm()
 		full)
 			if [ "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
 				if [ "$2" == 'stop' ];then
-					if [ -n "$defaultDM" ];then
-						xActionExtra="$noHup systemctl stop $defaultDM && "
-					fi
-					xActionString="$xActionExtra$noHup systemctl isolate multi-user.target && success='true'"
+# 					if [ -n "$defaultDM" ];then
+# 						xActionExtra="$noHup systemctl stop $defaultDM && "
+# 					fi
+					xActionString="$noHup systemctl isolate multi-user.target && success='true'"
 				elif ["$2" == 'start' ];then
 					xActionString="$noHup systemctl isolate graphical.target && success='true'"
 				fi
 				echo "${M}Using ${C}systemd/systemctl${M} to try to ${C}$2${M} your desktop.${N}"
-			elif [ -z "$defaultDM" ];then
-				for dm in $dmList
-				do
-					if [ -x /etc/init.d/$dm ];then
-						echo "${S}Attempting to ${C}$2${S} display manager $dm now... ${N}"
+			else
+				if [ -z "$defaultDM" ];then
+					for dm in $dmList
+					do
+						if [ -x /etc/init.d/$dm ];then
+							echo "${S}Attempting to ${C}$2${S} display manager $dm now... ${N}"
+							# nohup is required to make sure dm is fully stopped, and pids removed
+							if [ "$B_SYSTEMD" == 'true' ];then
+								xActionString="$noHup $serviceControl $2 $dm.service && success='true'"
+							else
+								xActionString="$noHup $serviceControl$dm $2 && success='true'"
+							fi
+							break
+						fi
+					done
+				else
+					# question: why is this in some cases not working? No init 5 is happening
+					if [ -x /etc/init.d/$defaultDM ];then
+						echo "${S}Attempting to ${C}$2${S} default display manager $defaultDM now... ${N}"
 						# nohup is required to make sure dm is fully stopped, and pids removed
 						if [ "$B_SYSTEMD" == 'true' ];then
-							xActionString="$noHup $serviceControl $2 $dm.service && success='true'"
+							xActionString="$noHup $serviceControl $2 $defaultDM.service && success='true'"
 						else
-							xActionString="$noHup $serviceControl$dm $2 && success='true'"
+							xActionString="$noHup $serviceControl$defaultDM $2 && success='true'"
 						fi
-						break
-					fi
-				done
-			else
-				# question: why is this in some cases not working? No init 5 is happening
-				if [ -x /etc/init.d/$defaultDM ];then
-					echo "${S}Attempting to ${C}$2${S} default display manager $defaultDM now... ${N}"
-					# nohup is required to make sure dm is fully stopped, and pids removed
-					if [ "$B_SYSTEMD" == 'true' ];then
-						xActionString="$noHup $serviceControl $2 $dm.service && success='true'"
-					else
-						xActionString="$noHup $serviceControl$defaultDM $2 && success='true'"
 					fi
 				fi
 			fi
@@ -2227,13 +2229,17 @@ start_stop_default_dm()
 			fi
 		else
 			echo "${E}No login Pid found to kill. Exiting script without killing root session.${N}"
-			init $INIT_LEVEL && exit 0
+			if [ "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
+				systemctl isolate graphical.target
+			else
+				init $INIT_LEVEL && exit 0
+			fi
 		fi
 	fi
 	eval $LOGUE
 }
 
-# get active pid for dm. Note: for systemd, this doesn't matter since dm can run with x off, somehow.
+# get active pid for dm. Note: for systemd, this doesn't matter since dm is loaded but not active (ACtive: inactive)
 do_display_manager_pid_test()
 {
 	eval $LOGUS
@@ -2241,6 +2247,7 @@ do_display_manager_pid_test()
 	
 	for dmId in $dmIdList
 	do
+		# trim off extension of dm
 		if [ -e /var/run/$dmId -o -e /run/$dmId ];then
 			dmInstance=$( sed -r 's/\.(pid|lock))//' <<< $dmId )
 		fi
@@ -2281,7 +2288,7 @@ get_display_manager_runlevels()
 
 	if [ -n "$defaultDM" ];then
 		# we're only interested in the actual runlevels here
-		dmRunlevels=$( ls /etc/rc*.d/S*$defaultDM | sed -r 's%/etc/rc([1-5])\.d.*%\1%g' )
+		dmRunlevels=$( ls /etc/rc*.d/S*$defaultDM 2>/dev/null | sed -r 's%/etc/rc([1-5])\.d.*%\1%g' )
 	fi
 	echo $dmRunlevels
 	log_function_data "dmRunlevels: $( echo $dmRunlevels)"
