@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel-install
-####  version: 2.12.9
-####  Date: 2013-12-15
+####  version: 2.12.10
+####  Date: 2014-01-01
 
-####  Copyright (C) Harald Hope 2005-2013
+####  Copyright (C) Harald Hope 2005-2014
 ####  The following functions use core logic by Kel Modderman (kelmo)
 ####  extra_module_installer update_kernel_links install_the_apt_kernel_module
 ####  install_apt_kernel_modules
@@ -1007,7 +1007,7 @@ reboot_now_question()
 					echo $LINE
 					echo "${S}Rebooting now into your new ${C}$1${S} kernel...${N}"
 					eval $LOGPE
-					reboot
+					handle_shutdowns 'reboot'
 					exit 0
 					;;
 				$continueOpt)

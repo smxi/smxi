@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.39
-####  Date: 2013-12-31
+####  version: 8.15.00
+####  Date: 2013-01-01
 ########################################################################
-####  Copyright (C) Harald Hope 2005-2013
+####  Copyright (C) Harald Hope 2005-2014
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -2122,7 +2122,7 @@ start_stop_default_dm()
 	if [ -z "$defaultDM" ];then
 		defaultDM=$( do_display_manager_pid_test )
 	fi
-	local success='' dmUsed=''
+	local success='' dmUsed='' ttyKill=0
 	local dmList='entrance gdm gdm3 kdm kdm-trinity lightdm lxdm mdm nodm slim wdm xdm' dm=''
 	local noHup='nohup' dmanCommand=''  finalXKill='' xActionExtra=''
 	local serviceControl='/etc/init.d/'
@@ -2209,6 +2209,7 @@ start_stop_default_dm()
 		nowmstart)
 			success='true'
 			;;
+		# not used in smxi/sgfxi
 		killroot)
 			if [ -n "$LOGIN_PID" ];then
 				kill $LOGIN_PID && exit 0
@@ -2223,19 +2224,86 @@ start_stop_default_dm()
 	if [ "$success" == 'true' -a "$2" == 'start' ];then
 		if [ -n "$LOGIN_PID" ];then
 			if [ "$B_SYSTEMD" == 'true' ];then
-				kill $LOGIN_PID && exit 0
-			else
+				kill_systemd_tty || ttyKill=$?
+				if [ "$ttyKill" -gt 0 ];then
+					kill $LOGIN_PID && exit 0 || exit 1
+				fi
+			elif [ -n "$defaultRunlevel" ];then
 				init $INIT_LEVEL && kill $LOGIN_PID && exit 0
+			else
+				kill $LOGIN_PID && exit 0 || exit 1
 			fi
 		else
 			echo "${E}No login Pid found to kill. Exiting script without killing root session.${N}"
-			if [ "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
-				systemctl isolate graphical.target
+			if [ "$B_SYSTEMD" == 'true' ];then
+				kill_systemd_tty || ttyKill=$?
+				exit $ttyKill
 			else
 				init $INIT_LEVEL && exit 0
 			fi
 		fi
 	fi
+	eval $LOGUE
+}
+
+kill_systemd_tty()
+{
+	eval $LOGUS
+	local returnValue=1 ttyStatus=''
+	local scriptTTY=$(get_current_tty)
+	
+	# verify we have an actual tty valid type
+	if [ -n "$scriptTTY" -a -n "$( grep -E '^tty[0-9]+$' <<< $scriptTTY )" ];then
+		ttyStatus="$( systemctl status getty@$scriptTTY.service )"
+		log_function_data "ttyStatus:\n$ttyStatus"
+		# double check it's the tty running script, then make sure that tty is actually active
+		if [ -n "$( grep "$SCRIPT_NAME" <<< "$ttyStatus" )" ];then
+			if "$( grep -Esi 'Active:[[:space:]]*active' <<< "$ttyStatus" )" ];then
+				echo "${M}Systemd being used to attempt to exit tty${N}"
+				systemctl stop getty@$scriptTTY.service
+				returnValue=$?
+			fi
+		fi
+	fi
+	# in theory this should not be running anymore so nothing to log, but we'll do it for errors
+	log_function_data "returnValue: $returnValue"
+	return $returnValue
+	eval $LOGUE
+}
+
+# args: $1 - shutdown/reboot
+handle_shutdowns()
+{
+	eval $LOGUS
+	
+	local command='' realCommand=$1
+	
+	if [ "$B_SYSTEMD" == 'true' ];then
+		case $realCommand in
+			halt)
+				realCommand='poweroff'
+				;;
+		esac
+		command="systemctl $realCommand 2>>$LOG_FILE || $1"
+	else
+		command=$1
+	fi
+	log_function_data "command: $command"
+	
+	eval $LOGUE
+	eval $command
+}
+
+get_current_tty()
+{
+	eval $LOGUS
+	
+	local term=$( basename tty )
+	term=$( basename $term )
+	
+	log_function_data "term: $term"
+	echo $term
+	
 	eval $LOGUE
 }
 

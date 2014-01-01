@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.26
-####  Date: 2013-12-31
+####  version: 3.4.27
+####  Date: 2014-01-01
 
-####  Copyright (C) Harald Hope 2005-2013
+####  Copyright (C) Harald Hope 2005-2014
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1805,7 +1805,7 @@ install_kpowersave()
 		y)
 			echo $LINE
 			echo "${S}Rebooting now...${N}"
-			reboot
+			handle_shutdowns 'reboot'
 			;;
 		n)
 			echo $LINE
