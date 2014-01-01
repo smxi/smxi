@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.01
+####  version: 8.15.02
 ####  Date: 2013-01-01
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2014
@@ -2298,7 +2298,7 @@ get_current_tty()
 {
 	eval $LOGUS
 	
-	local term=$( basename tty )
+	local term=$( tty )
 	term=$( basename $term )
 	
 	log_function_data "term: $term"
