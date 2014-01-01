@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.14.35
+####  version: 8.14.36
 ####  Date: 2013-12-31
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2013
@@ -2220,7 +2220,7 @@ start_stop_default_dm()
 	# method, so they end up in their default runlevel as expected
 	if [ "$success" == 'true' -a "$2" == 'start' ];then
 		if [ -n "$LOGIN_PID" ];then
-			if [ "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
+			if [ "$B_SYSTEMD" == 'true' ];then
 				kill $LOGIN_PID && exit 0
 			else
 				init $INIT_LEVEL && kill $LOGIN_PID && exit 0
@@ -2391,7 +2391,7 @@ start_up_tests()
 	fi
 	
 	if [ -n "$( type -p systemctl )" ];then
-		systemdData="$( systemctl list-units type=target 2>/dev/null)"
+		systemdData="$( systemctl list-units --type=target 2>/dev/null)"
 		if [ -n "$( grep -sE '^sysinit.target.*[[:space:]]active' <<< "$systemdData" )" ];then
 			B_SYSTEMD='true'
 		fi
