@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.05
-####  Date: 2014-02-20
+####  version: 8.15.06
+####  Date: 2014-03-04
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -247,8 +247,10 @@ B_SHOW_KERNEL_INSTALL_OPTION='false'
 B_SKIP_CONNECTION_RETRY='false'
 B_SYSTEMD='false'
 B_SYSTEMD_GRAPHICAL='false'
+B_SYSTEMD_SYSINIT='false'
 B_UDEV_KERNEL26='false'
 B_UDEV_KERNEL26_DU='false'
+B_UPSTART='false'
 B_USE_DEBDELTA='false'
 B_USE_DEBIAN_KERNEL='false'
 B_TESTING_1='false'
@@ -807,17 +809,19 @@ create_log()
 		logrotate $SCRIPT_ROTATE
 	fi
 	touch $LOG_FILE # and if rotated, make a new one
-	echo "=========================================================" >> $LOG_FILE
-	echo "START $SCRIPT_NAME LOGGING:" >> $LOG_FILE
-	echo "=========================================================" >> $LOG_FILE
-	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
-	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
-	echo "$SCRIPT_NAME script version: $scriptVersion" >> $LOG_FILE
-	echo "$SCRIPT_NAME start args: $START_OPTIONS" >> $LOG_FILE
-	echo "SUDO_START: $SUDO_START" >> $LOG_FILE
-	echo "B_SYSTEMD: $B_SYSTEMD" >> $LOG_FILE
-	echo "B_SYSTEMD_GRAPHICAL: $B_SYSTEMD_GRAPHICAL" >> $LOG_FILE
-	echo "=========================================================" >> $LOG_FILE
+	echo "=========================================================
+START $SCRIPT_NAME LOGGING:
+=========================================================
+Script started: $( date +%Y-%m-%d-%H:%M:%S )
+Installed Kernel: $CURRENT_KERNEL
+$SCRIPT_NAME script version: $scriptVersion
+$SCRIPT_NAME start args: $START_OPTIONS
+SUDO_START: $SUDO_START
+B_SYSTEMD: $B_SYSTEMD
+B_SYSTEMD_GRAPHICAL: $B_SYSTEMD_GRAPHICAL
+B_SYSTEMD_SYSINIT: $B_SYSTEMD_SYSINIT
+B_UPSTART: $B_UPSTART
+=========================================================" >> $LOG_FILE
 
 	B_LOGGING_STARTED='true'
 }
@@ -2127,65 +2131,93 @@ start_stop_default_dm()
 	local dmList='entrance gdm gdm3 kdm kdm-trinity lightdm lxdm mdm nodm slim wdm xdm' dm=''
 	local noHup='nohup' dmanCommand=''  finalXKill='' xActionExtra=''
 	local serviceControl='/etc/init.d/'
+	local action=$2
 	
 	if [ -z "$DISPLAY" -a "$2" == 'stop' ];then
 		noHup=''
 	fi
 	# note that init.d does not take a space, but service does,for the first parameter like kdm
-	if [ "$B_SYSTEMD" == 'true' ];then
-		serviceControl='systemctl '
-	elif [ -n "$( type -P service )" ];then
+	if [ -n "$( type -P service )" ];then
 		serviceControl='service '
+	fi
+	
+	if [ "$B_SYSTEMD" == 'true' ];then
+		echo "${M}Using ${C}systemd/systemctl${M} to try to ${C}$action${M} your desktop.${N}"
+	fi
+	if [ "$B_UPSTART" == 'true' ];then
+		echo "${M}Using ${C}upstart/initctl${M} to try to ${C}$action${M} your desktop.${N}"
 	fi
 	
 	case $1 in
 		full)
-			if [ "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
-				if [ "$2" == 'stop' ];then
-# 					if [ -n "$defaultDM" ];then
-# 						xActionExtra="systemctl stop $defaultDM"
-# 					fi
-					dmanCommand="systemctl isolate multi-user.target"
-				elif [ "$2" == 'start' ];then
-					dmanCommand="systemctl isolate graphical.target"
-				fi
-				echo "${M}Using ${C}systemd/systemctl${M} to try to ${C}$2${M} your desktop.${N}"
-			else
-				if [ -z "$defaultDM" ];then
-					for dm in $dmList
-					do
-						if [ -x /etc/init.d/$dm ];then
-							echo "${S}Attempting to ${C}$2${S} display manager $dm now... ${N}"
-							if [ "$B_SYSTEMD" == 'true' ];then
-								dmanCommand="$serviceControl $2 $dm.service"
-							else
-								dmanCommand="$serviceControl$dm $2"
-							fi
-							break
-						fi
-					done
-				else
-					# question: why is this in some cases not working? No init 5 is happening
-					if [ -x /etc/init.d/$defaultDM ];then
-						echo "${S}Attempting to ${C}$2${S} default display manager $defaultDM now... ${N}"
+			if [ -z "$defaultDM" ];then
+				for dm in $dmList
+				do
+					# upstart, systemd
+					if [ -n "$( type -p $dman )" ];then
 						if [ "$B_SYSTEMD" == 'true' ];then
-							dmanCommand="$serviceControl $2 $defaultDM.service"
-						else
-							dmanCommand="$serviceControl$defaultDM $2"
+							dmanCommand="systemctl $action $dman.service"
+						elif [ "$B_UPSTART" == 'true' ];then
+							dmanCommand="initctl $action $dman"
+						elif [ -x /etc/init.d/$dman  ];then
+							dmanCommand="$serviceControl$dman $action"
 						fi
+						defaultDM=$dman
+						break
+					# sysvinit
+					elif [ -x /etc/init.d/$dman  ];then
+						if [ "$B_SYSTEMD" == 'true' ];then
+							dmanCommand="systemctl $action $dman.service"
+						elif [ "$B_UPSTART" == 'true' ];then
+							dmanCommand="initctl $action $dman"
+						else
+							dmanCommand="$serviceControl$dman $action"
+						fi
+						defaultDM=$dman
+						break
+					fi
+				done
+			else
+				# have to retest dm for null for fedora here
+				# upstart in ubuntu, commands like: start gdm; stop gdm; restart gdm
+				if [ "$B_SYSTEMD" == 'true' ];then
+					dmanCommand="systemctl $action $defaultDM.service"
+				elif [ "$B_UPSTART" == 'true' ];then
+					dmanCommand="initctl $action $defaultDM"
+				elif [ -x /etc/init.d/$defaultDM ];then
+					dmanCommand="$serviceControl$defaultDM $action"
+				fi
+				# question: why is this in some cases not working? No init 5 is happening
+				if [ -x /etc/init.d/$defaultDM ];then
+					if [ "$B_SYSTEMD" == 'true' ];then
+						dmanCommand="$serviceControl $action $defaultDM.service"
+					else
+						dmanCommand="$serviceControl$defaultDM $action"
 					fi
 				fi
 			fi
+			# testing for systemd and graphical loaded, fallback if dm was not found
+			if [ -z "$dmanCommand" -a "$B_SYSTEMD" == 'true' -a "$B_SYSTEMD_GRAPHICAL" == 'true' ];then
+				case $action in
+					stop)
+						dmanCommand="systemctl isolate multi-user.target"
+						;;
+					start)
+						dmanCommand="systemctl isolate graphical.target"
+						;;
+				esac
+			fi
 			log_function_data "dmanCommand: $dmanCommand"
 			if [ -n "$dmanCommand" ];then
+				echo "${S}Attempting to ${C}$action${S} display manager ${C}$defaultDM${S} now... ${N}"
 				# nohup is required to make sure dm is fully stopped, and pids removed
 				dmanCommand="$noHup $dmanCommand 2>>$LOG_FILE && success='true'"
 				eval $dmanCommand
 				if [ -z "$noHup" ];then
 					if [ "$success" == 'true' ];then
-						echo "${S}Display manager ${C}$2${S} successful.${N}"
+						echo "${S}Display manager ${C}$action${S} successful.${N}"
 					else
-						echo "${W}Display manager ${C}$2${S} failed${N}"
+						echo "${W}Display manager ${C}$action${S} failed${N}"
 					fi
 				fi
 			fi
@@ -2470,16 +2502,20 @@ start_up_tests()
 	fi
 	
 	if [ -n "$( type -p systemctl )" ];then
+		B_SYSTEMD='true'
 		systemdData="$( systemctl list-units --type=target 2>/dev/null)"
 		if [ -n "$( grep -sE '^sysinit.target.*[[:space:]]active' <<< "$systemdData" )" ];then
-			B_SYSTEMD='true'
+			B_SYSTEMD_SYSINIT='true'
 		fi
 		systemdData="$( systemctl status graphical.target 2>/dev/null )"
 		if [ -n "$( grep -Eis '^[[:space:]]*Loaded:[[:space:]]*loaded' <<< "$systemdData" )" ];then
 			B_SYSTEMD_GRAPHICAL='true'
 		fi
 	fi
-
+	# not making this elif for now because who knows what ubuntu will actually do with upstart
+	if [ -n "$( type -p initctl )" ];then
+		B_UPSTART='true'
+	fi
 }
 
 check_root()
