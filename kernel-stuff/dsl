@@ -361,6 +361,12 @@ download_kernel_files()
 	sleep $sleepTime
 	echo "Getting kernel debian.tar.bz2 data now..."
 	wget -r -l3 -Nc -nd -np -A.debian.tar.bz2 $MIRROR_MAIN -e robots=off # || error_handler 3
+	echo $LINE
+	echo $LINE
+	echo
+	sleep $sleepTime
+	echo "Getting kernel debian.tar.xz data now..."
+	wget -r -l3 -Nc -nd -np -A.debian.tar.xz $MIRROR_MAIN -e robots=off # || error_handler 3
 	case $KERNEL_TYPE in
 		liquorix)
 			cd ../
@@ -415,6 +421,8 @@ move_files_to_directories()
 	mv -f linux-headers-2.6-${kernelType}*amd64.deb 64-meta
 	cp -f $gzDir*${KERNEL_MAIN}*.gz 32
 	cp -f $gzDir*$KERNEL_MAIN*.gz 64
+	cp -f $gzDir*${KERNEL_MAIN}*.xz 32
+	cp -f $gzDir*$KERNEL_MAIN*.xz 64
 	cp -f $gzDir*${KERNEL_MAIN}*.bz2 32
 	cp -f $gzDir*$KERNEL_MAIN*.bz2 64
 	cp -f *linux-support*.deb 32
