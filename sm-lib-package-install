@@ -205,7 +205,7 @@ package_group_installer()
 			gnomePackages="$gnomePackages gnome-sytem-tools"
 		fi
 	fi
-	local googleEarth='googleearth-package fakeroot libfreeimage3 libfreeimage4 lsb-core'
+	local googleEarth='googleearth-package'
 	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmenuedit kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config pulseaudio puvcontrol"
 	local kdePackages="$kdeBase konqueror konversation $kpdf $ksvg $dmUse kdm"
 	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
@@ -1519,6 +1519,8 @@ install_google_earth()
 		fi
 		echo "${S}Installing ${C}$goog${S} deb...${N}"
 		dpkg -i googleearth*.deb 2>>$LOG_FILE 2>&1
+		# this will pull in any needed packages the deb required
+		apt-get install -f -y
 		if [ "$APT_TYPE" == 'aptitude' ];then
 			$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
 		fi
