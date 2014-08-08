@@ -1508,7 +1508,7 @@ install_google_earth()
 	if [ "$BITS" == '64' ];then
 		install_deb='google-earth-stable_current_amd64.deb'
 	fi
-	download_path=" http://dl.google.com/dl/earth/client/current/$install_deb"
+	local download_path=" http://dl.google.com/dl/earth/client/current/$install_deb"
 	echo $LINE
 	echo "${S}Starting ${C}$goog${S} installer."
 	echo
