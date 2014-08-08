@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.27
-####  Date: 2014-01-01
+####  version: 3.4.28
+####  Date: 2014-08-08
 
 ####  Copyright (C) Harald Hope 2005-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -205,7 +205,7 @@ package_group_installer()
 			gnomePackages="$gnomePackages gnome-sytem-tools"
 		fi
 	fi
-	local googleEarth='googleearth-package fakeroot'
+	local googleEarth='googleearth-package fakeroot libfreeimage3 libfreeimage4 lsb-core'
 	local kdeExtras="ark $karm $katePlugins $kcolor $kdeAddonsKfile $kdeMultimediaKfile kdemultimedia-kio-plugins $khelp $kickerApplets $kioapt kmenuedit kmix $kmoon knemo konq-plugins $kpower ksensors ksnapshot kuser $plasmaWidgets $qt4Config pulseaudio puvcontrol"
 	local kdePackages="$kdeBase konqueror konversation $kpdf $ksvg $dmUse kdm"
 	local kdepimPackages="akregator kmail $karm kontact korganizer kalarm"
@@ -646,7 +646,7 @@ non_free_installer()
 	echo "${C}5${S} - ${C}flash${S} Installs the flash plugin, for use by all browsers."
 	echo "    Check out the new FSF gnash player for the Free Software version flash player."
 	echo "${C}6${S} - ${C}java-plugin${S} Installs the Java plugin and jre, for use by all browsers."
-	echo "    Depending on your system, this will either be the ${C}Sun${S} version or ${C}icedtea6-plugin${S}"
+	echo "    Depending on your system, this will either be the ${C}Oracle/Sun${S} version or ${C}icedtea-plugin${S}"
 	echo "${C}7${S} - ${C}ms-core-fonts${S} Installs the basic set of Microsoft TrueType fonts, arial, times new roman, etc."
 	echo "${C}8${S} - ${C}skype${S} Installs Skype. Hate it or love it, here it is."
 	echo -e "${C}9${S} - ${C}google-earth${S} Installs google earth using Debian installer method.$gge64"
@@ -1430,7 +1430,21 @@ java_plugin_installer()
 	echo $LINE
 	echo "${S}Checking for ${C}Java Plugin${S} installation candidates...${N}"
 	
-	if [ -n "$( check_package_status 'icedtea6-plugin' 'c' )" ];then
+	# first choice is the metapackage that is not version number based:
+	if [ -n "$( check_package_status 'icedtea-plugin' 'c' )" ];then
+		package_group_installer plain 'icedtea-plugin'
+		installed='true'
+	elif [ -n "$( check_package_status 'icedtea-8-plugin' 'c' )" ];then
+		package_group_installer plain 'icedtea-8-plugin'
+		installed='true'
+	elif [ -n "$( check_package_status 'icedtea-7-plugin' 'c' )" ];then
+		package_group_installer plain 'icedtea-7-plugin'
+		installed='true'
+	elif [ -n "$( check_package_status 'icedtea-6-plugin' 'c' )" ];then
+		package_group_installer plain 'icedtea-6-plugin'
+		installed='true'
+	# legacy formats
+	elif [ -n "$( check_package_status 'icedtea6-plugin' 'c' )" ];then
 		package_group_installer plain 'icedtea6-plugin'
 		installed='true'
 	elif [ -n "$( check_package_status 'java-gcj-compat-plugin' 'c' )" ];then
@@ -1562,16 +1576,15 @@ inxi_installer()
 	fi
 	inxiPath=$( type -p $MOD_INXI )
 	if [ -n "$inxiPath" ];then
-		if [ -f "$inxiPath" -a -d $konviPath ];then
-			echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
-			ln -sf $inxiPath ${konviPath}$MOD_INXI
-		fi
 		if [ -f "$SinxiPath" -a -d $konviKde4Path ];then
 			echo "${S}Creating link to ${C}${konviKde4Path}${S} now...${N}"
 			ln -sf $inxiPath ${konviKde4Path}$MOD_INXI
 		fi
+		if [ -f "$inxiPath" -a -d $konviPath ];then
+			echo "${S}Creating link to ${C}${konviPath}${S} now...${N}"
+			ln -sf $inxiPath ${konviPath}$MOD_INXI
+		fi
 	fi
-
 	echo "${M}Please do NOT use the ${C}-F${M} or the ${C}-v 5 (or greater)${M} options unless requested in IRC."
 	echo "${S}Those are far too verbose. Please use only specific line triggers, or ${C}-b${S} or ${C}-v 1 (1-3 are reasonable)${S}"
 	echo "See ${C}inxi -h${S} for the full list of supported output options.${N}"
@@ -1765,7 +1778,7 @@ install_ntfs_3g()
 	eval $LOGPS
 	echo $LINE
 	echo "${S}For more information on how to setup ntfs-3g, please read ${C}/usr/share/doc/ntfs-3g/README.gz${S}"
-	echo "or use the ${C}aptosid-irc${S} factoid ${C}!ntfs-3g${S}."
+	# echo "or use the ${C}aptosid-irc${S} factoid ${C}!ntfs-3g${S}."
 	echo "Here is a sample new line in your ${C}/etc/fstab${S} to give you an idea:"
 	echo "${C}/dev/hda1       /media/hda1     ntfs-3g silent,umask=0,no_def_opts,allow_other 0 0"
 	print_hec
