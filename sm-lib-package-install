@@ -1522,7 +1522,7 @@ install_google_earth()
 	# http://dl.google.com/dl/earth/client/current/google-earth-stable_current_amd64.deb
 	if [ "$download_error" -gt 0 ];then
 		echo $ELINE
-		echo "${E}Oh, too bad, the ${C}googleearth deb${E} package failed to download."
+		echo "${E}Oh, too bad, the ${C}$install_deb${E} deb failed to download."
 		echo "Please let the maintainer know, or try again in a few minutes in case it's your"
 		echo "network connection that failed.${N}"
 	else
@@ -1552,8 +1552,8 @@ install_google_earth()
 		else
 			echo $ELINE
 			echo "${E}Oh, too bad, the ${C}google earth deb${E} package failed to download, sorry about that."
-			echo "${S}Check forums and other information to see if the Debian package builder is broken."
-			echo "Unable to install googleearth using this method, sorry.${N}"
+			echo "${S}Check forums and other information to see if the package is changed somehow."
+			echo "Unable to install googleearth, sorry.${N}"
 		fi
 	fi
 	cd $SCRIPT_HOME
