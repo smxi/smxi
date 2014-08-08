@@ -1544,7 +1544,6 @@ install_google_earth()
 # 				$APT_TYPE install googleearth 2>>$LOG_FILE 2>&1
 # 			fi
 			rm -f $install_deb
-			cd $SCRIPT_HOME
 			#echo "${S}Cleaning up ${C}$goog${S} installer stuff...${N}"
 			# package_remover 'googleearth-package' 'purge -y'
 			echo "${S}Completed install of ${C}$goog${S}.${N}"
@@ -1557,7 +1556,7 @@ install_google_earth()
 			echo "Unable to install googleearth using this method, sorry.${N}"
 		fi
 	fi
-
+	cd $SCRIPT_HOME
 	print_hec
 	eval $LOGPE
 }
