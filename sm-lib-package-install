@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.29
-####  Date: 2014-08-08
+####  version: 3.4.30
+####  Date: 2014-08-11
 
 ####  Copyright (C) Harald Hope 2005-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1468,7 +1468,7 @@ java_plugin_installer()
 reinstall_skype()
 {
 	eval $LOGPS
-	local SkypeFileName=''
+	local SkypeFileName='' b_ia32_libs='false' package_type='32'
 	# note: the skype url is a 302 to the current latest version of skype
 	# local skypeDebUrl='http://www.skype.com/go/getskype-linux-beta-deb'
 	# this changed and now there's a 32/64 bit auto redirect, default 32, so need to
@@ -1476,7 +1476,11 @@ reinstall_skype()
 
 	# dependencies: libasound2 (>> 1.0.8), libc6 (>= 2.3.2.ds1-4), libgcc1 (>= 1:3.4.1-3), libqt3-mt | libqt3c102-mt (>= 3:3.3.3.2), libstdc++5 (>= 1:3.3.4-1), libx11-6 | xlibs (>> 4.1.0), libxext6 | xlibs (>> 4.1.0)
 	# libasound2 libc6 libgcc1 libstdc++5
-	local skypeDebUrl="http://www.skype.com/go/getskype-linux-deb-$BITS"
+	if [ "$BITS" == '64' -a -n "$( package_tester 'ia32-libs' )" ];then
+		b_ia32_libs='true'
+		package_type='64'
+	fi
+	local skypeDebUrl="http://www.skype.com/go/getskype-linux-deb-$package_type"
 	echo $LINE
 	wget -T$TIME_OUT -t2 -Nc $skypeDebUrl
 	SkypeFileName=$(ls -f | grep 'skype')
@@ -1487,10 +1491,16 @@ reinstall_skype()
 		echo "Removing old skype version.${N}"
 		# install skype
 		COLUMNS=200 dpkg -l | awk '/skype/{print $2}' | xargs -r dpkg --purge
+		if [ "$BITS" == '64' -a "$b_ia32_libs" == 'false' ];then
+			echo "${S}Addeing ${C}i386${S} architecture so 32 bit runs on 64 bit system...${N}"
+			dpkg --add-architecture i386
+			$APT_TYPE update
+		fi
 		echo "${S}Installing new skype.${N}"
-		package_installer 'libqtwebkit4 libstdc++5 libqt4-core libqt4-gui' 'install-user'
+		# package_installer 'libqtwebkit4 libstdc++5 libqt4-core libqt4-gui' 'install-user'
 		dpkg -i $SkypeFileName
 		rm -f $SkypeFileName
+		echo "${S}Running ${C}apt-get install -f${S} to install any missing packages.${N}"
 		$APT_TYPE install -f
 		echo "${S}New skype install completed.${N}"
 	else
@@ -1504,9 +1514,12 @@ install_google_earth()
 	eval $LOGPS
 	local goog='Google Earth' uninstallPackage='' install_deb='google-earth-stable_current_i386.deb'
 	local download_error=0 google_earth_package='googleearth-package'
+	local b_ia32_libs='false'
 	
-	if [ "$BITS" == '64' ];then
+	# we'll use 32 bit package unless it's an old install that has support for deprected ia32-libs meta
+	if [ "$BITS" == '64' -a -n "$( package_tester 'ia32-libs' )" ];then
 		install_deb='google-earth-stable_current_amd64.deb'
+		 b_ia32_libs='true'
 	fi
 	local download_path=" http://dl.google.com/dl/earth/client/current/$install_deb"
 	echo $LINE
@@ -1534,6 +1547,12 @@ install_google_earth()
 			fi
 			if [ -n "$google_earth_package" ];then
 				package_remover "$google_earth_package" 'purge -y' 'group'
+			fi
+			if [ "$BITS" == '64' -a "$b_ia32_libs" == 'false' ];then
+				echo "${S}Addeing ${C}i386${S} architecture so 32 bit runs on 64 bit system...${N}"
+				dpkg --add-architecture i386
+				echo "${S}Updating ${C}apt${S} now...${N}"
+				$APT_TYPE update
 			fi
 			echo "${S}Installing ${C}$goog${S} deb...${N}"
 			dpkg -i $install_deb 2>>$LOG_FILE 2>&1
