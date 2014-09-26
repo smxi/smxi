@@ -34,10 +34,10 @@ install_graphics()
 	local cardBrand='' bError='false' xorgNative='' installXorgDriver='install-xorg-driver'
 	# nvidia stuff
 	local NvOptionText='' OptNv='' OptNvCurrentStable='' NvAdvancedText=''
-	local NvDefault='' NvCurrentStable='' NvLegacy4='' NvLegacy3='' NvLegacy2=''
-	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy4Math='' NvLegacy3Math='' NvLegacy2Math=''
+	local NvDefault='' NvCurrentStable='' NvLegacy5='' NvLegacy4='' NvLegacy3='' NvLegacy2=''
+	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy5Math='' NvLegacy4Math='' NvLegacy3Math='' NvLegacy2Math=''
 	local NvTest1='' NvTest2='' NvTest3='' NvTest4='' NvTest5=''
-	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy4MathTemp=''
+	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy5MathTemp='' NvLegacy4MathTemp=''
 	local NvLegacy2MathTemp='' nvXorgtext=''
 	local NvDebId='debian-nvidia'
 	local NvDebianText="${C}$NvDebId${S} - Debian method nVidia driver installation.\n    ${S}This will install the proper ${C}Debian nVidia${S} driver packages for your card.\n"
@@ -149,20 +149,20 @@ install_graphics()
 		NvDefaultMath=$( echo $NvDefault | cut -d '-' -f 2 )
 		NvCurrentStable=$( echo $sgfxiData | cut -d ':' -f 2 )
 		NvCurrentStableMath=$( echo $NvCurrentStable | cut -d '-' -f 2 )
-		NvLegacy4=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvLegacy5=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvLegacy5Math=$( echo $NvLegacy5 | cut -d '-' -f 2 )
+		NvLegacy4=$( echo $sgfxiData | cut -d ':' -f 4 )
 		NvLegacy4Math=$( echo $NvLegacy4 | cut -d '-' -f 2 )
-		NvLegacy3=$( echo $sgfxiData | cut -d ':' -f 4 )
+		NvLegacy3=$( echo $sgfxiData | cut -d ':' -f 5 )
 		NvLegacy3Math=$( echo $NvLegacy3 | cut -d '-' -f 2 )
-		NvLegacy2=$( echo $sgfxiData | cut -d ':' -f 5 )
-		NvLegacy2Math=$( echo $NvLegacy2 | cut -d '-' -f 2 )
 # 		[ "$NvDefaultMath" -gt "$NvLegacy3Math"  ] && NvTest1=0 || NvTest1=1
 # 		[ "$NvLegacy4Math" -gt "$NvDefaultMath"  ] && NvTest2=0 || NvTest2=1
 # 		[ "$NvCurrentStableMath" -gt "$NvDefaultMath"  ] && NvTest3=0 || NvTest3=1
 		NvDefaultMathTemp=$( convert_to_new_versioning $NvDefaultMath nv )
 		NvCurrentStableMathTemp=$( convert_to_new_versioning $NvCurrentStableMath nv )
+		NvLegacy5MathTemp=$( convert_to_new_versioning $NvLegacy5Math nv )
 		NvLegacy4MathTemp=$( convert_to_new_versioning $NvLegacy4Math nv )
 		NvLegacy3MathTemp=$( convert_to_new_versioning $NvLegacy3Math nv )
-		NvLegacy2MathTemp=$( convert_to_new_versioning $NvLegacy2Math nv )
 		# this is preparing for the new nvidia driver format, the above will handle the
 		# legacy formatting, and requires no change for new formatting.
 		# once 10x.xx formatting is used, the logic here will handle the conversions
@@ -171,9 +171,10 @@ install_graphics()
 		NvTest2=$( compare_numbers $NvDefaultMathTemp $NvLegacy3MathTemp )
 		NvTest3=$( compare_numbers $NvCurrentStableMathTemp $NvDefaultMathTemp )
 		NvTest4=$( compare_numbers $NvDefaultMathTemp $NvLegacy4Math )
+		NvTest5=$( compare_numbers $NvDefaultMathTemp $NvLegacy5Math )
 
-		log_function_data "NV tempno 1:$NvDefaultMathTemp 2:$NvCurrentStableMathTemp 3:$NvLegacy4MathTemp 4:$NvLegacy3MathTemp 5:$NvLegacy2MathTemp"
-		log_function_data "nvtests 1:$NvTest1 2:$NvTest2 3:$NvTest3 4:$NvTest4"
+		log_function_data "NV tempno 1:$NvDefaultMathTemp 2:$NvCurrentStableMathTemp 3:$NvLegacy5MathTemp 4:$NvLegacy4MathTemp 5:$NvLegacy3MathTemp 6:$NvLegacy2MathTemp"
+		log_function_data "nvtests 1:$NvTest1 2:$NvTest2 3:$NvTest3 4:$NvTest4 5: $NvTest5"
 
 		if [ "$NvTest1" -eq 0 ];then
 			# short hack while 304 series is current stable, remove:   -a "$NvTest3" -ne 1 when stable > 304
@@ -315,6 +316,9 @@ install_graphics()
 				;;
 			6-7xxx-nvidia)
 				final_graphics_install nvco $NvLegacy4Math
+				;;
+			8-9xxx-nvidia)
+				final_graphics_install nvco $NvLegacy5Math
 				;;
 			current-nvidia)
 				final_graphics_install nvco $NvCurrentStableMath
