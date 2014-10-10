@@ -116,7 +116,7 @@ alternate_kernel_install()
 	echo "${M}NOTE: The listed kernels are zip files of ${C}$BITS bit${M} kernel debs plus installer script."
 	if [[ "$BITS" == '32' ]];then
 		if [ "$( check_pae_support )" == 'true' ];then
-			echo "These are the current ${C}PAE${S} kernels for your ${C}PAE${S} kernel/memory needs."
+			echo "These are the current ${C}PAE${S} kernels for your ${C}PAE${S} kernel/memory system."
 		else
 			echo "These are the current ${C}Non PAE${S} kernels for your ${C}Non PAE${S} system."
 		fi
