@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.54
-####  Date: 2014-10-08
+####  version: 2.6.55
+####  Date: 2014-10-09
 
 ####  Copyright (C) Harald Hope 2005-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,11 +28,13 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists 
-KERNEL_LIST_32='3.16-4.dmz.2-liquorix-686 3.15-10.dmz.3-liquorix-686 3.14-9.dmz.1-liquorix-686 3.13-11.dmz.3-liquorix-686 3.12-10.dmz.1-liquorix-686 3.11-10.dmz.1-liquorix-686 3.10-22.dmz.1-liquorix-686 3.8-13.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
-KERNEL_ADVANCED_LIST_32=''
+KERNEL_LIST_32_NON_PAE='3.16-4.dmz.4-liquorix-686'
+KERNEL_LIST_32_PAE='3.16-4.dmz.4-liquorix-686-pae 3.14-9.dmz.1-liquorix-686 3.13-11.dmz.3-liquorix-686 3.12-10.dmz.1-liquorix-686 3.11-10.dmz.1-liquorix-686 3.10-22.dmz.1-liquorix-686 3.8-13.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
+KERNEL_ADVANCED_LIST_32_PAE=''
+KERNEL_ADVANCED_LIST_32_NON_PAE=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
-KERNEL_LIST_64='3.16-4.dmz.2-liquorix-amd64 3.15-10.dmz.3-liquorix-amd64 3.14-9.dmz.1-liquorix-amd64 3.13-11.dmz.3-liquorix-amd64 3.12-10.dmz.1-liquorix-amd64 3.11-10.dmz.1-liquorix-amd64 3.10-22.dmz.1-liquorix-amd64 3.8-13.dmz.1-liquorix-amd64 3.6.0-11.dmz.1-liquorix-amd64 3.4.0-35.dmz.1-liquorix-amd64 3.2.0-14.dmz.1-liquorix-amd64 3.0.0-9.dmz.1-liquorix-amd64 2.6.38-7.dmz.2-liquorix-amd64 2.6.36-3.dmz.2-liquorix-amd64 2.6.34-2.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64'
+KERNEL_LIST_64='3.16-4.dmz.4-liquorix-amd64 3.15-10.dmz.3-liquorix-amd64 3.14-9.dmz.1-liquorix-amd64 3.13-11.dmz.3-liquorix-amd64 3.12-10.dmz.1-liquorix-amd64 3.11-10.dmz.1-liquorix-amd64 3.10-22.dmz.1-liquorix-amd64 3.8-13.dmz.1-liquorix-amd64 3.6.0-11.dmz.1-liquorix-amd64 3.4.0-35.dmz.1-liquorix-amd64 3.2.0-14.dmz.1-liquorix-amd64 3.0.0-9.dmz.1-liquorix-amd64 2.6.38-7.dmz.2-liquorix-amd64 2.6.36-3.dmz.2-liquorix-amd64 2.6.34-2.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64'
 KERNEL_ADVANCED_LIST_64=''
 TESTING_KERNEL_64=''
 
@@ -886,7 +888,7 @@ install_the_module()
 }
 # install_wireless_modules
 
-# switch the kernel file name to get the correct latest 64 bit slh kernel
+# switch the kernel file name to get the correct latest 64 bit kernel
 set_kernel_data()
 {
 	eval $LOGUS
@@ -899,8 +901,13 @@ set_kernel_data()
 		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_64
 		testingKernel=$TESTING_KERNEL_64
 	else
-		KERNEL_LIST=$KERNEL_LIST_32
-		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_32
+		if [ "$( check_pae_support )" == 'true' ];then
+			KERNEL_LIST=$KERNEL_LIST_32_PAE
+			KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_32_PAE
+		else
+			KERNEL_LIST=$KERNEL_LIST_32_NON_PAE
+			KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_32_NON_PAE
+		fi
 		testingKernel=$TESTING_KERNEL_32
 	fi
 	if [ "$B_TESTING_1" == 'true' ];then

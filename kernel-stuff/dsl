@@ -2,10 +2,10 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.10
-####  Date: 2013-01-15
+####  version: 2.3.11
+####  Date: 2014-10-09
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2013
+####  Copyright (C) Harald Hope 2007-2014
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
@@ -252,12 +252,12 @@ create_kernel_directory()
 
 create_sub_directories()
 {
-	local directories='32 32-meta 64 64-meta kernel-installer-files src-gz kernel-full-zips'
-	local redoDirectories='32 32-meta 64 64-meta'
+	local directories='32 32-pae 32-meta 64 64-meta kernel-installer-files src-gz kernel-full-zips'
+	local redoDirectories='32 32-pae 32-meta 64 64-meta'
 	local directory=''
 
 	echo $LINE
-	echo 'Generating 32/64 bit and meta directories...'
+	echo 'Generating 32/32-pae/64 bit and meta directories...'
 	for directory in $directories
 	do
 		if [ ! -d $directory ];then
@@ -420,23 +420,29 @@ move_files_to_directories()
 	mv -f linux-image-2.6-${kernelType}*amd64.deb 64-meta
 	mv -f linux-headers-2.6-${kernelType}*amd64.deb 64-meta
 	cp -f $gzDir*${KERNEL_MAIN}*.gz 32
+	cp -f $gzDir*${KERNEL_MAIN}*.gz 32-pae
 	cp -f $gzDir*$KERNEL_MAIN*.gz 64
 	cp -f $gzDir*${KERNEL_MAIN}*.xz 32
+	cp -f $gzDir*${KERNEL_MAIN}*.xz 32-pae
 	cp -f $gzDir*$KERNEL_MAIN*.xz 64
 	cp -f $gzDir*${KERNEL_MAIN}*.bz2 32
+	cp -f $gzDir*${KERNEL_MAIN}*.bz2 32-pae
 	cp -f $gzDir*$KERNEL_MAIN*.bz2 64
 	cp -f *linux-support*.deb 32
+	cp -f *linux-support*.deb 32-pae
 	cp -f *linux-support*.deb 64
+	mv -f *${KERNEL_MAIN}*pae*i386.deb 32-pae
 	mv -f *${KERNEL_MAIN}*i386.deb 32
 	mv -f *${KERNEL_MAIN}*amd64.deb 64
 	cp -f linux-patch-${kernelType}* 32
+	cp -f linux-patch-${kernelType}* 32-pae
 	cp -f linux-patch-${kernelType}* 64
 	echo "Completed download and handling of: $NEW_KERNEL_DIRECTORY"
 }
 
 add_update_installer_files()
 {
-	local fullKernelString32='' fullKernelString64=''
+	local fullKernelString32='' fullKernelString64='' fullKernelString32Pae=''
 
 	case $KERNEL_TYPE in
 		aptosid)
@@ -445,6 +451,7 @@ add_update_installer_files()
 			;;
 		liquorix)
 			fullKernelString32="$KERNEL_WORKING-liquorix-686"
+			fullKernelString32Pae="$KERNEL_WORKING-liquorix-686-pae"
 			fullKernelString64="$KERNEL_WORKING-liquorix-amd64"
 			;;
 	esac
@@ -452,14 +459,17 @@ add_update_installer_files()
 	echo $LINE
 	echo 'Adding installer files and updating files...'
 	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 32/install-kernel.sh
+	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 32-pae/install-kernel.sh
 	cp $KERNEL_INSTALLER_DIR/install-kernel.sh 64/install-kernel.sh
 
 	sed -i 's/^KERNEL_VERSION=\".*\"/KERNEL_VERSION=\"'$fullKernelString32'\"/' 32/install-kernel.sh
+	sed -i 's/^KERNEL_VERSION=\".*\"/KERNEL_VERSION=\"'$fullKernelString32Pae'\"/' 32-pae/install-kernel.sh
 	sed -i 's/^KERNEL_VERSION=\".*\"/KERNEL_VERSION=\"'$fullKernelString64'\"/' 64/install-kernel.sh
 	
 	if [ -n "$GCC_ALT" ];then
 		echo "Updating GCC data to use: $GCC_ALT"
 		sed -i 's/^GCC_VERSION=\".*\"/GCC_VERSION=\"'$GCC_ALT'\"/' 32/install-kernel.sh
+		sed -i 's/^GCC_VERSION=\".*\"/GCC_VERSION=\"'$GCC_ALT'\"/' 32-pae/install-kernel.sh
 		sed -i 's/^GCC_VERSION=\".*\"/GCC_VERSION=\"'$GCC_ALT'\"/' 64/install-kernel.sh
 	fi
 }
@@ -467,7 +477,7 @@ add_update_installer_files()
 make_zip_files()
 {
 	local contents=''
-	local kernel32Zip='' kernel64Zip=''
+	local kernel32Zip='' kernel64Zip='' kernel32PaeZip=''
 
 	case $KERNEL_TYPE in
 		aptosid)
@@ -476,6 +486,7 @@ make_zip_files()
 			;;
 		liquorix)
 			kernel32Zip="$KERNEL_WORKING-liquorix-686.zip"
+			kernel32PaeZip="$KERNEL_WORKING-liquorix-686-pae.zip"
 			kernel64Zip="$KERNEL_WORKING-liquorix-amd64.zip"
 			;;
 	esac
@@ -489,6 +500,15 @@ make_zip_files()
 	unzip -t $kernel32Zip || error_handler 7 $kernel32Zip
 	echo "32 bit kernel zip corruption test: passed"
 	mv $kernel32Zip ../kernel-full-zips/
+	
+	echo 'Making 32-pae bit zip file now...'
+	cd ../32-pae
+	contents=$(ls)
+	zip $kernel32PaeZip $contents
+	echo 'Testing 32-pae bit kernel zip file for corruption...'
+	unzip -t $kernel32PaeZip || error_handler 7 $kernel32PaeZip
+	echo "32-pae bit kernel zip corruption test: passed"
+	mv $kernel32PaeZip ../kernel-full-zips/
 
 	echo 'Making 64 bit zip file now...'
 	cd ../64
