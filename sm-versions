@@ -6,7 +6,7 @@ sm-lib-du-fixes=1.4.11:2014-03-18
 sm-lib-graphics=2.6.1:2014-09-28
 sm-lib-kde4-updater=0.7.39:2013-11-19
 sm-lib-kernel=2.6.59:2014-11-04
-sm-lib-kernel-install=2.12.12:2014-10-10
+sm-lib-kernel-install=2.12.13:2014-11-18
 sm-lib-misc-tweaks=1.24.5:2014-01-23
 sm-lib-package-install=3.4.30:2014-08-11
 sm-lib-package-removal=1.4.2:2011-02-10
@@ -26,6 +26,6 @@ sgfxi=4.24.9:2014-11-13
 svmi=2.8.51:2014-10-14
 inxi=2.2.16:2014-11-03
 rbxi=2.7.2:4 September 2009
-sm-main-version=8.41.09:2014-11-04
+sm-main-version=8.41.10:2014-11-18
 
 ###**EOF**###

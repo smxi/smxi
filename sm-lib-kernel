@@ -896,7 +896,7 @@ set_kernel_data()
 
 	# run_script_import $LIB_KERNELS
 
-	if [ "$BITS" == "64" ];then
+	if [ "$BITS" == '64' ];then
 		KERNEL_LIST=$KERNEL_LIST_64 # with -K, this includes advanced list
 		KERNEL_ADVANCED_LIST=$KERNEL_ADVANCED_LIST_64
 		testingKernel=$TESTING_KERNEL_64
