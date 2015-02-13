@@ -65,7 +65,7 @@ error_handler()
 			message="The directory: $2 does not exist, please fix this."
 			;;
 		3)
-			message="You have to have a -k <kernel> to run this, it's not optional"
+			message="You have to have a -k <kernel> to run this, it's not optional: item/line $2"
 			;;
 		4)
 			message="wget download error when downloading: $2"
@@ -172,7 +172,7 @@ get_options()
 		error_handler 10
 	fi
 	if [ -z "$KERNEL_WORKING" ];then
-		error_handler 3
+		error_handler 3 175
 	fi
 	# avoid careless errors
 	if [ -n "$( grep 'slh' <<< $KERNEL_WORKING )" -a "$KERNEL_TYPE" != 'aptosid' ];then
@@ -316,27 +316,27 @@ download_kernel_files()
 	echo
 	## download kernels and all related debs
 	echo "Getting module debs now..."
-	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off # || error_handler 3 $MIRROR_MODULES-deb
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MODULES -e robots=off # || error_handler 4 $MIRROR_MODULES-deb
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	# grab source zips/debs for modules
 	echo "Getting module tar.gz data now..."
-	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off # || error_handler 3 $MIRROR_MODULES-tar.gz
+	wget -r -l3 -Nc -nd -np -A.tar.gz $MIRROR_MODULES -e robots=off # || error_handler 4 $MIRROR_MODULES-tar.gz
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	# grab source zips/debs for modules
 	echo "Getting module diff.gz data now..."
-	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MODULES -e robots=off # || error_handler 3 $MIRROR_MODULES-tar.gz
+	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MODULES -e robots=off # || error_handler 4 $MIRROR_MODULES-tar.gz
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	echo "Getting primary kernel debs now..."
-	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off || error_handler 3 $MIRROR_MAIN-deb
+	wget -r -l3 -Nc -nd -np -A.deb $MIRROR_MAIN -e robots=off # || error_handler 4 $MIRROR_MAIN-deb
 	echo $LINE
 	echo $LINE
 	echo
@@ -348,25 +348,25 @@ download_kernel_files()
 			cd src-gz
 			;;
 	esac
-	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off # || error_handler 3 $MIRROR_MAIN-diff.gz
+	wget -r -l3 -Nc -nd -np -A.diff.gz $MIRROR_MAIN -e robots=off # || error_handler 4 $MIRROR_MAIN-diff.gz
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	echo "Getting kernel debian.tar.gz data now..."
-	wget -r -l3 -Nc -nd -np -A.debian.tar.gz $MIRROR_MAIN -e robots=off # || error_handler 3
+	wget -r -l3 -Nc -nd -np -A.debian.tar.gz $MIRROR_MAIN -e robots=off # || error_handler 4
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	echo "Getting kernel debian.tar.bz2 data now..."
-	wget -r -l3 -Nc -nd -np -A.debian.tar.bz2 $MIRROR_MAIN -e robots=off # || error_handler 3
+	wget -r -l3 -Nc -nd -np -A.debian.tar.bz2 $MIRROR_MAIN -e robots=off # || error_handler 4
 	echo $LINE
 	echo $LINE
 	echo
 	sleep $sleepTime
 	echo "Getting kernel debian.tar.xz data now..."
-	wget -r -l3 -Nc -nd -np -A.debian.tar.xz $MIRROR_MAIN -e robots=off # || error_handler 3
+	wget -r -l3 -Nc -nd -np -A.debian.tar.xz $MIRROR_MAIN -e robots=off # || error_handler 4
 	case $KERNEL_TYPE in
 		liquorix)
 			cd ../
