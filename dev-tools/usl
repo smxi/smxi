@@ -404,9 +404,12 @@ process_rbxi()
 	tar vcjf rbxi.tar.bz2 rbxi*
 	echo "Moving to: $RBXI_ZIPS"
 	mv rbxi.tar.bz2 $RBXI_ZIPS
-	echo "Creating backup bzip file now..."
+	echo "Creating backup bzip file now and copying bz2 to svn/trunk..."
 	cp -f ${RBXI_ZIPS}rbxi.tar.bz2 ${RBXI_ZIPS}rbxi-$localVersion.tar.bz2
+	cp -f ${RBXI_ZIPS}rbxi.tar.bz2 ${RBXI_SVN}rbxi.tar.bz2
 	echo "Done with rbxi specific tasks now."
+	echo "Remember to upload rbxi/dev/rb-version and rbxi to the remote rb directory"
+	echo "on server!!! And the bz2 file."
 }
 #construct_smxi_version_number;exit
 

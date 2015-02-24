@@ -2951,7 +2951,7 @@ check_force_update()
 		update_scripts $SCRIPT_NAME 'chm'
 		if [ "$?" -eq 0 ];then
 			echo "${E}Restarting script...${N}"
-			$SCRIPT_HOME/$SCRIPT_NAME -r$START_OPTIONS
+			exec $SCRIPT_HOME/$SCRIPT_NAME -r$START_OPTIONS
 			exit 0
 		else
 			error_handler force-update-failed $FUNCNAME "$?"
@@ -2987,7 +2987,7 @@ ${S}You are using the latest script engine.${N}"
 		fi
 		# run the script again, using the newly downloaded script
 		# restart with full args, append all start options except f and r to -r
-		./$SCRIPT_NAME -r$START_OPTIONS
+		exec ./$SCRIPT_NAME -r$START_OPTIONS
 		exit 0
 	fi
 	eval $LOGPE
