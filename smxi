@@ -82,6 +82,7 @@ EAS='/etc/apt/sources.list'
 EASDL='/etc/apt/sources.list.d/debian.list'
 EDD='/etc/default/distro'
 EF='/etc/fstab'
+EIT='/etc/inittab'
 EUKU='/etc/udev/kernel-upgrade'
 KDMRC_PATH='/etc/kde3/kdm'
 X_ORG_PATH='/etc/X11/xorg.conf'
@@ -222,6 +223,10 @@ B_DEBUG='false'
 # setting to 'true' turns off script self-updater. You must have ALL script components
 # in $SCRIPT_HOME (/usr/local/bin) here already to use this without having error occur.
 B_DEV_FLAG='false'
+B_EIT='false'
+if [ -f $EIT ];then
+	B_EIT='true'
+fi
 B_FORCE_DOWNLOAD='false'
 B_FORCE_NON_PAE='false'
 B_FORCE_UPDATE='false'
@@ -388,7 +393,10 @@ EXTRA_OPTIONS=''
 HEC_ALT=''
 HOLD_INSTALL_ITEMS='' # holds value for any hold/install required
 # we'll always use the system default in all cases
-INIT_LEVEL=$( grep ':initdefault:' /etc/inittab | grep -Eo '[0-5]' )
+INIT_LEVEL=''
+if [ "$B_EIT" == 'true' ];then
+	INIT_LEVEL=$( grep ':initdefault:' $EIT | grep -Eo '[0-5]' )
+fi
 LOG_FILE='/var/log/smxi.log'
 LOG_INDENT=''
 LOGMS='log_function_data ms $FUNCNAME "$( echo $@ )"'
@@ -2560,8 +2568,8 @@ check_display_and_x()
 	local data1=${c2[4]}${c2[1]}${c2[8]}${c2[2]}${c2[0]}${c2[5]}
 	local data2=${c2[7]}${c2[11]}${c2[3]}${c2[0]}${c2[10]}${c2[6]}${c2[9]}
 	local defaultRunlevel=''
-	if [ -f  /etc/inittab ];then
-		defaultRunlevel=$( grep ':initdefault:' /etc/inittab | grep -Eo '[0-5]' )
+	if [ "$B_EIT" == 'true' ];then
+		defaultRunlevel=$( grep ':initdefault:' $EIT | grep -Eo '[0-5]' )
 	fi
 	local runlevelUse='' runlevelText='' runlevelText2='' runlevelText3=''
 	local dmRunlevels=$( get_display_manager_runlevels )
