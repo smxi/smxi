@@ -1288,6 +1288,7 @@ update_sources()
 			extraFunctions2='package_installer liquorix-archive-keyring install-always --allow-unauthenticated'
 			;;
 		google-chrome)
+			# wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 			extraFunctions='wget -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
 			grepSearch='(google.com/linux/chrome/deb|deb-google-chrome)'
 			searchIdentifier='Google Chrome'
