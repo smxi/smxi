@@ -5,7 +5,7 @@ sm-lib-distro-conversion=3.3.17:2014-03-29
 sm-lib-du-fixes=1.4.11:2014-03-18
 sm-lib-graphics=2.6.2:2014-12-19
 sm-lib-kde4-updater=0.7.39:2013-11-19
-sm-lib-kernel=2.6.61:2015-01-15
+sm-lib-kernel=2.6.62:2015-04-13
 sm-lib-kernel-install=2.12.13:2014-11-18
 sm-lib-misc-tweaks=1.24.6:2015-03-11
 sm-lib-package-install=3.4.31:2015-03-19
@@ -26,6 +26,6 @@ sgfxi=4.24.25:2015-04-08
 svmi=2.8.55:2015-03-27
 inxi=2.2.19:2015-02-15
 rbxi=2.7.3:2015-02-20
-sm-main-version=8.41.17:2015-03-20
+sm-main-version=8.41.18:2015-04-13
 
 ###**EOF**###
