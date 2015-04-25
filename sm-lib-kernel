@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.63
-####  Date: 2015-04-23
+####  version: 2.6.64
+####  Date: 2015-04-25
 
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -88,15 +88,19 @@ check_kernel()
 		# need to force du prior to kernel install to avoid errors
 		# need to see if it's new or 2.6 kernel first
 		case $CURRENT_APT_KERN_BASE in
-			3)	kernelAptMath=$(( $kernelAptMath + 40 ))
+			3)	kernelAptMath=$(( $kernelAptMath + 19 ))
 				;;
-			4)	kernelAptMath=$(( $kernelAptMath + 80 ))
+			4)	kernelAptMath=$(( $kernelAptMath + 39 ))
+				;;
+			5)	kernelAptMath=$(( $kernelAptMath + 59 ))
 				;;
 		esac
 		case $KERNEL_BASE in
-			3)	kernelMath=$(( $kernelMath + 40 ))
+			3)	kernelMath=$(( $kernelMath + 19 ))
 				;;
-			4)	kernelMath=$(( $kernelMath + 80 ))
+			4)	kernelMath=$(( $kernelMath + 39 ))
+				;;
+			5)	kernelMath=$(( $kernelMath + 59 ))
 				;;
 		esac
 
