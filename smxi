@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.14
-####  Date: 2015-03-13
+####  version: 8.15.15
+####  Date: 2015-05-01
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -313,7 +313,7 @@ DEBIAN_KERNEL_INSTALLED=''
 DEBIAN_KERNEL_CANDIDATE=''
 DEFAULT_KERNEL=''
 # 1 dot: like 3.2 - 2 dot: like: 2.6.32
-KERNEL_NUMBER=$( uname -r | cut -d '-' -f 1 | grep -Eo "(2\.6|3)\.[0-9]+" )
+KERNEL_NUMBER=$( uname -r | cut -d '-' -f 1 | grep -Eo "(2\.6|[3-9])\.[0-9]+" )
 # for math kernel compares, eg, -gt 24
 if [ -n "$( grep -Es '^[3-9]\.' <<< $KERNEL_NUMBER )" ];then
 	KERNEL_MATH=$( cut -d '.' -f 2 <<< $KERNEL_NUMBER )
