@@ -1583,7 +1583,7 @@ set_distro_data()
 		LIB_2008_FIXES="$LIB_2008_FIXES_STATIC-s"
 		LIB_2009_FIXES="$LIB_2009_FIXES_STATIC-s"
 		LIB_2011_FIXES="$LIB_2011_FIXES_STATIC-s"
-	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isJessie" -o "$isTesting" -gt 0 ];then
+	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isStretch" -o "$isTesting" -gt 0 ];then
 		SYSTEM_BASE='testing'
 		WARNING_BODY='warning_message_t'
 		ALERT_BODY='alert_message_t'
