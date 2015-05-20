@@ -254,6 +254,7 @@ package_installer()
 	fi
 	for package in $1
 	do
+		# when this runs it checks for ii status apt packages locally
 		if [ "$installAlways" != 'true' ];then
 			packageTemp=$( package_tester $package $testOption )
 			# here we handle cases where one of several is null, so we want to install all
@@ -264,6 +265,7 @@ package_installer()
 			# don't add a space or the -n test will be true
 			packageExists="$packageExists$packageTemp"
 		fi
+		# check and create list of actual existing installable packages
 		if [ -n "$( check_package_status $package 'c' )" ];then
 			echo "${S}Adding ${C}$package${S} to install group.${N}"
 			packages="$packages$package "
