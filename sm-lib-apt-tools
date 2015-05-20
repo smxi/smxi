@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.39
+####  version: 1.23.40
 ####  Date: 2015-05-19
 
 ####  Copyright (C) Harald Hope 2005-2014
@@ -252,10 +252,9 @@ package_installer()
 		fi
 		doYes='' # because of how aptitude handles this stuff, no auto yes yet
 	fi
-	#  no point running these tests if they are not needed
-	if [ "$installAlways" != 'true' ];then
-		for package in $1
-		do
+	for package in $1
+	do
+		if [ "$installAlways" != 'true' ];then
 			packageTemp=$( package_tester $package $testOption )
 			# here we handle cases where one of several is null, so we want to install all
 			# however, for multi sets of packages, we don't want to not install it if one is missing
@@ -264,19 +263,18 @@ package_installer()
 			fi
 			# don't add a space or the -n test will be true
 			packageExists="$packageExists$packageTemp"
-			
-			if [ -n "$( check_package_status $package 'c' )" ];then
-				echo "${S}Adding ${C}$package${S} to install group.${N}"
-				packages="$packages$package "
-			else
-				echo "${M}Sorry, ${C}$package${M} is not available in ${C}Debian $SYSTEM_BASE${M}!${N}"
-			fi
-		done
-		# just want to make sure here that's it's going to be truly null
-		packageExists=$( echo $packageExists | sed 's/\s//g' )
-		log_function_data "packages install list: $packages"
-		log_function_data "packageExists install list: $packageExists"
-	fi
+		fi
+		if [ -n "$( check_package_status $package 'c' )" ];then
+			echo "${S}Adding ${C}$package${S} to install group.${N}"
+			packages="$packages$package "
+		else
+			echo "${M}Sorry, ${C}$package${M} is not available in ${C}Debian $SYSTEM_BASE${M}!${N}"
+		fi
+	done
+	# just want to make sure here that's it's going to be truly null
+	packageExists=$( echo $packageExists | sed 's/\s//g' )
+	log_function_data "packages install list: $packages"
+	log_function_data "packageExists install list: $packageExists"
 	# nullify the entire set if one member is null
 	if [ "$installIt" == 'true' ];then
 		packageExists=''
