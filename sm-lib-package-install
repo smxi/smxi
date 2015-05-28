@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.31
-####  Date: 2015-03-19
+####  version: 3.4.32
+####  Date: 2015-05-28
 
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -216,7 +216,7 @@ package_group_installer()
 	local mozillaGroup="$iceDove iceweasel"
 	local openboxPackages="openbox obconf obmenu openbox-themes"
 	local rsyncGroup="rsync $rdiff"
-	local streamTuner='streamtuner streamripper'
+	local streamTuner='streamtuner2 streamripper'
 	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors lsb-core lsb-release iproute pmount powersaved sdparm udev"
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
@@ -762,7 +762,7 @@ utilities_installer()
 	echo "${C}4${S} - ${C}swiftfox${S} Lets you pick from a list of ${C}swiftfox${S} versions that match your cpu type"
 	echo "    for optimal performance. Will show your installed cpu so you can make the right choice."
 
-	echo "${C}5${S} - ${C}streamtuner${S} Installs ${C}streamtuner, streamripper, kstreamripper${S}"
+	echo "${C}5${S} - ${C}streamtuner${S} Installs ${C}streamtuner2 and streamripper${S}"
 	echo "    These are convient tools to listen to audio streams, and record them."
 	echo
 	echo "${C}6${S} - ${C}captive-to-ntfs-3g${S} Replaces ${C}Captive${S} with ${C}ntfs-3g${S} for ntfs read/write on linux."
