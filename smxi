@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.16
-####  Date: 2015-05-02
+####  version: 8.15.17
+####  Date: 2015-06-08
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -113,6 +113,7 @@ EAX='/etc/antix-version'
 ELRC='/etc/lsb-release-crunchbang'
 EDI='/etc/issue'
 EDV='/etc/debian_version'
+EDVV='/etc/devuan_version'
 EKV='/etc/kanotix-version'
 ELR='/etc/lsb-release'
 EOR='/etc/os-release'
@@ -1505,6 +1506,8 @@ set_distro_data()
 	local edvContent='' easContent='' eaaContent=''
 	if [ -f "$EDV" ];then
 		edvContent="$( cat $EDV )"
+	elif [ -f "$EDVV" ];then
+		edvContent="$( cat $EDVV )"
 	fi
 	if [ -f "$EAS" -o -d "$EAS.d" ];then
 		easContent="$( cat $EAS $EAS.d/*.list 2>/dev/null )"
@@ -2515,7 +2518,7 @@ start_up_tests()
 # 	if [ -e $EKV ];then
 # 		error_handler 'unsupported-distro' $FUNCNAME 'Kanotix'
 # 	fi
-	if [ ! -e $ESV -a ! -e $EDV ];then
+	if [ ! -e $ESV -a ! -e $EDV -a ! -e $EDVV  ];then
 		error_handler 'unidentified-distro' $FUNCNAME ''
 	fi
 	
@@ -2749,6 +2752,8 @@ check_distro_version()
 # 			DISTRO_VERSION=$( cat /etc/issue )
 		if [ -f $EDV ];then
 			DISTRO_VERSION=$( cat $EDV )
+		if [ -f $EDVV ];then
+			DISTRO_VERSION=$( cat $EDVV )
 		elif [ -f $SMDV ];then
 			DISTRO_VERSION=$( cat $SMDV )
 		else
@@ -2777,7 +2782,7 @@ check_distro_version()
 		done
 	# run debian conversion options only if no id files for s/k present
 	# non supported tests have already been run in  start_up_tests
-	elif [ ! -f $ESV -a -e $EDV ];then
+	elif [ ! -f $ESV ] && [ -e $EDV -o -e $EDVV ];then
 		set_distro_data  # need to set this here to avoid small detection errors
 		run_script_import $LIB_APT_TOOLS
 		run_script_import $LIB_DISTRO_CONVERSION
@@ -3590,7 +3595,7 @@ print_distro_id()
 	eval $LOGUS
 	# Note: $EDV is the default if all else fails. The order is important,
 	# distros with specific versionining files need to come before the defaults
-	local knownDistroIds="$EAV $ESV $ESUV $EKV $EAX $ELRC $ELR $EOR $EDI $SMDV $EDV"
+	local knownDistroIds="$EAV $ESV $ESUV $EKV $EAX $ELRC $ELR $EOR $EDI $SMDV $EDV $EDVV"
 	local distroFile='' distroId=''
 
 	for distroFile in $knownDistroIds
