@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.17
-####  Date: 2015-06-08
+####  version: 8.15.18
+####  Date: 2015-06-09
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -2752,7 +2752,7 @@ check_distro_version()
 # 			DISTRO_VERSION=$( cat /etc/issue )
 		if [ -f $EDV ];then
 			DISTRO_VERSION=$( cat $EDV )
-		if [ -f $EDVV ];then
+		elif [ -f $EDVV ];then
 			DISTRO_VERSION=$( cat $EDVV )
 		elif [ -f $SMDV ];then
 			DISTRO_VERSION=$( cat $SMDV )
