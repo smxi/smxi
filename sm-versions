@@ -1,5 +1,5 @@
 smxi=8.15.18:2015-06-09
-sm-lib-apt-tools=1.23.41:2015-06-22
+sm-lib-apt-tools=1.23.42:2015-06-23
 sm-lib-clean-up=2.10.15:2012-02-08
 sm-lib-distro-conversion=3.3.17:2014-03-29
 sm-lib-du-fixes=1.4.11:2014-03-18
@@ -26,6 +26,6 @@ sgfxi=4.24.36:2015-06-23
 svmi=2.8.59:2015-06-15
 inxi=2.2.25:2015-06-15
 rbxi=2.7.3:2015-02-20
-sm-main-version=8.41.28:2015-06-22
+sm-main-version=8.41.29:2015-06-23
 
 ###**EOF**###

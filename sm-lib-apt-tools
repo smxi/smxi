@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.41
-####  Date: 2015-06-22
+####  version: 1.23.42
+####  Date: 2015-06-23
 
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1149,7 +1149,13 @@ change_debian_mirrors()
 				for i in $EAS $EASDL
 				do
 					if [ -e "$i" ];then
-						sed -i "s%ftp[.a-z]*\.debian\.org%ftp\.$countryId\.debian\.org%g" $i && updateSuccess='true'
+						if [ "$countryId" == 'httpredir' ];then
+							sed -i "s%\(ftp\.\|http\.\)\?[a-z]*\.debian\.org%$countryId\.debian\.org%g" $i && \
+							updateSuccess='true'
+						else
+							sed -i "s%\(ftp\.\|http\.\)\?[a-z]*\.debian\.org%ftp\.$countryId\.debian\.org%g" $i && \
+							updateSuccess='true'
+						fi
 					fi
 				done
 				if [ "$updateSuccess" == 'true' ];then
