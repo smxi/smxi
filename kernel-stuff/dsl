@@ -291,7 +291,9 @@ check_kernel_exists()
 			kernelId="linux-image-$KERNEL_WORKING-liquorix-686"
 			;;
 	esac
-
+	# linux-image-4.1-1.dmz.2-liquorix-686-pae_4.1-2_i386.deb
+	# linux-image-4.1-1.dmz.2-liquorix-686_4.1-2_i386.deb
+	# linux-image-4.1-1.dmz.2-liquorix-amd64_4.1-2_amd64.deb
 	echo $LINE
 	echo "Confirming that kernel $KERNEL_WORKING exists on server..."
 	wget -O $fileName -q -e robots=off $MIRROR_MAIN
