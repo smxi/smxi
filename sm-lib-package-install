@@ -192,7 +192,7 @@ package_group_installer()
 		sysvRcConf=''
 	fi
 	
-	local consoleBrowsers='lynx links elinks links2 w3m'
+	local consoleBrowsers='lynx links elinks links2 w3m' 
 	local consoleTools="$aTop bc bzip2 ed htop irssi less nano gzip findutils mc $mlocate iproute p7zip-full p7zip-rar rcconf screen sysstat $sysvRcConf xz-utils zip unzip"
 	local baseLightPackages="$consoleBrowsers $consoleTools aterm gpicview leafpad mc pcmanfm sudo vim xarchiver xchat xchat-common xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libcurses-ui-perl libexpect-perl  libterm-readkey-perl udev wireless-tools wpasupplicant"
