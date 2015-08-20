@@ -32,7 +32,9 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 ACXI_DEV="$HOME/bin/scripts/acxi/"
 ACXI_REMOTE="https://github.com/smxi/acxi HEAD:stable"
 ACXI_VC="$HOME/bin/scripts/acxi/git/"
-INXI_VC="$HOME/bin/scripts/inxi/svn/trunk/"
+INXI_DEV="$HOME/bin/scripts/inxi/svn/trunk/"
+INXI_REMOTE="https://github.com/smxi/inxi master"
+INXI_VC="$HOME/bin/scripts/inxi/git/"
 KERNEL_DIR="$HOME/large/kernel-zips/"
 PHP_DEV="$HOME/bin/scripts/my-php/"
 PHP_REMOTE="https://github.com/smxi/php-browser-detection master"
@@ -69,6 +71,7 @@ WORKING_REMOTE=$SMXI_REMOTE
 RB_VERSION="${RBXI_VC}rb-version"
 SCRIPT_LIST_ACXI='acxi'
 SCRIPT_LIST_INXI='inxi'
+SCRIPT_LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz'
 SCRIPT_LIST_PHP='browser_detection.inc language_detection.inc useragents.xml'
 SCRIPT_LIST_RBXI='rbxi'
 SCRIPT_LIST_SGFXI="sgfxi"
@@ -161,7 +164,8 @@ get_options()
 				WORKING_VC_DIR=$INXI_VC
 				UPDATE_TYPE='i'
 				B_SKIP_ZIP='true'
-				VC_TYPE='svn'
+				VC_TYPE='git'
+				WORKING_REMOTE=$INXI_REMOTE
 				;;
 			p)
 				WORKING_VC_DIR=$PHP_VC
@@ -319,6 +323,7 @@ main_updater()
 		update_sm_data "$SCRIPT_LIST_SMXI" "$SMXI_DEV"
 		update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_DEV"
 		update_sm_data "$SCRIPT_LIST_SVMI" "$SVMI_DEV"
+		process_script "$SCRIPT_LIST_INXI_FULL" "$INXI_DEV" "$INXI_VC"
 		update_sm_data "$SCRIPT_LIST_INXI" "$INXI_VC"
 		update_sm_data "$SCRIPT_LIST_RBXI" "$RBXI_VC"
 		process_script "$SCRIPT_LIST_SMXI_BACKEND" "$SMXI_BACKEND_DEV" "$SMXI_BACKEND_VC"
