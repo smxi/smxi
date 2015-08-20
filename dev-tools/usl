@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.4.17
-####  Date: 2015-02-20
+####  version: 2.5.0
+####  Date: 2015-08-18
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2014
 ####
@@ -20,6 +20,7 @@
 #### DEFINE:
 #### TRUE: -eq 0; == 'true'; function return 0
 #### FALSE: -gt 0; == ''; function return > 0
+#### VC = Version Control - not specific like svn/gits
 ########################################################################
 #### VARIABLES
 ########################################################################
@@ -28,48 +29,78 @@
 LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # paths, change these to suite your needs
-# first set the master svn, the main target for all others
-SMXI_SVN="$HOME/bin/scripts/smxi/svn/trunk/"
-# then set the rest
-DEV_TOOLS_SVN="${SMXI_SVN}dev-tools/"
-INXI_SVN="$HOME/bin/scripts/inxi/svn/trunk/"
-KERNEL_SVN="${SMXI_SVN}kernel-stuff/"
-RBXI_SVN="$HOME/bin/scripts/rbxi/svn/trunk/"
-SGFXI_SVN="$HOME/bin/scripts/sgfxi/svn/trunk/"
-STUB_SVN="${SMXI_SVN}smxi-stub/"
-SVMI_SVN="$HOME/bin/scripts/svmi/svn/trunk/"
-
-# then set the default svn, no usl startup args given
-WORKING_SVN_DIR=$SMXI_SVN
-
-# then set the other stuff
+ACXI_DEV="$HOME/bin/scripts/acxi/"
+ACXI_REMOTE="https://github.com/smxi/acxi HEAD:stable"
+ACXI_VC="$HOME/bin/scripts/acxi/git/"
+INXI_VC="$HOME/bin/scripts/inxi/svn/trunk/"
 KERNEL_DIR="$HOME/large/kernel-zips/"
+PHP_DEV="$HOME/bin/scripts/my-php/"
+PHP_REMOTE="https://github.com/smxi/php-browser-detection master"
+PHP_VC="$HOME/bin/scripts/my-php/git/"
 RBXI_BZIP="$HOME/bin/scripts/rbxi/rbxi/"
 RBXI_DEV="$HOME/bin/scripts/rbxi/dev/"
 RBXI_HOME="$HOME/bin/scripts/rbxi/"
+RBXI_REMOTE="https://github.com/smxi/rbxi master"
+RBXI_VC="$HOME/bin/scripts/rbxi/git/"
 RBXI_ZIPS="$HOME/bin/scripts/rbxi/zips/"
 SGFXI_DEV="$HOME/bin/scripts/sgfxi/dev/"
-SVMI_DEV="$HOME/bin/scripts/svmi/dev/"
+SGFXI_REMOTE="https://github.com/smxi/sgfxi master"
+SGFXI_VC="$HOME/bin/scripts/sgfxi/git/"
 SMXI_DEV='/usr/local/bin/'
+SMXI_BACKEND_DEV="$HOME/bin/scripts/smxi/svn/trunk/backend-stuff/upgrade-data/"
+SMXI_BACKEND_VC="$HOME/bin/scripts/smxi/git/backend-stuff/upgrade-data/"
+SMXI_TOOLS_DEV="$HOME/bin/scripts/smxi/svn/trunk/dev-tools/"
+SMXI_TOOLS_VC="$HOME/bin/scripts/smxi/git/dev-tools/"
+SMXI_KERNEL_DEV="$HOME/bin/scripts/smxi/svn/trunk/kernel-stuff/"
+SMXI_KERNEL_VC="$HOME/bin/scripts/smxi/git/kernel-stuff/"
+SMXI_REMOTE="https://github.com/smxi/smxi master"
+SMXI_STUB_DEV="$HOME/bin/scripts/smxi/svn/trunk/smxi-stub/"
+SMXI_STUB_VC="$HOME/bin/scripts/smxi/git/smxi-stub/"
+SMXI_VC="$HOME/bin/scripts/smxi/git/"
+SVMI_DEV="$HOME/bin/scripts/svmi/dev/"
+SVMI_REMOTE="https://github.com/smxi/svmi master"
+SVMI_VC="$HOME/bin/scripts/svmi/git/"
+
+# then set the default data, no usl startup args given
+WORKING_VC_DIR=$SMXI_VC
+WORKING_REMOTE=$SMXI_REMOTE
 
 # scripts/libs
-RB_VERSION="${RBXI_SVN}rb-version"
-SCRIPT_LIST_SVMI='svmi'
-SCRIPT_LIST_SGFXI="sgfxi"
+RB_VERSION="${RBXI_VC}rb-version"
+SCRIPT_LIST_ACXI='acxi'
 SCRIPT_LIST_INXI='inxi'
+SCRIPT_LIST_PHP='browser_detection.inc language_detection.inc useragents.xml'
 SCRIPT_LIST_RBXI='rbxi'
-SCRIPT_LIST_MAIN="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-du-fixes sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t sm-lib-2009-fixes sm-lib-2009-fixes-s sm-lib-2009-fixes-t sm-lib-2011-fixes sm-lib-2011-fixes-s sm-lib-2011-fixes-t"
-SM_VERSIONS="${SMXI_SVN}sm-versions"
-SM_VERSIONS_PREVIOUS="${SMXI_SVN}sm-versions-previous"
+SCRIPT_LIST_SGFXI="sgfxi"
+SCRIPT_LIST_SVMI='svmi'
+SCRIPT_LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-du-fixes 
+sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  
+sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes 
+sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t sm-lib-2009-fixes sm-lib-2009-fixes-s 
+sm-lib-2009-fixes-t sm-lib-2011-fixes sm-lib-2011-fixes-s sm-lib-2011-fixes-t"
+SCRIPT_LIST_SMXI_BACKEND="alert_message configs_last_modified configs_t  holds_last_modified_t  
+last_modified_s status  warning_message_s alert_message_s  configs_last_modified_s  holds
+holds_s last_modified_t status_s warning_message_t alert_message_t configs_last_modified_t  
+holds_last_modified holds_t sm-lib-kernels status_t configs configs_s holds_last_modified_s  
+last_modified sm-lib-kernels-bu warning_message"
+SCRIPT_LIST_SMXI_KERNEL="dsl install-kernel.sh"
+SCRIPT_LIST_SMXI_STUB="smxi-stub"
+SCRIPT_LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
+
+
+SM_VERSIONS="${SMXI_VC}sm-versions"
+SM_VERSIONS_PREVIOUS="${SMXI_VC}sm-versions-previous"
 # this has to the current live version on smxi.org
 SM_VERSIONS_URL='http://smxi.org/sm/sm-versions'
 
 # the primary version number will be manually set.
 SM_MAIN_FIRST='8'
 
-B_SKIP_SVN='false'
+B_MAKE_VERSIONS_FILE='true'
+B_SKIP_VC='false'
 B_SKIP_ZIP='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
+VC_TYPE='git'
 
 ########################################################################
 #### FUNCTIONS
@@ -108,48 +139,76 @@ get_options()
 {
 	local opt=''
 
-	while getopts :ghirsuvz opt
+	while getopts :aghiprsuvz opt
 	do
 		case $opt in
+			a)
+				WORKING_VC_DIR=$ACXI_VC
+				UPDATE_TYPE='a'
+				B_SKIP_ZIP='true'
+				B_MAKE_VERSIONS_FILE='false'
+				VC_TYPE='git'
+				WORKING_REMOTE=$ACXI_REMOTE
+				;;
 			g)
-				WORKING_SVN_DIR=$SGFXI_SVN
+				WORKING_VC_DIR=$SGFXI_VC
 				UPDATE_TYPE='g'
 				B_SKIP_ZIP='true'
+				VC_TYPE='git'
+				WORKING_REMOTE=$SGFXI_REMOTE
 				;;
 			i)
-				WORKING_SVN_DIR=$INXI_SVN
+				WORKING_VC_DIR=$INXI_VC
 				UPDATE_TYPE='i'
 				B_SKIP_ZIP='true'
+				VC_TYPE='svn'
+				;;
+			p)
+				WORKING_VC_DIR=$PHP_VC
+				UPDATE_TYPE='p'
+				B_SKIP_ZIP='true'
+				VC_TYPE='git'
+				WORKING_REMOTE=$PHP_REMOTE
 				;;
 			r)
-				WORKING_SVN_DIR=$RBXI_SVN
+				WORKING_VC_DIR=$RBXI_VC
 				UPDATE_TYPE='r'
+				B_SKIP_ZIP='true'
+				B_MAKE_VERSIONS_FILE='false'
+				VC_TYPE='git'
+				WORKING_REMOTE=$RBXI_REMOTE
 				;;
 			u)
-				B_SKIP_SVN='true'
+				B_SKIP_VC='true'
 				;;
 			v)
-				WORKING_SVN_DIR=$SVMI_SVN
+				WORKING_VC_DIR=$SVMI_VC
 				UPDATE_TYPE='v'
 				B_SKIP_ZIP='true'
+				VC_TYPE='git'
+				WORKING_REMOTE=$SVMI_REMOTE
 				;;
 			''|s)
 				UPDATE_TYPE='s'
+				VC_TYPE='git'
+				WORKING_REMOTE=$SMXI_REMOTE
 				;;
 			z)
 				B_SKIP_ZIP='true'
 				;;
 			h)
 				echo "Useage:
--g Update and commit sgfxi svn
--i Update and commit inxi svn
--r Update and commit rbxi svn
--u Update only, skip svn commit
--s (or null, no args) Update and commit smxi svn.
+-a Update and commit acxi
+-g Update and commit sgfxi
+-i Update and commit inxi
+-p Update and commit php libraries
+-r Update and commit rbxi
+-u Update only, skip svn/git commit
+-s (or null, no args) Update and commit smxi.
    Will get inxi, sgfxi, and svmi version numbers as well,
    and add those files to the main smxi svn directory for easy
    uploading and handling.
--v Update and commit svmi svn
+-v Update and commit svmi
 -z Skip the zip up part
 "
 				exit 0
@@ -177,7 +236,7 @@ start_up_tests()
 # 	fi
 
 	# make sure the paths you made are right and exist
-	for startDir in $DEV_TOOLS_SVN $INXI_SVN $KERNEL_DIR $KERNEL_SVN $RBXI_BZIP $RBXI_DEV $RBXI_SVN $SMXI_DEV $SGFXI_DEV $SGFXI_SVN $SMXI_SVN $STUB_SVN $SVMI_DEV $SVMI_SVN
+	for startDir in $ACXI_DEV $ACXI_VC $SMXI_TOOLS_DEV $INXI_VC $KERNEL_DIR $SMXI_KERNEL_DEV $PHP_DEV $RBXI_BZIP $RBXI_DEV $RBXI_VC $SMXI_DEV $SGFXI_DEV $SGFXI_VC $SMXI_VC $SMXI_STUB_DEV $SVMI_DEV $SVMI_VC
 	do
 		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
@@ -218,7 +277,7 @@ clean_dev_flags()
 	local isDev=''
 
 	echo "Cleaning dev flags up now..."
-	cd $SMXI_SVN
+	cd $SMXI_VC
 	for script in $scripts
 	do
 		isRestart=$( grep -i "^SKIP_RESTART='true'" $script )
@@ -227,7 +286,7 @@ clean_dev_flags()
 		# just a small fix to make the files not update unless they need to
 		if [ -n "$isRestart" -o -n "$isDev" ];then
 			# important! only reset where line begins with variable name
-			sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SMXI_SVN$script || error_handler 3 $script
+			sed -i -e "s/^SKIP_RESTART=.*/SKIP_RESTART=''/" -e "s/^DEV_FLAG=.*/DEV_FLAG=''/" $SMXI_VC$script || error_handler 3 $script
 		fi
 	done
 }
@@ -235,14 +294,14 @@ clean_dev_flags()
 # this is for those times I forget to clean the -T flag data
 clean_gfx_test_data()
 {
-	local svnGfx="${SMXI_SVN}sgfxi"
-	local setTestDataStart=$( grep -n '^set_test_data()' $svnGfx | cut -d ':' -f 1 )
+	local vcGfx="${SMXI_VC}sgfxi"
+	local setTestDataStart=$( grep -n '^set_test_data()' $vcGfx | cut -d ':' -f 1 )
 	# start 5 lines below
 	setTestDataStart=$(( $setTestDataStart + 6 ))
 	echo "Cleaning gfx test data, start line: $setTestDataStart..."
 	# add # before any line in the function starting with space
 	# remember to search for ' fi', otherwise something like 'specific' triggers it
-	sed -i ''${setTestDataStart}',/[[:space:]]fi/ s/^[[:space:]].*/#&/' $svnGfx
+	sed -i ''${setTestDataStart}',/[[:space:]]fi/ s/^[[:space:]].*/#&/' $vcGfx
 }
 
 # trigger update_sm_data
@@ -252,19 +311,39 @@ main_updater()
 
 	if [ "$UPDATE_TYPE" == 'r' ];then
 		process_rbxi
+	elif [ "$UPDATE_TYPE" == 'a' ];then
+		process_script "$SCRIPT_LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
+	elif [ "$UPDATE_TYPE" == 'p' ];then
+		process_script "$SCRIPT_LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
 	else
-		update_sm_data "$SCRIPT_LIST_MAIN" "$SMXI_DEV"
+		update_sm_data "$SCRIPT_LIST_SMXI" "$SMXI_DEV"
 		update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_DEV"
 		update_sm_data "$SCRIPT_LIST_SVMI" "$SVMI_DEV"
-		update_sm_data "$SCRIPT_LIST_INXI" "$INXI_SVN"
-		update_sm_data "$SCRIPT_LIST_RBXI" "$RBXI_SVN"
+		update_sm_data "$SCRIPT_LIST_INXI" "$INXI_VC"
+		update_sm_data "$SCRIPT_LIST_RBXI" "$RBXI_VC"
+		process_script "$SCRIPT_LIST_SMXI_BACKEND" "$SMXI_BACKEND_DEV" "$SMXI_BACKEND_VC"
+		process_script "$SCRIPT_LIST_SMXI_KERNEL" "$SMXI_KERNEL_DEV" "$SMXI_KERNEL_VC"
+		process_script "$SCRIPT_LIST_SMXI_STUB" "$SMXI_STUB_DEV" "$SMXI_STUB_VC"
+		process_script "$SCRIPT_LIST_SMXI_TOOLS" "$SMXI_TOOLS_DEV" "$SMXI_TOOLS_VC"
 		update_kernel_installers
 		update_other_components
 		clean_dev_flags
 		clean_gfx_test_data
 		finalize_sm_versions
 	fi
+}
 
+# args: $1 - which data set to update; $2 - data dir; $3 vc directory
+process_script()
+{
+	local script='' localVersion='' localDate=''
+
+	echo "Updating $2 group now"
+	
+	for script in $1
+	do
+		cp -fL --preserve=timestamps $2$script $3$script
+	done
 }
 
 # args: $1 - which data set to update; $2 - data dir
@@ -281,18 +360,18 @@ update_sm_data()
 		localDate=$( grep -im 1 -o -G "Date:[\ ]*[A-Za-z0-9,\ -]*" $2$script | cut -f 2-4 -d ' ' )
 		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
 
-		# echo "copy $script to ${SMXI_SVN}$script"
+		# echo "copy $script to ${SMXI_VC}$script"
 		echo "$script=$localVersion:$localDate"
-		cp -f --preserve=timestamps $2$script $SMXI_SVN$script
+		cp -f --preserve=timestamps $2$script $SMXI_VC$script
 
 		# working sgfxi/svmi will often have testing data, don't want to comment out
 		# that each update
 		case $2 in
 			$SGFXI_DEV)
-				cp -f --preserve=timestamps $2$script $SGFXI_SVN$script
+				cp -f --preserve=timestamps $2$script $SGFXI_VC$script
 				;;
 			$SVMI_DEV)
-				cp -f --preserve=timestamps $2$script $SVMI_SVN$script
+				cp -f --preserve=timestamps $2$script $SVMI_VC$script
 				;;
 		esac
 	done
@@ -312,7 +391,7 @@ construct_smxi_version_number()
 	local smOld='' smNew=''
 	local smOldOne='' smNewOne='' smOldTwo='' smNewTwo='' smOldThird='' smNewThird=''
 
-	for script in $SCRIPT_LIST_MAIN
+	for script in $SCRIPT_LIST_SMXI
 	do
 		# get the two values, old and new
 		smOld=$( grep "$script=" $SM_VERSIONS_PREVIOUS |cut -d '=' -f 2 | cut -d ':' -f 1 )
@@ -382,15 +461,11 @@ process_rbxi()
 
 	local localVersion='' localDate=''
 
-	echo "Copying rbxi files to bzip and svn"
-	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_SVN
+	echo "Copying rbxi files to bzip and VC"
+	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_VC
+	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/ ${RBXI_VC}rbxi-data
 	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
-	cp -f --preserve=timestamps ${RBXI_DEV}rbxi-data/readme-rbxi.htm ${RBXI_SVN}rbxi-data
-	# send excludes
-	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/excludes* ${RBXI_BZIP}rbxi-data
-	# send values/readme
-	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/rbxi-values ${RBXI_BZIP}rbxi-data
-	cp -f --preserve=timestamps ${RBXI_SVN}rbxi-data/readme-rbxi.htm ${RBXI_BZIP}rbxi-data
+	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/ ${RBXI_BZIP}rbxi-data
 
 	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9-]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
@@ -404,9 +479,9 @@ process_rbxi()
 	tar vcjf rbxi.tar.bz2 rbxi*
 	echo "Moving to: $RBXI_ZIPS"
 	mv rbxi.tar.bz2 $RBXI_ZIPS
-	echo "Creating backup bzip file now and copying bz2 to svn/trunk..."
+	echo "Creating backup bzip file now and copying bz2 to VC..."
 	cp -f ${RBXI_ZIPS}rbxi.tar.bz2 ${RBXI_ZIPS}rbxi-$localVersion.tar.bz2
-	cp -f ${RBXI_ZIPS}rbxi.tar.bz2 ${RBXI_SVN}rbxi.tar.bz2
+	cp -f ${RBXI_ZIPS}rbxi.tar.bz2 ${RBXI_VC}rbxi.tar.bz2
 	echo "Done with rbxi specific tasks now."
 	echo "Remember to upload rbxi/dev/rb-version and rbxi to the remote rb directory"
 	echo "on server!!! And the bz2 file."
@@ -426,7 +501,7 @@ finalize_sm_versions()
 	echo >> $SM_VERSIONS
 	echo '###**EOF**###' >> $SM_VERSIONS
 	# add the versions file to the svn too
-	# cp -f --preserve=timestamps $SM_VERSIONS $SMXI_SVN
+	# cp -f --preserve=timestamps $SM_VERSIONS $SMXI_VC
 }
 
 # extra scripts used in smxi, kernel installers for zipped kernels
@@ -436,16 +511,16 @@ update_kernel_installers()
 
 	# update kernel installers if needed
 	# note needed anymore, it's a sym link now
-	# cp -f ${KERNEL_DIR}kernel-installer/$kernelInstaller $KERNEL_SVN$kernelInstaller
+	# cp -f ${KERNEL_DIR}kernel-installer/$kernelInstaller $SMXI_KERNEL_DEV$kernelInstaller
 }
 
 # developer scripts for creating smxi
 update_other_components()
 {
-	#cp -f ${DEV_TOOLS_DIR}dsl ${KERNEL_SVN}dsl
-	# cp -f ${DEV_TOOLS_DIR}smxi-stub ${STUB_SVN}smxi-stub
-	#cp -f ${DEV_TOOLS_DIR}usl ${DEV_TOOLS_SVN}usl
-	#cp -f ${DEV_TOOLS_DIR}zsl ${DEV_TOOLS_SVN}zsl
+	#cp -f ${DEV_TOOLS_DIR}dsl ${SMXI_KERNEL_DEV}dsl
+	# cp -f ${DEV_TOOLS_DIR}smxi-stub ${SMXI_STUB_DEV}smxi-stub
+	#cp -f ${DEV_TOOLS_DIR}usl ${SMXI_TOOLS_DEV}usl
+	#cp -f ${DEV_TOOLS_DIR}zsl ${SMXI_TOOLS_DEV}zsl
 	:
 }
 
@@ -480,15 +555,20 @@ update_svn_data()
 # args: $1 - message for commit
 commit_to_svn()
 {
-	svn commit $WORKING_SVN_DIR$svnWild
+	svn commit $WORKING_VC_DIR$svnWild
+}
+# args: $1 - message for commit
+commit_to_git()
+{
+	cd $WORKING_VC_DIR
+	git commit -a
+	git push $WORKING_REMOTE
 }
 
 zip_it_up()
 {
-	if [ "$UPDATE_TYPE" != 'r' -a "$UPDATE_TYPE" != 'i' ];then
-		cd $HOME
-		su -c "${DEV_TOOLS_SVN}zsl"
-	fi
+	cd $HOME
+	su -c "${SMXI_TOOLS_DEV}zsl"
 }
 
 finish_it_up()
@@ -502,12 +582,18 @@ finish_it_up()
 ########################################################################
 get_options "$@"
 start_up_tests
-make_versions_file
+if [ "$B_MAKE_VERSIONS_FILE" == 'true' ];then
+	make_versions_file
+fi
 main_updater
 # comment this out if you do not have svn write access
-if [ "$B_SKIP_SVN" == 'false' ];then
-	commit_to_svn
-	#update_svn_data
+if [ "$B_SKIP_VC" == 'false' ];then
+	if [ "$VC_TYPE" == 'svn' ];then
+		commit_to_svn
+		#update_svn_data
+	elif [ "$VC_TYPE" == 'git' ];then
+		commit_to_git
+	fi
 fi
 if [ "$B_SKIP_ZIP" == 'false' ];then
 	zip_it_up
