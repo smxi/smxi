@@ -85,13 +85,14 @@ package_group_installer()
 			kdeAddonsKfile=''
 			kdeBase='kde-plasma-desktop kaboom upower udisks polkit-kde-1'
 			kdeMultimediaKfile=''
-			khelp='khelpcenter4'
+			khelp='khelpcenter'
 			kickerApplets=''
 			kioapt=''
 			kmoon=''
 			kpdf='okular okular-extra-backends'
 			kpower=''
 			ksvg=''
+			# plasma-widgets-workspace NOT in kde 5
 			plasmaWidgets='plasma-widgets-addons plasma-widgets-workspace'
 			qt4Config='qt4-qtconfig'
 		fi
