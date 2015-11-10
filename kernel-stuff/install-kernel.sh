@@ -28,10 +28,11 @@ LINE='--------------------------------------------------------------------'
 ## set core variables: gcc/kernel version are dynamically set if needed
 # make this match version kernel was built with, can be overridden with -g in dsl
 # both must use "" for smxi / dsl handling here
-# switch to 4.8 as of 3.12; 4.9 as of 4.x
+# switch to 4.8 as of 3.12; 4.9 as of 4.x; 5.0 as of 4.3
+# NOTE: gcc 5 and later drops the .x, so it's just gcc-5
 GCC_VERSION="4.9"
 # KERNEL_VERSION will be set dynamically by dsl, 
-KERNEL_VERSION="3.5"
+KERNEL_VERSION="4.0"
 
 # initialize globals
 SCRIPT_NAME=$( basename $0 )
