@@ -221,7 +221,7 @@ package_group_installer()
 	local systemUtils="$alsaGroup acpid acpi-support anacron cpufrequtils dbus dbus-X11 gpm hal hddtemp hdparm lm-sensors lsb-core lsb-release iproute pmount powersaved sdparm udev"
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
-	local xfcePackages="gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia xfce4-notify tango-icon-theme xfce4-mixer xfce4-volumed"
+	local xfcePackages="gtk2-engines-xfce parole thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia xfce4-notify tango-icon-theme xfce4-mixer xfce4-volumed"
 	local xfceExtras="gcolor2 light-locker lxterminal medit murrine-themes pcmanfm spacemanfm xfce4-datetime-plugin xfce4-goodies xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfe xfwm4-themes "
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg-video-all xterm xutils'
 
