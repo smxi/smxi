@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.33
-####  Date: 2015-11-23
+####  version: 3.4.34
+####  Date: 2015-11-24
 
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -222,7 +222,7 @@ package_group_installer()
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
 	local xfcePackages="gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia xfce4-notify tango-icon-theme xfce4-mixer xfce4-volumed"
-	local xfceExtras="lxterminal murrine-themes xscreensaver xfce4-datetime-plugin xfce4-goodies xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfwm4-themes "
+	local xfceExtras="lxterminal murrine-themes xscreensaver xfce4-datetime-plugin xfce4-goodies xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfe xfwm4-themes "
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg-video-all xterm xutils'
 
 	echo $LINE
