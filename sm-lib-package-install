@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.34
-####  Date: 2015-11-24
+####  version: 3.4.35
+####  Date: 2015-11-25
 
 ####  Copyright (C) Harald Hope 2005-2015
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -222,7 +222,7 @@ package_group_installer()
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
 	local xfcePackages="gtk2-engines-xfce thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia xfce4-notify tango-icon-theme xfce4-mixer xfce4-volumed"
-	local xfceExtras="lxterminal murrine-themes pcmanfm spacemanfm xscreensaver xfce4-datetime-plugin xfce4-goodies xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfe xfwm4-themes "
+	local xfceExtras="light-locker lxterminal medit murrine-themes pcmanfm spacemanfm xfce4-datetime-plugin xfce4-goodies xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfe xfwm4-themes "
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg-video-all xterm xutils'
 
 	echo $LINE
@@ -2118,8 +2118,8 @@ apache_package_installer()
 # 	echo "    knowledge of configuration files (${M}I have NOT tested this tool${S})."
 
 	echo "${M}::  MySql  ::"
-	echo "${C}3 - mysql5-server${S} - Main Database server for ${C}Apache2${S} installs. Install first if you are adding Apache2."
-	echo "${C}4 - mysql5-client${S} - Includes the client binaries and the additional tools
+	echo "${C}3 - mysql-server${S} - Main Database server for ${C}Apache2${S} installs. Install first if you are adding Apache2."
+	echo "${C}4 - mysql-client${S} - Includes the client binaries and the additional tools
  innotop, mysqlreport"
 	echo "${C}5 - mysql-top${S} - Installs ${C}mtop${S} and ${C}mytop${S} command line ${C}mysql${S} monitoring tools (like ${C}top${S})."
 
@@ -2136,7 +2136,7 @@ apache_package_installer()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="apache2-full apache2-server mysql5-server mysql5-client mysql-top apache2-mod-php5 php5-modules php5-mysql php5-postgre apache2-mod-perl  apache2-mod-python apache2-mod-ruby back-to-menu"
+	options="apache2-full apache2-server mysql-server mysql5-client mysql-top apache2-mod-php5 php5-modules php5-mysql php5-postgre apache2-mod-perl  apache2-mod-python apache2-mod-ruby back-to-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
@@ -2145,17 +2145,18 @@ apache_package_installer()
 				package_group_installer 'plain' 'apache2-configuration'
 				repeat='true'
 				;;
+			# note: older debian don't have mysql-server meta, and newer don't have: mysql5-server
 			apache2-full)
-				package_group_installer 'plain' 'mysql5-server'
-				package_group_installer 'plain' 'apache2-server'
-				package_group_installer 'plain' 'apache2-mod-php5'
+				package_group_installer 'plain' 'mysql-server mysql5-server'
+				package_group_installer 'plain' 'apache2 apache2-server'
+				package_group_installer 'plain' 'libapache2-mod-php5 apache2-mod-php5'
 				package_group_installer 'plain' 'php5-mysql'
 				echo "${S}Reconfiguring ${C}php5-mysql${S} now...${N}"
 				dpkg-reconfigure php5-mysql
 				repeat='true'
 				;;
 			apache2-server)
-				package_group_installer 'plain' 'apache2-server'
+				package_group_installer 'plain' 'apache2 apache2-server'
 				repeat='true'
 				;;
 			apache2-mod-perl)
@@ -2163,7 +2164,7 @@ apache_package_installer()
 				repeat='true'
 				;;
 			apache2-mod-php5)
-				package_group_installer 'plain' 'apache2-mod-php5'
+				package_group_installer 'plain' 'libapache2-mod-php5 apache2-mod-php5'
 				repeat='true'
 				;;
 			apache2-mod-python)
@@ -2174,12 +2175,12 @@ apache_package_installer()
 				package_group_installer 'plain' 'apache2-mod-ruby'
 				repeat='true'
 				;;
-			mysql5-client)
-				package_group_installer 'plain' 'mysql5-client'
+			mysql-client)
+				package_group_installer 'plain' 'mysql-client mysql5-client'
 				repeat='true'
 				;;
-			mysql5-server)
-				package_group_installer 'plain' 'mysql5-server'
+			mysql-server)
+				package_group_installer 'plain' 'mysql-server mysql5-server'
 				repeat='true'
 				;;
 			mysql-top)
