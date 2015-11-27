@@ -195,7 +195,7 @@ package_group_installer()
 	
 	local consoleBrowsers='lynx links elinks links2 w3m' 
 	local consoleTools="$aTop bc bzip2 ed htop irssi less nano gzip findutils mc $mlocate iproute p7zip-full p7zip-rar rcconf screen sysstat $sysvRcConf xz-utils zip unzip"
-	local baseLightPackages="$consoleBrowsers $consoleTools aterm gcolor2 gpicview leafpad mc medit mousepad pcmanfm spacemanfm sudo vim xarchiver xchat xchat-common xfe xterm $pdfLight"
+	local baseLightPackages="$consoleBrowsers $consoleTools aterm dillo gpicview leafpad mc medit mousepad pcmanfm spacemanfm sudo vim xarchiver xchat xchat-common xfe xterm $pdfLight"
 	local ceniStuff="ifupdown libcurses-perl libcurses-ui-perl libexpect-perl  libterm-readkey-perl udev wireless-tools wpasupplicant"
 	local fluxPackages="fluxbox fluxconf"
 	local fvwmCrystal="audacious audacious-plugins cdcd debhelper dpatch docbook-xsl fvwm fvwm-crystal fvwm-icons imagemagick mpd python python-support quodlibet rxvt-unicode rox-filer trayer xscreensaver"
@@ -222,7 +222,7 @@ package_group_installer()
 	# xfwm4 xfconf  xfce4-panel thunar xfce4-utils gtk2-engines-xfce xfce4-session
 	# bad:  xfce4-session xfce4-settings
 	local xfcePackages="gtk2-engines-xfce mousepad thunar-archive-plugin thunar-media-tags-plugin thunar-thumbnailers thunar-volman xfwm4 xfconf  xfce4-panel thunar xfce4-session xfce4-settings xfce4-utils xfce4-terminal xfdesktop4 xfmedia xfce4-notify tango-icon-theme xfce4-mixer xfce4-volumed"
-	local xfceExtras="gcolor2 light-locker lxterminal medit murrine-themes parole pcmanfm ristretto spacefm xfce4-datetime-plugin xfce4-goodies xfce4-indicator-plugin xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfe xfwm4-themes "
+	local xfceExtras="dillo gcolor2 light-locker lxterminal medit murrine-themes parole pcmanfm ristretto spacefm xfce4-datetime-plugin xfce4-goodies xfce4-indicator-plugin xfce4-power-manager xfce4-power-manager-plugins xfce4-pulseaudio-plugin xfce4-screenshooter xfce4-weather-plugin xfe xfwm4-themes "
 	local xorgPackages='libgl1-mesa-dri libglu1-mesa libxfont1 libgl1-mesa-glx mesa-utils  xbase-clients xkb-data xfonts-base xfonts-100dpi xfonts-75dpi xfonts-scalable xserver-xorg xserver-xorg-input-all xserver-xorg-video-all xterm xutils'
 
 	echo $LINE
