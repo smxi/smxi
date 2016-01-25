@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.6.72
-####  Date: 2015-12-21
+####  version: 2.6.73
+####  Date: 2016-01-25
 
-####  Copyright (C) Harald Hope 2005-2015
+####  Copyright (C) Harald Hope 2005-2016
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -28,13 +28,13 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists 
-KERNEL_LIST_32_NON_PAE='4.2-7.dmz.1-liquorix-686 4.1-11.dmz.1-liquorix-686 4.0-9.dmz.1-liquorix-686 3.19-5.dmz.1-liquorix-686 3.18-11.dmz.1-liquorix-686 3.17-7.dmz.2-liquorix-686 3.16-7.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
-KERNEL_LIST_32_PAE='4.2-7.dmz.1-liquorix-pae 4.1-11.dmz.1-liquorix-pae 4.0-9.dmz.1-liquorix-pae 3.19-5.dmz.1-liquorix-pae 3.18-11.dmz.1-liquorix-pae 3.17-7.dmz.2-liquorix-686-pae 3.16-7.dmz.1-liquorix-686-pae 3.14-9.dmz.1-liquorix-686 3.12-10.dmz.1-liquorix-686 3.10-22.dmz.1-liquorix-686 3.8-13.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
+KERNEL_LIST_32_NON_PAE='4.3-3.dmz.7-liquorix-686 4.2-7.dmz.1-liquorix-686 4.1-11.dmz.1-liquorix-686 4.0-9.dmz.1-liquorix-686 3.19-5.dmz.1-liquorix-686 3.18-11.dmz.1-liquorix-686 3.17-7.dmz.2-liquorix-686 3.16-7.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
+KERNEL_LIST_32_PAE='4.3-3.dmz.7-liquorix-pae 4.2-7.dmz.1-liquorix-pae 4.1-11.dmz.1-liquorix-pae 4.0-9.dmz.1-liquorix-pae 3.19-5.dmz.1-liquorix-pae 3.18-11.dmz.1-liquorix-pae 3.17-7.dmz.2-liquorix-686-pae 3.16-7.dmz.1-liquorix-686-pae 3.14-9.dmz.1-liquorix-686 3.12-10.dmz.1-liquorix-686 3.10-22.dmz.1-liquorix-686 3.8-13.dmz.1-liquorix-686 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686 2.6.36-3.dmz.2-liquorix-686 2.6.34-2.dmz.3-liquorix-686 2.6.32-12.dmz.1-liquorix-686'
 KERNEL_ADVANCED_LIST_32_PAE=''
 KERNEL_ADVANCED_LIST_32_NON_PAE=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
-KERNEL_LIST_64='4.2-7.dmz.1-amd64 4.1-11.dmz.1-liquorix-amd64 4.0-9.dmz.1-liquorix-amd64 3.19-5.dmz.1-liquorix-amd64 3.18-11.dmz.1-liquorix-amd64 3.17-7.dmz.2-liquorix-amd64 3.16-7.dmz.1-liquorix-amd64 3.14-9.dmz.1-liquorix-amd64 3.12-10.dmz.1-liquorix-amd64 3.10-22.dmz.1-liquorix-amd64 3.8-13.dmz.1-liquorix-amd64 3.6.0-11.dmz.1-liquorix-amd64 3.4.0-35.dmz.1-liquorix-amd64 3.2.0-14.dmz.1-liquorix-amd64 3.0.0-9.dmz.1-liquorix-amd64 2.6.38-7.dmz.2-liquorix-amd64 2.6.36-3.dmz.2-liquorix-amd64 2.6.34-2.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64'
+KERNEL_LIST_64='4.3-3.dmz.7-amd64 4.2-7.dmz.1-amd64 4.1-11.dmz.1-liquorix-amd64 4.0-9.dmz.1-liquorix-amd64 3.19-5.dmz.1-liquorix-amd64 3.18-11.dmz.1-liquorix-amd64 3.17-7.dmz.2-liquorix-amd64 3.16-7.dmz.1-liquorix-amd64 3.14-9.dmz.1-liquorix-amd64 3.12-10.dmz.1-liquorix-amd64 3.10-22.dmz.1-liquorix-amd64 3.8-13.dmz.1-liquorix-amd64 3.6.0-11.dmz.1-liquorix-amd64 3.4.0-35.dmz.1-liquorix-amd64 3.2.0-14.dmz.1-liquorix-amd64 3.0.0-9.dmz.1-liquorix-amd64 2.6.38-7.dmz.2-liquorix-amd64 2.6.36-3.dmz.2-liquorix-amd64 2.6.34-2.dmz.3-liquorix-amd64 2.6.32-12.dmz.1-liquorix-amd64'
 KERNEL_ADVANCED_LIST_64=''
 TESTING_KERNEL_64=''
 
