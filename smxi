@@ -1284,7 +1284,7 @@ file_download_error()
 		downloadError1='is incomplete or corrupted.'
 		downloadError2="It appears the file failed to fully download for some reason."
 	elif [ "$2" == 'server-problem' ];then
-		downloadError1='could not be accessied.'
+		downloadError1='could not be accessed.'
 		downloadError2="The download failed with wget error: ${C}$3${E} The site may be down."
 	fi
 	echo $ELINE
@@ -2019,7 +2019,7 @@ sort_sticky_prefs()
 	local tempFile='/etc/ljsdflsjf5848sljf4'
 
 	# sort the data, test/clean for unique entries
-	# this is simpler and fewer disk accessies than writing to file at this point
+	# this is simpler and fewer disk accesses than writing to file at this point
 	SM_CONFIGS_STATIC=$( sort -u -f -b <<< "$SM_CONFIGS_STATIC" )
 }
 
