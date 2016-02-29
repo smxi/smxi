@@ -1284,7 +1284,7 @@ file_download_error()
 		downloadError1='is incomplete or corrupted.'
 		downloadError2="It appears the file failed to fully download for some reason."
 	elif [ "$2" == 'server-problem' ];then
-		downloadError1='could not be accessed.'
+		downloadError1='could not be accessied.'
 		downloadError2="The download failed with wget error: ${C}$3${E} The site may be down."
 	fi
 	echo $ELINE
@@ -1544,12 +1544,12 @@ set_distro_data()
 	local isStretch=$( grep -Eis '^(stretch|9\.)' <<< "$edvContent" )
 
 	# first tests sources
-	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jesse)' )
+	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jessie)' )
 	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stretch|testing)' )
 	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(sid|unstable)' )
 
 	# then test conf for default version
-	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jesse)"' <<< "$eaaContent" )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jessie)"' <<< "$eaaContent" )
 	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|stretch)"' <<< "$eaaContent" )
 	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 	
@@ -2019,7 +2019,7 @@ sort_sticky_prefs()
 	local tempFile='/etc/ljsdflsjf5848sljf4'
 
 	# sort the data, test/clean for unique entries
-	# this is simpler and fewer disk accesses than writing to file at this point
+	# this is simpler and fewer disk accessies than writing to file at this point
 	SM_CONFIGS_STATIC=$( sort -u -f -b <<< "$SM_CONFIGS_STATIC" )
 }
 
