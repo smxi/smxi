@@ -192,7 +192,7 @@ set_values()
 			repoExtra='linux-kbuild/'
 			;;
 		liquorix)
-			repoPre="https://liquorix.net/debian/pool/${POOL_TYPE}/l/"
+			repoPre="http://liquorix.net/debian/pool/${POOL_TYPE}/l/"
 			repoMain='linux-liquorix/'
 			repoModules='linux-modules-liquorix-main/'
 			repoExtra=''
