@@ -72,7 +72,7 @@ RB_VERSION="${RBXI_VC}rb-version"
 SCRIPT_LIST_ACXI='acxi'
 SCRIPT_LIST_INXI='inxi'
 SCRIPT_LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz'
-SCRIPT_LIST_PHP='browser_detection.inc language_detection.inc useragents.xml'
+SCRIPT_LIST_PHP='browser_detection.inc language_detection.inc'
 SCRIPT_LIST_RBXI='rbxi'
 SCRIPT_LIST_SGFXI="sgfxi"
 SCRIPT_LIST_SVMI='svmi'
@@ -468,14 +468,14 @@ process_rbxi()
 
 	echo "Copying rbxi files to bzip and VC"
 	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_VC
-	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/ ${RBXI_VC}rbxi-data
+	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_VC}rbxi-data
 	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
-	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/ ${RBXI_BZIP}rbxi-data
+	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_BZIP}rbxi-data
 
 	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9-]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
 
-	echo "rbxi=$localVersion:$localDate" >> $RB_VERSION
+	echo "rbxi=$localVersion:$localDate" > $RB_VERSION
 
 	# all files are copied to rbxi/rbxi so tar it
 	echo "rbxi data is: $localVersion:$localDate"
