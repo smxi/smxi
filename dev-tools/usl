@@ -69,26 +69,26 @@ WORKING_REMOTE=$SMXI_REMOTE
 
 # scripts/libs
 RB_VERSION="${RBXI_VC}rb-version"
-SCRIPT_LIST_ACXI='acxi'
-SCRIPT_LIST_INXI='inxi'
-SCRIPT_LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz'
-SCRIPT_LIST_PHP='browser_detection.inc language_detection.inc'
-SCRIPT_LIST_RBXI='rbxi'
-SCRIPT_LIST_SGFXI="sgfxi"
-SCRIPT_LIST_SVMI='svmi'
-SCRIPT_LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-du-fixes 
+SELF_LIST_ACXI='acxi'
+SELF_LIST_INXI='inxi'
+SELF_LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz'
+SELF_LIST_PHP='browser_detection.inc language_detection.inc'
+SELF_LIST_RBXI='rbxi'
+SELF_LIST_SGFXI="sgfxi"
+SELF_LIST_SVMI='svmi'
+SELF_LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-du-fixes 
 sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  
 sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes 
 sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t sm-lib-2009-fixes sm-lib-2009-fixes-s 
 sm-lib-2009-fixes-t sm-lib-2011-fixes sm-lib-2011-fixes-s sm-lib-2011-fixes-t"
-SCRIPT_LIST_SMXI_BACKEND="alert_message configs_last_modified configs_t  holds_last_modified_t  
+SELF_LIST_SMXI_BACKEND="alert_message configs_last_modified configs_t  holds_last_modified_t  
 last_modified_s status  warning_message_s alert_message_s  configs_last_modified_s  holds
 holds_s last_modified_t status_s warning_message_t alert_message_t configs_last_modified_t  
 holds_last_modified holds_t sm-lib-kernels status_t configs configs_s holds_last_modified_s  
 last_modified sm-lib-kernels-bu warning_message"
-SCRIPT_LIST_SMXI_KERNEL="dsl install-kernel.sh"
-SCRIPT_LIST_SMXI_STUB="smxi-stub"
-SCRIPT_LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
+SELF_LIST_SMXI_KERNEL="dsl install-kernel.sh"
+SELF_LIST_SMXI_STUB="smxi-stub"
+SELF_LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
 
 
 SM_VERSIONS="${SMXI_VC}sm-versions"
@@ -316,20 +316,20 @@ main_updater()
 	if [ "$UPDATE_TYPE" == 'r' ];then
 		process_rbxi
 	elif [ "$UPDATE_TYPE" == 'a' ];then
-		process_script "$SCRIPT_LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
+		process_script "$SELF_LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
 	elif [ "$UPDATE_TYPE" == 'p' ];then
-		process_script "$SCRIPT_LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
+		process_script "$SELF_LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
 	else
-		update_sm_data "$SCRIPT_LIST_SMXI" "$SMXI_DEV"
-		update_sm_data "$SCRIPT_LIST_SGFXI" "$SGFXI_DEV"
-		update_sm_data "$SCRIPT_LIST_SVMI" "$SVMI_DEV"
-		process_script "$SCRIPT_LIST_INXI_FULL" "$INXI_DEV" "$INXI_VC"
-		update_sm_data "$SCRIPT_LIST_INXI" "$INXI_VC"
-		update_sm_data "$SCRIPT_LIST_RBXI" "$RBXI_VC"
-		process_script "$SCRIPT_LIST_SMXI_BACKEND" "$SMXI_BACKEND_DEV" "$SMXI_BACKEND_VC"
-		process_script "$SCRIPT_LIST_SMXI_KERNEL" "$SMXI_KERNEL_DEV" "$SMXI_KERNEL_VC"
-		process_script "$SCRIPT_LIST_SMXI_STUB" "$SMXI_STUB_DEV" "$SMXI_STUB_VC"
-		process_script "$SCRIPT_LIST_SMXI_TOOLS" "$SMXI_TOOLS_DEV" "$SMXI_TOOLS_VC"
+		update_sm_data "$SELF_LIST_SMXI" "$SMXI_DEV"
+		update_sm_data "$SELF_LIST_SGFXI" "$SGFXI_DEV"
+		update_sm_data "$SELF_LIST_SVMI" "$SVMI_DEV"
+		process_script "$SELF_LIST_INXI_FULL" "$INXI_DEV" "$INXI_VC"
+		update_sm_data "$SELF_LIST_INXI" "$INXI_VC"
+		update_sm_data "$SELF_LIST_RBXI" "$RBXI_VC"
+		process_script "$SELF_LIST_SMXI_BACKEND" "$SMXI_BACKEND_DEV" "$SMXI_BACKEND_VC"
+		process_script "$SELF_LIST_SMXI_KERNEL" "$SMXI_KERNEL_DEV" "$SMXI_KERNEL_VC"
+		process_script "$SELF_LIST_SMXI_STUB" "$SMXI_STUB_DEV" "$SMXI_STUB_VC"
+		process_script "$SELF_LIST_SMXI_TOOLS" "$SMXI_TOOLS_DEV" "$SMXI_TOOLS_VC"
 		update_kernel_installers
 		update_other_components
 		clean_dev_flags
@@ -360,7 +360,7 @@ update_sm_data()
 
 	for script in $1
 	do
-		localVersion=$( grep -im 1 -o -E "version(:\ |=)[0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+		localVersion=$( grep -im 1 -o -E "version(:[\ ]*|=)[0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 		# weird: [A-Za-z0-9,\ -] works but [A-Za-z0-9,-\ ] only returns the first number in 2013-10-14
 		localDate=$( grep -im 1 -o -E "Date(:[\ ]*|=)[0-9-]*" $2$script | grep -o -E "[0-9]{4}-[0-9]{2}-[0-9]{2}" )
 		echo $script'='$localVersion':'$localDate >> $SM_VERSIONS
@@ -396,7 +396,7 @@ construct_smxi_version_number()
 	local smOld='' smNew=''
 	local smOldOne='' smNewOne='' smOldTwo='' smNewTwo='' smOldThird='' smNewThird=''
 
-	for script in $SCRIPT_LIST_SMXI
+	for script in $SELF_LIST_SMXI
 	do
 		# get the two values, old and new
 		smOld=$( grep "$script=" $SM_VERSIONS_PREVIOUS |cut -d '=' -f 2 | cut -d ':' -f 1 )
