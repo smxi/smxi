@@ -536,6 +536,10 @@ update_inxi_branches()
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/two/"
 				files='inxi'
 				;;
+			three)
+				dev_dir="$HOME/bin/scripts/inxi/svn/branches/three/"
+				files='inxi'
+				;;
 		esac
 		WORKING_BRANCH=$branch
 		checkout_git_branch
