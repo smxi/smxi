@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.6.1
+####  version: 2.6.2
 ####  Date: 2017-10-29
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2017
@@ -338,7 +338,7 @@ clean_gfx_test_data()
 main_updater()
 {
 	echo $LINE
-	checkout_git_branch
+	git_checkout
 	if [ "$UPDATE_TYPE" == 'r' ];then
 		process_rbxi
 	elif [ "$UPDATE_TYPE" == 'a' ];then
@@ -522,18 +522,26 @@ process_rbxi()
 update_inxi_branches()
 {
 	# docs 
-	local branches='docs master-plain one two' 
-	local files='' dev_dir='';
+	local branches='docs master-plain one two three inxi-perl' 
+	local files='' dev_dir='' b_perl='false' add_perl=''
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
 	echo $LINE
 	echo "Starting inxi branch updates..."
 	
 	for branch in $branches;do
+		b_perl='false'
+		add_perl=''
 		case $branch in
 			docs)
 				dev_dir="$HOME/bin/scripts/inxi/svn/docs/"
 				files='inxi-about.htm inxi-faqs.htm inxi-man.htm inxi-usage.htm inxi-configuration.htm inxi.htm inxi-options.htm smxi-docs.css inxi-cpu-flags.htm inxi-installation.htm inxi-programming-conventions.htm inxi-dependencies.htm inxi-irc-tech.htm inxi-tech.htm'
+				;;
+			inxi-perl)
+				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
+				files='perl_info.txt  README.txt'
+				b_perl='true'
+				add_perl='modules/*'
 				;;
 			master-plain)
 				dev_dir=$INXI_DEV
@@ -552,13 +560,19 @@ update_inxi_branches()
 				files='inxi README.txt'
 				;;
 		esac
+		echo $LINE
 		WORKING_BRANCH=$branch
-		checkout_git_branch
+		git_checkout
 		process_script "$files" "$dev_dir" "$INXI_VC"
-		commit_to_git
+		if [ "$b_perl" == 'true' ];then
+			cp -f ${dev_dir}modules/* ${INXI_VC}modules
+			git_add "$add_perl"
+		fi
+		git_commit
 	done
 	WORKING_BRANCH='master'
-	checkout_git_branch
+	echo $LINE
+	git_checkout
 	echo "Completed inxi branch updates."
 }
 
@@ -599,7 +613,7 @@ update_other_components()
 }
 
 # if you have write access to svn, this last step will update svn
-update_svn_data()
+svn_update()
 {
 	local response='' response2=''
 
@@ -617,28 +631,34 @@ update_svn_data()
 	case $response2 in
 		y|Y)
 			echo "Ok, committing it now"
-			commit_to_svn "$response"
+			svn_commit "$response"
 			;;
 		*)
 			echo "Ok, let's try it again..."
-			update_svn_data
+			svn_update
 			;;
 	esac
 }
 
 # args: $1 - message for commit
-commit_to_svn()
+svn_commit()
 {
 	svn commit $WORKING_VC_DIR$svnWild
 }
-checkout_git_branch()
+git_checkout()
 {
 	echo "Checking out branch $WORKING_BRANCH in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
 	git checkout $WORKING_BRANCH || error_handler 6 "$?"
 }
+git_add()
+{
+	echo "Adding files (if new) to branch $WORKING_BRANCH in $WORKING_VC_DIR"
+	cd $WORKING_VC_DIR
+	git add $1
+}
 # args: $1 - message for commit
-commit_to_git()
+git_commit()
 {
 	echo "Committing $WORKING_BRANCH branch in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
@@ -670,10 +690,10 @@ main_updater
 # comment this out if you do not have svn write access
 if [ "$B_SKIP_VC" == 'false' ];then
 	if [ "$VC_TYPE" == 'svn' ];then
-		commit_to_svn
-		#update_svn_data
+		svn_commit
+		#svn_update
 	elif [ "$VC_TYPE" == 'git' ];then
-		commit_to_git
+		git_commit
 	fi
 fi
 if [ "$B_SKIP_ZIP" == 'false' ];then
