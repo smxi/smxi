@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.6.0
-####  Date: 2017-10-28
+####  version: 2.6.1
+####  Date: 2017-10-29
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2017
 ####
@@ -79,7 +79,7 @@ WORKING_BRANCH=$SMXI_BRANCH
 RB_VERSION="${RBXI_VC}rb-version"
 LIST_ACXI='acxi'
 LIST_INXI='inxi'
-LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz'
+LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
 LIST_RBXI='rbxi'
 LIST_SGFXI="sgfxi"
@@ -138,9 +138,18 @@ error_handler()
 		5)
 			message="You used an option that does not exist: $2"
 			;;
+		6)
+			message="git checkout of $WORKING_REMOTE $WORKING_BRANCH\nfailed with error: $2"
+			;;
+		7)
+			message="git commit of $WORKING_VC_DIR $WORKING_BRANCH\nfailed with error: $2"
+			;;
+		6)
+			message="git push to $WORKING_REMOTE $WORKING_BRANCH\nfailed with error: $2"
+			;;
 	esac
 	echo $LINE
-	echo $message
+	echo -e $message
 	echo "Error $1 - Exiting script, please correct the error"
 	echo $LINE
 	exit $1
@@ -517,6 +526,8 @@ update_inxi_branches()
 	local files='' dev_dir='';
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
+	echo $LINE
+	echo "Starting inxi branch updates..."
 	
 	for branch in $branches;do
 		case $branch in
@@ -526,19 +537,19 @@ update_inxi_branches()
 				;;
 			master-plain)
 				dev_dir=$INXI_DEV
-				files='inxi inxi.1 inxi.changelog'
+				files='inxi inxi.1 inxi.changelog  README.txt'
 				;;
 			one)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/one/"
-				files='inxi'
+				files='inxi  README.txt'
 				;;
 			two)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/two/"
-				files='inxi'
+				files='inxi  README.txt'
 				;;
 			three)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/three/"
-				files='inxi'
+				files='inxi README.txt'
 				;;
 		esac
 		WORKING_BRANCH=$branch
@@ -548,6 +559,7 @@ update_inxi_branches()
 	done
 	WORKING_BRANCH='master'
 	checkout_git_branch
+	echo "Completed inxi branch updates."
 }
 
 # add closing steps for sm_versions file
@@ -623,15 +635,15 @@ checkout_git_branch()
 {
 	echo "Checking out branch $WORKING_BRANCH in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
-	git checkout $WORKING_BRANCH
+	git checkout $WORKING_BRANCH || error_handler 6 "$?"
 }
 # args: $1 - message for commit
 commit_to_git()
 {
 	echo "Committing $WORKING_BRANCH branch in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
-	git commit -a
-	git push $WORKING_REMOTE $WORKING_BRANCH
+	git commit -a # || error_handler 7 "$?"
+	git push $WORKING_REMOTE $WORKING_BRANCH || error_handler 8 "$?"
 }
 
 zip_it_up()
