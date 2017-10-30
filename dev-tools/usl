@@ -539,7 +539,7 @@ update_inxi_branches()
 				;;
 			inxi-perl)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
-				files='perl_info.txt  README.txt'
+				files='perl_programming.txt  perl_version_support.txt README.txt'
 				b_perl='true'
 				add_perl='modules/*'
 				;;
@@ -563,7 +563,9 @@ update_inxi_branches()
 		echo $LINE
 		WORKING_BRANCH=$branch
 		git_checkout
-		process_script "$files" "$dev_dir" "$INXI_VC"
+		if [ "$files" != '' ];then
+			process_script "$files" "$dev_dir" "$INXI_VC"
+		fi
 		if [ "$b_perl" == 'true' ];then
 			cp -f ${dev_dir}modules/* ${INXI_VC}modules
 			git_add "$add_perl"
