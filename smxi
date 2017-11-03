@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.22
-####  Date: 2016-07-29
+####  version: 8.15.23
+####  Date: 2017-11-03
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2017
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -132,11 +132,11 @@ SCRIPT_DOWNLOAD_BRANCH_1='https://github.com/smxi/smxi/raw/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='https://github.com/smxi/smxi/raw/two/'
 SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/dev/'
 # main download urls
-SCRIPT_DOWNLOAD='http://smxi.org/sm/'
-SCRIPT_DOWNLOAD_SG='http://smxi.org/sg/'
-SCRIPT_DOWNLOAD_SV='http://smxi.org/sv/'
+SCRIPT_DOWNLOAD='https://smxi.org/sm/'
+SCRIPT_DOWNLOAD_SG='https://smxi.org/sg/'
+SCRIPT_DOWNLOAD_SV='https://smxi.org/sv/'
 SCRIPT_DOWNLOAD_IN='https://github.com/smxi/inxi/raw/master/'
-SCRIPT_DOWNLOAD_KERNELS='http://smxi.org/sm/kernels/'
+SCRIPT_DOWNLOAD_KERNELS='https://smxi.org/sm/kernels/'
 SCRIPT_HOME='/usr/local/bin'
 SCRIPT_NAME=$( basename $0 )
 SCRIPT_ROTATE="/etc/logrotate.d/$SCRIPT_NAME"
