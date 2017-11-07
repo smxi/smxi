@@ -2,10 +2,10 @@
 ########################################################################
 ####  Script Name: dsl
 ####  Description: smxi archive kernel zip file constructor
-####  version: 2.3.12
-####  Date: 2016-05-13
+####  version: 2.4.0
+####  Date: 2017-11-07
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2016
+####  Copyright (C) Harald Hope 2007-2017
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
@@ -30,6 +30,7 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 # paths, change these to suite your needs
 SVN_DIR="$HOME/bin/scripts/smxi/svn/trunk"
 KERNEL_DIR="$HOME/large/kernel-zips"
+LIQUORIX_MIRROR="$HOME/large/kernel-zips/liquorix"
 KERNEL_SVN_DIR="$SVN_DIR/kernel-stuff/"
 KERNEL_INSTALLER_DIR="$KERNEL_DIR/kernel-installer"
 
@@ -45,8 +46,10 @@ MIRROR_EXTRA=''
 NEW_KERNEL_DIRECTORY=''
 
 # boolean switches
-B_REDO=''
-B_SKIP_ZIP=''
+B_LIQUORIX_MIRROR='false'
+B_REDO='false'
+B_RSYNC='false'
+B_SKIP_ZIP='false'
 
 ########################################################################
 #### FUNCTIONS
@@ -100,6 +103,9 @@ error_handler()
 		13)
 			message="-e is only for aptosid kernels."
 			;;
+		14)
+			message="Rsync of Liquorix mirror failed: $2"
+			;;
 	esac
 	echo $LINE
 	echo -e $message
@@ -141,7 +147,8 @@ get_options()
 				;;
 			r)	B_REDO='true'
 				;;
-			
+			s) B_RSYNC='true'
+				;;
 			z)	B_SKIP_ZIP='true'
 				;;
 			h)
@@ -154,7 +161,7 @@ get_options()
    NOTE: -k <kernel> is required to run dsl always
 -p Use past data (liquorix only)
 -r Redo zip without downloading again.
-
+-s Use rsync to mirror.
 -z Download only, no zip creation
 "
 				exit 0
@@ -164,6 +171,9 @@ get_options()
 				;;
 		esac
 	done
+	if [ "$KERNEL_TYPE" == 'liquorix' ];then
+		B_LIQUORIX_MIRROR='true'
+	fi
 	
 	if [ "$POOL_TYPE" == 'exp.main' -a "$KERNEL_TYPE" != 'aptosid' ];then
 		error_handler 13
@@ -276,6 +286,30 @@ create_sub_directories()
 		done
 		rm -f kernel-full-zips/*
 	fi
+}
+
+function rsync_liquorix_mirror()
+{
+	echo $LINE
+	echo "Syncing Liquorix mirror..."
+	rsync -av --delete --progress --exclude={'*.origin.tar.gz','*.orig.tar.xz'} \
+	mirror@liquorix.net::debian/pool/main/l/linux-liquorix/ $LIQUORIX_MIRROR || error_handler 14 "$?"
+}
+function check_rsynced_kernel_exists()
+{
+	echo $LINE
+	echo "Checking kernel $KERNEL_WORKING exists in Liquorix mirror..."
+	if [ -n "$( ls $LIQUORIX_MIRROR 2>/dev/null | grep -s $KERNEL_WORKING )" ];then
+		echo "Kernel exists."
+	else
+		error_handler 5 $KERNEL_WORKING
+	fi
+}
+function copy_mirror_files()
+{
+	echo $LINE
+	echo "Copying $KERNEL_WORKING files to $KERNEL_INSTALLER_DIR..."
+	cp -f $LIQUORIX_MIRROR/*$KERNEL_WORKING* $NEW_KERNEL_DIRECTORY
 }
 
 check_kernel_exists()
@@ -522,6 +556,15 @@ make_zip_files()
 	mv $kernel64Zip ../kernel-full-zips/
 }
 
+function cleanup_kernel_files()
+{
+	echo "Cleaning up kernel files..."
+	rm -rf $NEW_KERNEL_DIRECTORY/32*
+	rm -rf $NEW_KERNEL_DIRECTORY/64*
+	rm -rf $NEW_KERNEL_DIRECTORY/src-gz
+	rm -rf $NEW_KERNEL_DIRECTORY/kernel-installer-files
+}
+
 clean_up()
 {
 	cd ../
@@ -541,7 +584,21 @@ finish_it_up()
 get_options "$@"
 set_values
 
-if [ "$B_REDO" == 'true' ];then
+if [ "$B_LIQUORIX_MIRROR" == 'true' ];then
+	start_up_tests
+	if [ "$B_RSYNC" == 'true' ];then
+		rsync_liquorix_mirror
+	fi
+	check_rsynced_kernel_exists
+	create_kernel_directory
+	create_sub_directories
+	copy_mirror_files
+	move_files_to_directories
+	add_update_installer_files
+	make_zip_files
+	cleanup_kernel_files
+	finish_it_up
+elif [ "$B_REDO" == 'true' ];then
 	#start_up_tests
 	#check_kernel_exists
 	create_kernel_directory

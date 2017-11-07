@@ -102,7 +102,7 @@ LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
 SM_VERSIONS="${SMXI_VC}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_VC}sm-versions-previous"
 # this has to the current live version on smxi.org
-SM_VERSIONS_URL='http://smxi.org/sm/sm-versions'
+SM_VERSIONS_URL='https://smxi.org/sm/sm-versions'
 
 # the primary version number will be manually set.
 SM_MAIN_FIRST='8'
