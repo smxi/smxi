@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.24.6
-####  Date: 2015-03-11
+####  version: 1.24.7
+####  Date: 2017-11-25
 
-####  Copyright (C) Harald Hope 2005-2015
+####  Copyright (C) Harald Hope 2005-2017
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -625,7 +625,7 @@ install_kmenu_sidebar()
 	local siduxKmenuBar2='kside_213.png'
 	# raider700 sidebar
 	local siduxKmenuBar3='kside_810.png'
-	local ua='-U s-tools/s-gfx'
+	local ua='s-tools/s-gfx'
 
 	echo $LINE
 	echo "${S}Please select one of the following kmenu side graphics:"
@@ -672,7 +672,11 @@ install_kmenu_sidebar()
 		mv $ksp $ksp-original
 	fi
 	echo "${S}Downloading new kmenu side image...${N}"
-	wget $ua -O $ksp -T$TIME_OUT -t 2 $menu
+	if [ "$B_CURL" == 'true' ];then
+		curl -A $ua -y $TIME_OUT -o $ksp $menu
+	else
+		wget -U $ua -O $ksp -T$TIME_OUT -t 2 $menu
+	fi
 	echo "${S}Done installing kmenu side image.${N}"
 
 	cd $SCRIPT_HOME
@@ -833,12 +837,16 @@ grub_gfx_message_installer()
 	local bgmc=$SCRIPT_DOWNLOAD'artwork/'$cbrd
 	# make sure not commented out etc
 	local gfxGrubExists=$( grep '^gfxmenu'  $GRUB_PATH )
-	local ua="-U s-tools/grub-gfx.$cbrd"
+	local ua="s-tools/grub-gfx.$cbrd"
 
 	echo $LINE
 	if [ -n "$gfxGrubExists" ];then
 		echo "${S}Downloading ${C}$cbrd${S} file now...${N}"
-		wget $ua -T$TIME_OUT -t 2 -O $grubCbrd $bgmc
+		if [ "$B_CURL" == 'true' ];then
+			curl -A $ua -y $TIME_OUT -o $grubCbrd $bgmc
+		else
+			wget -U $ua -T $TIME_OUT -t 2 -O $grubCbrd $bgmc
+		fi
 		if [ -s "$grubCbrd" ];then
 			echo "${S}Updating ${C}$GRUB_PATH${S} to use the new grub boot image...${N}"
 			# we're being careful here to not overwrite any other /boot/message type files or links
