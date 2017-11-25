@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.42
-####  Date: 2015-06-23
+####  version: 1.23.43
+####  Date: 2015-11-25
 
-####  Copyright (C) Harald Hope 2005-2015
+####  Copyright (C) Harald Hope 2005-2017
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1312,7 +1312,11 @@ update_sources()
 			;;
 		google-chrome)
 			# wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-			extraFunctions='wget -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
+			if [ "$B_CURL" == 'true' ];then
+				extraFunctions='curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
+			else
+				extraFunctions='wget -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
+			fi
 			grepSearch='(google.com/linux/chrome/deb|deb-google-chrome)'
 			searchIdentifier='Google Chrome'
 			sourceFile=$googleChromeApt
@@ -1323,7 +1327,11 @@ update_sources()
 		opera)
 			# opera keyrings
 			# extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
-			extraFunctions='wget -O - http://deb.opera.com/archive.key | apt-key add - '
+			if [ "$B_CURL" == 'true' ];then
+				extraFunctions='curl http://deb.opera.com/archive.key | apt-key add - '
+			else
+				extraFunctions='wget -O - http://deb.opera.com/archive.key | apt-key add - '
+			fi
 			grepSearch='(opera|deb-op)'
 			searchIdentifier='Opera'
 			sourceFile=$operaApt
@@ -2315,7 +2323,7 @@ test_required_startup_apps()
 {
 	eval $LOGUS
 	local p='' r='' missing='' installApps='' response='' updateError='' appPath=''
-	local requiredApps="awk bzip2 gawk logrotate make perl sed tar unzip wget"
+	local requiredApps="awk bzip2 curl gawk logrotate make perl sed tar unzip wget"
 	# dctr is for grep-aptavail; findutils is for xargs and find
 	local dpkgCheck='dctrl-tools findutils initramfs-tools'
 
@@ -2336,10 +2344,11 @@ test_required_startup_apps()
 			missing='true'
 		fi
 	done
-
+	
 	if [ "$missing" == 'true' ];then
 		eval $LOGUE
 		install_missing_apps "$installApps" 'required'
+		B_CURL='true'
 	else
 		log_function_data "No missing required script apps"
 		eval $LOGUE

@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.38
-####  Date: 2016-11-01
+####  version: 3.4.39
+####  Date: 2016-11-25
 
-####  Copyright (C) Harald Hope 2005-2016
+####  Copyright (C) Harald Hope 2005-2017
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software 
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -678,7 +678,11 @@ non_free_installer()
 				;;
 			update-opera-keyrings)
 				echo "${S}Updating Opera keyrings..."${N}
-				wget -O - http://deb.opera.com/archive.key | apt-key add -
+				if [ "$B_CURL" == 'true' ];then
+					curl http://deb.opera.com/archive.key | apt-key add - 
+				else
+					wget -O - http://deb.opera.com/archive.key | apt-key add -
+				fi
 				repeat='true'
 				;;
 			flash-plugin)
@@ -705,7 +709,11 @@ non_free_installer()
 				;;
 			update-chrome-keyrings)
 				echo "${S}Updating Google Chrome keyrings..."${N}
-				wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+				if [ "$B_CURL" == 'true' ];then
+					curl -s https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - 
+				else
+					wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+				fi
 				repeat='true'
 				;;
 			java-plugin)
