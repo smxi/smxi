@@ -539,7 +539,7 @@ update_inxi_branches()
 				;;
 			inxi-perl)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
-				files='inxi README.txt'
+				files='pinxi README.txt'
 				b_perl='true'
 				add_perl='modules/* docs/*'
 				;;
