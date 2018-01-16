@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.6.3
-####  Date: 2017-10-31
+####  version: 2.6.4
+####  Date: 2018-01-13
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2017
 ####
@@ -541,7 +541,7 @@ update_inxi_branches()
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
 				files='pinxi README.txt'
 				b_perl='true'
-				add_perl='modules/* docs/*'
+				add_perl='modules/* docs/* lib/*'
 				;;
 			master-plain)
 				dev_dir=$INXI_DEV
@@ -567,8 +567,9 @@ update_inxi_branches()
 			process_script "$files" "$dev_dir" "$INXI_VC"
 		fi
 		if [ "$b_perl" == 'true' ];then
-			cp -f ${dev_dir}modules/* ${INXI_VC}modules
 			cp -f ${dev_dir}docs/* ${INXI_VC}docs
+			cp -f ${dev_dir}lib/* ${INXI_VC}lib
+			cp -f ${dev_dir}modules/* ${INXI_VC}modules
 			git_add "$add_perl" 
 		fi
 		git_commit
