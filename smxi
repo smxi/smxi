@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.26
-####  Date: 2017-11-25
+####  version: 8.15.27
+####  Date: 2018-01-20
 ########################################################################
-####  Copyright (C) Harald Hope 2005-2017
+####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1231,7 +1231,7 @@ download_test_file()
 		if [ "$ua" != '' ];then
 			ua='-A '$ua
 		fi
-		fileDataHolderTemp="$( curl $ua -y $TIME_OUT -s $downloadUrl 2>/dev/null )" || wgetError="$?"
+		fileDataHolderTemp="$( curl -L $ua -y $TIME_OUT -s $downloadUrl 2>/dev/null )" || wgetError="$?"
 	else
 		if [ "$ua" != '' ];then
 			ua='-U '$ua
@@ -3716,7 +3716,7 @@ print_video_data()
 			downloadFullUrl=$downloadUrl$VIDEO_DATA_NVIDIA
 			uaFull="$ua$VIDEO_DATA_NVIDIA"
 			if [ "$B_CURL" == 'true' ];then
-				VIDEO_SUPPORT_NVIDIA="$( curl -A $uaFull -y 3 -s $downloadFullUrl 2>/dev/null )"
+				VIDEO_SUPPORT_NVIDIA="$( curl -L -A $uaFull -y 3 -s $downloadFullUrl 2>/dev/null )"
 			else
 				VIDEO_SUPPORT_NVIDIA="$( wget -U $uaFull -T3 -t 1 -q -O - $downloadFullUrl )"
 			fi
@@ -3738,7 +3738,7 @@ print_video_data()
 			downloadFullUrl=$downloadUrl$VIDEO_DATA_FGLRX
 			uaFull="$ua$VIDEO_DATA_FGLRX"
 			if [ "$B_CURL" == 'true' ];then
-				VIDEO_SUPPORT_FGLRX="$( curl -A $uaFull -y 3 -s $downloadFullUrl 2>/dev/null )"
+				VIDEO_SUPPORT_FGLRX="$( curl -L -A $uaFull -y 3 -s $downloadFullUrl 2>/dev/null )"
 			else
 				VIDEO_SUPPORT_FGLRX="$( wget -U $uaFull -T3 -t 1 -q -O - $downloadFullUrl )"
 			fi

@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-misc-tweaks
-####  version: 1.24.7
-####  Date: 2017-11-25
+####  version: 1.24.8
+####  Date: 2018-01-20
 
-####  Copyright (C) Harald Hope 2005-2017
+####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -673,7 +673,7 @@ install_kmenu_sidebar()
 	fi
 	echo "${S}Downloading new kmenu side image...${N}"
 	if [ "$B_CURL" == 'true' ];then
-		curl -A $ua -y $TIME_OUT -o $ksp $menu
+		curl -L -A $ua -y $TIME_OUT -o $ksp $menu
 	else
 		wget -U $ua -O $ksp -T$TIME_OUT -t 2 $menu
 	fi
@@ -843,7 +843,7 @@ grub_gfx_message_installer()
 	if [ -n "$gfxGrubExists" ];then
 		echo "${S}Downloading ${C}$cbrd${S} file now...${N}"
 		if [ "$B_CURL" == 'true' ];then
-			curl -A $ua -y $TIME_OUT -o $grubCbrd $bgmc
+			curl -L -A $ua -y $TIME_OUT -o $grubCbrd $bgmc
 		else
 			wget -U $ua -T $TIME_OUT -t 2 -O $grubCbrd $bgmc
 		fi

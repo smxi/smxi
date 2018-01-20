@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.43
-####  Date: 2015-11-25
+####  version: 1.23.44
+####  Date: 2017-01-20
 
-####  Copyright (C) Harald Hope 2005-2017
+####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -1313,7 +1313,7 @@ update_sources()
 		google-chrome)
 			# wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 			if [ "$B_CURL" == 'true' ];then
-				extraFunctions='curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
+				extraFunctions='curl -L https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
 			else
 				extraFunctions='wget -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - '
 			fi
@@ -1328,7 +1328,7 @@ update_sources()
 			# opera keyrings
 			# extraFunctions='gpg --keyserver wwwkeys.eu.pgp.net --recv-keys 6A423791 &> /dev/null && apt-key add /root/.gnupg/pubring.gpg 1> /dev/null'
 			if [ "$B_CURL" == 'true' ];then
-				extraFunctions='curl http://deb.opera.com/archive.key | apt-key add - '
+				extraFunctions='curl -L http://deb.opera.com/archive.key | apt-key add - '
 			else
 				extraFunctions='wget -O - http://deb.opera.com/archive.key | apt-key add - '
 			fi
