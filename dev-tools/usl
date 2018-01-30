@@ -373,7 +373,7 @@ process_script()
 	
 	for script in $1
 	do
-		cp -fL --preserve=timestamps $2$script $3$script
+		cp -afL --preserve=timestamps $2$script $3$script
 	done
 }
 
@@ -393,16 +393,16 @@ update_sm_data()
 
 		# echo "copy $script to ${SMXI_VC}$script"
 		echo "$script=$localVersion:$localDate"
-		cp -f --preserve=timestamps $2$script $SMXI_VC$script
+		cp -af --preserve=timestamps $2$script $SMXI_VC$script
 
 		# working sgfxi/svmi will often have testing data, don't want to comment out
 		# that each update
 		case $2 in
 			$SGFXI_DEV)
-				cp -f --preserve=timestamps $2$script $SGFXI_VC$script
+				cp -af --preserve=timestamps $2$script $SGFXI_VC$script
 				;;
 			$SVMI_DEV)
-				cp -f --preserve=timestamps $2$script $SVMI_VC$script
+				cp -af --preserve=timestamps $2$script $SVMI_VC$script
 				;;
 		esac
 	done
@@ -493,10 +493,10 @@ process_rbxi()
 	local localVersion='' localDate=''
 
 	echo "Copying rbxi files to bzip and VC"
-	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_VC
-	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_VC}rbxi-data
-	cp -f --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
-	cp -rvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_BZIP}rbxi-data
+	cp -af --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_VC
+	cp -arvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_VC}rbxi-data
+	cp -af --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
+	cp -arvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_BZIP}rbxi-data
 
 	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9-]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
@@ -567,9 +567,9 @@ update_inxi_branches()
 			process_script "$files" "$dev_dir" "$INXI_VC"
 		fi
 		if [ "$b_perl" == 'true' ];then
-			cp -f ${dev_dir}docs/* ${INXI_VC}docs
-			cp -f ${dev_dir}lib/* ${INXI_VC}lib
-			cp -f ${dev_dir}modules/* ${INXI_VC}modules
+			cp -af ${dev_dir}docs/* ${INXI_VC}docs
+			cp -af ${dev_dir}lib/* ${INXI_VC}lib
+			cp -af ${dev_dir}modules/* ${INXI_VC}modules
 			git_add "$add_perl" 
 		fi
 		git_commit
