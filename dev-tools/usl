@@ -522,7 +522,7 @@ process_rbxi()
 update_inxi_branches()
 {
 	# docs 
-	local branches='docs master-plain one two three inxi-perl' 
+	local branches='master-plain inxi-perl one two inxi-legacy docs' 
 	local files='' dev_dir='' b_perl='false' add_perl=''
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
@@ -535,11 +535,11 @@ update_inxi_branches()
 		case $branch in
 			docs)
 				dev_dir="$HOME/bin/scripts/inxi/svn/docs/"
-				files='inxi-about.htm inxi-faqs.htm inxi-man.htm inxi-usage.htm inxi-configuration.htm inxi.htm inxi-options.htm smxi-docs.css inxi-cpu-flags.htm inxi-installation.htm inxi-programming-conventions.htm inxi-dependencies.htm inxi-irc-tech.htm inxi-tech.htm'
+				files='inxi-about.htm inxi-faqs.htm inxi-man.htm inxi-man-2.x.htm inxi-usage.htm inxi-configuration.htm inxi.htm inxi-options.htm inxi-options-2.x.htm smxi-docs.css inxi-cpu-flags.htm inxi-installation.htm inxi-programming-conventions.htm inxi-dependencies.htm inxi-irc-tech.htm inxi-tech.htm'
 				;;
 			inxi-perl)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
-				files='pinxi README.txt'
+				files='pinxi.1 pinxi README.txt'
 				b_perl='true'
 				add_perl='modules/* docs/* lib/*'
 				;;
@@ -555,9 +555,9 @@ update_inxi_branches()
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/two/"
 				files='inxi  README.txt'
 				;;
-			three)
-				dev_dir="$HOME/bin/scripts/inxi/svn/branches/three/"
-				files='inxi README.txt'
+			inxi-legacy)
+				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-legacy/"
+				files='binxi.1 binxi README.txt'
 				;;
 		esac
 		echo $LINE
