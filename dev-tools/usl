@@ -391,8 +391,9 @@ update_sm_data()
 			localVersion=$( grep -im 1 -E '^my \$self_version=.*' $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 			localDate=$( grep -im 1 -E '^my \$self_date=.*' $2$script | grep -o -E "[0-9]{4}-[0-9]{2}-[0-9]{2}" )
 			#echo "$localVersion $localDate"
-			random=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
-			INXI_VERSION="$localVersion-$localDate-$random"
+			final=$(date +%H-%M-%S)
+			#final=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
+			INXI_VERSION="$localVersion-$localDate-$final"
 		else
 			localVersion=$( grep -im 1 -o -E "version(:[\ ]*|=)[0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 			# weird: [A-Za-z0-9,\ -] works but [A-Za-z0-9,-\ ] only returns the first number in 2013-10-14
@@ -678,7 +679,8 @@ git_tag()
 {
 	echo "Tagging $WORKING_BRANCH branch in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
-	git tag $INXI_VERSION 
+	git tag $INXI_VERSION $WORKING_BRANCH
+	git pull --tags
 	git push --tags $WORKING_REMOTE $WORKING_BRANCH
 }
 zip_it_up()
