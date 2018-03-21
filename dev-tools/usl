@@ -28,7 +28,7 @@
 # layout
 LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
-# paths, change these to suite your needs
+# paths, change these to suit your needs
 ACXI_DEV="$HOME/bin/scripts/acxi/"
 ACXI_REMOTE="https://github.com/smxi/acxi"
 ACXI_BRANCH='HEAD:stable'
@@ -79,7 +79,7 @@ WORKING_BRANCH=$SMXI_BRANCH
 RB_VERSION="${RBXI_VC}rb-version"
 LIST_ACXI='acxi'
 LIST_INXI='inxi'
-LIST_INXI_FULL='inxi inxi.1 inxi.1.gz inxi.changelog inxi.tar.gz README.txt'
+LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
 LIST_RBXI='rbxi'
 LIST_SGFXI="sgfxi"
@@ -98,7 +98,7 @@ LIST_SMXI_KERNEL="dsl install-kernel.sh"
 LIST_SMXI_STUB="smxi-stub"
 LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
 
-
+INXI_VERSION=''
 SM_VERSIONS="${SMXI_VC}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_VC}sm-versions-previous"
 # this has to the current live version on smxi.org
@@ -390,7 +390,9 @@ update_sm_data()
 		if [ "$script" == 'inxi' ];then
 			localVersion=$( grep -im 1 -E '^my \$self_version=.*' $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 			localDate=$( grep -im 1 -E '^my \$self_date=.*' $2$script | grep -o -E "[0-9]{4}-[0-9]{2}-[0-9]{2}" )
-			echo "$localVersion $localDate"
+			#echo "$localVersion $localDate"
+			random=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
+			INXI_VERSION="$localVersion-$localDate-$random"
 		else
 			localVersion=$( grep -im 1 -o -E "version(:[\ ]*|=)[0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 			# weird: [A-Za-z0-9,\ -] works but [A-Za-z0-9,-\ ] only returns the first number in 2013-10-14
@@ -528,7 +530,7 @@ process_rbxi()
 update_inxi_branches()
 {
 	# docs 
-	local branches='master-plain inxi-perl one two inxi-legacy docs' 
+	local branches='inxi-perl one two inxi-legacy docs' 
 	local files='' dev_dir='' b_perl='false' add_perl=''
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
@@ -548,10 +550,6 @@ update_inxi_branches()
 				files='pinxi.1 pinxi README.txt'
 				b_perl='true'
 				add_perl='modules/* docs/* lib/*'
-				;;
-			master-plain)
-				dev_dir=$INXI_DEV
-				files='inxi inxi.1 inxi.changelog  README.txt'
 				;;
 			one)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/one/"
@@ -667,6 +665,7 @@ git_add()
 	cd $WORKING_VC_DIR
 	git add $1
 }
+
 # args: $1 - message for commit
 git_commit()
 {
@@ -675,7 +674,13 @@ git_commit()
 	git commit -a # || error_handler 7 "$?"
 	git push $WORKING_REMOTE $WORKING_BRANCH || error_handler 8 "$?"
 }
-
+git_tag()
+{
+	echo "Tagging $WORKING_BRANCH branch in $WORKING_VC_DIR"
+	cd $WORKING_VC_DIR
+	git tag $INXI_VERSION 
+	git push --tags $WORKING_REMOTE $WORKING_BRANCH
+}
 zip_it_up()
 {
 	cd $HOME
@@ -710,6 +715,7 @@ if [ "$B_SKIP_ZIP" == 'false' ];then
 	zip_it_up
 fi
 if [ "$B_INXI" == 'true' ];then
+	git_tag
 	update_inxi_branches
 fi
 finish_it_up
