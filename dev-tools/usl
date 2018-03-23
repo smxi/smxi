@@ -111,6 +111,7 @@ B_INXI='false'
 B_MAKE_VERSIONS_FILE='true'
 B_SKIP_VC='false'
 B_SKIP_ZIP='false'
+B_TAG='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
 VC_TYPE='git'
 
@@ -160,7 +161,7 @@ get_options()
 {
 	local opt=''
 
-	while getopts :aghiprsuvz opt
+	while getopts :aghiprstuvz opt
 	do
 		case $opt in
 			a)
@@ -206,6 +207,9 @@ get_options()
 				WORKING_BRANCH=$RBXI_BRANCH
 				WORKING_REMOTE=$RBXI_REMOTE
 				;;
+			t)
+				B_TAG='true'
+				;;
 			u)
 				B_SKIP_VC='true'
 				;;
@@ -238,6 +242,8 @@ get_options()
    Will get inxi, sgfxi, and svmi version numbers as well,
    and add those files to the main smxi svn directory for easy
    uploading and handling.
+-t Auto tag commit. Only use this with inxi, 
+   and only when commiting to master.
 -v Update and commit svmi
 -z Skip the zip up part
 "
@@ -672,8 +678,11 @@ git_commit()
 {
 	echo "Committing $WORKING_BRANCH branch in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
-	git commit -a # || error_handler 7 "$?"
+	git $tag_opt commit -a # || error_handler 7 "$?"
 	git push $WORKING_REMOTE $WORKING_BRANCH || error_handler 8 "$?"
+	if [ "$B_TAG" == 'true' -a "$WORKING_VC_DIR" == "$INXI_VC" -a "$WORKING_BRANCH" == 'master' ];then
+		git_tag
+	fi
 }
 git_tag()
 {
@@ -717,7 +726,7 @@ if [ "$B_SKIP_ZIP" == 'false' ];then
 	zip_it_up
 fi
 if [ "$B_INXI" == 'true' ];then
-	git_tag
+	#git_tag
 	update_inxi_branches
 fi
 finish_it_up
