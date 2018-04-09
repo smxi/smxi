@@ -174,7 +174,6 @@ get_options()
 	if [ "$KERNEL_TYPE" == 'liquorix' ];then
 		B_LIQUORIX_MIRROR='true'
 	fi
-	
 	if [ "$POOL_TYPE" == 'exp.main' -a "$KERNEL_TYPE" != 'aptosid' ];then
 		error_handler 13
 	fi
@@ -224,15 +223,12 @@ set_values()
 start_up_tests()
 {
 	local startDir=''
-
 	echo $LINE
 	echo "Running initial startup tests..."
-
 	# don't want to use root for this script
 	if [ "$(whoami)" == 'root' ];then
 		error_handler 1
 	fi
-
 	# make sure the paths you made are right and exist
 	for startDir in $KERNEL_DIR $KERNEL_INSTALLER_DIR $SVN_DIR
 	do
@@ -240,7 +236,6 @@ start_up_tests()
 			error_handler 2 $startDir
 		fi
 	done
-
 	if [ ! -f $KERNEL_INSTALLER_DIR/install-kernel.sh ];then
 		error_handler 6 "$KERNEL_INSTALLER_DIR/install-kernel.sh"
 	fi
