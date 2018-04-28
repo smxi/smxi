@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.27
-####  Date: 2018-01-20
+####  version: 8.15.28
+####  Date: 2018-04-27
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1024,7 +1024,7 @@ test_version_info()
 		update_scripts $1 $2
 	fi
 	# test local against remote versions
-	LocalVersion=$( grep -im 1 -o -E "version(:\ |=)[0-9].[0-9]*.[0-9]*" $SCRIPT_HOME/$1 | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+	LocalVersion=$( grep -im 1 -o -E "(^my \$self_version|version)(:\ |=)[']?[0-9].[0-9]*.[0-9]*[']?" $SCRIPT_HOME/$1 | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	# I'm being careful with globals, I want to make sure no unset global error occurs
 	# reset the global value for remote version now
 	remoteVersion=$( grep -e "$1=.*" <<< "$SM_VERSIONS_STATIC" | cut -d '=' -f 2 | cut -d ':' -f 1 )
@@ -1032,7 +1032,7 @@ test_version_info()
 	# now set the globals
 	REMOTE_VERSION=$remoteVersion
 	REMOTE_DATE=$remoteDate
-
+	# echo "$LocalVersion"
 	# keep in mind, return values for compare: 0 -> >; 1 -> ==; 2 -> <
 	updateLocal=$( compare_numbers $remoteVersion $LocalVersion )
 
