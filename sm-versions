@@ -10,7 +10,7 @@ sm-lib-kernel-install=2.12.14:2016-05-12
 sm-lib-misc-tweaks=1.24.8:2018-01-20
 sm-lib-package-install=3.4.40:2018-01-20
 sm-lib-package-removal=1.4.2:2011-02-10
-sm-lib-warning=2.0.4:2018-01-20
+sm-lib-warning=2.0.5:2018-04-27
 sm-lib-2006-fixes=1.2.2:2008-06-08
 sm-lib-2007-fixes=1.3.20:2008-11-17
 sm-lib-2008-fixes=1.4.2:2008-12-26
@@ -26,6 +26,6 @@ sgfxi=4.25.19:2018-04-18
 svmi=2.8.73:2018-01-16
 inxi=3.0.07:2018-04-17
 rbxi=2.7.4:2016-12-20
-sm-main-version=8.42.05:2018-01-20
+sm-main-version=8.42.06:2018-04-27
 
 ###**EOF**###
