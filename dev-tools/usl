@@ -538,7 +538,7 @@ process_rbxi()
 update_inxi_branches()
 {
 	# docs 
-	local branches='inxi-perl one two inxi-legacy docs' 
+	local branches='inxi-perl inxi-c one two inxi-legacy docs' 
 	local files='' dev_dir='' b_perl='false' add_perl=''
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
@@ -547,6 +547,7 @@ update_inxi_branches()
 	
 	for branch in $branches;do
 		b_perl='false'
+		b_c='false'
 		add_perl=''
 		case $branch in
 			docs)
@@ -558,6 +559,12 @@ update_inxi_branches()
 				files='pinxi.1 pinxi README.txt'
 				b_perl='true'
 				add_perl='modules/* docs/* lib/*'
+				;;
+			inxi-c)
+				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-c/"
+				files='README.txt'
+				b_c='true'
+				add_perl='GetSystemData/*'
 				;;
 			one)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/one/"
@@ -582,6 +589,10 @@ update_inxi_branches()
 			cp -af ${dev_dir}docs/* ${INXI_VC}docs
 			cp -af ${dev_dir}lib/* ${INXI_VC}lib
 			cp -af ${dev_dir}modules/* ${INXI_VC}modules
+			git_add "$add_perl" 
+		fi
+		if [ "$b_c" == 'true' ];then
+			cp -af ${dev_dir}GetSystemData/* ${INXI_VC}GetSystemData
 			git_add "$add_perl" 
 		fi
 		git_commit
