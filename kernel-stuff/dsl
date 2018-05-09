@@ -581,13 +581,22 @@ set_values
 
 if [ "$B_LIQUORIX_MIRROR" == 'true' ];then
 	start_up_tests
-	if [ "$B_RSYNC" == 'true' ];then
-		rsync_liquorix_mirror
+	if [ "$POOL_TYPE" != 'past' ];then
+		if [ "$B_RSYNC" == 'true' ];then
+			rsync_liquorix_mirror
+		fi
+		check_rsynced_kernel_exists
+	else 
+		check_kernel_exists
 	fi
-	check_rsynced_kernel_exists
 	create_kernel_directory
 	create_sub_directories
-	copy_mirror_files
+	if [ "$POOL_TYPE" != 'past' ];then
+		copy_mirror_files
+	else
+		download_kernel_files
+		move_files_to_directories
+	fi
 	move_files_to_directories
 	add_update_installer_files
 	make_zip_files
