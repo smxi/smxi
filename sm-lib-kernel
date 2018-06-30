@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.7.2
-####  Date: 2018-05-08
+####  version: 2.7.3
+####  Date: 2018-06-30
 
 ####  Copyright (C) Harald Hope 2005-2017
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -28,14 +28,15 @@
 ####  VARIABLES
 ########################################################################
 # 32 bit lists 
-KERNEL_LIST_32_NON_PAE='4.15.0-18.4-liquorix-686 4.13.0-16.1-liquorix-686 4.12.0-14.3-liquorix-686 4.11.0-12.1-liquorix-686 4.10.0-16.1-liquorix-686 
+KERNEL_LIST_32_NON_PAE='4.16.0-16.3-liquorix-686  4.15.0-18.4-liquorix-686 4.13.0-16.1-liquorix-686 
+4.12.0-14.3-liquorix-686 4.11.0-12.1-liquorix-686 4.10.0-16.1-liquorix-686 
 4.9.0-49.1-liquorix-686 4.8.0-17.2-liquorix-686 4.6-6.1-liquorix-686 
 4.4-10.dmz.1-liquorix-686 4.2-7.dmz.1-liquorix-686 4.0-9.dmz.1-liquorix-686 
 3.19-5.dmz.1-liquorix-686 3.16-7.dmz.1-liquorix-686 
 3.6.0-11.dmz.1-liquorix-686 3.4.0-35.dmz.1-liquorix-686 3.2.0-14.dmz.1-liquorix-686 
 3.0.0-9.dmz.1-liquorix-686 2.6.38-7.dmz.2-liquorix-686'
-KERNEL_LIST_32_PAE='4.15.0-18.4-686-pae 4.13.0-16.1-liquorix-686-pae 4.12.0-14.3-liquorix-686-pae 4.11.0-12.1-liquorix-686-pae 
-4.10.0-16.1-liquorix-686-pae 
+KERNEL_LIST_32_PAE='4.16.0-16.3-liquorix-686-pae 4.15.0-18.4-686-pae 4.13.0-16.1-liquorix-686-pae 
+4.12.0-14.3-liquorix-686-pae 4.11.0-12.1-liquorix-686-pae 4.10.0-16.1-liquorix-686-pae 
 4.9.0-49.1-liquorix-686-pae 4.8.0-17.2-liquorix-686-pae 4.6-6.1-liquorix-686-pae 
 4.4-10.dmz.1-liquorix-686-pae 4.2-7.dmz.1-liquorix-686-pae 4.0-9.dmz.1-liquorix-686-pae 
 3.19-5.dmz.1-liquorix-686-pae 3.16-7.dmz.1-liquorix-686-pae 3.14-9.dmz.1-liquorix-686 
@@ -46,7 +47,7 @@ KERNEL_ADVANCED_LIST_32_PAE=''
 KERNEL_ADVANCED_LIST_32_NON_PAE=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
-KERNEL_LIST_64='4.15.0-18.4-amd64 4.13.0-16.1-amd64 4.12.0-14.3-liquorix-amd64 4.11.0-12.1-liquorix-amd64 4.10.0-16.1-liquorix-amd64 
+KERNEL_LIST_64='4.16.0-16.3-amd64 4.15.0-18.4-amd64 4.13.0-16.1-amd64 4.12.0-14.3-liquorix-amd64 4.11.0-12.1-liquorix-amd64 4.10.0-16.1-liquorix-amd64 
 4.9.0-49.1-liquorix-amd64 4.8.0-17.2-liquorix-amd64 4.6-6.1-liquorix-amd64 
 4.4-10.dmz.1-amd64 4.2-7.dmz.1-amd64 4.0-9.dmz.1-liquorix-amd64 
 3.19-5.dmz.1-liquorix-amd64 3.16-7.dmz.1-liquorix-amd64 3.14-9.dmz.1-liquorix-amd64 
