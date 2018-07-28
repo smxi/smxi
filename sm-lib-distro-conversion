@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.17
-####  Date: 2014-03-29
+####  version: 3.3.18
+####  Date: 2018-07-27
 
-####  Copyright (C) Harald Hope 2005-2014
+####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -45,7 +45,7 @@ check_debian()
 	eval $LOGMS
 	trap 'conversion_trap_handler $FUNCNAME' INT TERM EXIT
 	local opt='' options='' repeat='' optionSet='debian'
-	local conversionOptions='aptosid-sources'
+	local conversionOptions='' # 'aptosid-sources'
 	local quitNu='' mepisId='' bSkipQuestion='true'
 	local altText1="${S}Adding ${C}Aptosid sources${S} let you run Aptosid kernels."
 	
@@ -54,7 +54,7 @@ check_debian()
 	altText1=""
 	
 	case $SYSTEM_BASE in
-		stable|squeeze|lenny|etch)
+		stable|stretch|squeeze|lenny|etch)
 			# have to use this for wild card mepis string, mepis-8.x...
 			case $DISTRO in
 				mepis*)
@@ -459,6 +459,26 @@ distro_number_calculator()
 	2015:06:39
 	2015:09:40
 	2015:12:41
+	2016:03:42
+	2016:06:43
+	2016:09:44
+	2016:12:45
+	2017:03:46
+	2017:06:47
+	2017:09:48
+	2017:12:49
+	2018:03:50
+	2018:06:51
+	2018:09:52
+	2018:12:53
+	2019:03:50
+	2019:06:51
+	2019:09:52
+	2019:12:53
+	2020:03:54
+	2020:06:55
+	2020:09:56
+	2020:12:57
 	'
 
 	if [ ! -f $SMDL ];then
