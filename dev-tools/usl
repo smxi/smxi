@@ -551,8 +551,26 @@ update_inxi_branches()
 		add_perl=''
 		case $branch in
 			docs)
+				# remember, you have to manually git add a new page, after running 
+				# this once to put a copy in the git branch docs.
 				dev_dir="$HOME/bin/scripts/inxi/svn/docs/"
-				files='inxi-about.htm inxi-faqs.htm inxi-man.htm inxi-man-2.x.htm inxi-usage.htm inxi-configuration.htm inxi.htm inxi-options.htm inxi-options-2.x.htm smxi-docs.css inxi-cpu-flags.htm inxi-installation.htm inxi-programming-conventions.htm inxi-dependencies.htm inxi-irc-tech.htm inxi-tech.htm'
+				files='smxi-docs.css 
+				inxi.htm 
+				inxi-about.htm 
+				inxi-configuration.htm 
+				inxi-cpu-flags.htm 
+				inxi-dependencies.htm 
+				inxi-faqs.htm 
+				inxi-installation.htm 
+				inxi-irc-tech.htm inxi-tech.htm
+				inxi-man.htm 
+				inxi-man-2.x.htm 
+				inxi-options.htm 
+				inxi-options-2.x.htm 
+				inxi-programming-conventions.htm 
+				inxi-screenshots.htm 
+				inxi-usage.htm 
+				'
 				;;
 			inxi-perl)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
