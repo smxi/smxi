@@ -31,7 +31,7 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 # paths, change these to suit your needs
 ACXI_DEV="$HOME/bin/scripts/acxi/"
 ACXI_REMOTE="https://github.com/smxi/acxi"
-ACXI_BRANCH='HEAD:stable'
+ACXI_BRANCH='stable'
 ACXI_VC="$HOME/bin/scripts/acxi/git/"
 INXI_DEV="$HOME/bin/scripts/inxi/svn/trunk/"
 INXI_REMOTE="https://github.com/smxi/inxi"
