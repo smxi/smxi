@@ -77,7 +77,7 @@ WORKING_BRANCH=$SMXI_BRANCH
 
 # scripts/libs
 RB_VERSION="${RBXI_VC}rb-version"
-LIST_ACXI='acxi'
+LIST_ACXI='acxi acxi.1'
 LIST_INXI='inxi'
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
