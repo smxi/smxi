@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.7.5
-####  Date: 2019-01-22
+####  version: 2.7.6
+####  Date: 2019-05-08
 
 ####  Copyright (C) Harald Hope 2005-2019
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -29,6 +29,7 @@
 ########################################################################
 # 32 bit lists 
 KERNEL_LIST_32_NON_PAE='
+4.20.0-16.2-liquorix-686
 4.19.0-16.1-liquorix-686
 4.18.0-20.3-liquorix-686
 4.17.0-19.2-liquorix-686
@@ -52,6 +53,7 @@ KERNEL_LIST_32_NON_PAE='
 3.0.0-9.dmz.1-liquorix-686 
 2.6.38-7.dmz.2-liquorix-686'
 KERNEL_LIST_32_PAE='
+4.20.0-16.2-liquorix-686-pae 
 4.19.0-16.1-liquorix-686-pae 
 4.18.0-20.3-liquorix-686-pae 
 4.17.0-19.2-liquorix-686-pae 
@@ -83,20 +85,21 @@ KERNEL_ADVANCED_LIST_32_NON_PAE=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
 KERNEL_LIST_64='
-4.19.0-16.1-amd64 
-4.18.0-20.3-amd64 
-4.17.0-19.2-amd64 
-4.16.0-16.3-amd64 
-4.15.0-18.4-amd64 
-4.13.0-16.1-amd64 
+4.20.0-16.2-liquorix-amd64 
+4.19.0-16.1-liquorix-amd64 
+4.18.0-20.3-liquorix-amd64 
+4.17.0-19.2-liquorix-amd64 
+4.16.0-16.3-liquorix-amd64 
+4.15.0-18.4-liquorix-amd64 
+4.13.0-16.1-liquorix-amd64 
 4.12.0-14.3-liquorix-amd64 
 4.11.0-12.1-liquorix-amd64 
 4.10.0-16.1-liquorix-amd64 
 4.9.0-49.1-liquorix-amd64 
 4.8.0-17.2-liquorix-amd64 
 4.6-6.1-liquorix-amd64 
-4.4-10.dmz.1-amd64 
-4.2-7.dmz.1-amd64 
+4.4-10.dmz.1-liquorix-amd64 
+4.2-7.dmz.1-liquorix-amd64 
 4.0-9.dmz.1-liquorix-amd64 
 3.19-5.dmz.1-liquorix-amd64 
 3.16-7.dmz.1-liquorix-amd64 
