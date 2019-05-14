@@ -2167,7 +2167,7 @@ apache_package_installer()
 			apache2-full)
 				package_group_installer 'plain' 'mysql-server mysql5-server'
 				package_group_installer 'plain' 'apache2 apache2-server'
-				package_group_installer 'plain' 'libapache2-mod-php apache2-mod-php'
+				package_group_installer 'plain' 'libapache2-mod-php'
 				package_group_installer 'plain' 'php-mysql'
 				echo "${S}Reconfiguring ${C}php-mysql${S} now...${N}"
 				dpkg-reconfigure php-mysql
@@ -2182,7 +2182,7 @@ apache_package_installer()
 				repeat='true'
 				;;
 			apache2-mod-php)
-				package_group_installer 'plain' 'libapache2-mod-php apache2-mod-php'
+				package_group_installer 'plain' 'libapache2-mod-php'
 				repeat='true'
 				;;
 			apache2-mod-python)
