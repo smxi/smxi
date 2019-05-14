@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-package-install
-####  version: 3.4.40
-####  Date: 2018-01-20
+####  version: 3.4.41
+####  Date: 2018-05-14
 
 ####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -119,21 +119,23 @@ package_group_installer()
 
 	# package groups, console stuff first so it's included in following
 	# apache/php/mysql
-	local apache2Main='apache2-mpm-prefork apache2-utils'
-	local apache2ModPerl='libapache2-mod-perl2'
-	local apache2ModPhp5='libapache2-mod-php5'
+	local apache2Main='apache2 apache2-utils'
+	local apache2ModPerl='libapache2-mod-perl'
+	local apache2ModPhp='libapache2-mod-php'
 	local apache2ModPython='libapache2-mod-python'
 	local apache2ModRuby='libapache2-mod-ruby'
 	local apacheRapache='rapache'
 	local mysql5Client='' # set these below
 	local mysql5Server=''
 	local mysqlTop='mytop mtop'
-	local php5Modules='php5-curl php5-gd'
-	local php5Mysql='php5-mysql'
-	local php5Postgre='php5-pgsql'
+	local phpModules='php php-curl php-gd php-xml php-soap php-readline php-json php-cli'
+	local phpMysql='php-mysql'
+	local php5Postgre='php-pgsql'
 	# handle different distro mysql package availability
 	if [ "$2" == 'mysql5-server' ];then
-		if [ -n "$( check_package_status 'mysql-server-5.7' 'c' )" ];then
+		if [ -n "$( check_package_status 'mysql-server-5.8' 'c' )" ];then
+			mysql5Server='mysql-server-5.8'
+		elif [ -n "$( check_package_status 'mysql-server-5.7' 'c' )" ];then
 			mysql5Server='mysql-server-5.7'
 		elif [ -n "$( check_package_status 'mysql-server-5.6' 'c' )" ];then
 			mysql5Server='mysql-server-5.6'
@@ -154,7 +156,9 @@ package_group_installer()
 		fi
 	fi
 	if [ "$2" == 'mysql5-client' ];then
-		if [ -n "$( check_package_status 'mysql-client-5.7' 'c' )" ];then
+		if [ -n "$( check_package_status 'mysql-client-5.8' 'c' )" ];then
+			mysql5Client='mysql-client-5.8'
+		elif [ -n "$( check_package_status 'mysql-client-5.7' 'c' )" ];then
 			mysql5Client='mysql-client-5.7'
 		elif [ -n "$( check_package_status 'mysql-client-5.6' 'c' )" ];then
 			mysql5Client='mysql-client-5.6'
@@ -242,8 +246,8 @@ package_group_installer()
 		apache2-mod-perl)
 			packageName="$apache2ModPerl"
 			;;
-		apache2-mod-php5)
-			packageName="$apache2ModPhp5"
+		apache2-mod-php)
+			packageName="$apache2ModPhp"
 			;;
 		apache2-mod-python)
 			packageName="$apache2ModPython"
@@ -260,13 +264,13 @@ package_group_installer()
 		mysql-top)
 			packageName="$mysqlTop"
 			;;
-		php5-modules)
-			packageName="$php5Modules"
+		php-modules)
+			packageName="$phpModules"
 			;;
-		php5-mysql)
-			packageName="$php5Mysql"
+		php-mysql)
+			packageName="$phpMysql"
 			;;
-		php5-postgre)
+		php-postgre)
 			packageName="$php5Postgre"
 			;;
 		## main packages
@@ -2138,10 +2142,10 @@ apache_package_installer()
 	echo "${C}5 - mysql-top${S} - Installs ${C}mtop${S} and ${C}mytop${S} command line ${C}mysql${S} monitoring tools (like ${C}top${S})."
 
 	echo "${M}::  PHP / Python / Perl / Ruby ::"
-	echo "${C}6 - apache2-mod-php5${S} - This is the main PHP5 Apache2 module."
-	echo "${C}7 - php5-modules${S} - Installs useful ${C}gd${S} and ${C}curl${S} modules for Apache2/PHP."
-	echo "${C}8 - php5-mysql${S} - Installs the MySql database PHP module."
-	echo "${C}9 - php5-postgre${S} - Installs the Postgre database PHP module."
+	echo "${C}6 - apache2-mod-php${S} - This is the main PHP Apache2 module."
+	echo "${C}7 - php-modules${S} - Installs useful ${C}gd${S} and ${C}curl${S} modules for Apache2/PHP."
+	echo "${C}8 - php-mysql${S} - Installs the MySql database PHP module."
+	echo "${C}9 - php-postgre${S} - Installs the Postgre database PHP module."
 	echo "${C}10 - apache2-mod-perl${S} - Installs the Apache2 Perl module."
 	echo "${C}11 - apache2-mod-python${S} - Installs the Apache2 Python module."
 	echo "${C}12 - apache2-mod-ruby${S} - Installs the Apache2 Ruby module."
@@ -2150,7 +2154,7 @@ apache_package_installer()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="apache2-full apache2-server mysql-server mysql5-client mysql-top apache2-mod-php5 php5-modules php5-mysql php5-postgre apache2-mod-perl  apache2-mod-python apache2-mod-ruby back-to-menu"
+	options="apache2-full apache2-server mysql-server mysql5-client mysql-top apache2-mod-php php-modules php-mysql php-postgre apache2-mod-perl  apache2-mod-python apache2-mod-ruby back-to-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
@@ -2163,10 +2167,10 @@ apache_package_installer()
 			apache2-full)
 				package_group_installer 'plain' 'mysql-server mysql5-server'
 				package_group_installer 'plain' 'apache2 apache2-server'
-				package_group_installer 'plain' 'libapache2-mod-php5 apache2-mod-php5'
-				package_group_installer 'plain' 'php5-mysql'
-				echo "${S}Reconfiguring ${C}php5-mysql${S} now...${N}"
-				dpkg-reconfigure php5-mysql
+				package_group_installer 'plain' 'libapache2-mod-php apache2-mod-php'
+				package_group_installer 'plain' 'php-mysql'
+				echo "${S}Reconfiguring ${C}php-mysql${S} now...${N}"
+				dpkg-reconfigure php-mysql
 				repeat='true'
 				;;
 			apache2-server)
@@ -2177,8 +2181,8 @@ apache_package_installer()
 				package_group_installer 'plain' 'apache2-mod-perl'
 				repeat='true'
 				;;
-			apache2-mod-php5)
-				package_group_installer 'plain' 'libapache2-mod-php5 apache2-mod-php5'
+			apache2-mod-php)
+				package_group_installer 'plain' 'libapache2-mod-php apache2-mod-php'
 				repeat='true'
 				;;
 			apache2-mod-python)
@@ -2201,16 +2205,16 @@ apache_package_installer()
 				package_group_installer 'plain' 'mysql-top'
 				repeat='true'
 				;;
-			php5-modules)
-				package_group_installer 'plain' 'php5-modules'
+			php-modules)
+				package_group_installer 'plain' 'php-modules'
 				repeat='true'
 				;;
-			php5-mysql)
-				package_group_installer 'plain' 'php5-mysql'
+			php-mysql)
+				package_group_installer 'plain' 'php-mysql'
 				repeat='true'
 				;;
-			php5-postgre)
-				package_group_installer 'plain' 'php5-postgre'
+			php-postgre)
+				package_group_installer 'plain' 'php-postgre'
 				repeat='true'
 				;;
 			back-to-menu)

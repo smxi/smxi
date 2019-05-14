@@ -8,7 +8,7 @@ sm-lib-kde4-updater=0.7.39:2013-11-19
 sm-lib-kernel=2.7.6:2019-05-08
 sm-lib-kernel-install=2.12.14:2016-05-12
 sm-lib-misc-tweaks=1.24.8:2018-01-20
-sm-lib-package-install=3.4.40:2018-01-20
+sm-lib-package-install=3.4.41:2018-05-14
 sm-lib-package-removal=1.4.2:2011-02-10
 sm-lib-warning=2.0.5:2018-04-27
 sm-lib-2006-fixes=1.2.2:2008-06-08
@@ -26,6 +26,6 @@ sgfxi=4.26.15:2019-05-14
 svmi=2.8.77:2018-07-29
 inxi=3.0.34:2019-04-30
 rbxi=2.7.4:2016-12-20
-sm-main-version=8.42.17:2019-05-08
+sm-main-version=8.42.18:2019-05-14
 
 ###**EOF**###
