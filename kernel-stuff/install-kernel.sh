@@ -2,12 +2,12 @@
 ########################################################################
 ####  Script Name:  install-kernel.sh
 ####  Description: this is the included installer script in smxi kernel zip files
-####  version: 2.1.8
-####  Date: 2015-05-19
+####  version: 2.1.9
+####  Date: 2019-05-27
 ########################################################################
 ####  Script is based on kelmo and slh's old zip file kernel installer. 
 ####  Copyright (C) 2006-2008: Kel Modderman Stefan Lippers-Hollmann (sidux project)
-####  Subsequent changes: copyright (C) 2008-2015: Harald Hope
+####  Subsequent changes: copyright (C) 2008-2019: Harald Hope
 ####
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License version 2 as published by the Free
@@ -30,7 +30,7 @@ LINE='--------------------------------------------------------------------'
 # both must use "" for smxi / dsl handling here
 # switch to 4.8 as of 3.12; 4.9 as of 4.x; 5.0 as of 4.3
 # NOTE: gcc 5 and later drops the .x, so it's just gcc-5
-GCC_VERSION="7"
+GCC_VERSION="8"
 # KERNEL_VERSION will be set dynamically by dsl, 
 KERNEL_VERSION="4.0"
 
