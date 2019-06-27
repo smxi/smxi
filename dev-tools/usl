@@ -576,7 +576,7 @@ update_inxi_branches()
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
 				files='pinxi.1 pinxi README.txt'
 				b_perl='true'
-				add_perl='modules/* docs/* lib/*'
+				add_perl='modules/README.txt docs/* lib/*'
 				;;
 			inxi-c)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-c/"
