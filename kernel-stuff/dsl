@@ -287,7 +287,7 @@ function rsync_liquorix_mirror()
 {
 	echo $LINE
 	echo "Syncing Liquorix mirror..."
-	rsync -av --delete --progress --exclude={'*.origin.tar.gz','*.orig.tar.xz','*~buster*','*~stretch*'} \
+	rsync -av --delete --progress --exclude={'*.origin.tar.gz','*.orig.tar.xz','*~bullseye*','*~buster*','*~stretch*'} \
 	mirror@liquorix.net::debian/pool/main/l/linux-liquorix/ $LIQUORIX_MIRROR || error_handler 14 "$?"
 }
 function check_rsynced_kernel_exists()
