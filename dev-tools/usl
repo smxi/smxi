@@ -77,7 +77,7 @@ WORKING_BRANCH=$SMXI_BRANCH
 
 # scripts/libs
 RB_VERSION="${RBXI_VC}rb-version"
-LIST_ACXI='acxi acxi.1'
+LIST_ACXI='acxi acxi.1 auto.tag'
 LIST_INXI='inxi'
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
@@ -720,7 +720,7 @@ git_tag()
 	local tags=$(git tag) working='' version='1'
 	tags=$(sort -r <<< $tags)
 	for tag in $tags;do
-		if [ -n "$(grep "$INXI_VERSION-" <<< $tag)" ];then
+		if [ -n "$(grep "^$INXI_VERSION-" <<< $tag)" ];then
 			version=$(cut -d '-' -f 2 <<< $tag)
 			version=$(($version + 1))
 			break;
