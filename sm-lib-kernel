@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.7.7
-####  Date: 2019-08-15
+####  version: 2.7.8
+####  Date: 2019-12-19
 
 ####  Copyright (C) Harald Hope 2005-2019
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -29,7 +29,7 @@
 ########################################################################
 # 32 bit lists 
 KERNEL_LIST_32_NON_PAE='
-5.1.0-19.1-liquorix-686
+5.1.0-20.1-liquorix-686
 5.0.0-20.1-liquorix-686
 4.20.0-16.2-liquorix-686
 4.19.0-16.1-liquorix-686
@@ -55,7 +55,7 @@ KERNEL_LIST_32_NON_PAE='
 3.0.0-9.dmz.1-liquorix-686 
 2.6.38-7.dmz.2-liquorix-686'
 KERNEL_LIST_32_PAE='
-5.1.0-19.1-liquorix-686-pae 
+5.1.0-20.1-liquorix-686-pae 
 5.0.0-20.1-liquorix-686-pae 
 4.20.0-16.2-liquorix-686-pae 
 4.19.0-16.1-liquorix-686-pae 
@@ -89,7 +89,9 @@ KERNEL_ADVANCED_LIST_32_NON_PAE=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
 KERNEL_LIST_64='
-5.1.0-19.1-liquorix-amd64 
+5.3.0-18.1-liquorix-amd64 
+5.2.0-21.2-liquorix-amd64 
+5.1.0-20.1-liquorix-amd64 
 5.0.0-20.1-liquorix-amd64 
 4.20.0-16.2-liquorix-amd64 
 4.19.0-16.1-liquorix-amd64 
