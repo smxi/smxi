@@ -32,7 +32,7 @@ LINE='--------------------------------------------------------------------'
 # NOTE: gcc 5 and later drops the .x, so it's just gcc-5
 # note: just use generic gcc metapackage, damentz always uses the 
 # current version. Use -9 if you want specific included.
-GCC_VERSION=""
+GCC_VERSION="-9"
 # KERNEL_VERSION will be set dynamically by dsl, 
 KERNEL_VERSION="4.0"
 
