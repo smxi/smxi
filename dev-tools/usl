@@ -558,6 +558,7 @@ update_inxi_branches()
 				inxi.htm 
 				inxi-about.htm 
 				inxi-configuration.htm 
+				inxi-core-mission.htm 
 				inxi-cpu-flags.htm 
 				inxi-dependencies.htm 
 				inxi-faqs.htm 
