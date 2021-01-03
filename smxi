@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.31
-####  Date: 2019-07-19
+####  version: 8.15.32
+####  Date: 2021-01-03
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2019
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -272,7 +272,7 @@ B_MEPIS_SOURCES='false'
 B_SIDUCTION_SOURCES='false'
 
 # video driver booleans
-B_ATI='false'
+B_AMD='false'
 B_INTEL='false'
 B_NVIDIA='false'
 
@@ -1744,8 +1744,8 @@ set_graphics_data()
 				cardInfo='NVIDIA'
 				;;
 			1002)
-				B_ATI='true'
-				cardInfo='ATI'
+				B_AMD='true'
+				cardInfo='AMD'
 				;;
 			8086)
 				B_INTEL='true'
@@ -1759,7 +1759,7 @@ set_graphics_data()
 
 	if [ "$B_TESTING_1" == 'true' ];then
 		:
-# 		B_ATI='true'
+# 		B_AMD='true'
 # 		B_INTEL='false'
 # 		B_NVIDIA='false'
 	fi
@@ -3735,7 +3735,7 @@ print_video_data()
 		fi
 		log_function_data "Nvidia Support Data:\n$VIDEO_SUPPORT_NVIDIA"
 	fi
-	if [ "$B_ATI" == 'true' -a "$VIDEO_SUPPORT_FGLRX" != 'unset' ];then
+	if [ "$B_AMD" == 'true' -a "$VIDEO_SUPPORT_FGLRX" != 'unset' ];then
 		if [ -z "$VIDEO_SUPPORT_FGLRX" ];then
 			downloadFullUrl=$downloadUrl$VIDEO_DATA_FGLRX
 			uaFull="$ua$VIDEO_DATA_FGLRX"

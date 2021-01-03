@@ -55,12 +55,12 @@ install_graphics()
 	local FgDebianText="${C}$FgDebId${S} - Debian method fglrx driver installation.\n    ${S}This will install the ${C}Debian fglrx${S} driver packages.\n"
 	local FgBetaId='fglrx-beta-driver' 
 	local FgBetaText="\n${C}$FgBetaId${S} - Installs latest ${C}AMD/fglrx beta driver${S} (${M}if available${S}) for your card type.\n    ${S}If none is available, the ${C}latest stable FGLRX${S} driver is used instead.\n"
-	local radeonhdText='' bRadeonhd='true'
+	local amdgpuText='' bRadeonhd='true'
 	local optRadeonhd=''
 	# intel stuff
 	local optIntel=''  
 	## test stuff
-# 	B_ATI='true'
+# 	B_AMD='true'
 # 	B_NVIDIA='false'
 	if [ "$B_NVIDIA" == 'true' ];then
 		if [ -n "$( check_package_status 'xserver-xorg-video-nouvea' 'c' )" ];then
@@ -71,12 +71,12 @@ install_graphics()
 		else
 			bNoNvDriver='true'
 		fi
-	elif [ "$B_ATI" == 'true' ];then
+	elif [ "$B_AMD" == 'true' ];then
 # 		if [ -z "$( check_package_status 'xserver-xorg-video-radeon' 'c' )" ];then
 # 			bRadeonhd='false'
 # 		fi
-		cardBrand='ATI'
-		xorgNative='ati'
+		cardBrand='AMD'
+		xorgNative='amdgpu'
 		OptFg=$installXorgDriver
 	elif [ "$B_INTEL" == 'true' ];then
 		cardBrand='Intel'
@@ -84,7 +84,7 @@ install_graphics()
 		OptIntel=$installXorgDriver
 	fi
 
-	if [ "$B_NVIDIA"  == 'true' -o "$B_ATI"  == 'true' -o "$B_INTEL" == 'true' ];then
+	if [ "$B_NVIDIA"  == 'true' -o "$B_AMD"  == 'true' -o "$B_INTEL" == 'true' ];then
 		# load the gfx installer script
 		test_version_info $GFX_INSTALLER chm
 		# get the output data for print available drivers
@@ -110,24 +110,24 @@ install_graphics()
 					bError='true'
 				fi
 				# there are some cases with both ati/nvidia installed...
-				if [ "$B_ATI" == 'true' ];then
+				if [ "$B_AMD" == 'true' ];then
 # 					if [ "$bRadeonhd" == 'true' ];then
-# 						radeonhdText="\n${C}install-xorg-radeonhd${S} - ${S} Install the ${C}Xorg Radeonhd${S} driver. For newer ATI cards.\n\t${M}3d quality varies - 2d, dual monitor should be fine.${S}"
+# 						amdgpuText="\n${C}install-xorg-radeonhd${S} - ${S} Install the ${C}Xorg Radeonhd${S} driver. For newer ATI cards.\n\t${M}3d quality varies - 2d, dual monitor should be fine.${S}"
 # 						optRadeonhd='install-xorg-radeonhd'
 # 					fi
 					if [ "$fgXorgError" -eq 0 ];then
-						fgXorgText='\n${C}install-xorg-radeon${S} - Install the ${C}Xorg Radeon${S} driver. Card support varies, 2d usually at least, 3d getting better.'$radeonhdText'\n'
+						fgXorgText='\n${C}install-xorg-amdgpu${S} - Install the ${C}Xorg amdgpu${S} driver. Good card support.'$amdgpuText'\n'
 					else
-						fgXorgText='\n\n${E}Unfortunately, because of an ATI error, there is no working ${C}fglrx${E} driver\navailable for your ATI gfx card and Xorg your version\n\n${S}You can either install the regular ${C}Xorg ati${S} native driver, or try the \n${C}xorg radeon${S} driver.\n\n'
+						fgXorgText='\n\n${E}Unfortunately, because of an ATI error, there is no working ${C}fglrx${E} driver\navailable for your ATI gfx card and Xorg your version\n\n${S}You can either install the regular ${C}Xorg ati${S} native driver, or try the \n${C}xorg amdgpu${S} driver.\n\n'
 						bError='true'
 					fi
-					OptFg="$OptFg install-xorg-radeon $optRadeonhd"
+					OptFg="$OptFg install-xorg-amdgpu $optRadeonhd"
 				fi
 				if [ "$B_NVIDIA" == 'true' ];then
 # 					if [ "$bNoNvDriver" != 'true' ];then
 # 						NvDriverString="\n${C}install-xorg-driver${S} - Install native, Free, non binary blob ${C}xorg $xorgNative${S} drivers. This will\n    also update your xorg.conf and clean out all currently installed binary drivers."
 # 					fi
-					nvXorgtext="\n${C}install-xorg-nouveau${S} - Install the ${C}Xorg Nouveau${S} driver - Support varies widely\n     card to card, Xorg to Xorg. If it fails, try$NvText vesa instead (${C}sgfxi -N vesa${S}).\n     Handles KMS modeset blacklisting automatically if needed.\n"
+					nvXorgtext="\n${C}install-xorg-nouvxorgNativeeau${S} - Install the ${C}Xorg Nouveau${S} driver - Support varies widely\n     card to card, Xorg to Xorg. If it fails, try$NvText vesa instead (${C}sgfxi -N vesa${S}).\n     Handles KMS modeset blacklisting automatically if needed.\n"
 					OptNv="$OptNv install-xorg-nouveau"
 				fi
 			fi
@@ -210,11 +210,11 @@ install_graphics()
 		fi
 	fi
 
-	if [ "$B_ATI"  == 'true' -a "$bError" != 'true' ];then
+	if [ "$B_AMD"  == 'true' -a "$bError" != 'true' ];then
 		# set the driver data if it's available
 		log_function_data "FgCurrentDriver: $FgCurrentDriver"
 		if [ -n "$FgCurrentDriver" ];then
-			currentDriverText='echo -e "${M}Your currently Installed Fglrx/Ati Driver is: ${C}$FgCurrentDriver${S}"'
+			currentDriverText='echo -e "${M}Your currently Installed Fglrx/AMD Driver is: ${C}$FgCurrentDriver${S}"'
 		fi
 
 		FgDebianSid=$( echo $sgfxiData | grep -o $FgDebId )
@@ -305,6 +305,9 @@ install_graphics()
 		case $opt in
 			install-xorg-driver)
 				final_graphics_install native
+				;;
+			install-xorg-amdgpu)
+				final_graphics_install amdgpu
 				;;
 			install-xorg-nouveau)
 				final_graphics_install nouveau
@@ -428,6 +431,11 @@ final_graphics_install()
 	case $1 in
 		native)
 			extraArgs=" -n "
+			bInstallDriver='true'
+			bCompleted='true'
+			;;
+		amdgpu)
+			extraArgs=" -N amdgpu"
 			bInstallDriver='true'
 			bCompleted='true'
 			;;
