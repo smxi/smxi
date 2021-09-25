@@ -576,7 +576,7 @@ update_inxi_branches()
 				;;
 			inxi-perl)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
-				files='pinxi.1 pinxi README.txt'
+				files='pinxi.1 pinxi pinxi.changelog README.txt'
 				b_perl='true'
 				add_perl='modules/* docs/* lib/*'
 				;;
