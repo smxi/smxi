@@ -539,7 +539,7 @@ process_rbxi()
 update_inxi_branches()
 {
 	# docs 
-	local branches='inxi-perl one two inxi-legacy docs' 
+	local branches='inxi-perl one two docs' 
 	local files='' dev_dir='' b_perl='false' add_perl=''
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
