@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-apt-tools
-####  version: 1.23.44
-####  Date: 2017-01-20
+####  version: 1.23.45
+####  Date: 2021-11-06
 
 ####  Copyright (C) Harald Hope 2005-2018
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1480,7 +1480,7 @@ set_apt_type()
 		:
 	else
 		# no point in showing this option if aptitude isn't even installed
-		if [ -n "$( which aptitude )" ];then
+		if [ -n "$( type -p aptitude )" ];then
 			if [ -n "$aptType"  ];then
 				aptTypeSetting=$aptType
 			else
@@ -2338,7 +2338,7 @@ test_required_startup_apps()
 
 	for p in $requiredApps
 	do
-		appPath=$( which $p )
+		appPath=$( type -p $p )
 		if [ ! -e "$appPath" -o -z "$appPath" ];then
 			installApps="$installApps $p"
 			missing='true'
