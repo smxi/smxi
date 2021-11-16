@@ -1,5 +1,5 @@
 smxi=8.15.33:2021-11-06
-sm-lib-apt-tools=1.23.45:2021-11-06
+sm-lib-apt-tools=1.23.45:2021-11-14
 sm-lib-clean-up=2.10.15:2012-02-08
 sm-lib-distro-conversion=3.3.18:2018-07-27
 sm-lib-du-fixes=1.4.13:2018-08-09
