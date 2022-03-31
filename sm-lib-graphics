@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-graphics
-####  version: 2.6.4
-####  Date: 2021-01-03
+####  version: 2.6.5
+####  Date: 2022-03-31
 
 ####  Copyright (C) Harald Hope 2005-2021
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -34,8 +34,8 @@ install_graphics()
 	local cardBrand='' bError='false' xorgNative='' installXorgDriver='install-xorg-driver'
 	# nvidia stuff
 	local NvOptionText='' OptNv='' OptNvFullList='' NvFullText=''
-	local NvDefault='' NvCurrentStable='' NvLegacy6='' NvLegacy5='' NvLegacy4='' NvLegacy3='' NvLegacy2=''
-	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy6Math='' NvLegacy5Math='' NvLegacy4Math='' NvLegacy3Math='' NvLegacy2Math=''
+	local NvDefault='' NvCurrentStable='' NvLegacy7='' NvLegacy6='' NvLegacy5='' NvLegacy4='' NvLegacy3='' NvLegacy2=''
+	local NvDefaultMath='' NvCurrentStableMath='' NvLegacy7Math='' NvLegacy6Math='' NvLegacy5Math='' NvLegacy4Math='' NvLegacy3Math='' NvLegacy2Math=''
 	local NvTestCurrent='' NvTest2='' NvTest3='' NvTest4='' NvTest5='' NvTest65=''
 	local NvDefaultMathTemp='' NvCurrentStableMathTemp='' NvLegacy5MathTemp='' NvLegacy4MathTemp=''
 	local NvLegacy2MathTemp='' nvXorgtext=''
@@ -149,21 +149,24 @@ install_graphics()
 		NvDefaultMath=$( echo $NvDefault | cut -d '-' -f 2 )
 		NvCurrentStable=$( echo $sgfxiData | cut -d ':' -f 2 )
 		NvCurrentStableMath=$( echo $NvCurrentStable | cut -d '-' -f 2 )
-		NvLegacy6=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvLegacy7=$( echo $sgfxiData | cut -d ':' -f 3 )
+		NvLegacy7Math=$( echo $NvLegacy6 | cut -d '-' -f 2 )
+		NvLegacy6=$( echo $sgfxiData | cut -d ':' -f 4 )
 		NvLegacy6Math=$( echo $NvLegacy6 | cut -d '-' -f 2 )
-		NvLegacy5=$( echo $sgfxiData | cut -d ':' -f 4 )
+		NvLegacy5=$( echo $sgfxiData | cut -d ':' -f 5 )
 		NvLegacy5Math=$( echo $NvLegacy5 | cut -d '-' -f 2 )
-		NvLegacy4=$( echo $sgfxiData | cut -d ':' -f 5 )
+		NvLegacy4=$( echo $sgfxiData | cut -d ':' -f 6 )
 		NvLegacy4Math=$( echo $NvLegacy4 | cut -d '-' -f 2 )
-		NvLegacy3=$( echo $sgfxiData | cut -d ':' -f 6 )
+		NvLegacy3=$( echo $sgfxiData | cut -d ':' -f 7 )
 		NvLegacy3Math=$( echo $NvLegacy3 | cut -d '-' -f 2 )
-		NvLegacy2=$( echo $sgfxiData | cut -d ':' -f 7 )
+		NvLegacy2=$( echo $sgfxiData | cut -d ':' -f 8 )
 		NvLegacy2Math=$( echo $NvLegacy2 | cut -d '-' -f 2 )
 # 		[ "$NvDefaultMath" -gt "$NvLegacy3Math"  ] && NvTestCurrent=0 || NvTestCurrent=1
 # 		[ "$NvLegacy4Math" -gt "$NvDefaultMath"  ] && NvTest2=0 || NvTest2=1
 # 		[ "$NvCurrentStableMath" -gt "$NvDefaultMath"  ] && NvTest3=0 || NvTest3=1
 		NvDefaultMathTemp=$( convert_to_new_versioning $NvDefaultMath nv )
 		NvCurrentStableMathTemp=$( convert_to_new_versioning $NvCurrentStableMath nv )
+		NvLegacy7MathTemp=$( convert_to_new_versioning $NvLegacy7Math nv )
 		NvLegacy6MathTemp=$( convert_to_new_versioning $NvLegacy6Math nv )
 		NvLegacy5MathTemp=$( convert_to_new_versioning $NvLegacy5Math nv )
 		NvLegacy4MathTemp=$( convert_to_new_versioning $NvLegacy4Math nv )
@@ -179,10 +182,11 @@ install_graphics()
 		NvTest4=$( compare_numbers $NvDefaultMathTemp $NvLegacy4MathTemp )
 		NvTest5=$( compare_numbers $NvDefaultMathTemp $NvLegacy5MathTemp )
 		NvTest6=$( compare_numbers $NvDefaultMathTemp $NvLegacy6MathTemp )
+		NvTest7=$( compare_numbers $NvDefaultMathTemp $NvLegacy7MathTemp )
 		#echo "NV tempno 1:$NvDefaultMathTemp 2:$NvCurrentStableMathTemp 3:$NvLegacy5MathTemp 4:$NvLegacy4MathTemp 5:$NvLegacy3MathTemp 6:$NvLegacy2MathTemp"
 		#echo "nvtests 1:$NvTestCurrent 2:$NvTest2 3:$NvTest3 4:$NvTest4 5: $NvTest5"
-		log_function_data "NV tempno 1:$NvDefaultMathTemp 2:$NvCurrentStableMathTemp 3:$NvLegacy6MathTemp 4:$NvLegacy5MathTemp 5:$NvLegacy4MathTemp 6:$NvLegacy3MathTemp 7:$NvLegacy2MathTemp"
-		log_function_data "nvtests 1:$NvTestCurrent 2:$NvTest2 3:$NvTest3 4:$NvTest4 5: $NvTest5 6: $NvTest6"
+		log_function_data "NV tempno DeMaTe:$NvDefaultMathTemp CuStMaTe:$NvCurrentStableMathTemp Legacies: 7:$NvLegacy7MathTemp 6:$NvLegacy6MathTemp 5:$NvLegacy5MathTemp 4:$NvLegacy4MathTemp 3:$NvLegacy3MathTemp 2:$NvLegacy2MathTemp"
+		log_function_data "nvtests 1:$NvTestCurrent 2:$NvTest2 3:$NvTest3 4:$NvTest4 5: $NvTest5 6: $NvTest6 7: $NvTest7"
 		
 		if [ "$NvTest2" -eq 0 ];then
 			# short hack while 304 series is current stable, remove:   -a "$NvTest3" -ne 1 when stable > 304
@@ -190,17 +194,20 @@ install_graphics()
 				OptNvFullList='5xxx-nvidia'
 				NvFullText="${C}5xxx-nvidia${S} - ${M}Recommended Driver${S} Use only for your GeForce 5xxx series) card${S}.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n"
 			elif [ "$NvTest4" -eq 1 ];then
-				OptNvFullList='5xxx-nvidia 6-7xxx-nvidia'
-				NvFullText="${C}5xxx-nvidia${S} - Generally only for older (5xxx series) cards.\n    ${S}This will install the legacy 3 nVidia driver: ${C}$NvLegacy3${S}\n${C}6-7xxx-nvidia${S} - ${M}Recommended Driver${S} Latest driver for your GeForce 6xxx/7xxx card.\n    ${S}This will install this nVidia driver: ${C}$NvLegacy4${S}\n"
+				OptNvFullList='6-7xxx-nvidia'
+				NvFullText="${C}6-7xxx-nvidia${S} - ${M}Recommended Driver${S} Latest driver for your GeForce 6xxx/7xxx card.\n    ${S}This will install this nVidia driver: ${C}$NvLegacy4${S}\n"
 			elif [ "$NvTest5" -eq 1 ];then
-				OptNvFullList='6-7xxx-nvidia 8-9xxx-gt-1-3xx-nvidia'
-				NvFullText="${C}6-7xxx-nvidia${S} - legacy driver for GeForce 6xxx/7xxx cards.\n    ${S}This will install this nVidia driver: ${C}$NvLegacy4${S}\n    Use only if you have problems with the ${C}8-9xxx-gt-1-3xx-nvidia${S} driver.\n${C}8-9xxx-gt-1-3xx-nvidia${S} - ${M}Recommended Driver${S} 340 series nVidia driver.\n    For GeForce 8/9xxx and GT 1xx-3xx cards.\n    ${S}This will install the legacy 5 nVidia driver: ${C}$NvLegacy5${S}\n"
+				OptNvFullList='8-9xxx-gt-1-3xx-nvidia'
+				NvFullText="${C}8-9xxx-gt-1-3xx-nvidia${S} - ${M}Recommended Driver${S} 340 series nVidia driver.\n    For GeForce 8/9xxx and GT 1xx-3xx cards.\n    ${S}This will install the legacy 5 nVidia driver: ${C}$NvLegacy5${S}\n"
 			elif [ "$NvTest6" -eq 1 ];then
-				OptNvFullList='8-9xxx-gt-1-3xx-nvidia gt-2-8xx-nvidia'
-				NvFullText="${C}8-9xxx-gt-1-3xx-nvidia${S} - legacy driver for GeForce 8xxx/9xxx cards.\n    ${S}This will install this nVidia driver: ${C}$NvLegacy5${S}\n    Use only if you have problems with the ${C}gt-2-8xx-nvidiaa${S} driver.\n${C}gt-2-8xx-nvidia${S} - ${M}Recommended Driver${S} 390 series nVidia driver.\n    For GeForce GT 2-8xx cards.\n    ${S}This will install the legacy 6 nVidia driver: ${C}$NvLegacy6${S}\n"
+				OptNvFullList='gt-2-8xx-nvidia'
+				NvFullText="${C}gt-2-8xx-nvidia${S} - ${M}Recommended Driver${S} 390 series nVidia driver.\n    For GeForce GT 2-8xx cards.\n    ${S}This will install the legacy 6 nVidia driver: ${C}$NvLegacy6${S}\n"
+			elif [ "$NvTest7" -eq 1 ];then
+				OptNvFullList='gt-6-8xx-nvidia'
+				NvFullText="${C}gt-6-8xx-nvidia${S} - ${M}Recommended Driver${S} 470 series nVidia driver.\n    For GeForce GT 6xx-8xx cards.\n    ${S}This will install the legacy 7 nVidia driver: ${C}$NvLegacy7${S}\n"
 			elif [ "$NvTestCurrent" -eq 1 ];then
-				OptNvFullList='gt-2-8xx-nvidia current-nvidia'
-				NvFullText="${C}gt-2-8xx-nvidia${S} - 390 series nVidia driver. Use only if you have problems\n    with ${C}current-nvidia${S}.\n    ${S}This will install the legacy 6 nVidia driver: ${C}$NvLegacy6${S}\n${C}current-nvidia${S} - ${M}Recommended Driver${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
+				OptNvFullList='gt-6-8xx-nvidia current-nvidia'
+				NvFullText="${C}gt-6-8xx-nvidia${S} - 470 series nVidia driver. Use only if you have problems\n    with ${C}current-nvidia${S}.\n    ${S}This will install the legacy 6 nVidia driver: ${C}$NvLegacy6${S}\n${C}current-nvidia${S} - ${M}Recommended Driver${S}.\n    ${S}This will install the latest current nVidia driver: ${C}$NvCurrentStable${S}\n"
 			fi
 			OptNv="$OptNv $NvDebId $OptNvFullList $NvBetaId"
 			NvOptionText='echo -e "$NvDebianText\n$NvFullText$NvBetaText"'
@@ -342,6 +349,9 @@ install_graphics()
 				;;
 			gt-2-8xx-nvidia)
 				final_graphics_install nvco $NvLegacy6Math
+				;;
+			gt-6-8xx-nvidia)
+				final_graphics_install nvco $NvLegacy7Math
 				;;
 			current-nvidia)
 				final_graphics_install nvco $NvCurrentStableMath
