@@ -558,6 +558,7 @@ update_inxi_branches()
 				files='smxi-docs.css 
 				inxi.htm 
 				inxi-about.htm 
+				inxi-changelog.htm 
 				inxi-configuration.htm 
 				inxi-core-mission.htm 
 				inxi-cpu-flags.htm 
@@ -588,11 +589,11 @@ update_inxi_branches()
 				;;
 			one)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/one/"
-				files='inxi  README.txt'
+				files='inxi README.txt'
 				;;
 			two)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/two/"
-				files='inxi  README.txt'
+				files='inxi README.txt'
 				;;
 			inxi-legacy)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-legacy/"
