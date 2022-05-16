@@ -540,14 +540,14 @@ update_inxi_branches()
 {
 	# docs 
 	local branches='inxi-perl one two docs' 
-	local files='' dev_dir='' b_perl='false' add_perl=''
+	local files='' dev_dir='' b_pinxi='false' add_perl=''
 	WORKING_REMOTE=$INXI_REMOTE
 	WORKING_VC_DIR=$INXI_VC
 	echo $LINE
 	echo "Starting inxi branch updates..."
 	
 	for branch in $branches;do
-		b_perl='false'
+		b_pinxi='false'
 		b_c='false'
 		add_perl=''
 		case $branch in
@@ -578,8 +578,8 @@ update_inxi_branches()
 			inxi-perl)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
 				files='pinxi.1 pinxi pinxi.changelog README.txt'
-				b_perl='true'
-				add_perl='modules/* docs/* lib/*'
+				b_pinxi='true'
+				add_perl='modules/* docs/* lib/* tools/*'
 				;;
 			inxi-c)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-c/"
@@ -606,10 +606,11 @@ update_inxi_branches()
 		if [ "$files" != '' ];then
 			process_script "$files" "$dev_dir" "$INXI_VC"
 		fi
-		if [ "$b_perl" == 'true' ];then
+		if [ "$b_pinxi" == 'true' ];then
 			cp -af ${dev_dir}docs/* ${INXI_VC}docs
 			cp -af ${dev_dir}lib/* ${INXI_VC}lib
 			cp -af ${dev_dir}modules/* ${INXI_VC}modules
+			cp -af ${dev_dir}tools/* ${INXI_VC}tools
 			git_add "$add_perl" 
 		fi
 		if [ "$b_c" == 'true' ];then
