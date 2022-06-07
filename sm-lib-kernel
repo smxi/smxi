@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.7.14
-####  Date: 2021-07-20
+####  version: 2.7.15
+####  Date: 2022-06-07
 
-####  Copyright (C) Harald Hope 2005-2021
+####  Copyright (C) Harald Hope 2005-2022
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -77,11 +77,11 @@ KERNEL_ADVANCED_LIST_32_NON_PAE=''
 TESTING_KERNEL_32=''
 # 64 bit lists 
 KERNEL_LIST_64='
-5.11.0-21.2-liquorix-amd64
+5.16.0-18.2-liquorix-amd64
+5.14.0-19.2-liquorix-amd64
+5.12.0-19.4-liquorix-amd64
 5.10.0-17.1-liquorix-amd64
-5.9.0-16.1-liquorix-amd64
 5.8.0-17.2-liquorix-amd64
-5.7.0-19.1-liquorix-amd64
 5.6.0-19.1-liquorix-amd64 
 5.4.0-17.1-liquorix-amd64 
 5.2.0-21.2-liquorix-amd64 
