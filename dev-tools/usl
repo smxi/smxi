@@ -579,7 +579,7 @@ update_inxi_branches()
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
 				files='pinxi.1 pinxi pinxi.changelog README.txt'
 				b_pinxi='true'
-				add_perl='modules/* docs/* lib/* tools/*'
+				add_perl='modules/* data/*/* docs/* lib/* tools/*'
 				;;
 			inxi-c)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-c/"
@@ -607,6 +607,7 @@ update_inxi_branches()
 			process_script "$files" "$dev_dir" "$INXI_VC"
 		fi
 		if [ "$b_pinxi" == 'true' ];then
+			cp -af ${dev_dir}data/* ${INXI_VC}data
 			cp -af ${dev_dir}docs/* ${INXI_VC}docs
 			cp -af ${dev_dir}lib/* ${INXI_VC}lib
 			cp -af ${dev_dir}modules/* ${INXI_VC}modules
