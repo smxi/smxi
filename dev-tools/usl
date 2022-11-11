@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.6.8
-####  Date: 2018-08-28
+####  version: 2.6.9
+####  Date: 2022-11-08
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2018
 ####
@@ -78,7 +78,7 @@ WORKING_BRANCH=$SMXI_BRANCH
 
 # scripts/libs
 RB_VERSION="${RBXI_VC}rb-version"
-LIST_ACXI='acxi acxi.1 auto.tag'
+LIST_ACXI='acxi acxi.1 acxi.conf auto.tag'
 LIST_INXI='inxi'
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
