@@ -2,7 +2,7 @@ smxi=8.15.33:2021-11-06
 sm-lib-apt-tools=1.23.45:2021-11-14
 sm-lib-clean-up=2.10.15:2012-02-08
 sm-lib-distro-conversion=3.3.18:2018-07-27
-sm-lib-du-fixes=1.4.14:2022-10-17
+sm-lib-du-fixes=1.4.13:2018-08-09
 sm-lib-graphics=2.6.5:2022-03-31
 sm-lib-kde4-updater=0.7.39:2013-11-19
 sm-lib-kernel=2.7.15:2022-06-07
@@ -22,10 +22,10 @@ sm-lib-2009-fixes-t=1.1.19:2009-12-02
 sm-lib-2011-fixes=1.1.0:2011-07-14
 sm-lib-2011-fixes-s=1.0.0:2011-02-10
 sm-lib-2011-fixes-t=1.1.0:2011-07-14
-sgfxi=4.26.80:2022-12-01
+sgfxi=4.26.81:2023-01-16
 svmi=2.8.79:2019-11-15
-inxi=3.3.23:2022-10-31
+inxi=3.3.24:2022-12-27
 rbxi=2.7.4:2021-08-04
-sm-main-version=8.42.34:2022-10-31
+sm-main-version=8.42.00:2023-01-16
 
 ###**EOF**###

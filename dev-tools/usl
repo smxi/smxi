@@ -552,8 +552,16 @@ update_inxi_branches()
 		add_perl=''
 		case $branch in
 			docs)
-				# remember, you have to manually git add a new page, after running 
-				# this once to put a copy in the git branch docs.
+				## remember, you have to manually git add a new page, after running 
+				# #this once to put a copy in the git branch docs.
+				# 1. create link between smxi/docs file and svn/docs
+				# 2. run usl -i to create file 
+				## then:
+				# 3. git checkout docs
+				# 4. git add inxi-json-xml-output.htm
+				## I think usl -i does this part but might as well
+				# 5. git commit -a
+				# 6. git push git@github.com:smxi/inxi docs
 				dev_dir="$HOME/bin/scripts/inxi/svn/docs/"
 				files='smxi-docs.css 
 				inxi.htm 
@@ -565,13 +573,15 @@ update_inxi_branches()
 				inxi-dependencies.htm 
 				inxi-faqs.htm 
 				inxi-installation.htm 
-				inxi-irc-tech.htm inxi-tech.htm
+				inxi-irc-tech.htm
+				inxi-json-xml-output.htm
 				inxi-man.htm 
 				inxi-man-2.x.htm 
 				inxi-options.htm 
 				inxi-options-2.x.htm 
 				inxi-programming-conventions.htm 
 				inxi-screenshots.htm 
+				inxi-tech.htm
 				inxi-usage.htm 
 				'
 				;;
