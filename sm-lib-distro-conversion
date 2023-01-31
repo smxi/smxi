@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-distro-conversion
-####  version: 3.3.18
-####  Date: 2018-07-27
+####  version: 3.3.19
+####  Date: 2023-01-31
 
-####  Copyright (C) Harald Hope 2005-2018
+####  Copyright (C) Harald Hope 2005-2023
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 2 of the License, or (at your option) any later version.
@@ -351,9 +351,9 @@ update_smxi_data()
 {
 	eval $LOGPS
 	run_script_import $LIB_MISC_TWEAKS
-	if [ "$B_OFFER_LIQUORIX_KERNELS" == 'true' ];then
-		offer_liquorix_kernel
-	fi
+# 	if [ "$B_OFFER_LIQUORIX_KERNELS" == 'true' ];then
+# 		offer_liquorix_kernel
+# 	fi
 	# this tests for presence of aptitude, and only offers itself if user has aptitude installed
 	set_apt_type 'conversion'
 	set_upgrade_type 'conversion'
