@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.33
-####  Date: 2021-11-06
+####  version: 8.15.34
+####  Date: 2023-01-31
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2019
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -587,6 +587,10 @@ error_handler()
 		sudo-login)
 			errorCode=8
 			errorMessage="You cannot start $SCRIPT_NAME with sudo. Please start $SCRIPT_NAME \nproperly as root (use either 'sudo su -' (note the '-' at the end) \nto become root, or login as root directly). If 'sudo su -' does not \nwork, please let the $SCRIPT_NAME maintainer know, and if your system \nhas root locked (why would anyone do that?) then you will have to \nunlock root, but for most cases 'sudo su -' should work.\nAfter you are root, then start $SCRIPT_NAME.\n\nTypical signs of sudo failures are respawnings of your desktop while \n$SCRIPT_NAME is running, or failures to create directories.\n"
+			;;
+		missing-core-tool)
+			errorCode=9
+			errorMessage="Missing core tool $errorExtra. Unable to continue."
 			;;
 		smxi-version-too-old)
 			errorCode=5
@@ -2545,6 +2549,9 @@ start_up_tests()
 	if [ ! -e $GRUB_PATH -a "$B_IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
+	if [ -n "$( type -p gawk &>/dev/null)" ];then
+		error_handler 'missing-core-tool' $FUNCNAME 'gawk'
+	fi
 	
 	if [ -n "$( type -p systemctl )" ];then
 		B_SYSTEMD='true'
@@ -2561,10 +2568,10 @@ start_up_tests()
 		fi
 	fi
 	# not making this elif for now because who knows what ubuntu will actually do with upstart
-	if [ -n "$( type -p initctl )" ];then
+	if [ -n "$( type -p initctl &>/dev/null )" ];then
 		B_UPSTART='true'
 	fi
-	if type -p curl &>/dev/null;then
+	if [ -n "$( type -p curl &>/dev/null )" ];then
 		B_CURL='true'
 	fi
 }

@@ -331,7 +331,7 @@ kernel_options()
 	echo "    Sometimes older kernels work and newer ones don't for some hardware issues."
 	eval "$altKernelOption"
 	echo "${C}$akoOption - advanced-kernel-options${S} Kernel metapackage options (add/remove kernel metapackages); "
-	echo "    Add ${C}liquorix${S} kernel sources (if supported); Update ${C}$SCRIPT_NAME${S} default kernel; Add/Remove kernel modules."
+	echo "    Install ${C}liquorix${S} kernel (if supported); Update ${C}$SCRIPT_NAME${S} default kernel; Add/Remove kernel modules."
 	echo "${C}$kmOption - kernel-remover${S} Remove unused kernels."
 	echo
 	#echo "${C}3${S} - Install wifi modules. ${W}This only works if you are booted into the kernel "
@@ -474,12 +474,12 @@ advanced_kernel_options()
 	fi
 }
 
-install_liquorix 
+install_liquorix()
 {
 	echo "Installing ${C}Liquorix${S} kernel..."
-	if [[ type -p curl ]];then
+	if [[ -n "$(type -p curl &>/dev/null)" ]];then
 		curl 'https://liquorix.net/install-liquorix.sh' | bash
-	elif [[ type -p wget ]];
+	elif [[ -n "$(type -p wget &>/dev/null)" ]];
 		wget -O - 'https://liquorix.net/install-liquorix.sh' | bash
 	else 
 		echo "${E}You must have either curl or wget installed.${N}"
