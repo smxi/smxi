@@ -479,7 +479,7 @@ install_liquorix()
 	echo "Installing ${C}Liquorix${S} kernel..."
 	if [[ -n "$(type -p curl &>/dev/null)" ]];then
 		curl 'https://liquorix.net/install-liquorix.sh' | bash
-	elif [[ -n "$(type -p wget &>/dev/null)" ]];
+	elif [[ -n "$(type -p wget &>/dev/null)" ]];then
 		wget -O - 'https://liquorix.net/install-liquorix.sh' | bash
 	else 
 		echo "${E}You must have either curl or wget installed.${N}"
