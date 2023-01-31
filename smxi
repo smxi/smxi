@@ -2549,7 +2549,7 @@ start_up_tests()
 	if [ ! -e $GRUB_PATH -a "$B_IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
-	if [ -n "$( type -p gawk 2>/dev/null)" ];then
+	if [ -z "$( type -p gawk 2>/dev/null)" ];then
 		error_handler 'missing-core-tool' $FUNCNAME 'gawk'
 	fi
 	
