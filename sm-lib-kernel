@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.7.15
-####  Date: 2022-06-07
+####  version: 2.7.16
+####  Date: 2023-01-31
 
 ####  Copyright (C) Harald Hope 2005-2022
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -415,7 +415,7 @@ advanced_kernel_options()
 
 	echo "${C}1 - kernel-metapackage-options${S} Kernel metapackage options: remove, install"
 	echo "     apt kernel/module metapackages. Also, install current apt kernel + modules."
-	echo "${C}2 - add-liquorix-sources${S} Add liquorix kernel sources (Debian Sid/Testing only, and if system supports)"
+	echo "${C}2 - install-liquorix${S} Install Liquorix kernel (Debian Sid/Testing only, and if system supports)"
 	echo "${C}3 - add-siduction-sources${S} Add siduction/towo kernel sources (Debian Sid/Testing only)"
 	echo "${C}4 - change-$SCRIPT_NAME-default-kernel${S} Change the default kernel $SCRIPT_NAME uses to your preference."
 	echo "${C}5 - install-kernel-modules${S} - Install kernel modules. Offers list of modules, install one by one"
@@ -426,15 +426,12 @@ advanced_kernel_options()
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-	options="kernel-metapackage-options add-liquorix-sources add-siduction-sources change-$SCRIPT_NAME-default-kernel install-kernel-modules remove-kernel-modules return-to-previous-menu"
+	options="kernel-metapackage-options install-liquorix add-siduction-sources change-$SCRIPT_NAME-default-kernel install-kernel-modules remove-kernel-modules return-to-previous-menu"
 	select opt in $options
 	do
 		log_function_data "opt selected: $opt"
 		case $opt in
-			add-liquorix-sources)
-				add_alternate_kernels_sources "liquorix"
-				repeat='true'
-				;;
+			
 			add-siduction-sources)
 				add_alternate_kernels_sources "siduction"
 				repeat='true'
@@ -442,6 +439,10 @@ advanced_kernel_options()
 			change-$SCRIPT_NAME-default-kernel)
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel
+				repeat='true'
+				;;
+			install-liquorix)
+				install_liquorix
 				repeat='true'
 				;;
 			kernel-metapackage-options)
@@ -471,6 +472,12 @@ advanced_kernel_options()
 	if [ "$repeat" == 'true' ];then
 		advanced_kernel_options
 	fi
+}
+
+install_liquorix 
+{
+	echo "Installing ${C}Liquorix${S} kernel..."
+	curl 'https://liquorix.net/install-liquorix.sh' | bash
 }
 
 # args: $1 - which kernel type, currently only 

@@ -78,23 +78,28 @@ WORKING_BRANCH=$SMXI_BRANCH
 
 # scripts/libs
 RB_VERSION="${RBXI_VC}rb-version"
-LIST_ACXI='acxi acxi.1 acxi.conf auto.tag'
+LIST_ACXI='acxi acxi.1 acxi.changelog acxi.conf auto.tag LICENSE.txt README.txt
+docs/acxi-values.txt'
 LIST_INXI='inxi'
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
 LIST_RBXI='rbxi'
 LIST_SGFXI="sgfxi"
 LIST_SVMI='svmi'
-LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion sm-lib-du-fixes 
-sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel sm-lib-kernel-install sm-lib-misc-tweaks  
-sm-lib-package-install sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes 
-sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t sm-lib-2009-fixes sm-lib-2009-fixes-s 
-sm-lib-2009-fixes-t sm-lib-2011-fixes sm-lib-2011-fixes-s sm-lib-2011-fixes-t"
-LIST_SMXI_BACKEND="alert_message configs_last_modified configs_t  holds_last_modified_t  
-last_modified_s status  warning_message_s alert_message_s  configs_last_modified_s  holds
-holds_s last_modified_t status_s warning_message_t alert_message_t configs_last_modified_t  
-holds_last_modified holds_t sm-lib-kernels status_t configs configs_s holds_last_modified_s  
-last_modified sm-lib-kernels-bu warning_message"
+LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion 
+sm-lib-du-fixes sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel 
+sm-lib-kernel-install sm-lib-misc-tweaks sm-lib-package-install 
+sm-lib-package-removal sm-lib-warning sm-lib-2006-fixes sm-lib-2007-fixes 
+sm-lib-2008-fixes sm-lib-2008-fixes-s sm-lib-2008-fixes-t sm-lib-2009-fixes 
+sm-lib-2009-fixes-s sm-lib-2009-fixes-t sm-lib-2011-fixes sm-lib-2011-fixes-s 
+sm-lib-2011-fixes-t"
+LIST_SMXI_BACKEND="alert_message configs_last_modified configs_t  
+holds_last_modified_t last_modified_s status
+warning_message_s alert_message_s configs_last_modified_s  holds
+holds_s last_modified_t status_s warning_message_t alert_message_t 
+configs_last_modified_t holds_last_modified holds_t sm-lib-kernels 
+status_t configs configs_s holds_last_modified_s last_modified sm-lib-kernels-bu 
+warning_message"
 LIST_SMXI_KERNEL="dsl install-kernel.sh"
 LIST_SMXI_STUB="smxi-stub"
 LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
