@@ -2549,7 +2549,7 @@ start_up_tests()
 	if [ ! -e $GRUB_PATH -a "$B_IS_LIVE" != 'true' -a "$B_SKIP_GRUB_TEST" != 'true' ];then
 		error_handler 'no-grub-config' $FUNCNAME ''
 	fi
-	if [ -n "$( type -p gawk &>/dev/null)" ];then
+	if [ -n "$( type -p gawk 2>/dev/null)" ];then
 		error_handler 'missing-core-tool' $FUNCNAME 'gawk'
 	fi
 	
@@ -2568,10 +2568,10 @@ start_up_tests()
 		fi
 	fi
 	# not making this elif for now because who knows what ubuntu will actually do with upstart
-	if [ -n "$( type -p initctl &>/dev/null )" ];then
+	if [ -n "$( type -p initctl 2>/dev/null )" ];then
 		B_UPSTART='true'
 	fi
-	if [ -n "$( type -p curl &>/dev/null )" ];then
+	if [ -n "$( type -p curl 2>/dev/null )" ];then
 		B_CURL='true'
 	fi
 }
