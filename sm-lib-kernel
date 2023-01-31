@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-kernel
-####  version: 2.7.16
+####  version: 2.7.17
 ####  Date: 2023-01-31
 
 ####  Copyright (C) Harald Hope 2005-2022
@@ -477,7 +477,14 @@ advanced_kernel_options()
 install_liquorix 
 {
 	echo "Installing ${C}Liquorix${S} kernel..."
-	curl 'https://liquorix.net/install-liquorix.sh' | bash
+	if [[ type -p curl ]];then
+		curl 'https://liquorix.net/install-liquorix.sh' | bash
+	elif [[ type -p wget ]];
+		wget -O - 'https://liquorix.net/install-liquorix.sh' | bash
+	else 
+		echo "${E}You must have either curl or wget installed.${N}"
+		print_hec
+	fi
 }
 
 # args: $1 - which kernel type, currently only 
