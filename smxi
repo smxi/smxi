@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.34
+####  version: 8.15.35
 ####  Date: 2023-01-31
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2023
@@ -1562,15 +1562,15 @@ set_distro_data()
 
 	# first tests sources
 	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | \
-	grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jessie|stretch|buster)' )
+	grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jessie|stretch|buster|bullseye)' )
 	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | \
-	grep -Eicw '(bullseye|testing)' )
+	grep -Eicw '(bookworm|testing)' )
 	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | \
 	grep -Eicw '(sid|unstable)' )
 
 	# then test conf for default version
-	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jessie|stretch|buster)"' <<< "$eaaContent" )
-	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|bullseye)"' <<< "$eaaContent" )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jessie|stretch|buster|bullseye)"' <<< "$eaaContent" )
+	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|bookworm)"' <<< "$eaaContent" )
 	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 	
 	local useDebianKernel=''

@@ -54,7 +54,7 @@ check_debian()
 	altText1=""
 	
 	case $SYSTEM_BASE in
-		stable|stretch|squeeze|lenny|etch)
+		stable|buster|bullseye|stretch|squeeze|lenny|etch)
 			# have to use this for wild card mepis string, mepis-8.x...
 			case $DISTRO in
 				mepis*)
@@ -307,14 +307,14 @@ aptosid_graphics_legacy()
 offer_liquorix_kernel()
 {
 	eval $LOGUS
-	local opt='' options='yes-add-liquorix-sources continue-without-adding-liquorix'
+	local opt='' options='yes-install-liquorix continue-without-adding-liquorix'
 	local repeat='false'
 	
 	echo $MLINE
-	echo "${M}Add ${C}Liquorix${M} Kernel Sources?"
+	echo "${M}Install ${C}Liquorix${M} Kernel?"
 	echo $MLINE
-	echo "${S}Selecting ${C}yes-add-liquorix-sources${S} will add ${C}Liquorix${S} kernel apt repositories"
-	echo "to your system, after which you will be able to install them in ${C}$SCRIPT_NAME${S}'s"
+	echo "${S}Selecting ${C}yes-install-liquorix${S} will install ${C}Liquorix${S} kernel,"
+	echo "after which you will be able to update them in ${C}$SCRIPT_NAME${S}'s"
 	echo "${C}Advanced Kernel Install${S} options, or make it your system default in the"
 	echo "${C}Miscellaneous Tweaks${S} section."
 	echo 
@@ -325,14 +325,15 @@ offer_liquorix_kernel()
 	select opt in $options
 	do
 		case $opt in
-			yes-add-liquorix-sources)
+			yes-install-liquorix)
 				run_script_import $LIB_KERNEL
-				add_alternate_kernels_sources "liquorix"
+				# add_alternate_kernels_sources "liquorix"
+				install_liquorix
 				run_script_import $LIB_MISC_TWEAKS
 				set_default_system_kernel 'conversion'
 				;;
 			continue-without-adding-liquorix)
-				echo "${S}OK, moving along without adding Liquorix sources...${N}"
+				echo "${S}OK, moving along without installing Liquorix...${N}"
 				;;
 			*)
 				print_error opt
@@ -351,9 +352,9 @@ update_smxi_data()
 {
 	eval $LOGPS
 	run_script_import $LIB_MISC_TWEAKS
-# 	if [ "$B_OFFER_LIQUORIX_KERNELS" == 'true' ];then
-# 		offer_liquorix_kernel
-# 	fi
+	if [ "$B_OFFER_LIQUORIX_KERNELS" == 'true' ];then
+		offer_liquorix_kernel
+	fi
 	# this tests for presence of aptitude, and only offers itself if user has aptitude installed
 	set_apt_type 'conversion'
 	set_upgrade_type 'conversion'
