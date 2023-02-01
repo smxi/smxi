@@ -476,7 +476,7 @@ advanced_kernel_options()
 
 install_liquorix()
 {
-	echo "Installing ${C}Liquorix${S} kernel..."
+	echo "Installing ${C}Liquorix${S} kernel...${N}"
 	if [[ -n "$(type -p curl 2>/dev/null)" ]];then
 		curl 'https://liquorix.net/install-liquorix.sh' | bash
 	elif [[ -n "$(type -p wget 2>/dev/null)" ]];then
