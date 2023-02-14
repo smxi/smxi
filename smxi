@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.37
+####  version: 8.15.38
 ####  Date: 2023-02-14
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2023
@@ -385,8 +385,8 @@ CHECK_HOLD_PACKAGES=''
 CHECK_VERSION_TEXT=''
 DISTRO='debian'
 DISTRO_F=''
-# this one is used for assigning fixes based on release versions, default is 0
-DISTRO_LEVEL=0
+# this one is used for assigning fixes based on release versions, default is 1000
+DISTRO_LEVEL=1000
 # distro version info
 DISTRO_VERSION=''
 DPKG_UPDATE=''
@@ -2773,9 +2773,11 @@ check_distro_version()
 	local supportedReleases=( 'sidux(64)? 2010-01^18' 'sidux(64)? 2009-04^17' 'sidux(64)? 2009-03^16' 'sidux(64)? 2009-02^15' 'sidux(64)? 2009-01^14' 'sidux(64)? 2008-04^13' 'sidux(64)? 2008-03^12' 'sidux(64)? 2008-02^11' 'sidux(64)? 2008-01^10' 'sidux(64)? 2007-04^9' 'sidux(64)? 2007-03^8' 'sidux(64)? 2007-02^7' 'sidux(64)? 2007-01^6' 'sidux^8' )
 
 	# handles conversion cases for all future use
-	if [ -f $SMDL ] && [ -s $SMDL ];then
+	if [ -f $SMDL ];then
 		DISTRO_LEVEL=$( cat $SMDL )
-		
+		if [ -z "$DISTRO_LEVEL" -o "$DISTRO_LEVEL" == ' ' ];then 
+			DISTRO_LEVEL=1000
+		fi
 		# if [ -f $SMDV ]
 # 		if [ -f /etc/issue ]
 # 		then
