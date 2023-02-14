@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.35
-####  Date: 2023-01-31
+####  version: 8.15.36
+####  Date: 2023-02-14
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2023
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1587,7 +1587,7 @@ set_distro_data()
 	# set system type. This test will never be perfect, but it's a good approximation
 	# if [ -n "$isEtch" -o -n "$isLennyStable" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isSqueeze" -o -n "$isWheezy" -o -n "$isJessie" \
-		-o -n "$isStretch" -o -n "$isBuster" -o -n "$isStableDefault" ] || \
+		-o -n "$isStretch" -o -n "$isBuster" -o -n "$isBullseye" -o -n "$isStableDefault" ] || \
 		[ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 		if [ -n "$isEtch" ];then
 			SYSTEM_BASE='etch'
@@ -2773,8 +2773,9 @@ check_distro_version()
 	local supportedReleases=( 'sidux(64)? 2010-01^18' 'sidux(64)? 2009-04^17' 'sidux(64)? 2009-03^16' 'sidux(64)? 2009-02^15' 'sidux(64)? 2009-01^14' 'sidux(64)? 2008-04^13' 'sidux(64)? 2008-03^12' 'sidux(64)? 2008-02^11' 'sidux(64)? 2008-01^10' 'sidux(64)? 2007-04^9' 'sidux(64)? 2007-03^8' 'sidux(64)? 2007-02^7' 'sidux(64)? 2007-01^6' 'sidux^8' )
 
 	# handles conversion cases for all future use
-	if [ -f $SMDL ];then
+	if [ -f $SMDL ] && [ -s $SMDL ];then
 		DISTRO_LEVEL=$( cat $SMDL )
+		
 		# if [ -f $SMDV ]
 # 		if [ -f /etc/issue ]
 # 		then

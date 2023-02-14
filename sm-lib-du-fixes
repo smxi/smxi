@@ -1,10 +1,10 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: sm-lib-du-fixes
-####  version: 1.4.13
-####  Date: 2018-08-09
+####  version: 1.4.14
+####  Date: 2023-02-14
 
-####  Copyright (C) Harald Hope 2005-2018
+####  Copyright (C) Harald Hope 2005-2023
 
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
