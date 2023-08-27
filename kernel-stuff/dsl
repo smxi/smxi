@@ -201,6 +201,7 @@ set_values()
 			repoExtra='linux-kbuild/'
 			;;
 		liquorix)
+			# origin.liquorix.net cdn.liquorix.net
 			repoPre="https://liquorix.net/debian/pool/${POOL_TYPE}/l/"
 			repoMain='linux-liquorix/'
 			repoModules='linux-modules-liquorix-main/'
