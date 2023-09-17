@@ -1,8 +1,8 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: smxi
-####  version: 8.15.38
-####  Date: 2023-02-14
+####  version: 8.15.39
+####  Date: 2023-09-17
 ########################################################################
 ####  Copyright (C) Harald Hope 2005-2023
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -128,14 +128,14 @@ CLEAN_X_ORG_LOG='/var/log/sm_clean_xorg_modules.log'
 CONFIGS_BODY='configs'
 HOLD_INSTALL='holds'
 # dev urls:
-SCRIPT_DOWNLOAD_BRANCH_1='https://github.com/smxi/smxi/raw/one/'
-SCRIPT_DOWNLOAD_BRANCH_2='https://github.com/smxi/smxi/raw/two/'
-SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/dev/'
+SCRIPT_DOWNLOAD_BRANCH_1='https://codeberg.org/smxi/smxi/raw/one/'
+SCRIPT_DOWNLOAD_BRANCH_2='https://codeberg.org/smxi/smxi/raw/two/'
+SCRIPT_DOWNLOAD_DEV='https://smxi.org/sm/dev/'
 # main download urls
 SCRIPT_DOWNLOAD='https://smxi.org/sm/'
 SCRIPT_DOWNLOAD_SG='https://smxi.org/sg/'
 SCRIPT_DOWNLOAD_SV='https://smxi.org/sv/'
-SCRIPT_DOWNLOAD_IN='https://github.com/smxi/inxi/raw/master/'
+SCRIPT_DOWNLOAD_IN='https://codeberg.org/smxi/inxi/raw/master/'
 SCRIPT_DOWNLOAD_KERNELS='https://smxi.org/sm/kernels/'
 SCRIPT_HOME='/usr/local/bin'
 SCRIPT_NAME=$( basename $0 )

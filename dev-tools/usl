@@ -2,11 +2,10 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.6.9
-####  Date: 2022-11-08
+####  version: 2.7.0
+####  Date: 2023-09-17
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2018
-####
+####  Copyright (C) Harald Hope 2007-2023
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 3 of the License, or (at your option) any later version.
@@ -30,9 +29,13 @@ LINE='- - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 
 # paths, change these to suit your needs
 ACXI_DEV="$HOME/bin/scripts/acxi/"
-ACXI_REMOTE="git@github.com:smxi/acxi"
+ACXI_REMOTE="git@codeberg.org:smxi/acxi"
 ACXI_BRANCH='stable'
 ACXI_VC="$HOME/bin/scripts/acxi/git/"
+BINXI_DEV="$HOME/bin/scripts/inxi/svn/branches/inxi-legacy/"
+BINXI_REMOTE="https://codeberg.org/smxi/inxi-legacy"
+BINXI_BRANCH='master'
+BINXI_VC="$HOME/bin/scripts/inxi/gitcb/inxi-legacy/inxi-legacy"
 INXI_DEV="$HOME/bin/scripts/inxi/svn/trunk/"
 INXI_REMOTE="https://github.com/smxi/inxi"
 INXI_REMOTE='git@github.com:smxi/inxi'
@@ -46,12 +49,12 @@ PHP_VC="$HOME/bin/scripts/my-php/git/"
 RBXI_BZIP="$HOME/bin/scripts/rbxi/rbxi/"
 RBXI_DEV="$HOME/bin/scripts/rbxi/dev/"
 RBXI_HOME="$HOME/bin/scripts/rbxi/"
-RBXI_REMOTE="git@github.com:smxi/rbxi "
+RBXI_REMOTE="git@codeberg.org:smxi/rbxi "
 RBXI_BRANCH='master'
 RBXI_VC="$HOME/bin/scripts/rbxi/git/"
 RBXI_ZIPS="$HOME/bin/scripts/rbxi/zips/"
 SGFXI_DEV="$HOME/bin/scripts/sgfxi/dev/"
-SGFXI_REMOTE="git@github.com:smxi/sgfxi"
+SGFXI_REMOTE="git@codeberg.org:smxi/sgfxi"
 SGFXI_BRANCH='master'
 SGFXI_VC="$HOME/bin/scripts/sgfxi/git/"
 SMXI_DEV='/usr/local/bin/'
@@ -67,7 +70,7 @@ SMXI_STUB_DEV="$HOME/bin/scripts/smxi/svn/trunk/smxi-stub/"
 SMXI_STUB_VC="$HOME/bin/scripts/smxi/git/smxi-stub/"
 SMXI_VC="$HOME/bin/scripts/smxi/git/"
 SVMI_DEV="$HOME/bin/scripts/svmi/dev/"
-SVMI_REMOTE="git@github.com:smxi/svmi"
+SVMI_REMOTE="git@codeberg.org:smxi/svmi"
 SVMI_BRANCH='master'
 SVMI_VC="$HOME/bin/scripts/svmi/git/"
 
@@ -80,12 +83,14 @@ WORKING_BRANCH=$SMXI_BRANCH
 RB_VERSION="${RBXI_VC}rb-version"
 LIST_ACXI='acxi acxi.1 acxi.changelog acxi.conf auto.tag LICENSE.txt README.txt
 docs/acxi-values.txt'
+LIST_BINXI='binxi binxi.1 README.txt'
 LIST_INXI='inxi'
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
-LIST_RBXI='rbxi'
-LIST_SGFXI="sgfxi"
-LIST_SVMI='svmi'
+# not actually used, see process_rbxi() for files/actions
+LIST_RBXI='rbxi rb README.txt'
+LIST_SGFXI="sgfxi README.txt"
+LIST_SVMI='svmi README.txt'
 LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion 
 sm-lib-du-fixes sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel 
 sm-lib-kernel-install sm-lib-misc-tweaks sm-lib-package-install 
@@ -179,6 +184,14 @@ get_options()
 				WORKING_BRANCH=$ACXI_BRANCH
 				WORKING_REMOTE=$ACXI_REMOTE
 				;;
+# 			b)
+# 				WORKING_VC_DIR=$BINXI_VC
+# 				UPDATE_TYPE='b'
+# 				B_SKIP_ZIP='true'
+# 				VC_TYPE='git'
+# 				WORKING_BRANCH=$BINXI_BRANCH
+# 				WORKING_REMOTE=$BINXI_REMOTE
+# 				;;
 			g)
 				WORKING_VC_DIR=$SGFXI_VC
 				UPDATE_TYPE='g'
@@ -239,6 +252,7 @@ get_options()
 			h)
 				echo "Useage:
 -a Update and commit acxi
+-b Update and commit binxi
 -g Update and commit sgfxi
 -i Update and commit inxi
 -p Update and commit php libraries
@@ -355,6 +369,8 @@ main_updater()
 		process_rbxi
 	elif [ "$UPDATE_TYPE" == 'a' ];then
 		process_script "$LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
+	elif [ "$UPDATE_TYPE" == 'b' ];then
+		process_script "$LIST_BINXI" "$BINXI_DEV" "$WORKING_VC_DIR"
 	elif [ "$UPDATE_TYPE" == 'p' ];then
 		process_script "$LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
 	else
@@ -516,6 +532,7 @@ process_rbxi()
 
 	echo "Copying rbxi files to bzip and VC"
 	cp -af --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_VC
+	cp -af --preserve=timestamps ${RBXI_DEV}README.txt $RBXI_VC
 	cp -arvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_VC}rbxi-data
 	cp -af --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
 	cp -arvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_BZIP}rbxi-data
