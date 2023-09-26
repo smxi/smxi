@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.7.0
-####  Date: 2023-09-17
+####  version: 2.7.1
+####  Date: 2023-09-18
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2023
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -32,20 +32,39 @@ ACXI_DEV="$HOME/bin/scripts/acxi/"
 ACXI_REMOTE="git@codeberg.org:smxi/acxi"
 ACXI_BRANCH='stable'
 ACXI_VC="$HOME/bin/scripts/acxi/git/"
+
+# only updating binxi stuff, not the xorg-c etc.
 BINXI_DEV="$HOME/bin/scripts/inxi/svn/branches/inxi-legacy/"
 BINXI_REMOTE="https://codeberg.org/smxi/inxi-legacy"
 BINXI_BRANCH='master'
-BINXI_VC="$HOME/bin/scripts/inxi/gitcb/inxi-legacy/inxi-legacy"
+BINXI_VC="$HOME/bin/scripts/inxi/git-cb/binxi/"
+
 INXI_DEV="$HOME/bin/scripts/inxi/svn/trunk/"
-INXI_REMOTE="https://github.com/smxi/inxi"
-INXI_REMOTE='git@github.com:smxi/inxi'
+INXI_REMOTE='git@codeberg.org:smxi/inxi'
 INXI_BRANCH='master'
-INXI_VC="$HOME/bin/scripts/inxi/git/"
+INXI_VC="$HOME/bin/scripts/inxi/git-cb/inxi/"
+
+INXI_DOCS_DEV="$HOME/bin/scripts/inxi/svn/docs/"
+INXI_DOCS_REMOTE='git@codeberg.org:smxi/inxi-docs'
+INXI_DOCS_BRANCH='master'
+INXI_DOCS_VC="$HOME/bin/scripts/inxi/git-cb/docs/"
+
+INXI_PERL_REMOTE='git@github.com:smxi/inxi'
+INXI_PERL_BRANCH='inxi-perl'
+INXI_PERL_VC="$HOME/bin/scripts/inxi/git-gh/inxi/"
+
+PINXI_DEV="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
+PINXI_REMOTE='git@codeberg.org:smxi/pinxi'
+PINXI_BRANCH='master'
+PINXI_VC="$HOME/bin/scripts/inxi/git-cb/pinxi/"
+
 KERNEL_DIR="$HOME/large/kernel-zips/"
+
 PHP_DEV="$HOME/bin/scripts/my-php/"
-PHP_REMOTE="git@github.com:smxi/php-browser-detection"
+PHP_REMOTE="git@codeberg.org:smxi/php-browser-detection"
 PHP_BRANCH='master'
 PHP_VC="$HOME/bin/scripts/my-php/git/"
+
 RBXI_BZIP="$HOME/bin/scripts/rbxi/rbxi/"
 RBXI_DEV="$HOME/bin/scripts/rbxi/dev/"
 RBXI_HOME="$HOME/bin/scripts/rbxi/"
@@ -53,10 +72,12 @@ RBXI_REMOTE="git@codeberg.org:smxi/rbxi "
 RBXI_BRANCH='master'
 RBXI_VC="$HOME/bin/scripts/rbxi/git/"
 RBXI_ZIPS="$HOME/bin/scripts/rbxi/zips/"
+
 SGFXI_DEV="$HOME/bin/scripts/sgfxi/dev/"
 SGFXI_REMOTE="git@codeberg.org:smxi/sgfxi"
 SGFXI_BRANCH='master'
 SGFXI_VC="$HOME/bin/scripts/sgfxi/git/"
+
 SMXI_DEV='/usr/local/bin/'
 SMXI_BACKEND_DEV="$HOME/bin/scripts/smxi/svn/trunk/backend-stuff/upgrade-data/"
 SMXI_BACKEND_VC="$HOME/bin/scripts/smxi/git/backend-stuff/upgrade-data/"
@@ -69,6 +90,7 @@ SMXI_BRANCH='master'
 SMXI_STUB_DEV="$HOME/bin/scripts/smxi/svn/trunk/smxi-stub/"
 SMXI_STUB_VC="$HOME/bin/scripts/smxi/git/smxi-stub/"
 SMXI_VC="$HOME/bin/scripts/smxi/git/"
+
 SVMI_DEV="$HOME/bin/scripts/svmi/dev/"
 SVMI_REMOTE="git@codeberg.org:smxi/svmi"
 SVMI_BRANCH='master'
@@ -122,6 +144,7 @@ B_INXI='false'
 B_MAKE_VERSIONS_FILE='true'
 B_SKIP_VC='false'
 B_SKIP_ZIP='false'
+B_SM='false'
 B_TAG='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
 VC_TYPE='git'
@@ -130,8 +153,7 @@ VC_TYPE='git'
 #### FUNCTIONS
 ########################################################################
 # args: $1 error nu; $2 - extra data
-error_handler()
-{
+function error_handler(){
 	local message=''
 
 	case $1 in
@@ -168,11 +190,10 @@ error_handler()
 }
 
 # args: $1 - "$@"
-get_options()
-{
+function get_options(){
 	local opt=''
 
-	while getopts :aghiprstuvz opt
+	while getopts :abghiprstuvz opt
 	do
 		case $opt in
 			a)
@@ -184,18 +205,19 @@ get_options()
 				WORKING_BRANCH=$ACXI_BRANCH
 				WORKING_REMOTE=$ACXI_REMOTE
 				;;
-# 			b)
-# 				WORKING_VC_DIR=$BINXI_VC
-# 				UPDATE_TYPE='b'
-# 				B_SKIP_ZIP='true'
-# 				VC_TYPE='git'
-# 				WORKING_BRANCH=$BINXI_BRANCH
-# 				WORKING_REMOTE=$BINXI_REMOTE
-# 				;;
+			b)
+				WORKING_VC_DIR=$BINXI_VC
+				UPDATE_TYPE='b'
+				B_SKIP_ZIP='true'
+				VC_TYPE='git'
+				WORKING_BRANCH=$BINXI_BRANCH
+				WORKING_REMOTE=$BINXI_REMOTE
+				;;
 			g)
 				WORKING_VC_DIR=$SGFXI_VC
 				UPDATE_TYPE='g'
 				B_SKIP_ZIP='true'
+				B_SM='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$SGFXI_BRANCH
 				WORKING_REMOTE=$SGFXI_REMOTE
@@ -205,6 +227,7 @@ get_options()
 				WORKING_VC_DIR=$INXI_VC
 				UPDATE_TYPE='i'
 				B_SKIP_ZIP='true'
+				B_SM='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$INXI_BRANCH
 				WORKING_REMOTE=$INXI_REMOTE
@@ -236,6 +259,7 @@ get_options()
 				WORKING_VC_DIR=$SVMI_VC
 				UPDATE_TYPE='v'
 				B_SKIP_ZIP='true'
+				B_SM='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$SVMI_BRANCH
 				WORKING_REMOTE=$SVMI_REMOTE
@@ -243,6 +267,7 @@ get_options()
 			''|s)
 				UPDATE_TYPE='s'
 				VC_TYPE='git'
+				B_SM='true'
 				WORKING_BRANCH=$SMXI_BRANCH
 				WORKING_REMOTE=$SMXI_REMOTE
 				;;
@@ -276,8 +301,7 @@ get_options()
 	done
 }
 
-start_up_tests()
-{
+function start_up_tests(){
 	local startDir=''
 
 	echo $LINE
@@ -291,8 +315,8 @@ start_up_tests()
 # 		KERNEL_DIR=''
 # 	fi
 
-	# make sure the paths you made are right and exist
-	for startDir in $ACXI_DEV $ACXI_VC $SMXI_TOOLS_DEV $INXI_VC $KERNEL_DIR $SMXI_KERNEL_DEV $PHP_DEV $RBXI_BZIP $RBXI_DEV $RBXI_VC $SMXI_DEV $SGFXI_DEV $SGFXI_VC $SMXI_VC $SMXI_STUB_DEV $SVMI_DEV $SVMI_VC
+	# make sure the paths you made are right and exist $INXI_VC 
+	for startDir in $ACXI_DEV $ACXI_VC $SMXI_TOOLS_DEV $KERNEL_DIR $SMXI_KERNEL_DEV $PHP_DEV $RBXI_BZIP $RBXI_DEV $RBXI_VC $SMXI_DEV $SGFXI_DEV $SGFXI_VC $SMXI_VC $SMXI_STUB_DEV $SVMI_DEV $SVMI_VC
 	do
 		if [ ! -d "$startDir" ];then
 			error_handler 2 $startDir
@@ -301,8 +325,7 @@ start_up_tests()
 	echo "Start up tests: passed"
 }
 
-make_versions_file()
-{
+function make_versions_file(){
 	if [ "$UPDATE_TYPE" == 'r' ];then
 		if [ -f $RB_VERSION ];then
 			rm -f $RB_VERSION
@@ -326,8 +349,7 @@ make_versions_file()
 }
 
 # make sure to turn to false all dev flags
-clean_dev_flags()
-{
+function clean_dev_flags(){
 	local script='' scripts='smxi sgfxi svmi'
 	local isRestart=''
 	local isDev=''
@@ -348,8 +370,7 @@ clean_dev_flags()
 }
 
 # this is for those times I forget to clean the -T flag data
-clean_gfx_test_data()
-{
+function clean_gfx_test_data(){
 	local vcGfx="${SMXI_VC}sgfxi"
 	local setTestDataStart=$( grep -n '^set_test_data()' $vcGfx | cut -d ':' -f 1 )
 	# start 5 lines below
@@ -361,19 +382,10 @@ clean_gfx_test_data()
 }
 
 # trigger update_sm_data
-main_updater()
-{
+function main_updater(){
 	echo $LINE
 	git_checkout
-	if [ "$UPDATE_TYPE" == 'r' ];then
-		process_rbxi
-	elif [ "$UPDATE_TYPE" == 'a' ];then
-		process_script "$LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
-	elif [ "$UPDATE_TYPE" == 'b' ];then
-		process_script "$LIST_BINXI" "$BINXI_DEV" "$WORKING_VC_DIR"
-	elif [ "$UPDATE_TYPE" == 'p' ];then
-		process_script "$LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
-	else
+	if [ "$B_SM" == 'true' ];then
 		update_sm_data "$LIST_SMXI" "$SMXI_DEV"
 		update_sm_data "$LIST_SGFXI" "$SGFXI_DEV"
 		update_sm_data "$LIST_SVMI" "$SVMI_DEV"
@@ -389,12 +401,21 @@ main_updater()
 		clean_dev_flags
 		clean_gfx_test_data
 		finalize_sm_versions
+	else
+		if [ "$UPDATE_TYPE" == 'r' ];then
+			process_rbxi
+		elif [ "$UPDATE_TYPE" == 'a' ];then
+			process_script "$LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
+		elif [ "$UPDATE_TYPE" == 'b' ];then
+			process_script "$LIST_BINXI" "$BINXI_DEV" "$WORKING_VC_DIR"
+		elif [ "$UPDATE_TYPE" == 'p' ];then
+			process_script "$LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
+		fi
 	fi
 }
 
 # args: $1 - which data set to update; $2 - data dir; $3 vc directory
-process_script()
-{
+function process_script(){
 	local script='' localVersion='' localDate=''
 
 	echo "Updating $2 group now"
@@ -406,8 +427,7 @@ process_script()
 }
 
 # args: $1 - which data set to update; $2 - data dir
-update_sm_data()
-{
+function update_sm_data(){
 	local script='' localVersion='' localDate=''
 
 	echo "Updating $2 group now"
@@ -449,8 +469,7 @@ update_sm_data()
 # the basic idea here is simple: for every increment in any script component
 # 1st, 2nd, 3rd, increment the overall smxi equivalent number by 1
 # for manual primary 1st update, just set 2/3 to 0 and set new date
-construct_smxi_version_number()
-{
+function construct_smxi_version_number(){
 	local script='' incrementFirst='' incrementSecond='' incrementThird=''
 	local smMainVersion=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 1 )
 	local smMainDate=$( grep 'sm-main-version=' $SM_VERSIONS_PREVIOUS | cut -d '=' -f 2 | cut -d ':' -f 2 )
@@ -524,8 +543,7 @@ construct_smxi_version_number()
 	echo "$smMainFirst.$smMainSecond.$smMainThird:$smMainDate"
 }
 
-process_rbxi()
-{
+function process_rbxi(){
 	cd $RBXI_HOME
 
 	local localVersion='' localDate=''
@@ -558,21 +576,30 @@ process_rbxi()
 }
 #construct_smxi_version_number;exit
 
-update_inxi_branches()
-{
-	# docs 
-	local branches='inxi-perl one two docs' 
-	local files='' dev_dir='' b_pinxi='false' add_perl=''
-	WORKING_REMOTE=$INXI_REMOTE
-	WORKING_VC_DIR=$INXI_VC
+function update_inxi_branches(){
+	# unused branches: one two binxi
+	local branches='pinxi inxi-perl docs' 
+	local add_perl='' dev_dir='' files='' working_vc=''
+	local b_pinxi='false' 
 	echo $LINE
-	echo "Starting inxi branch updates..."
-	
+	echo "Starting pinxi/inxi related updates..."
 	for branch in $branches;do
 		b_pinxi='false'
 		b_c='false'
 		add_perl=''
+		dev_dir=''
+		files=''
+		WORKING_REMOTE=$INXI_REMOTE
+		WORKING_VC_DIR=$INXI_VC
+		WORKING_BRANCH=$branch
 		case $branch in
+			binxi)
+				dev_dir=$BINXI_DEV
+				files='binxi.1 binxi README.txt'
+				WORKING_REMOTE=$BINXI_REMOTE
+				WORKING_VC_DIR=$BINXI_VC
+				WORKING_BRANCH=$BINXI_BRANCH
+				;;
 			docs)
 				## remember, you have to manually git add a new page, after running 
 				# #this once to put a copy in the git branch docs.
@@ -584,7 +611,10 @@ update_inxi_branches()
 				## I think usl -i does this part but might as well
 				# 5. git commit -a
 				# 6. git push git@github.com:smxi/inxi docs
-				dev_dir="$HOME/bin/scripts/inxi/svn/docs/"
+				WORKING_REMOTE=$INXI_DOCS_REMOTE
+				WORKING_VC_DIR=$INXI_DOCS_VC
+				WORKING_BRANCH=$INXI_DOCS_BRANCH
+				dev_dir=$INXI_DOCS_DEV
 				files='smxi-docs.css 
 				inxi.htm 
 				inxi-about.htm 
@@ -608,10 +638,11 @@ update_inxi_branches()
 				'
 				;;
 			inxi-perl)
-				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-perl/"
-				files='pinxi.1 pinxi pinxi.changelog README.txt'
-				b_pinxi='true'
-				add_perl='modules/* data/*/* docs/* lib/* tools/*'
+				dev_dir=$PINXI_DEV
+				files='pinxi.1 pinxi'
+				WORKING_REMOTE=$INXI_PERL_REMOTE
+				WORKING_BRANCH=$INXI_PERL_BRANCH
+				WORKING_VC_DIR=$INXI_PERL_VC
 				;;
 			inxi-c)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-c/"
@@ -623,30 +654,34 @@ update_inxi_branches()
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/one/"
 				files='inxi README.txt'
 				;;
+			pinxi)
+				dev_dir=$PINXI_DEV
+				files='pinxi.1 pinxi pinxi.changelog README.txt'
+				b_pinxi='true'
+				add_perl='modules/* data/*/* docs/* lib/* tools/*'
+				WORKING_REMOTE=$PINXI_REMOTE
+				WORKING_VC_DIR=$PINXI_VC
+				WORKING_BRANCH=$PINXI_BRANCH
+				;;
 			two)
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/two/"
 				files='inxi README.txt'
 				;;
-			inxi-legacy)
-				dev_dir="$HOME/bin/scripts/inxi/svn/branches/inxi-legacy/"
-				files='binxi.1 binxi README.txt'
-				;;
+			
 		esac
 		echo $LINE
-		WORKING_BRANCH=$branch
 		git_checkout
 		if [ "$files" != '' ];then
-			process_script "$files" "$dev_dir" "$INXI_VC"
+			process_script "$files" "$dev_dir" "$WORKING_VC_DIR"
 		fi
 		if [ "$b_pinxi" == 'true' ];then
-			cp -af ${dev_dir}data/* ${INXI_VC}data
-			cp -af ${dev_dir}docs/* ${INXI_VC}docs
-			cp -af ${dev_dir}lib/* ${INXI_VC}lib
-			cp -af ${dev_dir}modules/* ${INXI_VC}modules
-			cp -af ${dev_dir}tools/* ${INXI_VC}tools
+			cp -af ${dev_dir}data/* ${WORKING_VC_DIR}data
+			cp -af ${dev_dir}docs/* ${WORKING_VC_DIR}docs
+			cp -af ${dev_dir}lib/* ${WORKING_VC_DIR}lib
+			cp -af ${dev_dir}modules/* ${WORKING_VC_DIR}modules
+			cp -af ${dev_dir}tools/* ${WORKING_VC_DIR}tools
 			git_add "$add_perl" 
-		fi
-		if [ "$b_c" == 'true' ];then
+		elif [ "$b_c" == 'true' ];then
 			cp -af ${dev_dir}GetSystemData/* ${INXI_VC}GetSystemData
 			git_add "$add_perl" 
 		fi
@@ -655,12 +690,11 @@ update_inxi_branches()
 	WORKING_BRANCH='master'
 	echo $LINE
 	git_checkout
-	echo "Completed inxi branch updates."
+	echo "Completed pinxi/inxi related updates."
 }
 
 # add closing steps for sm_versions file
-finalize_sm_versions()
-{
+function finalize_sm_versions(){
 	local smxiVersion=$( construct_smxi_version_number )
 	# construct_smxi_version_number
 	echo "smxi version number is:"
@@ -675,8 +709,7 @@ finalize_sm_versions()
 }
 
 # extra scripts used in smxi, kernel installers for zipped kernels
-update_kernel_installers()
-{
+function update_kernel_installers(){
 	local kernelInstaller='install-kernel.sh'
 
 	# update kernel installers if needed
@@ -685,8 +718,7 @@ update_kernel_installers()
 }
 
 # developer scripts for creating smxi
-update_other_components()
-{
+function update_other_components(){
 	#cp -f ${DEV_TOOLS_DIR}dsl ${SMXI_KERNEL_DEV}dsl
 	# cp -f ${DEV_TOOLS_DIR}smxi-stub ${SMXI_STUB_DEV}smxi-stub
 	#cp -f ${DEV_TOOLS_DIR}usl ${SMXI_TOOLS_DEV}usl
@@ -695,8 +727,7 @@ update_other_components()
 }
 
 # if you have write access to svn, this last step will update svn
-svn_update()
-{
+function svn_update(){
 	local response='' response2=''
 
 	echo $LINE
@@ -723,26 +754,24 @@ svn_update()
 }
 
 # args: $1 - message for commit
-svn_commit()
-{
+function svn_commit(){
 	svn commit $WORKING_VC_DIR$svnWild
 }
-git_checkout()
-{
+
+function git_checkout(){
 	echo "Checking out branch $WORKING_BRANCH in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
 	git checkout $WORKING_BRANCH || error_handler 6 "$?"
 }
-git_add()
-{
+
+function git_add(){
 	echo "Adding files (if new) to branch $WORKING_BRANCH in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
 	git add $1
 }
 
 # args: $1 - message for commit
-git_commit()
-{
+function git_commit(){
 	echo "Committing $WORKING_BRANCH branch in $WORKING_VC_DIR"
 	cd $WORKING_VC_DIR
 	git $tag_opt commit -a # || error_handler 7 "$?"
@@ -751,8 +780,8 @@ git_commit()
 		git_tag
 	fi
 }
-git_tag()
-{
+
+function git_tag(){
 	echo "Tagging $WORKING_BRANCH branch in $WORKING_VC_DIR"
 	local tags=$(git tag) working='' version='1'
 	tags=$(sort -r <<< $tags)
@@ -770,14 +799,13 @@ git_tag()
 	git pull --tags
 	git push --tags $WORKING_REMOTE $WORKING_BRANCH
 }
-zip_it_up()
-{
+
+function zip_it_up(){
 	cd $HOME
 	su -c "${SMXI_TOOLS_DEV}zsl"
 }
 
-finish_it_up()
-{
+function finish_it_up(){
 	echo $LINE
 	echo "OK, all finished. Remember to upload via ftp the changes to make it live."
 }
