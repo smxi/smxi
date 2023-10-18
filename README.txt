@@ -1,6 +1,6 @@
 Please file issue reports or feature requests at:
 
-https://codeberg.org/smxi/smxi
+https://codeberg.org/smxi/rbxi
 
 The Codeberg repos will be mirrored to Github until the end of 2023, after that,
 no updates to github repos will be made. Some time after that, the code will be
