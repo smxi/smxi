@@ -85,7 +85,7 @@ SMXI_TOOLS_DEV="$HOME/bin/scripts/smxi/svn/trunk/dev-tools/"
 SMXI_TOOLS_VC="$HOME/bin/scripts/smxi/git/dev-tools/"
 SMXI_KERNEL_DEV="$HOME/bin/scripts/smxi/svn/trunk/kernel-stuff/"
 SMXI_KERNEL_VC="$HOME/bin/scripts/smxi/git/kernel-stuff/"
-SMXI_REMOTE="git@github.com:smxi/smxi"
+SMXI_REMOTE="git@codeberg.org:smxi/smxi"
 SMXI_BRANCH='master'
 SMXI_STUB_DEV="$HOME/bin/scripts/smxi/svn/trunk/smxi-stub/"
 SMXI_STUB_VC="$HOME/bin/scripts/smxi/git/smxi-stub/"
@@ -129,7 +129,7 @@ status_t configs configs_s holds_last_modified_s last_modified sm-lib-kernels-bu
 warning_message"
 LIST_SMXI_KERNEL="dsl install-kernel.sh"
 LIST_SMXI_STUB="smxi-stub"
-LIST_SMXI_TOOLS="sm-extra-functions  usl  zsl"
+LIST_SMXI_TOOLS="sm-extra-functions usl zsl"
 
 INXI_VERSION=''
 SM_VERSIONS="${SMXI_VC}sm-versions"
@@ -273,6 +273,7 @@ function get_options(){
 				;;
 			z)
 				B_SKIP_ZIP='true'
+				B_SM='true'
 				;;
 			h)
 				echo "Useage:
@@ -303,18 +304,15 @@ function get_options(){
 
 function start_up_tests(){
 	local startDir=''
-
 	echo $LINE
 	echo "Running initial startup tests..."
 	# don't want to use root for this script
 	if [ "$(whoami)" == 'root' ];then
 		error_handler 1
 	fi
-	
 # 	if [[ $UPDATE_TYPE == 'i' ]];then
 # 		KERNEL_DIR=''
 # 	fi
-
 	# make sure the paths you made are right and exist $INXI_VC 
 	for startDir in $ACXI_DEV $ACXI_VC $SMXI_TOOLS_DEV $KERNEL_DIR $SMXI_KERNEL_DEV $PHP_DEV $RBXI_BZIP $RBXI_DEV $RBXI_VC $SMXI_DEV $SGFXI_DEV $SGFXI_VC $SMXI_VC $SMXI_STUB_DEV $SVMI_DEV $SVMI_VC
 	do
@@ -336,7 +334,6 @@ function make_versions_file(){
 		if [ -f $SM_VERSIONS ];then
 			rm -f $SM_VERSIONS
 		fi
-
 		# this ensures that we're working with the true last version, not an off version
 		# this is important to have in order to always be using the latest live versions file
 		wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL || error_handler 4 $SM_VERSIONS_PREVIOUS
@@ -353,14 +350,12 @@ function clean_dev_flags(){
 	local script='' scripts='smxi sgfxi svmi'
 	local isRestart=''
 	local isDev=''
-
 	echo "Cleaning dev flags up now..."
 	cd $SMXI_VC
 	for script in $scripts
 	do
 		isRestart=$( grep -i "^SKIP_RESTART='true'" $script )
 		isDev=$( grep -i "^DEV_FLAG='true'" $script )
-
 		# just a small fix to make the files not update unless they need to
 		if [ -n "$isRestart" -o -n "$isDev" ];then
 			# important! only reset where line begins with variable name
@@ -417,9 +412,7 @@ function main_updater(){
 # args: $1 - which data set to update; $2 - data dir; $3 vc directory
 function process_script(){
 	local script='' localVersion='' localDate=''
-
 	echo "Updating $2 group now"
-	
 	for script in $1
 	do
 		cp -afL --preserve=timestamps $2$script $3$script
@@ -429,9 +422,7 @@ function process_script(){
 # args: $1 - which data set to update; $2 - data dir
 function update_sm_data(){
 	local script='' localVersion='' localDate=''
-
 	echo "Updating $2 group now"
-
 	for script in $1
 	do
 		# Perl version/date different
@@ -452,7 +443,6 @@ function update_sm_data(){
 		# echo "copy $script to ${SMXI_VC}$script"
 		echo "$script=$localVersion:$localDate"
 		cp -af --preserve=timestamps $2$script $SMXI_VC$script
-
 		# working sgfxi/svmi will often have testing data, don't want to comment out
 		# that each update
 		case $2 in
@@ -478,7 +468,6 @@ function construct_smxi_version_number(){
 	local smMainThird=$( cut -d '.' -f 3 <<< $smMainVersion )
 	local smOld='' smNew=''
 	local smOldOne='' smNewOne='' smOldTwo='' smNewTwo='' smOldThird='' smNewThird=''
-
 	for script in $LIST_SMXI
 	do
 		# get the two values, old and new
@@ -497,7 +486,6 @@ function construct_smxi_version_number(){
 		smNewOne=$( cut -d '.' -f 1 <<< $smNew )
 		smNewTwo=$( cut -d '.' -f 2 <<< $smNew )
 		smNewThird=$( cut -d '.' -f 3 <<< $smNew )
-
 		# second number increments occur with change in primary first or second number
 		if [ "$smNewOne" -gt "$smOldOne" -o "$smNewTwo" -gt "$smOldTwo" ];then
 			incrementSecond='true'
@@ -517,7 +505,6 @@ function construct_smxi_version_number(){
 	# http://www.askdavetaylor.com/how_do_i_strip_leading_zeroes_for_math_in_a_shell_script.html
 	smMainSecond=$( sed 's/^0*//' <<< $smMainSecond | awk '{print $1 + 0}' )
 	smMainThird=$( sed 's/^0*//' <<< $smMainThird | awk '{print $1 + 0}' )
-
 	# if manual primary version update, just reset 2/3 to 0
 	if [ "$SM_MAIN_FIRST" -gt "$smMainFirst" ];then
 		smMainFirst=$SM_MAIN_FIRST
@@ -536,7 +523,6 @@ function construct_smxi_version_number(){
 		smMainDate=$( date "+%Y-%m-%d" )
 	fi
 	# process the numbers to make them nice and neat again for output
-
 	smMainSecond=$( printf %02d $smMainSecond )
 	smMainThird=$( printf %02d $smMainThird )
 	# then print it out to function
@@ -545,21 +531,16 @@ function construct_smxi_version_number(){
 
 function process_rbxi(){
 	cd $RBXI_HOME
-
 	local localVersion='' localDate=''
-
 	echo "Copying rbxi files to bzip and VC"
 	cp -af --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_VC
 	cp -af --preserve=timestamps ${RBXI_DEV}README.txt $RBXI_VC
 	cp -arvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_VC}rbxi-data
 	cp -af --preserve=timestamps ${RBXI_DEV}rbxi $RBXI_BZIP
 	cp -arvf --preserve=timestamps ${RBXI_DEV}rbxi-data-static/* ${RBXI_BZIP}rbxi-data
-
 	local localVersion=$( grep -im 1 -o -G "Version:\ [0-9].[0-9]*.[0-9]*" rbxi/rbxi  | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 	local localDate=$( grep -im 1 -o -G "Date:\ [A-Za-z0-9-]*" rbxi/rbxi | cut -f 2-4 -d ' ' )
-
 	echo "rbxi=$localVersion:$localDate" > $RB_VERSION
-
 	# all files are copied to rbxi/rbxi so tar it
 	echo "rbxi data is: $localVersion:$localDate"
 	echo "Tar/bzipping now..."
@@ -610,7 +591,7 @@ function update_inxi_branches(){
 				# 4. git add inxi-json-xml-output.htm
 				## I think usl -i does this part but might as well
 				# 5. git commit -a
-				# 6. git push git@github.com:smxi/inxi docs
+				# 6. git push git@codeberg.org:smxi/inxi_docs
 				WORKING_REMOTE=$INXI_DOCS_REMOTE
 				WORKING_VC_DIR=$INXI_DOCS_VC
 				WORKING_BRANCH=$INXI_DOCS_BRANCH
