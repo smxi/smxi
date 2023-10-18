@@ -155,7 +155,6 @@ VC_TYPE='git'
 # args: $1 error nu; $2 - extra data
 function error_handler(){
 	local message=''
-
 	case $1 in
 		1)
 			message='You should not be root to run this script'
@@ -192,7 +191,6 @@ function error_handler(){
 # args: $1 - "$@"
 function get_options(){
 	local opt=''
-
 	while getopts :abghiprstuvz opt
 	do
 		case $opt in
