@@ -110,9 +110,12 @@ LIST_INXI='inxi'
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
 # not actually used, see process_rbxi() for files/actions
-LIST_RBXI='rbxi rb README.txt'
-LIST_SGFXI="sgfxi README.txt"
+LIST_RBXI='rbxi'
+LIST_RBXI_FULL='rbxi rb README.txt'
+LIST_SGFXI="sgfxi"
+LIST_SGFXI_FULL="sgfxi README.txt"
 LIST_SVMI='svmi README.txt'
+LIST_SVMI_FULL='svmi'
 LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion 
 sm-lib-du-fixes sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel 
 sm-lib-kernel-install sm-lib-misc-tweaks sm-lib-package-install 
@@ -218,6 +221,7 @@ function get_options(){
 				WORKING_VC_DIR=$SGFXI_VC
 				UPDATE_TYPE='g'
 				B_SKIP_ZIP='true'
+				B_SM='false'
 				B_MAKE_VERSIONS_FILE='false'
 				VC_TYPE='git'
 				WORKING_BRANCH=$SGFXI_BRANCH
@@ -263,6 +267,7 @@ function get_options(){
 				WORKING_VC_DIR=$SVMI_VC
 				UPDATE_TYPE='v'
 				VC_TYPE='git'
+				B_SM='false'
 				WORKING_BRANCH=$SVMI_BRANCH
 				WORKING_REMOTE=$SVMI_REMOTE
 				;;
@@ -395,12 +400,16 @@ function main_updater(){
 			process_script "$LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'b' ];then
 			process_script "$LIST_BINXI" "$BINXI_DEV" "$WORKING_VC_DIR"
+		elif [ "$UPDATE_TYPE" == 'g' ];then
+			process_script "$LIST_SGFXI_FULL" "$SGFXI_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'i' ];then
-			process_script "$LIST_INXI_FULL" "$INXI_DEV" "$INXI_VC"
+			process_script "$LIST_INXI_FULL" "$INXI_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'p' ];then
 			process_script "$LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'r' ];then
 			process_rbxi
+		elif [ "$UPDATE_TYPE" == 'v' ];then
+			process_script "$LIST_SVMI_FULL" "$SVMI_DEV" "$WORKING_VC_DIR"
 		fi
 	fi
 }
