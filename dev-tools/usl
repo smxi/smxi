@@ -521,7 +521,7 @@ function construct_smxi_version_number(){
 	fi
 	# then, if changed, update main date as well
 	if [ "$incrementFirst" == 'true' -o "$incrementSecond" == 'true' -o "$incrementThird" == 'true' ];then
-		smMainDate=$( date "+%Y-%m-%d" )
+		smMainDate=$(date "+%Y-%m-%d")
 	fi
 	# process the numbers to make them nice and neat again for output
 	smMainSecond=$( printf %02d $smMainSecond )
