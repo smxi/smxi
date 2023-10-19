@@ -144,7 +144,7 @@ B_INXI='false'
 B_MAKE_VERSIONS_FILE='true'
 B_SKIP_VC='false'
 B_SKIP_ZIP='false'
-B_SM='false'
+B_SM='true'
 B_TAG='false'
 UPDATE_TYPE='s' # set for default, smxi, or g/i/v
 VC_TYPE='git'
@@ -197,6 +197,7 @@ function get_options(){
 			a)
 				WORKING_VC_DIR=$ACXI_VC
 				UPDATE_TYPE='a'
+				B_SM='false'
 				B_SKIP_ZIP='true'
 				B_MAKE_VERSIONS_FILE='false'
 				VC_TYPE='git'
@@ -206,6 +207,7 @@ function get_options(){
 			b)
 				WORKING_VC_DIR=$BINXI_VC
 				UPDATE_TYPE='b'
+				B_SM='false'
 				B_SKIP_ZIP='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$BINXI_BRANCH
@@ -215,7 +217,6 @@ function get_options(){
 				WORKING_VC_DIR=$SGFXI_VC
 				UPDATE_TYPE='g'
 				B_SKIP_ZIP='true'
-				B_SM='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$SGFXI_BRANCH
 				WORKING_REMOTE=$SGFXI_REMOTE
@@ -225,7 +226,6 @@ function get_options(){
 				WORKING_VC_DIR=$INXI_VC
 				UPDATE_TYPE='i'
 				B_SKIP_ZIP='true'
-				B_SM='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$INXI_BRANCH
 				WORKING_REMOTE=$INXI_REMOTE
@@ -233,6 +233,7 @@ function get_options(){
 			p)
 				WORKING_VC_DIR=$PHP_VC
 				UPDATE_TYPE='p'
+				B_SM='false'
 				B_SKIP_ZIP='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$PHP_BRANCH
@@ -241,6 +242,7 @@ function get_options(){
 			r)
 				WORKING_VC_DIR=$RBXI_VC
 				UPDATE_TYPE='r'
+				B_SM='false'
 				B_SKIP_ZIP='true'
 				B_MAKE_VERSIONS_FILE='false'
 				VC_TYPE='git'
@@ -265,13 +267,11 @@ function get_options(){
 			''|s)
 				UPDATE_TYPE='s'
 				VC_TYPE='git'
-				B_SM='true'
 				WORKING_BRANCH=$SMXI_BRANCH
 				WORKING_REMOTE=$SMXI_REMOTE
 				;;
 			z)
 				B_SKIP_ZIP='true'
-				B_SM='true'
 				;;
 			h)
 				echo "Useage:
