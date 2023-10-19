@@ -1,7 +1,7 @@
 This tool is not being maintained actively. the tool still works however, and 
 has some utility, albeit limited scope.
 
-https://codeberg.org/smxi/svmi
+https://codeberg.org/smxi/smxi
 
 The Codeberg repos will be mirrored to Github until the end of 2023, after that,
 no updates to github repos will be made. Some time after that, the code will be

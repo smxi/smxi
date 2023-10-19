@@ -106,16 +106,14 @@ RB_VERSION="${RBXI_VC}rb-version"
 LIST_ACXI='acxi acxi.1 acxi.changelog acxi.conf auto.tag LICENSE.txt README.txt
 docs/acxi-values.txt'
 LIST_BINXI='binxi binxi.1 README.txt'
-LIST_INXI='inxi'
+LIST_INXI='inxi' # for sm
 LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
 LIST_PHP='browser_detection.inc language_detection.inc'
-# not actually used, see process_rbxi() for files/actions
-LIST_RBXI='rbxi'
-LIST_RBXI_FULL='rbxi rb README.txt'
-LIST_SGFXI="sgfxi"
+LIST_RBXI='rbxi' # for sm
+LIST_SGFXI="sgfxi" # for sm
 LIST_SGFXI_FULL="sgfxi README.txt"
-LIST_SVMI='svmi README.txt'
-LIST_SVMI_FULL='svmi'
+LIST_SVMI='svmi' # for sm
+LIST_SVMI_FULL='svmi README.txt'
 LIST_SMXI="smxi sm-lib-apt-tools sm-lib-clean-up sm-lib-distro-conversion 
 sm-lib-du-fixes sm-lib-graphics sm-lib-kde4-updater sm-lib-kernel 
 sm-lib-kernel-install sm-lib-misc-tweaks sm-lib-package-install 
@@ -143,13 +141,11 @@ SM_VERSIONS_URL='https://smxi.org/sm/sm-versions'
 # the primary version number will be manually set.
 SM_MAIN_FIRST='8'
 
-B_INXI='false'
-B_MAKE_VERSIONS_FILE='true'
+B_MAKE_VERSIONS_FILE='false'
 B_SKIP_VC='false'
 B_SKIP_ZIP='true'
-B_SM='true'
 B_TAG='false'
-UPDATE_TYPE='s' # set for default, smxi, or g/i/v
+UPDATE_TYPE='s' # set for default, smxi s, or a|b|g|i|v
 VC_TYPE='git'
 
 ########################################################################
@@ -200,63 +196,46 @@ function get_options(){
 			a)
 				WORKING_VC_DIR=$ACXI_VC
 				UPDATE_TYPE='a'
-				B_SM='false'
-				B_SKIP_ZIP='true'
-				B_MAKE_VERSIONS_FILE='false'
-				VC_TYPE='git'
 				WORKING_BRANCH=$ACXI_BRANCH
 				WORKING_REMOTE=$ACXI_REMOTE
 				;;
 			b)
 				WORKING_VC_DIR=$BINXI_VC
 				UPDATE_TYPE='b'
-				B_SM='false'
-				B_SKIP_ZIP='true'
-				B_MAKE_VERSIONS_FILE='false'
-				VC_TYPE='git'
 				WORKING_BRANCH=$BINXI_BRANCH
 				WORKING_REMOTE=$BINXI_REMOTE
 				;;
 			g)
 				WORKING_VC_DIR=$SGFXI_VC
 				UPDATE_TYPE='g'
-				B_SKIP_ZIP='true'
-				B_SM='false'
-				B_MAKE_VERSIONS_FILE='false'
-				VC_TYPE='git'
 				WORKING_BRANCH=$SGFXI_BRANCH
 				WORKING_REMOTE=$SGFXI_REMOTE
 				;;
 			i)
-				B_INXI='true'
 				WORKING_VC_DIR=$INXI_VC
 				UPDATE_TYPE='i'
-				B_SKIP_ZIP='true'
-				B_MAKE_VERSIONS_FILE='false'
-				B_SM='false'
-				VC_TYPE='git'
 				WORKING_BRANCH=$INXI_BRANCH
 				WORKING_REMOTE=$INXI_REMOTE
 				;;
 			p)
 				WORKING_VC_DIR=$PHP_VC
 				UPDATE_TYPE='p'
-				B_MAKE_VERSIONS_FILE='false'
-				B_SM='false'
-				B_SKIP_ZIP='true'
-				VC_TYPE='git'
 				WORKING_BRANCH=$PHP_BRANCH
 				WORKING_REMOTE=$PHP_REMOTE
 				;;
 			r)
 				WORKING_VC_DIR=$RBXI_VC
 				UPDATE_TYPE='r'
-				B_SM='false'
-				B_SKIP_ZIP='true'
-				VC_TYPE='git'
 				WORKING_BRANCH=$RBXI_BRANCH
 				WORKING_REMOTE=$RBXI_REMOTE
 				;;
+			''|s)
+				B_MAKE_VERSIONS_FILE='true'
+				UPDATE_TYPE='s'
+				WORKING_BRANCH=$SMXI_BRANCH
+				WORKING_REMOTE=$SMXI_REMOTE
+				;;
+			# Only used with -i inxi
 			t)
 				B_TAG='true'
 				;;
@@ -266,20 +245,13 @@ function get_options(){
 			v)
 				WORKING_VC_DIR=$SVMI_VC
 				UPDATE_TYPE='v'
-				VC_TYPE='git'
-				B_SM='false'
 				WORKING_BRANCH=$SVMI_BRANCH
 				WORKING_REMOTE=$SVMI_REMOTE
 				;;
-			''|s)
-				B_MAKE_VERSIONS_FILE='true'
+			z)
 				UPDATE_TYPE='s'
-				VC_TYPE='git'
 				WORKING_BRANCH=$SMXI_BRANCH
 				WORKING_REMOTE=$SMXI_REMOTE
-				;;
-			z)
-				B_SKIP_ZIP='true'
 				;;
 			h)
 				echo "Useage:
@@ -297,7 +269,7 @@ function get_options(){
 -t Auto tag commit. Only use this with inxi, 
    and only when commiting to master.
 -v Update and commit svmi
--z Skip the zip up part
+-z Skip the zip up part for smxi
 "
 				exit 0
 				;;
@@ -380,7 +352,7 @@ function clean_gfx_test_data(){
 function main_updater(){
 	echo $LINE
 	git_checkout
-	if [ "$B_SM" == 'true' ];then
+	if [ "$UPDATE_TYPE" == 's' ];then
 		update_sm_data "$LIST_SMXI" "$SMXI_DEV"
 		update_sm_data "$LIST_SGFXI" "$SGFXI_DEV"
 		update_sm_data "$LIST_SVMI" "$SVMI_DEV"
@@ -717,18 +689,15 @@ function update_other_components(){
 # if you have write access to svn, this last step will update svn
 function svn_update(){
 	local response='' response2=''
-
 	echo $LINE
 	echo "Please enter the svn commit message:"
 	read response
-
 	echo "You entered this:"
 	echo $LINE
 	echo "$response"
 	echo $LINE
 	echo "Is this correct (y/n)"
 	read response2
-
 	case $response2 in
 		y|Y)
 			echo "Ok, committing it now"
@@ -819,7 +788,7 @@ fi
 if [ "$B_SKIP_ZIP" == 'false' ];then
 	zip_it_up
 fi
-if [ "$B_INXI" == 'true' ];then
+if [ "$UPDATE_TYPE" == 'i' ];then
 	#git_tag
 	update_inxi_branches
 fi
