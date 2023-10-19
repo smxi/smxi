@@ -259,7 +259,6 @@ function get_options(){
 				WORKING_VC_DIR=$SVMI_VC
 				UPDATE_TYPE='v'
 				B_SKIP_ZIP='true'
-				B_SM='true'
 				VC_TYPE='git'
 				WORKING_BRANCH=$SVMI_BRANCH
 				WORKING_REMOTE=$SVMI_REMOTE
@@ -323,23 +322,17 @@ function start_up_tests(){
 
 function make_versions_file(){
 	if [ "$UPDATE_TYPE" == 'r' ];then
-		if [ -f $RB_VERSION ];then
-			rm -f $RB_VERSION
-		fi
-		# create the master working file
-		touch $RB_VERSION
+		# create or wipe the master working file
+		echo -n '' > $RB_VERSION
 	else
-		if [ -f $SM_VERSIONS ];then
-			rm -f $SM_VERSIONS
-		fi
+		# create or wipe the master working file
+		echo -n '' > $SM_VERSIONS
 		# this ensures that we're working with the true last version, not an off version
 		# this is important to have in order to always be using the latest live versions file
 		wget -O $SM_VERSIONS_PREVIOUS $SM_VERSIONS_URL || error_handler 4 $SM_VERSIONS_PREVIOUS
 		if [ "$?" -gt 0 ];then
 			error_handler 4 $SM_VERSIONS_URL
 		fi
-		# create the master working file
-		touch $SM_VERSIONS
 	fi
 }
 
@@ -382,7 +375,6 @@ function main_updater(){
 		update_sm_data "$LIST_SMXI" "$SMXI_DEV"
 		update_sm_data "$LIST_SGFXI" "$SGFXI_DEV"
 		update_sm_data "$LIST_SVMI" "$SVMI_DEV"
-		process_script "$LIST_INXI_FULL" "$INXI_DEV" "$INXI_VC"
 		update_sm_data "$LIST_INXI" "$INXI_VC"
 		update_sm_data "$LIST_RBXI" "$RBXI_VC"
 		process_script "$LIST_SMXI_BACKEND" "$SMXI_BACKEND_DEV" "$SMXI_BACKEND_VC"
@@ -395,14 +387,16 @@ function main_updater(){
 		clean_gfx_test_data
 		finalize_sm_versions
 	else
-		if [ "$UPDATE_TYPE" == 'r' ];then
-			process_rbxi
-		elif [ "$UPDATE_TYPE" == 'a' ];then
+		if [ "$UPDATE_TYPE" == 'a' ];then
 			process_script "$LIST_ACXI" "$ACXI_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'b' ];then
 			process_script "$LIST_BINXI" "$BINXI_DEV" "$WORKING_VC_DIR"
+		elif [ "$UPDATE_TYPE" == 'i' ];then
+			process_script "$LIST_INXI_FULL" "$INXI_DEV" "$INXI_VC"
 		elif [ "$UPDATE_TYPE" == 'p' ];then
 			process_script "$LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
+		elif [ "$UPDATE_TYPE" == 'r' ];then
+			process_rbxi
 		fi
 	fi
 }
