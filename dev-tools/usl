@@ -249,6 +249,7 @@ function get_options(){
 				WORKING_REMOTE=$SVMI_REMOTE
 				;;
 			z)
+				B_MAKE_VERSIONS_FILE='true'
 				UPDATE_TYPE='s'
 				WORKING_BRANCH=$SMXI_BRANCH
 				WORKING_REMOTE=$SMXI_REMOTE
