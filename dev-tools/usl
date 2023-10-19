@@ -226,6 +226,7 @@ function get_options(){
 				WORKING_VC_DIR=$INXI_VC
 				UPDATE_TYPE='i'
 				B_SKIP_ZIP='true'
+				B_SM='false'
 				VC_TYPE='git'
 				WORKING_BRANCH=$INXI_BRANCH
 				WORKING_REMOTE=$INXI_REMOTE
