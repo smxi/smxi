@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: usl
 ####  Description: updating tool for smxi scripts
-####  version: 2.7.2
+####  version: 2.7.3
 ####  Date: 2023-10-18
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2023
@@ -132,7 +132,6 @@ LIST_SMXI_KERNEL="dsl install-kernel.sh"
 LIST_SMXI_STUB="smxi-stub"
 LIST_SMXI_TOOLS="sm-extra-functions usl zsl"
 
-INXI_VERSION=''
 SM_VERSIONS="${SMXI_VC}sm-versions"
 SM_VERSIONS_PREVIOUS="${SMXI_VC}sm-versions-previous"
 # this has to the current live version on smxi.org
@@ -376,7 +375,7 @@ function main_updater(){
 		elif [ "$UPDATE_TYPE" == 'g' ];then
 			process_script "$LIST_SGFXI_FULL" "$SGFXI_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'i' ];then
-			process_script "$LIST_INXI_FULL" "$INXI_DEV" "$WORKING_VC_DIR"
+			process_inxi
 		elif [ "$UPDATE_TYPE" == 'p' ];then
 			process_script "$LIST_PHP" "$PHP_DEV" "$WORKING_VC_DIR"
 		elif [ "$UPDATE_TYPE" == 'r' ];then
@@ -410,8 +409,6 @@ function update_sm_data(){
 			#echo "$localVersion $localDate"
 			final=$(date +%H-%M-%S)
 			#final=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
-			# INXI_VERSION="$localVersion-$localDate-$final"
-			INXI_VERSION="$localVersion"
 		else
 			localVersion=$( grep -im 1 -o -E "version(:[\ ]*|=)[0-9].[0-9]*.[0-9]*" $2$script | grep -o -G "[0-9].[0-9]*.[0-9]*" )
 			# weird: [A-Za-z0-9,\ -] works but [A-Za-z0-9,-\ ] only returns the first number in 2013-10-14
@@ -538,9 +535,9 @@ function process_rbxi(){
 }
 #construct_smxi_version_number;exit
 
-function update_inxi_branches(){
+function process_inxi(){
 	# unused branches: one two binxi
-	local branches='pinxi inxi-perl docs' 
+	local branches='inxi pinxi inxi-perl docs' 
 	local add_perl='' dev_dir='' files='' working_vc=''
 	local b_pinxi='false' 
 	echo $LINE
@@ -599,6 +596,13 @@ function update_inxi_branches(){
 				inxi-usage.htm 
 				'
 				;;
+			inxi)
+				dev_dir=$INXI_DEV
+				files=$LIST_INXI_FULL
+				WORKING_REMOTE=$INXI_REMOTE
+				WORKING_VC_DIR=$INXI_VC
+				WORKING_BRANCH=$INXI_BRANCH
+				;;
 			inxi-perl)
 				dev_dir=$PINXI_DEV
 				files='pinxi.1 pinxi'
@@ -629,7 +633,6 @@ function update_inxi_branches(){
 				dev_dir="$HOME/bin/scripts/inxi/svn/branches/two/"
 				files='inxi README.txt'
 				;;
-			
 		esac
 		echo $LINE
 		git_checkout
@@ -741,19 +744,21 @@ function git_commit(){
 
 function git_tag(){
 	echo "Tagging $WORKING_BRANCH branch in $WORKING_VC_DIR"
-	local tags=$(git tag) working='' version='1'
+	local inxi_version=$( grep -im 1 -E '^my \$self_version=.*' "${WORKING_VC_DIR}inxi" | grep -o -G "[0-9].[0-9]*.[0-9]*" )
+	local working='' version='1'
+	local tags=$(git tag) 
 	tags=$(sort -r <<< $tags)
 	for tag in $tags;do
-		if [ -n "$(grep "^$INXI_VERSION-" <<< $tag)" ];then
+		if [ -n "$(grep "^$inxi_version-" <<< $tag)" ];then
 			version=$(cut -d '-' -f 2 <<< $tag)
 			version=$(($version + 1))
 			break;
 		fi
 	done
-	INXI_VERSION="$INXI_VERSION-$version"
-	echo "tag:$INXI_VERSION"
+	inxi_version="$inxi_version-$version"
+	echo "tag:$inxi_version"
 	cd $WORKING_VC_DIR
-	git tag $INXI_VERSION $WORKING_BRANCH
+	git tag $inxi_version $WORKING_BRANCH
 	git pull --tags
 	git push --tags $WORKING_REMOTE $WORKING_BRANCH
 }
@@ -788,10 +793,6 @@ if [ "$B_SKIP_VC" == 'false' ];then
 fi
 if [ "$B_SKIP_ZIP" == 'false' ];then
 	zip_it_up
-fi
-if [ "$UPDATE_TYPE" == 'i' ];then
-	#git_tag
-	update_inxi_branches
 fi
 finish_it_up
 exit 0
