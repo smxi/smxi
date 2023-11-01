@@ -264,7 +264,7 @@ function get_options(){
 -p Update and commit php libraries
 -r Update and commit rbxi
 -u Update only, skip svn/git commit
--s (or null, no args) Update and commit smxi.
+-s Update and commit smxi.
    Will get inxi, sgfxi, and svmi version numbers as well,
    and add those files to the main smxi svn directory for easy
    uploading and handling.
@@ -280,6 +280,9 @@ function get_options(){
 				;;
 		esac
 	done
+	if [[ -z "$1" ]];then
+		error_handler 9
+	fi
 }
 
 function start_up_tests(){
