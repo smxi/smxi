@@ -675,7 +675,6 @@ function finalize_sm_versions(){
 # extra scripts used in smxi, kernel installers for zipped kernels
 function update_kernel_installers(){
 	local kernelInstaller='install-kernel.sh'
-
 	# update kernel installers if needed
 	# note needed anymore, it's a sym link now
 	# cp -f ${KERNEL_DIR}kernel-installer/$kernelInstaller $SMXI_KERNEL_DEV$kernelInstaller
