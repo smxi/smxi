@@ -230,7 +230,7 @@ function get_options(){
 				;;
 			''|s)
 				B_MAKE_VERSIONS_FILE='true'
-				UPDATE_TYPE='s'
+				B_SKIP_ZIP='false'
 				WORKING_BRANCH=$SMXI_BRANCH
 				WORKING_REMOTE=$SMXI_REMOTE
 				;;
@@ -249,7 +249,6 @@ function get_options(){
 				;;
 			z)
 				B_MAKE_VERSIONS_FILE='true'
-				UPDATE_TYPE='s'
 				WORKING_BRANCH=$SMXI_BRANCH
 				WORKING_REMOTE=$SMXI_REMOTE
 				;;
