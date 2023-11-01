@@ -175,8 +175,11 @@ function error_handler(){
 		7)
 			message="git commit of $WORKING_VC_DIR $WORKING_BRANCH\nfailed with error: $2"
 			;;
-		6)
+		8)
 			message="git push to $WORKING_REMOTE $WORKING_BRANCH\nfailed with error: $2"
+			;;
+		9)
+			message="You must specify the type of update."
 			;;
 	esac
 	echo $LINE
@@ -228,7 +231,7 @@ function get_options(){
 				WORKING_BRANCH=$RBXI_BRANCH
 				WORKING_REMOTE=$RBXI_REMOTE
 				;;
-			''|s)
+			s)
 				B_MAKE_VERSIONS_FILE='true'
 				B_SKIP_ZIP='false'
 				WORKING_BRANCH=$SMXI_BRANCH
