@@ -107,7 +107,7 @@ LIST_ACXI='acxi acxi.1 acxi.changelog acxi.conf auto.tag LICENSE.txt README.txt
 docs/acxi-values.txt'
 LIST_BINXI='binxi binxi.1 README.txt'
 LIST_INXI='inxi' # for sm
-LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt'
+LIST_INXI_FULL='inxi inxi.1 inxi.changelog README.txt .gitattributes'
 LIST_PHP='browser_detection.inc language_detection.inc'
 LIST_RBXI='rbxi' # for sm
 LIST_SGFXI="sgfxi" # for sm
@@ -627,7 +627,7 @@ function process_inxi(){
 				;;
 			pinxi)
 				dev_dir=$PINXI_DEV
-				files='pinxi.1 pinxi pinxi.changelog README.txt'
+				files='pinxi.1 pinxi pinxi.changelog README.txt .gitattributes'
 				b_pinxi='true'
 				add_perl='modules/* data/*/* docs/* lib/* tools/*'
 				WORKING_REMOTE=$PINXI_REMOTE
